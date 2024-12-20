@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PatientController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\FollowUpController;
+
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -16,5 +20,27 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Route::resource('users',UserController::class);
+// Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+
+// Route::resource('patients', PatientController::class);
+// Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
+// Route::get('patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
+
+// Route::get('patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
+
+
+// Route::resource('followups', FollowUpController::class)->only(['store']);
+
+
+// Route::get('followups/create', [FollowUpController::class,'create'])->name('followups.create');
+// Route::post('followups', [FollowUpController::class,'store'])->name('followups.store');
+
+
+Route::resource('users', UserController::class);
+Route::resource('patients', PatientController::class);
+ Route::get('followups/create', [FollowUpController::class,'create'])->name('followups.create');
+ Route::resource('followups', FollowUpController::class)->only(['store']);
 
 require __DIR__.'/auth.php';
