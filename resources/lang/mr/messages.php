@@ -14,4 +14,6 @@ return [
     'remark' => 'शेरा',
     'add_follow_up' => 'फॉलो अप जोडा',
 
+    'locale' => 'भाषा', // Label for dropdown
+
 ];

@@ -14,13 +14,22 @@ class SetLocale
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
-    {
-        $locale = $request->query('locale', session('locale', config('app.locale')));
+    // public function handle(Request $request, Closure $next): Response
+    // {
+    //     $locale = $request->query('locale', session('locale', config('app.locale')));
 
+    //     App::setLocale($locale);
+
+    //     session(['locale' => $locale]);
+    //     return $next($request);
+    // }
+
+    public function handle($request, Closure $next)
+    {
+        // Get the locale from session or fallback to default
+        $locale = session('locale', config('app.locale'));
         App::setLocale($locale);
 
-        session(['locale' => $locale]);
         return $next($request);
     }
 }

@@ -32,12 +32,13 @@
                         </x-slot>
 
                         <x-slot name="content">
-                            <x-dropdown-link :href="route(Route::currentRouteName(), ['locale' => 'en'])"  :active="session('locale') == 'en'">
-                                 English
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route(Route::currentRouteName(), ['locale' => 'mr'])" :active="session('locale') == 'mr'">
-                                 मराठी
-                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('setLocale', ['locale' => 'en'])" :active="session('locale') == 'en'">
+                                English
+                           </x-dropdown-link>
+                           <x-dropdown-link :href="route('setLocale', ['locale' => 'mr'])" :active="session('locale') == 'mr'">
+                                मराठी
+                           </x-dropdown-link>
+
                         </x-slot>
                     </x-dropdown>
                 </div>

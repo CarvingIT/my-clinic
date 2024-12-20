@@ -13,4 +13,6 @@ return [
     'mobile_phone' => 'Mobile Phone',
     'remark' => 'Remark',
      'add_follow_up' => 'Add Follow Up',
+
+     'locale' => 'Language', // Label for dropdown
 ];

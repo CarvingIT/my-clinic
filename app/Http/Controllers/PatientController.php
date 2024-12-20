@@ -63,7 +63,7 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
-        dd($patient);
+        // dd($patient);
          return view('patients.show', compact('patient'));
     }
 
@@ -72,6 +72,7 @@ class PatientController extends Controller
      */
      public function edit(Patient $patient)
      {
+        // dd($patient);
          return view('patients.edit', compact('patient'));
      }
 
