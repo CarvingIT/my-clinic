@@ -10,12 +10,21 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <!-- Create User Button -->
+
                     <div class="flex justify-end mb-5">
-                        <a href="{{ route('users.create') }}"
+                        <a id="create-user-button" href="{{ route('users.create') }}"
                             class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow">
                             Create User
                         </a>
                     </div>
+
+                    {{-- To disable create button --}}
+                    <script>
+                        const button = document.getElementById('create-user-button');
+                        button.classList.add('opacity-50', 'cursor-not-allowed');
+                        button.setAttribute('onclick', 'return false;');
+                    </script>
+
 
                     <!-- Success Message -->
                     @if (session('success'))

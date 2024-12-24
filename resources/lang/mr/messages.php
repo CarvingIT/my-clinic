@@ -13,6 +13,7 @@ return [
     'mobile_phone' => 'मोबाईल नंबर',
     'remark' => 'शेरा',
     'add_follow_up' => 'फॉलो अप जोडा',
+    'patients' => 'रुग्ण',
 
     'locale' => 'भाषा', // Label for dropdown
 
