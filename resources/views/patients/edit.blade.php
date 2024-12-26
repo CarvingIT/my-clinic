@@ -53,8 +53,14 @@
                             <x-input-error :messages="$errors->get('remark')" class="mt-2" />
                         </div>
 
-                        <!-- Update Button -->
+                        <!-- Buttons -->
                         <div class="flex items-center justify-end mt-4">
+                            <a href="{{ route('patients.index') }}" class="text-gray-600 hover:text-gray-900">
+                                <x-secondary-button class="ml-4">
+                                    {{ __('Cancel') }}
+                                </x-secondary-button>
+                            </a>
+
                             <x-primary-button class="ml-4">
                                 {{ __('Update Patient') }}
                             </x-primary-button>

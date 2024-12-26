@@ -49,6 +49,14 @@
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        {{ __('messages.address') }}
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        {{ __('messages.remark') }}
+                                    </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
@@ -65,18 +73,24 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             {{ $patient->mobile_phone }}
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            {{ $patient->address }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            {{ $patient->remark }}
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-4">
                                             <a href="{{ route('patients.edit', $patient->id) }}"
-                                                class="text-indigo-600 hover:text-indigo-800 font-medium">
-                                                Edit
+                                                class="text-indigo-600 hover:text-indigo-800 font-medium" title="Edit">
+                                                <i class="fas fa-edit"></i>
                                             </a>
                                             <form method="POST" action="{{ route('patients.destroy', $patient->id) }}"
                                                 onsubmit="return confirmDelete()">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="text-red-600 hover:text-red-800 font-medium">
-                                                    Delete
+                                                    class="text-red-600 hover:text-red-800 font-medium" title="Delete">
+                                                    <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
                                         </td>

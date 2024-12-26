@@ -47,7 +47,7 @@ class PatientController extends Controller
                 'name' => ['required', 'string', 'max:255'],
                 'address' => ['required', 'string', 'max:255'],
                 'occupation' => ['required', 'string', 'max:255'],
-                'mobile_phone' => ['required', 'string', 'max:20'],
+                'mobile_phone' => ['required', 'string', 'max:20','regex:/^[0-9]{10}$/'],
                 'remark' => ['nullable', 'string'],
           ]);
 
@@ -86,7 +86,7 @@ class PatientController extends Controller
           'name' => ['required', 'string', 'max:255'],
            'address' => ['required', 'string', 'max:255'],
            'occupation' => ['required', 'string', 'max:255'],
-           'mobile_phone' => ['required', 'string', 'max:20'],
+           'mobile_phone' => ['required', 'string', 'max:20','regex:/^[0-9]{10}$/'],
           'remark' => ['nullable', 'string'],
            ]);
            $patient->update($request->all());
