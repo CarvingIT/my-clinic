@@ -3,10 +3,10 @@
 return [
     'diagnosis' => 'Diagnosis',
     'treatment' => 'Treatment',
-    'patient_details' => 'Patient Details',
+    'patient_details' => 'Patient',
     'follow_ups' => 'Follow Ups',
     'search' => 'Search',
-    'add_new_patient' => 'Add New Patient',
+    'add_new_patient' => 'New Patient',
     'name' => 'Name',
     'address' => 'Address',
     'occupation' => 'Occupation',

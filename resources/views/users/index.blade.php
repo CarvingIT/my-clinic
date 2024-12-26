@@ -45,14 +45,17 @@
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                                     Email
                                 </th>
-                                <th scope="col" class="relative px-6 py-3">
-                                    <span class="sr-only">Edit</span>
+                                <th scope="col"
+                                    class="px-2 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                    Edit
                                 </th>
-                                <th scope="col" class="relative px-6 py-3">
-                                    <span class="sr-only">Delete</span>
+                                <th scope="col"
+                                    class="px-2 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
+                                    Delete
                                 </th>
                             </tr>
                         </thead>
+
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach ($users as $user)
                                 <tr>
@@ -62,19 +65,18 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-gray-700">
                                         {{ $user->email }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td class="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <a href="{{ route('users.edit', $user->id) }}"
-                                            class="text-blue-600 hover:text-blue-800">
-                                            Edit
+                                            class="text-blue-600 hover:text-blue-800" title="Edit">
+                                            <i class="fas fa-edit"></i>
                                         </a>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <td class="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <form method="POST" action="{{ route('users.destroy', $user->id) }}" onsubmit="return confirmDelete()">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit"
-                                                class="text-red-600 hover:text-red-800">
-                                                Delete
+                                            <button type="submit" class="text-red-600 hover:text-red-800" title="Delete">
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
                                     </td>
@@ -82,6 +84,7 @@
                             @endforeach
                         </tbody>
                     </table>
+
                 </div>
             </div>
         </div>

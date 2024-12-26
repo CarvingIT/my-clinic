@@ -50,9 +50,17 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <div class="flex items-center justify-end mt-6">
+                        <div class="flex items-center justify-end mt-4">
+
+                            <!-- Cancel Button -->
+                            <a href="{{ route('users.index') }}" class="text-gray-600 hover:text-gray-900">
+                                <x-secondary-button class="ml-4">
+                                    {{ __('Cancel') }}
+                                </x-secondary-button>
+                            </a>
+
                             <x-primary-button
-                                class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-5 rounded-md focus:ring focus:ring-blue-300 focus:outline-none text-base">
+                                class="bg-blue-500 hover:bg-blue-600 text-white py-1 px-5 rounded-md focus:ring focus:ring-blue-300 focus:outline-none text-base ml-4">
                                 {{ __('Update User') }}
                             </x-primary-button>
                         </div>
