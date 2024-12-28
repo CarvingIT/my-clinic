@@ -25,7 +25,8 @@ class PatientController extends Controller
         if ($request->filled('search')) {
             $searchTerm = $request->search;
             $query->where('name', 'like', "%{$searchTerm}%")
-                ->orWhere('mobile_phone', 'like', "%{$searchTerm}%");
+                ->orWhere('mobile_phone', 'like', "%{$searchTerm}%")
+                ->orWhere('patient_id', 'like', "%{$searchTerm}%");
         }
         $patients = $query->orderBy('name')->paginate(10);
         return view('patients.index', compact('patients'));
@@ -56,7 +57,7 @@ class PatientController extends Controller
             'email_id' => ['nullable', 'email', 'max:255'],
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
-            'patient_id' => ['nullable', 'string', 'unique:patients,patient_id']
+            'patient_id' => ['required', 'string', 'unique:patients,patient_id']
         ]);
 
 
@@ -101,7 +102,7 @@ class PatientController extends Controller
             'email_id' => ['nullable', 'email', 'max:255'],
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
-            'patient_id' => ['nullable', 'string', 'unique:patients,patient_id']
+            'patient_id' => ['required', 'string', 'unique:patients,patient_id'.$patient->id]
         ]);
         $patient->update($request->all());
 

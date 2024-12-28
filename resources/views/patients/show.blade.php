@@ -16,19 +16,41 @@
                         </h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600">
                             <p>
+                                <span class="font-medium text-gray-800">{{ __('Patient id') }}:</span> {{$patient->patient_id}}
+                            </p>
+                            <p>
                                 <span class="font-medium text-gray-800">{{ __('messages.name') }}:</span> {{$patient->name}}
+                            </p>
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('Birthdate') }}:</span> {{$patient->birthdate}}
+                            </p>
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('Gender') }}:</span> {{$patient->gender}}
+                            </p>
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('messages.mobile_phone') }}:</span> {{$patient->mobile_phone}}
+                            </p>
+
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('Email Id') }}:</span> {{$patient->email_id}}
                             </p>
                             <p>
                                 <span class="font-medium text-gray-800">{{ __('messages.address') }}:</span> {{$patient->address}}
                             </p>
                             <p>
+                                <span class="font-medium text-gray-800">{{ __('Vishesh') }}:</span> {{$patient->vishesh}}
+                            </p>
+
+                            <p>
                                 <span class="font-medium text-gray-800">{{ __('messages.occupation') }}:</span> {{$patient->occupation}}
                             </p>
                             <p>
-                                <span class="font-medium text-gray-800">{{ __('messages.mobile_phone') }}:</span> {{$patient->mobile_phone}}
+                                <span class="font-medium text-gray-800">{{ __('Remark') }}:</span> {{$patient->remark}}
                             </p>
+
+
                             <p class="col-span-1 md:col-span-2">
-                                <span class="font-medium text-gray-800">{{ __('messages.remark') }}:</span> {{$patient->remark}}
+                                <span class="font-medium text-gray-800">{{ __('Balance') }}:</span> {{$patient->balance}}
                             </p>
                         </div>
                     </div>

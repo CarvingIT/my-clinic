@@ -40,6 +40,10 @@
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th scope="col"
+                                        class="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        {{ __('Id') }}
+                                    </th>
+                                    <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.name') }}
                                     </th>
@@ -64,6 +68,9 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($patients as $patient)
                                     <tr class="hover:bg-gray-50 transition duration-150">
+                                        <td class="px-2 py-4 whitespace-nowrap">
+                                            {{ $patient->patient_id }}
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <a href="{{ route('patients.show', $patient->id) }}"
                                                 class="text-blue-600 hover:text-blue-800 font-medium">

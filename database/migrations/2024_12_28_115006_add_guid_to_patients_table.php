@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('patients', function (Blueprint $table) {
-            $table->string('patient_id')->nullable()->change();
-
-            $table->string('patient_id')->change();
+            if (!Schema::hasColumn('patients', 'guid')) {
+                $table->uuid('guid')->unique(); // Adds the 'guid' column and makes it unique
+            }
         });
     }
 
@@ -24,9 +24,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('patients', function (Blueprint $table) {
-            $table->uuid('guid')->nullable();
-
-            $table->uuid('patient_id')->change();
+            $table->dropColumn('guid');
         });
     }
 };
