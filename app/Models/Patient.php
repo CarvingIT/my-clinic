@@ -18,7 +18,13 @@ class Patient extends Model
          'address',
          'occupation',
          'mobile_phone',
-         'remark'
+         'remark',
+         'gender',
+         'birthdate',
+         'email_id',
+         'vishesh',
+         'balance',
+         'patient_id'
      ];
 
 
@@ -28,6 +34,9 @@ class Patient extends Model
 
        static::creating(function ($model) {
          $model->guid = Str::uuid();
+        //  $model->patient_id = Str::uuid();
+
+
         });
      }
     public function followUps()
