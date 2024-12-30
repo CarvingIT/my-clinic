@@ -78,8 +78,8 @@ return [
     |
     */
 
-    // 'locale' => env('APP_LOCALE', 'en'),
-    'locale' => 'en',  // Default language
+     'locale' => env('APP_LOCALE', 'en'),
+    //'locale' => 'en',  // Default language
 
 
     // 'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
