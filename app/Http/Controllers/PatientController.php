@@ -102,7 +102,7 @@ class PatientController extends Controller
             'email_id' => ['nullable', 'email', 'max:255'],
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
-            'patient_id' => ['required', 'string', 'unique:patients,patient_id'.$patient->id]
+            'patient_id' => ['required', 'string', 'unique:patients,patient_id,'.$patient->id]
         ]);
         $patient->update($request->all());
 
