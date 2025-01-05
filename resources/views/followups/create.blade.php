@@ -27,16 +27,16 @@
                          </div>
 
                         <!-- Diagnosis Textarea -->
-                        <div class="mt-4">
+                        <div class="mt-4 mb-4">
                             <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-3">{{ __('लक्षणे') }}</h2>
-                            <textarea id="lakshane" name="diagnosis" rows="4" class="block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
+                            <textarea id="lakshane" name="diagnosis" rows="4" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                             <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
                         </div>
 
                         <!-- Treatment Section -->
                         <div>
                             <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-3">{{ __('चिकित्सा') }}</h2>
-                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 mt-2">
                                     @foreach(['अर्श' => 'अर्श', 'ग्रहणी' => 'ग्रहणी', 'ज्वर/प्रतिश्याय' => 'ज्वर/प्रतिश्याय'] as $id => $label)
                                        <div class="flex items-center">
                                             <input type="checkbox" id="{{ $id }}" name="{{ $id }}" value="1" class="mr-2 border-gray-300 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md transition-all duration-300 hover:border-indigo-400" />
@@ -60,11 +60,11 @@
                         </div>
 
 
-                        <!-- Remaining Input Fields (As Before) -->
+                        <!-- Remaining Input Fields -->
                         @foreach(['nidan' => 'निदान', 'upashay' => 'उपशय', 'salla' => 'सल्ला'] as $name => $label)
                             <div class="mt-4">
                                 <x-input-label for="{{ $name }}" :value="__($label)" />
-                                <x-text-input id="{{ $name }}" class="block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" type="text" name="{{ $name }}" />
+                                <x-text-input id="{{ $name }}" class="px-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" type="text" name="{{ $name }}" />
                                 <x-input-error :messages="$errors->get($name)" class="mt-2" />
                             </div>
                         @endforeach
@@ -73,14 +73,14 @@
                         @foreach(['amount' => 'Amount', 'balance' => 'Balance'] as $name => $label)
                             <div class="mt-4">
                                 <x-input-label for="{{ $name }}" :value="__($label)" />
-                                <x-text-input id="{{ $name }}" class="block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" type="number" name="{{ $name }}" />
+                                <x-text-input id="{{ $name }}" class="px-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" type="number" name="{{ $name }}" />
                                 <x-input-error :messages="$errors->get($name)" class="mt-2" />
                             </div>
                         @endforeach
 
                         <div class="mt-4">
                             <x-input-label for="payment_method" :value="__('Payment Method')" />
-                            <select id="payment_method" name="payment_method" class="border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm block mt-1 w-full transition-all duration-300 hover:border-indigo-400">
+                            <select id="payment_method" name="payment_method" class="border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm block mt-1 w-full transition-all duration-300 hover:border-indigo-400">
                                 <option value="">Please Select</option>
                                 <option value="cash">Cash</option>
                                 <option value="card">Card</option>
@@ -92,7 +92,7 @@
                         @foreach(['certificate' => 'Certificate', 'drawing' => 'Drawing'] as $name => $label)
                             <div class="mt-4">
                                 <x-input-label for="{{ $name }}" :value="__($label)" />
-                                <x-text-input id="{{ $name }}" class="block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" type="text" name="{{ $name }}" />
+                                <x-text-input id="{{ $name }}" class="px-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" type="text" name="{{ $name }}" />
                                 <x-input-error :messages="$errors->get($name)" class="mt-2" />
                             </div>
                         @endforeach
