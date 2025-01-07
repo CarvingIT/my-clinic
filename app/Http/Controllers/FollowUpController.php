@@ -67,4 +67,14 @@ class FollowUpController extends Controller
 
         return Redirect::route('patients.show', $request->patient_id)->with('success', 'Follow Up Created Successfully');
     }
+
+    public function index()
+    {
+        $followUps = FollowUp::with('patient')->orderBy('created_at', 'desc')->paginate(10); // Fetching follow-ups with patient details in desc order
+        return view('followups.index', compact('followUps'));
+    }
+    public function show(FollowUp $followup)
+    {
+        return view('followups.show', compact('followup'));
+    }
 }

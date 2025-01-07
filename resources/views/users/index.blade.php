@@ -19,11 +19,11 @@
                     </div>
 
                     {{-- To disable create button --}}
-                    <script>
+                    {{-- <script>
                         const button = document.getElementById('create-user-button');
                         button.classList.add('opacity-50', 'cursor-not-allowed');
                         button.setAttribute('onclick', 'return false;');
-                    </script>
+                    </script> --}}
 
 
                     <!-- Success Message -->

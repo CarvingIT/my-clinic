@@ -5,69 +5,64 @@
         </h2>
     </x-slot>
 
+
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-             <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
                 <div class="p-6">
-                   <div class="mb-4">
-                        <h2 class="text-2xl font-bold text-gray-700 mb-4 flex items-center">
-                              {{$patient->name}} ({{$patient->patient_id}})
 
-                         </h2>
-                    </div>
+                    <div class="mb-4">
+                        <div x-data="{ open: false }">
+                            <h2 @click="open = !open" class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400" style="cursor: pointer;">
+                                {{$patient->name}} ({{$patient->patient_id}})
+                                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ms-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                </svg>
+                                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ms-2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
+                                </svg>
+                            </h2>
 
-                     <div x-data="{ open: false }">
-                       <button x-on:click="open = !open" class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md transition duration-200 mb-4">
+                            <div x-show="open" x-transition class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 border-b pb-4 mb-4">
 
-                         <span x-show="!open">Show Patient Details</span>
-                         <span x-show="open">Hide Patient Details</span>
-                       <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block ms-1">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                       </svg>
-                       <svg x-show="open" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline-block ms-1">
-                           <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
-                       </svg>
-                        </button>
-                    <div x-show="open" x-transition class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 border-b pb-4 mb-4">
-
-                             <p>
-                               <span class="font-medium text-gray-800">{{ __('Birthdate') }}:</span>
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('Birthdate') }}:</span>
                                 {{ $patient->birthdate }}
-                             </p>
-                             <p>
-                                  <span class="font-medium text-gray-800">{{ __('Gender') }}:</span>
-                                 {{ $patient->gender }}
+                            </p>
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('Gender') }}:</span>
+                                {{ $patient->gender }}
                             </p>
                             <p>
                                 <span class="font-medium text-gray-800">{{ __('messages.mobile_phone') }}:</span>
                                 {{ $patient->mobile_phone }}
                             </p>
-                               <p>
-                                 <span class="font-medium text-gray-800">{{ __('Email Id') }}:</span>
-                                   {{ $patient->email_id }}
-                               </p>
-                             <p>
-                                 <span class="font-medium text-gray-800">{{ __('messages.address') }}:</span>
-                                {{ $patient->address }}
-                             </p>
-                             <p>
-                                  <span class="font-medium text-gray-800">{{ __('Vishesh') }}:</span>
-                                  {{ $patient->vishesh }}
-                             </p>
-                              <p>
-                                <span class="font-medium text-gray-800">{{ __('messages.occupation') }}:</span>
-                                 {{ $patient->occupation }}
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('Email Id') }}:</span>
+                                {{ $patient->email_id }}
                             </p>
-                               <p>
-                                   <span class="font-medium text-gray-800">{{ __('Remark') }}:</span>
-                                   {{ $patient->remark }}
-                               </p>
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('messages.address') }}:</span>
+                                {{ $patient->address }}
+                            </p>
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('Vishesh') }}:</span>
+                                {{ $patient->vishesh }}
+                            </p>
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('messages.occupation') }}:</span>
+                                {{ $patient->occupation }}
+                            </p>
+                            <p>
+                                <span class="font-medium text-gray-800">{{ __('Remark') }}:</span>
+                                {{ $patient->remark }}
+                            </p>
 
                             <p class="col-span-1 md:col-span-2">
                                 <span class="font-medium text-gray-800">{{ __('Balance') }}:</span>
                                 {{ $patient->balance }}
-                             </p>
-                       </div>
+                            </p>
+                        </div>
                     </div>
 
                     <!-- Add Follow Up Button -->
@@ -89,9 +84,9 @@
                                             {{ __('Created At') }}
                                         </th>
                                         <th scope="col"
-                                        class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                        <h2 class="font-semibold text-gray-800 dark:text-white">
-                                            {{ __('नाडी') }}</h2>
+                                            class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                            <h2 class="font-semibold text-gray-800 dark:text-white">
+                                                {{ __('नाडी') }}</h2>
                                         </th>
                                         <th scope="col"
                                             class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
@@ -118,7 +113,8 @@
                                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
 
 
-                                                 <p class="mt-2"> {{ $followUp->created_at->format('d M Y, h:i A') }}</p>
+                                                <p class="mt-2"> {{ $followUp->created_at->format('d M Y, h:i A') }}
+                                                </p>
                                                 {{-- {{ $followUp->created_at->format('d M Y, h:i A') }} --}}
                                             </td>
                                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
@@ -144,7 +140,6 @@
                                                                     'तीक्ष्ण',
                                                                     'वेग',
                                                                     'अनियमित',
-
                                                                 ]))
                                                                 @if (is_array($value))
                                                                     @foreach ($value as $option)
@@ -182,8 +177,6 @@
                                                             @endif
                                                         </p>
                                                     </div>
-
-
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
@@ -273,16 +266,18 @@
                                                             @endif
                                                         </p>
 
-                                                        <p><span class="font-bold text-gray-800 dark:text-white">{{ __('Branch') }}:</span>
-                                                            @if(isset($checkUpInfo['branch']))
-                                                               {{ $checkUpInfo['branch'] }}
-                                                             @endif
+                                                        <p><span
+                                                                class="font-bold text-gray-800 dark:text-white">{{ __('Branch') }}:</span>
+                                                            @if (isset($checkUpInfo['branch']))
+                                                                {{ $checkUpInfo['branch'] }}
+                                                            @endif
                                                         </p>
-                                                         <p><span class="font-bold text-gray-800 dark:text-white">{{ __('Doctor') }}:</span>
-                                                             @if(isset($checkUpInfo['doctor']))
-                                                                   {{ $checkUpInfo['doctor'] }}
-                                                             @endif
-                                                         </p>
+                                                        <p><span
+                                                                class="font-bold text-gray-800 dark:text-white">{{ __('Doctor') }}:</span>
+                                                            @if (isset($checkUpInfo['doctor']))
+                                                                {{ $checkUpInfo['doctor'] }}
+                                                            @endif
+                                                        </p>
                                                     </div>
                                                 @endif
                                             </td>
