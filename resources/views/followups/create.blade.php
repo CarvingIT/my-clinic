@@ -15,10 +15,10 @@
 
                         <!-- Nadi Checkboxes -->
                          <div class="mb-6">
-                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-3">{{ __('नाडी') }}</h2>
+                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">{{ __('नाडी') }}</h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 @foreach(['वात' => 'वात', 'पित्त' => 'पित्त', 'कफ' => 'कफ', 'सूक्ष्म' => 'सूक्ष्म', 'कठिन' => 'कठिन', 'साम' => 'साम', 'प्राण' => 'प्राण', 'व्यान' => 'व्यान', 'स्थूल' => 'स्थूल', 'तीक्ष्ण' => 'तीक्ष्ण', 'वेग' => 'वेग', 'अनियमित' => 'अनियमित'] as $id => $label)
-                                    <div class="flex items-center">
+                                    <div class="flex items-center gap-2">
                                         <input type="checkbox" id="{{ $id }}" name="{{ $id }}" value="1" class="mr-2 border-gray-300 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md transition-all duration-300 hover:border-indigo-400" />
                                         <x-input-label for="{{ $id }}" :value="__($label)" class="text-gray-700 dark:text-gray-300 font-medium cursor-pointer" />
                                     </div>
@@ -28,17 +28,17 @@
 
                         <!-- Diagnosis Textarea -->
                         <div class="mt-4 mb-4">
-                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-3">{{ __('लक्षणे') }}</h2>
+                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">{{ __('लक्षणे') }}</h2>
                             <textarea id="lakshane" name="diagnosis" rows="4" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                             <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
                         </div>
 
                         <!-- Treatment Section -->
                         <div>
-                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-3">{{ __('चिकित्सा') }}</h2>
+                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">{{ __('चिकित्सा') }}</h2>
                                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 mt-2">
                                     @foreach(['अर्श' => 'अर्श', 'ग्रहणी' => 'ग्रहणी', 'ज्वर/प्रतिश्याय' => 'ज्वर/प्रतिश्याय'] as $id => $label)
-                                       <div class="flex items-center">
+                                       <div class="flex items-center gap-2">
                                             <input type="checkbox" id="{{ $id }}" name="{{ $id }}" value="1" class="mr-2 border-gray-300 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md transition-all duration-300 hover:border-indigo-400" />
                                             <x-input-label for="{{ $id }}" :value="__($label)" class="text-gray-700 dark:text-gray-300 font-medium cursor-pointer" />
                                         </div>

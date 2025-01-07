@@ -11,15 +11,28 @@
                 <div class="p-6 text-gray-900">
                     <!-- Action Section -->
                     <div class="flex justify-between items-center mb-6">
+                        <!-- Add New Patient Button -->
                         <a href="{{ route('patients.create') }}"
                             class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
                             {{ __('messages.add_new_patient') }}
                         </a>
 
+                        <!-- Search Form -->
                         <form method="GET" action="{{ route('patients.index') }}" class="flex gap-2 items-center">
-                            <input type="text" name="search" placeholder="{{ __('messages.search') }}"
-                                value="{{ request('search') }}"
-                                class="border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <div class="relative">
+                                <!-- Search Input -->
+                                <input type="text" name="search" placeholder="{{ __('messages.search') }}"
+                                    value="{{ request('search') }}"
+                                    class="border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10">
+
+                                <!-- Clear Search Link -->
+                                <a href="{{ route('patients.index') }}"
+                                    class=" text-2xl text-gray-700 hover:text-gray-800 focus:outline-none {{ request('search') ? '' : 'pointer-events-none opacity-50' }}">
+                                    ×
+                                </a>
+                            </div>
+
+                            <!-- Search Button -->
                             <button type="submit"
                                 class="bg-gray-300 hover:bg-gray-400 text-black font-semibold px-4 py-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
                                 {{ __('messages.search') }}
@@ -86,9 +99,11 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             {{ $patient->remark }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-4">
+                                        <td
+                                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-4">
                                             <a href="{{ route('patients.edit', $patient->id) }}"
-                                                class="text-indigo-600 hover:text-indigo-800 font-medium" title="Edit">
+                                                class="text-indigo-600 hover:text-indigo-800 font-medium"
+                                                title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             <form method="POST" action="{{ route('patients.destroy', $patient->id) }}"
