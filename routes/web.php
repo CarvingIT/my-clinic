@@ -66,6 +66,8 @@ Route::resource('followups', FollowUpController::class)->only(['create', 'store'
 
  Route::resource('followups', FollowUpController::class)->only(['store']);
 
+ Route::resource('followups', FollowUpController::class)->except(['create', 'store']);
+
 
  // Patient Routes
 // Route::get('patients', [PatientController::class, 'index'])->name('patients.index');

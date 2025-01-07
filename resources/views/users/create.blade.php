@@ -52,7 +52,7 @@
                                 </x-secondary-button>
                             </a>
 
-                            <x-primary-button class="ms-4 ml-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 opacity-50 cursor-not-allowed" disabled>
+                            <x-primary-button class="ms-4 ml-4 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 " >
                                 {{ __('Create User') }}
                             </x-primary-button>
                         </div>

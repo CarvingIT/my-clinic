@@ -18,8 +18,11 @@
                     <x-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.index')">
                         {{ __('messages.patients') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('followups.index')" :active="request()->routeIs('followups.index')">
+                        {{ __('Follow ups') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
-                        Users
+                        Staff
                     </x-nav-link>
                 </div>
             </div>
