@@ -77,4 +77,46 @@ class FollowUpController extends Controller
     {
         return view('followups.show', compact('followup'));
     }
+
+
+
+    // For editing followup
+
+    public function edit(FollowUp $followup)
+    {
+        $parameters = Parameter::all();
+        return view('followups.edit', compact('followup', 'parameters'));
+    }
+
+    public function update(Request $request, FollowUp $followup)
+    {
+        $request->validate([
+            'patient_id' => ['required', 'exists:patients,id'],
+            'diagnosis' => ['nullable', 'string'],
+            'treatment' => ['nullable', 'string'],
+        ]);
+
+        $checkUpInfo = [];
+        foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment', 'chikitsa_combo']) as $key => $value) {
+            $checkUpInfo[$key] = $value;
+        }
+        if ($request->filled('chikitsa_combo')) {
+            $checkUpInfo['chikitsa_combo'] = $request->chikitsa_combo;
+        }
+
+        $followup->update([
+            'check_up_info' => json_encode($checkUpInfo),
+            'diagnosis' => $request->diagnosis,
+            'treatment' => $request->treatment,
+
+        ]);
+        return redirect()->route('patients.show', $request->patient_id)->with('success', 'Follow Up Updated Successfully');
+    }
+
+    public function destroy(FollowUp $followup)
+    {
+        $patientId = $followup->patient_id;
+        $followup->delete();
+        return redirect()->route('patients.show', $patientId)->with('success', 'Follow Up Deleted Successfully');
+    }
 }
