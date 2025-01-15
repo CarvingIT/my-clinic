@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('All Follow Ups') }}
+            {{ __('messages.All Follow Ups') }}
         </h2>
     </x-slot>
 
@@ -14,12 +14,12 @@
                             <thead class="bg-gray-50 dark:bg-gray-700">
                                 <tr>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                        {{ __('Created At') }}
+                                        class="px-6 py-3 text-left text-s font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        {{ __('messages.Created At') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                        {{ __('Patient Name') }}
+                                        class="px-6 py-3 text-left text-s font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        {{ __('messages.Patient Name') }}
                                     </th>
 
                                 </tr>

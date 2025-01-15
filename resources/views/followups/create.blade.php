@@ -79,7 +79,7 @@
                         @endforeach
 
                         <div class="mt-4">
-                            <x-input-label for="payment_method" :value="__('Payment Method')" />
+                            <x-input-label for="payment_method" :value="__('messages.Payment Method')" />
                             <select id="payment_method" name="payment_method" class="border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm block mt-1 w-full transition-all duration-300 hover:border-indigo-400">
                                 <option value="">Please Select</option>
                                 <option value="cash">Cash</option>
@@ -89,7 +89,7 @@
                             <x-input-error :messages="$errors->get('payment_method')" class="mt-2" />
                         </div>
 
-                        @foreach(['certificate' => 'Certificate', 'drawing' => 'Drawing'] as $name => $label)
+                        @foreach([ 'drawing' => 'Drawing'] as $name => $label)
                             <div class="mt-4">
                                 <x-input-label for="{{ $name }}" :value="__($label)" />
                                 <x-text-input id="{{ $name }}" class="px-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" type="text" name="{{ $name }}" />
@@ -98,7 +98,7 @@
                         @endforeach
 
                         <div class="mt-4">
-                            <x-input-label for="branch" :value="__('Branch')" />
+                            <x-input-label for="branch" :value="__('messages.Branch')" />
                             <select id="branch" name="branch" class="block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm block mt-1 w-full transition-all duration-300 hover:border-indigo-400">
                                  <option value="">Select Branch</option>
                                   <option value="Baner">Baner</option>
@@ -109,7 +109,7 @@
 
 
                         <div class="mt-4">
-                            <x-input-label for="doctor" :value="__('Doctor')" />
+                            <x-input-label for="doctor" :value="__('messages.Doctor')" />
                             <select id="doctor" name="doctor" class="border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm block mt-1 w-full transition-all duration-300 hover:border-indigo-400">
                                 <option value="">Select Doctor</option>
                                  <option value="Dr.V.S.Deshpande">Dr.V.S.Deshpande</option>

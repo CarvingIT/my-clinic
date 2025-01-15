@@ -15,6 +15,48 @@ return [
     'add_follow_up' => 'फॉलो अप जोडा',
     'patients' => 'रुग्ण',
 
+    'Gender' => 'लिंग',
+    'Birthdate' => 'जन्मदिनांक',
+    'Email ID' => 'ई-मेल आयडी',
+    'Vishesh' => 'विशेष',
+    'Balance' => 'शिल्लक',
+    'Patient ID' => 'रुग्ण आयडी',
+     'Patient Details' => 'रुग्णाची माहिती',
+     'Remark' => 'टीप',
+
+     'All Follow Ups' => 'सर्व फॉलो अप्स',
+     'Add Patient' => 'रुग्ण जोडा',
+     'Update Patient' => 'रुग्ण अपडेट करा',
+
+
+    'Update Follow Up' => 'फॉलो-अप अद्यतनित करा',
+    'Payment Method' => 'पैसे देण्याची पद्धत',
+    'Certificate' => 'प्रमाणपत्र',
+    'Drawing' => 'रेखाचित्र',
+    'Add Combo' => 'कॉम्बो जोडा',
+    'Dashboard' => 'डॅशबोर्ड',
+    'Users' => 'वापरकर्ते',
+    'Log in' => 'लॉग इन करा',
+    'Log Out' => 'लॉग आउट करा',
+    'Forgot your password?' => 'पासवर्ड विसरलात?',
+    'Profile' => 'प्रोफाइल',
+    'Actions' => 'क्रिया',
+    'Additional' => 'अतिरिक्त',
+    'Created At' => 'दिनांक',
+    'Amount' => 'रक्कम',
+    'Branch' => 'शाखा',
+    'Doctor' => 'डॉक्टर',
+    'Chikitsa Combo' => 'चिकित्सा कॉम्बो',
+    'Follow ups' => 'फॉलो अप्स',
+    'Staff' => 'कर्मचारी',
+    'Patient Name' => 'रुग्णाचे नाव',
+    'Name' => 'नाव',
+    'Email' => 'ई-मेल',
+    'Edit' => 'संपादित करा',
+    'Delete' => 'हटवा',
+    'Create User' => 'वापरकर्ता तयार करा',
+    'Create Staff' => 'कर्मचारी तयार करा',
+
     'locale' => 'भाषा', // Label for dropdown
 
 ];

@@ -40,40 +40,40 @@
                                 class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 border-b pb-4 mb-4">
 
                                 <p>
-                                    <span class="font-medium text-gray-800">{{ __('Birthdate') }}:</span>
+                                    <span class=" font-semibold text-gray-700">{{ __('messages.Birthdate') }}:</span>
                                     {{ $patient->birthdate }}
                                 </p>
                                 <p>
-                                    <span class="font-medium text-gray-800">{{ __('Gender') }}:</span>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.Gender') }}:</span>
                                     {{ $patient->gender }}
                                 </p>
                                 <p>
-                                    <span class="font-medium text-gray-800">{{ __('messages.mobile_phone') }}:</span>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.mobile_phone') }}:</span>
                                     {{ $patient->mobile_phone }}
                                 </p>
                                 <p>
-                                    <span class="font-medium text-gray-800">{{ __('Email Id') }}:</span>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.Email ID') }}:</span>
                                     {{ $patient->email_id }}
                                 </p>
                                 <p>
-                                    <span class="font-medium text-gray-800">{{ __('messages.address') }}:</span>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.address') }}:</span>
                                     {{ $patient->address }}
                                 </p>
                                 <p>
-                                    <span class="font-medium text-gray-800">{{ __('Vishesh') }}:</span>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.Vishesh') }}:</span>
                                     {{ $patient->vishesh }}
                                 </p>
                                 <p>
-                                    <span class="font-medium text-gray-800">{{ __('messages.occupation') }}:</span>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.occupation') }}:</span>
                                     {{ $patient->occupation }}
                                 </p>
                                 <p>
-                                    <span class="font-medium text-gray-800">{{ __('Remark') }}:</span>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.Remark') }}:</span>
                                     {{ $patient->remark }}
                                 </p>
 
                                 <p class="col-span-1 md:col-span-2">
-                                    <span class="font-medium text-gray-800">{{ __('Balance') }}:</span>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.Balance') }}:</span>
                                     {{ $patient->balance }}
                                 </p>
                             </div>
@@ -94,34 +94,37 @@
                                     <thead class="bg-gray-50 dark:bg-gray-700">
                                         <tr>
                                             <th scope="col"
-                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                {{ __('Created At') }}
+                                                class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                                <h2 class="font-semibold text-gray-600 dark:text-white">
+                                                    {{ __('messages.Created At') }}</h2>
                                             </th>
                                             <th scope="col"
                                                 class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-800 dark:text-white">
+                                                <h2 class="font-semibold text-gray-600 dark:text-white">
                                                     {{ __('नाडी') }}</h2>
                                             </th>
                                             <th scope="col"
                                                 class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-800 dark:text-white">
+                                                <h2 class="font-semibold text-gray-600 dark:text-white">
                                                     {{ __('लक्षणे') }}
                                                 </h2>
                                             </th>
                                             <th scope="col"
                                                 class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-800 dark:text-white">
+                                                <h2 class="font-semibold text-gray-600 dark:text-white">
                                                     {{ __('चिकित्सा') }}</h2>
                                             </th>
                                             <th scope="col"
                                                 class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-800 dark:text-white">
-                                                    {{ __('Additional') }}</h2>
+                                                <h2 class="font-semibold text-gray-600 dark:text-white">
+                                                    {{ __('messages.Additional') }}</h2>
                                             </th>
                                             <th scope="col"
-                                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                {{ __('Actions') }}
+                                                class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                                <h2 class="font-semibold text-gray-600 dark:text-white">
+                                                    {{ __('messages.Actions') }}</h2>
                                             </th>
+
 
 
                                         </tr>
@@ -130,7 +133,7 @@
                                         class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                                         @foreach ($patient->followUps->sortByDesc('created_at') as $followUp)
                                             <tr class="hover:bg-gray-50 transition duration-300">
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
 
 
                                                     <p class="mt-2">
@@ -138,7 +141,7 @@
                                                     </p>
                                                     {{-- {{ $followUp->created_at->format('d M Y, h:i A') }} --}}
                                                 </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
                                                     @if ($followUp->check_up_info)
                                                         @php
                                                             $checkUpInfo = json_decode($followUp->check_up_info, true);
@@ -200,11 +203,11 @@
                                                         </div>
                                                     @endif
                                                 </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
                                                     {{-- <h2 class="font-semibold text-gray-800 dark:text-white">{{ __('लक्षणे') }}</h2> --}}
                                                     {{ $followUp->diagnosis }}
                                                 </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
 
                                                     {{-- <h2 class="font-semibold text-gray-800 dark:text-white">{{ __('चिकित्सा') }}</h2> --}}
                                                     @if ($followUp->treatment)
@@ -229,14 +232,14 @@
                                                     @endif
                                                     @if (isset($checkUpInfo['chikitsa_combo']))
                                                         <p class="mt-2"><span
-                                                                class="font-bold text-gray-800 dark:text-white">Chikitsa
-                                                                Combo:</span> {{ $checkUpInfo['chikitsa_combo'] }}</p>
+                                                                class="font-bold text-gray-800 dark:text-white">{{ __('messages.Chikitsa Combo') }}:
+                                                            </span> {{ $checkUpInfo['chikitsa_combo'] }}</p>
                                                     @endif
 
                                                 </td>
 
 
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
                                                     @if ($followUp->check_up_info)
                                                         @php
                                                             $checkUpInfo = json_decode($followUp->check_up_info, true);
@@ -250,21 +253,21 @@
 
                                                         <div>
                                                             <p class="mt-2"><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('Payment Method') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Payment Method') }}:</span>
                                                                 @if (isset($checkUpInfo['payment_method']))
                                                                     {{ $checkUpInfo['payment_method'] }}
                                                                 @endif
                                                             </p>
 
-                                                            <p><span
+                                                            {{-- <p><span
                                                                     class="font-bold text-gray-800 dark:text-white">Certificate:</span>
                                                                 @if (isset($checkUpInfo['certificate']))
                                                                     {{ $checkUpInfo['certificate'] }}
                                                                 @endif
-                                                            </p>
+                                                            </p> --}}
 
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">Drawing:</span>
+                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Drawing') }}:</span>
                                                                 @if (isset($checkUpInfo['drawing']))
                                                                     {{ $checkUpInfo['drawing'] }}
                                                                 @endif
@@ -275,26 +278,26 @@
 
                                                         <div>
                                                             <p class="mt-2"><span
-                                                                    class="font-bold text-gray-800 dark:text-white">Amount:</span>
+                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Amount') }}:</span>
                                                                 @if (isset($checkUpInfo['amount']))
                                                                     {{ $checkUpInfo['amount'] }}
                                                                 @endif
                                                             </p>
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">Balance:</span>
+                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Balance') }}:</span>
                                                                 @if (isset($checkUpInfo['balance']))
                                                                     {{ $checkUpInfo['balance'] }}
                                                                 @endif
                                                             </p>
 
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('Branch') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Branch') }}:</span>
                                                                 @if (isset($checkUpInfo['branch']))
                                                                     {{ $checkUpInfo['branch'] }}
                                                                 @endif
                                                             </p>
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('Doctor') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Doctor') }}:</span>
                                                                 @if (isset($checkUpInfo['doctor']))
                                                                     {{ $checkUpInfo['doctor'] }}
                                                                 @endif
@@ -324,6 +327,7 @@
 
                                     </tbody>
                                 </table>
+                                {{ $patient->followUps->links() }}
                             </div>
                         @else
                             <p class="text-gray-600 bg-gray-100 p-4 rounded-md shadow-sm">
@@ -338,6 +342,6 @@
 
 <script>
     function confirmDelete() {
-        return confirm("Are you sure you want to delete this patient?");
+        return confirm("Are you sure you want to delete this followup?");
     }
 </script>

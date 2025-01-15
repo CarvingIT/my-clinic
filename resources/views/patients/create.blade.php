@@ -15,7 +15,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Patient ID -->
                         <div>
-                            <x-input-label for="patient_id" :value="__('Patient ID')" />
+                            <x-input-label for="patient_id" :value="__('messages.Patient ID')" />
                             <x-text-input id="patient_id"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="text" name="patient_id" autocomplete="off" />
@@ -33,7 +33,7 @@
 
                         <!-- Birthdate -->
                         <div>
-                            <x-input-label for="birthdate" :value="__('Birthdate')" />
+                            <x-input-label for="birthdate" :value="__('messages.Birthdate')" />
                             <x-text-input id="birthdate"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="date" name="birthdate" :value="old('birthdate')" />
@@ -42,7 +42,7 @@
 
                         <!-- Gender -->
                         <div>
-                            <x-input-label for="gender" :value="__('Gender')" />
+                            <x-input-label for="gender" :value="__('messages.Gender')" />
                             <select id="gender" name="gender"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2">
                                 <option value="">Please Select</option>
@@ -64,7 +64,7 @@
 
                         <!-- Email ID -->
                         <div>
-                            <x-input-label for="email_id" :value="__('Email ID')" />
+                            <x-input-label for="email_id" :value="__('messages.Email ID')" />
                             <x-text-input id="email_id"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="email" name="email_id" :value="old('email_id')" />
@@ -82,7 +82,7 @@
 
                         <!-- Vishesh -->
                         <div>
-                            <x-input-label for="vishesh" :value="__('Vishesh')" />
+                            <x-input-label for="vishesh" :value="__('messages.Vishesh')" />
                             <x-text-input id="vishesh"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="text" name="vishesh" :value="old('vishesh')" />
@@ -109,7 +109,7 @@
 
                         <!-- Balance -->
                         <div>
-                            <x-input-label for="balance" :value="__('Balance')" />
+                            <x-input-label for="balance" :value="__('messages.Balance')" />
                             <x-text-input id="balance"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="number" name="balance" :value="old('balance')" />

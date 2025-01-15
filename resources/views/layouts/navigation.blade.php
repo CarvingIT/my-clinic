@@ -13,16 +13,16 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('messages.Dashboard') }}
                     </x-nav-link>
                     <x-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.index')">
                         {{ __('messages.patients') }}
                     </x-nav-link>
                     <x-nav-link :href="route('followups.index')" :active="request()->routeIs('followups.index')">
-                        {{ __('Follow ups') }}
+                        {{ __('messages.Follow ups') }}
                     </x-nav-link>
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
-                        Staff
+                        {{ __('messages.Staff') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -87,7 +87,7 @@
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
+                {{ __('messages.Dashboard') }}
             </x-responsive-nav-link>
         </div>
 

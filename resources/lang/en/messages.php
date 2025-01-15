@@ -12,8 +12,50 @@ return [
     'occupation' => 'Occupation',
     'mobile_phone' => 'Mobile Phone',
     'remark' => 'Remark',
-     'add_follow_up' => 'Add Follow Up',
-     'patients' => 'Patients',
+    'add_follow_up' => 'Add Follow Up',
+    'patients' => 'Patients',
 
-     'locale' => 'Language', // Label for dropdown
+    'Gender' => 'Gender',
+    'Birthdate' => 'Birthdate',
+    'Email ID' => 'Email ID',
+    'Vishesh' => 'Vishesh',
+    'Balance' => 'Balance',
+    'Patient ID' => 'Patient ID',
+    'Patient Details' => 'Patient Details',
+    'Remark' => 'Remark',
+
+    'All Follow Ups' => 'All Follow Ups',
+    'Add Patient' => 'Add Patient',
+    'Update Patient' => 'Update Patient',
+
+
+    'Update Follow Up' => 'Update Follow Up',
+    'Payment Method' => 'Payment Method',
+    'Certificate' => 'Certificate',
+    'Drawing' => 'Drawing',
+    'Add Combo' => 'Add Combo',
+    'Dashboard' => 'Dashboard',
+    'Users' => 'Users',
+    'Log in' => 'Log in',
+    'Log Out' => 'Log Out',
+    'Forgot your password?' => 'Forgot your password?',
+    'Profile' => 'Profile',
+    'Actions' => 'Actions',
+    'Additional' => 'Additional',
+    'Created At' => 'Created At',
+    'Amount' => 'Amount',
+    'Branch' => 'Branch',
+    'Doctor' => 'Doctor',
+    'Chikitsa Combo' => 'Chikitsa Combo',
+    'Follow ups' => 'Follow ups',
+    'Staff' => 'Staff',
+    'Patient Name' => 'Patient Name',
+    'Name' => 'Name',
+    'Email' => 'Email',
+    'Edit' => 'Edit',
+    'Delete' => 'Delete',
+    'Create Staff' => 'Create Staff',
+
+
+    'locale' => 'Language', // Label for dropdown
 ];

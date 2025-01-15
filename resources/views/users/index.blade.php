@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Users') }}
+            {{ __('messages.Staff') }}
         </h2>
     </x-slot>
 
@@ -14,7 +14,7 @@
                     <div class="flex justify-end mb-5">
                         <a id="create-user-button" href="{{ route('users.create') }}"
                             class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded shadow">
-                            Create User
+                            {{ __('messages.Create Staff') }}
                         </a>
                     </div>
 
@@ -38,20 +38,20 @@
                         <thead class="bg-gray-100">
                             <tr>
                                 <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                    Name
+                                    class="px-6 py-3 text-left text-s font-semibold text-gray-600 uppercase tracking-wider">
+                                    {{ __('messages.Name') }}
                                 </th>
                                 <th scope="col"
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                    Email
+                                    class="px-6 py-3 text-left text-s font-semibold text-gray-600 uppercase tracking-wider">
+                                    {{ __('messages.Email') }}
                                 </th>
                                 <th scope="col"
-                                    class="px-2 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                    Edit
+                                    class="px-2 py-3 text-center text-s font-semibold text-gray-600 uppercase tracking-wider">
+                                    {{ __('messages.Edit') }}
                                 </th>
                                 <th scope="col"
-                                    class="px-2 py-3 text-center text-xs font-medium text-gray-600 uppercase tracking-wider">
-                                    Delete
+                                    class="px-2 py-3 text-center text-s font-semibold text-gray-600 uppercase tracking-wider">
+                                    {{ __('messages.Delete') }}
                                 </th>
                             </tr>
                         </thead>
