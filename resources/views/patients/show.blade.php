@@ -85,6 +85,10 @@
                                 class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-md shadow-md transition duration-300">
                                 {{ __('messages.add_follow_up') }}
                             </a>
+
+                            <a href="{{ route('patients.export-pdf', $patient) }}" class="bg-green-600 hover:bg-green-700 text-black font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
+                                {{ __('Export to PDF') }}
+                            </a>
                         </div>
 
                         <h2 class="text-xl font-semibold mb-2">{{ __('messages.follow_ups') }}</h2>

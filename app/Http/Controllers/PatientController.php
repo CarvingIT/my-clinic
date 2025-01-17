@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Redirect;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
+// use Knp\Snappy\Pdf;
+use PDF;
+
 
 class PatientController extends Controller
 {
@@ -105,7 +108,7 @@ class PatientController extends Controller
             'email_id' => ['nullable', 'email', 'max:255'],
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
-            'patient_id' => ['required', 'string', 'unique:patients,patient_id,'.$patient->id]
+            'patient_id' => ['required', 'string', 'unique:patients,patient_id,' . $patient->id]
         ]);
         $patient->update($request->all());
 
@@ -119,5 +122,15 @@ class PatientController extends Controller
     {
         $patient->delete();
         return Redirect::route('patients.index')->with('success', 'Patient Deleted Successfully');
+    }
+
+    public function exportPdf(Patient $patient)
+    {
+
+        $pdf = PDF::loadView('patients.pdf', compact('patient'));
+
+        // return $pdf->inline($patient->name . $patient->id . '.pdf');
+        return $pdf->inline($patient->name . '(' . $patient->id . ').pdf');
+
     }
 }

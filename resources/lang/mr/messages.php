@@ -56,6 +56,7 @@ return [
     'Delete' => 'हटवा',
     'Create User' => 'वापरकर्ता तयार करा',
     'Create Staff' => 'कर्मचारी तयार करा',
+    'check_up_info' => 'चेक-अप माहिती',
 
     'locale' => 'भाषा', // Label for dropdown
 

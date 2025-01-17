@@ -39,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+     Route::get('/patients/{patient}/export-pdf', [PatientController::class, 'exportPdf'])->name('patients.export-pdf');
 });
 
 // Route::resource('users',UserController::class);
@@ -77,6 +78,7 @@ Route::resource('followups', FollowUpController::class)->only(['create', 'store'
 // Route::get('patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
 // Route::put('patients/{patient}', [PatientController::class, 'update'])->name('patients.update');
 // Route::delete('patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
+
 
 
 require __DIR__.'/auth.php';

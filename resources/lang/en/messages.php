@@ -55,6 +55,7 @@ return [
     'Edit' => 'Edit',
     'Delete' => 'Delete',
     'Create Staff' => 'Create Staff',
+    'check_up_info' => 'Check-up Info',
 
 
     'locale' => 'Language', // Label for dropdown
