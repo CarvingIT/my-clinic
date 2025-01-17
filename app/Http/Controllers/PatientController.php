@@ -129,8 +129,8 @@ class PatientController extends Controller
 
         $pdf = PDF::loadView('patients.pdf', compact('patient'));
 
-        // return $pdf->inline($patient->name . $patient->id . '.pdf');
-        return $pdf->inline($patient->name . '(' . $patient->id . ').pdf');
+        return $pdf->inline($patient->name . '.pdf');
+
 
     }
 }
