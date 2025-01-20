@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Redirect;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
+use App\Models\FollowUp;
 // use Knp\Snappy\Pdf;
 use PDF;
 
@@ -130,7 +131,32 @@ class PatientController extends Controller
         $pdf = PDF::loadView('patients.pdf', compact('patient'));
 
         return $pdf->inline($patient->name . '.pdf');
-
-
     }
+
+
+    /**
+     *  Generate Medical Certificate
+     */
+
+     public function generateCertificate(Patient $patient, Request $request)
+     {
+         $request->validate([
+             'start_date' => 'required|date',
+             'end_date' => 'required|date',
+             'medical_condition' => 'required|string',
+         ]);
+
+         $checkUpInfo = json_decode($patient->followUps()->first()->check_up_info ?? '', true);
+
+         $pdf = PDF::loadView('patients.certificate', [
+             'patient' => $patient,
+             'checkUpInfo' => $checkUpInfo,
+             'startDate' => $request->start_date,
+             'endDate' => $request->end_date,
+              'medicalCondition' => $request->medical_condition,
+         ]);
+
+         return $pdf->inline('certificate_patient_'.$patient->id.'.pdf');
+
+     }
 }

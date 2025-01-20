@@ -39,7 +39,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-     Route::get('/patients/{patient}/export-pdf', [PatientController::class, 'exportPdf'])->name('patients.export-pdf');
+    Route::get('/patients/{patient}/export-pdf', [PatientController::class, 'exportPdf'])->name('patients.export-pdf');
+
+    Route::get('/patients/{patient}/certificate', [PatientController::class, 'generateCertificate'])->name('patients.certificate');
+    Route::get('/followups/{followup}/edit', [FollowUpController::class, 'edit'])->name('followups.edit');
 });
 
 // Route::resource('users',UserController::class);
@@ -61,16 +64,16 @@ Route::middleware('auth')->group(function () {
 
 Route::resource('users', UserController::class);
 Route::resource('patients', PatientController::class);
- Route::get('followups/create', [FollowUpController::class,'create'])->name('followups.create');
+Route::get('followups/create', [FollowUpController::class, 'create'])->name('followups.create');
 Route::resource('followups', FollowUpController::class)->only(['create', 'store']);
 
 
- Route::resource('followups', FollowUpController::class)->only(['store']);
+Route::resource('followups', FollowUpController::class)->only(['store']);
 
- Route::resource('followups', FollowUpController::class)->except(['create', 'store']);
+Route::resource('followups', FollowUpController::class)->except(['create', 'store']);
 
 
- // Patient Routes
+// Patient Routes
 // Route::get('patients', [PatientController::class, 'index'])->name('patients.index');
 // Route::get('patients/create', [PatientController::class, 'create'])->name('patients.create');
 // Route::post('patients', [PatientController::class, 'store'])->name('patients.store');
@@ -81,4 +84,4 @@ Route::resource('followups', FollowUpController::class)->only(['create', 'store'
 
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

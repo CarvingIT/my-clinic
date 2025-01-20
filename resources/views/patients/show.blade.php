@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
             {{ __('messages.patient_details') }}
         </h2>
     </x-slot>
@@ -12,7 +12,7 @@
                 <div class="p-6">
 
                     <!-- Display success message -->
-                    @if(session('success'))
+                    @if (session('success'))
                         <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
                             {{ session('success') }}
                         </div>
@@ -86,9 +86,104 @@
                                 {{ __('messages.add_follow_up') }}
                             </a>
 
-                            <a href="{{ route('patients.export-pdf', $patient) }}" class="bg-green-600 hover:bg-green-700 text-black font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
+                            <a href="{{ route('patients.export-pdf', $patient) }}"
+                                class="bg-green-600 hover:bg-green-700 text-black font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                 {{ __('Export to PDF') }}
                             </a>
+
+                            {{-- Generate Certificate button --}}
+
+                            <div x-data="{ open: false }">
+                                <button @click="open = true"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
+                                    {{ __('Generate Certificate') }}
+                                </button>
+
+                                <div x-show="open"
+                                    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
+                                    <div class="relative w-auto max-w-3xl mx-auto my-6">
+                                        <!--content-->
+                                        <div
+                                            class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+                                            <!--header-->
+                                            <div
+                                                class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
+                                                <h3 class="text-3xl font-semibold">
+                                                    Generate Certificate
+                                                </h3>
+                                                <button
+                                                    class="p-1 ms-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
+                                                    onclick="toggleModal('modal-id')" @click="open = false">
+                                                    <span
+                                                        class="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
+                                                        ×
+                                                    </span>
+                                                </button>
+                                            </div>
+                                            <!--body-->
+                                            <div class="relative p-6 flex-auto">
+                                                <form method="GET"
+                                                    action="{{ route('patients.certificate', $patient) }}"
+                                                    target="_blank">
+                                                    @csrf
+
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                                        <div>
+                                                            <x-input-label for="start_date" :value="__('Start Date')" />
+                                                            <x-text-input type="date" id="start_date"
+                                                                name="start_date" value="{{ old('start_date') }}"
+                                                                class="mt-1 block w-full" />
+                                                            <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
+                                                        </div>
+
+                                                        <div>
+                                                            <x-input-label for="end_date" :value="__('End Date')" />
+                                                            <x-text-input type="date" id="end_date" name="end_date"
+                                                                value="{{ old('end_date') }}"
+                                                                class="mt-1 block w-full" />
+                                                            <x-input-error :messages="$errors->get('end_date')" class="mt-2" />
+                                                        </div>
+
+                                                        <div>
+                                                            <x-input-label for="medical_condition" :value="__('Medical Condition')" />
+                                                            <x-text-input type="text" id="medical_condition"
+                                                                name="medical_condition"
+                                                                value="{{ old('medical_condition') }}"
+                                                                class="mt-1 block w-full" />
+                                                            <x-input-error :messages="$errors->get('medical_condition')" class="mt-2" />
+                                                        </div>
+                                                    </div>
+
+
+                                                    <!--footer-->
+                                                    <div
+                                                        class="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
+                                                        <button
+                                                            class="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none ms-1 mb-1 ease-linear transition-all duration-150"
+                                                            type="button" @click="open = false">
+                                                            Close
+                                                        </button>
+
+                                                        <button type="submit"
+                                                            class="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                                                            type="button">
+                                                            Generate Certificate
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+
+
+
+
                         </div>
 
                         <h2 class="text-xl font-semibold mb-2">{{ __('messages.follow_ups') }}</h2>
@@ -137,7 +232,8 @@
                                         class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                                         @foreach ($patient->followUps->sortByDesc('created_at') as $followUp)
                                             <tr class="hover:bg-gray-50 transition duration-300">
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                    style="vertical-align: top;">
 
 
                                                     <p class="mt-2">
@@ -145,7 +241,8 @@
                                                     </p>
                                                     {{-- {{ $followUp->created_at->format('d M Y, h:i A') }} --}}
                                                 </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                    style="vertical-align: top;">
                                                     @if ($followUp->check_up_info)
                                                         @php
                                                             $checkUpInfo = json_decode($followUp->check_up_info, true);
@@ -207,11 +304,13 @@
                                                         </div>
                                                     @endif
                                                 </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                    style="vertical-align: top;">
                                                     {{-- <h2 class="font-semibold text-gray-800 dark:text-white">{{ __('लक्षणे') }}</h2> --}}
                                                     {{ $followUp->diagnosis }}
                                                 </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                    style="vertical-align: top;">
 
                                                     {{-- <h2 class="font-semibold text-gray-800 dark:text-white">{{ __('चिकित्सा') }}</h2> --}}
                                                     @if ($followUp->treatment)
@@ -243,7 +342,8 @@
                                                 </td>
 
 
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                    style="vertical-align: top;">
                                                     @if ($followUp->check_up_info)
                                                         @php
                                                             $checkUpInfo = json_decode($followUp->check_up_info, true);
@@ -309,18 +409,21 @@
                                                         </div>
                                                     @endif
                                                 </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300 flex gap-4 items-center">
+                                                <td
+                                                    class="px-6 py-4 text-gray-600 dark:text-gray-300 flex gap-4 items-center">
                                                     <a href="{{ route('followups.edit', ['followup' => $followUp->id]) }}"
                                                         class="text-indigo-600 hover:text-indigo-900 font-medium"title="Edit">
 
                                                         <i class="fas fa-edit"></i>
                                                     </a>
-                                                    <form method="POST" action="{{ route('followups.destroy', ['followup' => $followUp->id]) }}"
+                                                    <form method="POST"
+                                                        action="{{ route('followups.destroy', ['followup' => $followUp->id]) }}"
                                                         onsubmit="return confirmDelete()">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit"
-                                                            class="text-red-600 hover:text-red-800 font-medium" title="Delete">
+                                                            class="text-red-600 hover:text-red-800 font-medium"
+                                                            title="Delete">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>
