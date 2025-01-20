@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-200 leading-tight">
+        <h2 class="font-semibold text-2xl text-gray-800 dark:text-gray-700 leading-tight">
             {{ __('messages.patient_details') }}
         </h2>
     </x-slot>
@@ -87,7 +87,7 @@
                             </a>
 
                             <a href="{{ route('patients.export-pdf', $patient) }}"
-                                class="bg-green-600 hover:bg-green-700 text-black font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
+                                class="bg-sky-400		 hover:bg-sky-500		 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                 {{ __('Export to PDF') }}
                             </a>
 
@@ -95,7 +95,7 @@
 
                             <div x-data="{ open: false }">
                                 <button @click="open = true"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
+                                    class="bg-emerald-400	 hover:bg-emerald-500 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                     {{ __('Generate Certificate') }}
                                 </button>
 
@@ -108,14 +108,14 @@
                                             <!--header-->
                                             <div
                                                 class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
-                                                <h3 class="text-3xl font-semibold">
+                                                <h3 class="text-3xl font-semibold text-gray-800 dark:text-gray-200">
                                                     Generate Certificate
                                                 </h3>
                                                 <button
                                                     class="p-1 ms-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
                                                     onclick="toggleModal('modal-id')" @click="open = false">
                                                     <span
-                                                        class="bg-transparent text-black opacity-5 h-6 w-6 text-2xl block outline-none focus:outline-none">
+                                                        class=" text-red-800 h-6 w-6 text-2xl block">
                                                         ×
                                                     </span>
                                                 </button>
@@ -149,7 +149,7 @@
                                                             <x-text-input type="text" id="medical_condition"
                                                                 name="medical_condition"
                                                                 value="{{ old('medical_condition') }}"
-                                                                class="mt-1 block w-full" />
+                                                                class="mt-1 block w-full border-x-2" />
                                                             <x-input-error :messages="$errors->get('medical_condition')" class="mt-2" />
                                                         </div>
                                                     </div>
@@ -190,48 +190,33 @@
                         @if ($patient->followUps->count() > 0)
                             <div class="overflow-x-auto">
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                    <thead class="bg-gray-50 text-black dark:bg-gray-700 dark:text-gray-200">
                                         <tr>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-600 dark:text-white">
-                                                    {{ __('messages.Created At') }}</h2>
+                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                                {{ __('messages.Created At') }}
                                             </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-600 dark:text-white">
-                                                    {{ __('नाडी') }}</h2>
+                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                                {{ __('नाडी') }}
                                             </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-600 dark:text-white">
-                                                    {{ __('लक्षणे') }}
-                                                </h2>
+                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                                {{ __('लक्षणे') }}
                                             </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-600 dark:text-white">
-                                                    {{ __('चिकित्सा') }}</h2>
+                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                                {{ __('चिकित्सा') }}
                                             </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-600 dark:text-white">
-                                                    {{ __('messages.Additional') }}</h2>
+                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                                {{ __('messages.Additional') }}
                                             </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-m font-large text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                                <h2 class="font-semibold text-gray-600 dark:text-white">
-                                                    {{ __('messages.Actions') }}</h2>
+                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                                {{ __('messages.Actions') }}
                                             </th>
-
-
-
                                         </tr>
                                     </thead>
+
                                     <tbody
                                         class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                                         @foreach ($patient->followUps->sortByDesc('created_at') as $followUp)
-                                            <tr class="hover:bg-gray-50 transition duration-300">
+                                            <tr class="hover:bg-gray-50 transition duration-300 dark:hover:bg-gray-700">
                                                 <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
                                                     style="vertical-align: top;">
 
@@ -249,7 +234,7 @@
                                                         @endphp
 
                                                         <div>
-                                                            {{-- <h2 class="font-semibold text-gray-800 dark:text-white">
+                                                            {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">
                                                             {{ __('नाडी') }}</h2> --}}
                                                             @foreach ($checkUpInfo as $key => $value)
                                                                 @if (in_array($key, [
@@ -281,7 +266,7 @@
 
                                                         <div>
                                                             <p class="mt-2"><span
-                                                                    class="font-bold text-gray-800 dark:text-white">
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">
                                                                     {{ __('निदान') }}:</span>
                                                                 @if (isset($checkUpInfo['nidan']))
                                                                     {{ $checkUpInfo['nidan'] }}
@@ -289,14 +274,14 @@
                                                             </p>
 
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('उपशय') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('उपशय') }}:</span>
                                                                 @if (isset($checkUpInfo['upashay']))
                                                                     {{ $checkUpInfo['upashay'] }}
                                                                 @endif
                                                             </p>
 
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('सल्ला') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('सल्ला') }}:</span>
                                                                 @if (isset($checkUpInfo['salla']))
                                                                     {{ $checkUpInfo['salla'] }}
                                                                 @endif
@@ -306,13 +291,13 @@
                                                 </td>
                                                 <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
                                                     style="vertical-align: top;">
-                                                    {{-- <h2 class="font-semibold text-gray-800 dark:text-white">{{ __('लक्षणे') }}</h2> --}}
+                                                    {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}</h2> --}}
                                                     {{ $followUp->diagnosis }}
                                                 </td>
                                                 <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
                                                     style="vertical-align: top;">
 
-                                                    {{-- <h2 class="font-semibold text-gray-800 dark:text-white">{{ __('चिकित्सा') }}</h2> --}}
+                                                    {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}</h2> --}}
                                                     @if ($followUp->treatment)
                                                         <p>{{ $followUp->treatment }}</p>
                                                     @endif
@@ -335,7 +320,7 @@
                                                     @endif
                                                     @if (isset($checkUpInfo['chikitsa_combo']))
                                                         <p class="mt-2"><span
-                                                                class="font-bold text-gray-800 dark:text-white">{{ __('messages.Chikitsa Combo') }}:
+                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Chikitsa Combo') }}:
                                                             </span> {{ $checkUpInfo['chikitsa_combo'] }}</p>
                                                     @endif
 
@@ -357,21 +342,21 @@
 
                                                         <div>
                                                             <p class="mt-2"><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Payment Method') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Payment Method') }}:</span>
                                                                 @if (isset($checkUpInfo['payment_method']))
                                                                     {{ $checkUpInfo['payment_method'] }}
                                                                 @endif
                                                             </p>
 
                                                             {{-- <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">Certificate:</span>
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">Certificate:</span>
                                                                 @if (isset($checkUpInfo['certificate']))
                                                                     {{ $checkUpInfo['certificate'] }}
                                                                 @endif
                                                             </p> --}}
 
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Drawing') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Drawing') }}:</span>
                                                                 @if (isset($checkUpInfo['drawing']))
                                                                     {{ $checkUpInfo['drawing'] }}
                                                                 @endif
@@ -382,26 +367,26 @@
 
                                                         <div>
                                                             <p class="mt-2"><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Amount') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Amount') }}:</span>
                                                                 @if (isset($checkUpInfo['amount']))
                                                                     {{ $checkUpInfo['amount'] }}
                                                                 @endif
                                                             </p>
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Balance') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Balance') }}:</span>
                                                                 @if (isset($checkUpInfo['balance']))
                                                                     {{ $checkUpInfo['balance'] }}
                                                                 @endif
                                                             </p>
 
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Branch') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Branch') }}:</span>
                                                                 @if (isset($checkUpInfo['branch']))
                                                                     {{ $checkUpInfo['branch'] }}
                                                                 @endif
                                                             </p>
                                                             <p><span
-                                                                    class="font-bold text-gray-800 dark:text-white">{{ __('messages.Doctor') }}:</span>
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Doctor') }}:</span>
                                                                 @if (isset($checkUpInfo['doctor']))
                                                                     {{ $checkUpInfo['doctor'] }}
                                                                 @endif

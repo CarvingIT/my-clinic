@@ -24,11 +24,11 @@
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
                         {{ __('messages.Staff') }}
                     </x-nav-link>
-                    <div x-data="{ darkMode: false }" :class="{ 'dark': darkMode }">
+                    {{-- <div x-data="{ darkMode: false }" :class="{ 'dark': darkMode }">
                         <button @click="darkMode = !darkMode; document.documentElement.classList.toggle('dark', darkMode)" class="text-gray-800 dark:text-gray-200">
                             Toggle Dark Mode
                         </button>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 

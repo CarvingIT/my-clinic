@@ -156,7 +156,7 @@ class PatientController extends Controller
               'medicalCondition' => $request->medical_condition,
          ]);
 
-         return $pdf->inline('certificate_patient_'.$patient->id.'.pdf');
+         return $pdf->inline('certificate_'.$patient->name.'.pdf');
 
      }
 }
