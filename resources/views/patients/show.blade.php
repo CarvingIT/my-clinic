@@ -88,7 +88,7 @@
 
                             <a href="{{ route('patients.export-pdf', $patient) }}"
                                 class="bg-sky-400		 hover:bg-sky-500		 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
-                                {{ __('Export to PDF') }}
+                                {{ __('messages.Export to PDF') }}
                             </a>
 
                             {{-- Generate Certificate button --}}
@@ -96,7 +96,7 @@
                             <div x-data="{ open: false }">
                                 <button @click="open = true"
                                     class="bg-emerald-400	 hover:bg-emerald-500 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
-                                    {{ __('Generate Certificate') }}
+                                    {{ __('messages.Generate Certificate') }}
                                 </button>
 
                                 <div x-show="open"
@@ -109,13 +109,12 @@
                                             <div
                                                 class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
                                                 <h3 class="text-3xl font-semibold text-gray-800 dark:text-gray-200">
-                                                    Generate Certificate
+                                                    {{ __('messages.Generate Certificate') }}
                                                 </h3>
                                                 <button
                                                     class="p-1 ms-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
                                                     onclick="toggleModal('modal-id')" @click="open = false">
-                                                    <span
-                                                        class=" text-red-800 h-6 w-6 text-2xl block">
+                                                    <span class=" text-red-800 h-6 w-6 text-2xl block">
                                                         ×
                                                     </span>
                                                 </button>
@@ -161,13 +160,13 @@
                                                         <button
                                                             class="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none ms-1 mb-1 ease-linear transition-all duration-150"
                                                             type="button" @click="open = false">
-                                                            Close
+                                                            {{__('messages.Close')}}
                                                         </button>
 
                                                         <button type="submit"
                                                             class="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                                                             type="button">
-                                                            Generate Certificate
+                                                            {{ __('messages.Generate Certificate') }}
                                                         </button>
                                                     </div>
                                                 </form>
@@ -176,6 +175,109 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {{-- Reports Button --}}
+
+                            <div x-data="{ openReportModal: false }">
+                                <button @click="openReportModal = true"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">{{ __('messages.Medical Reports') }}</button>
+
+                                <div x-show="openReportModal" style="background-color: rgba(0, 0, 0, 0.5)"
+                                    class="fixed top-0 left-0 w-full h-full flex items-center shadow-lg overflow-y-auto z-50"
+                                    x-cloak>
+                                    <div class="container mx-auto lg:px-32 rounded-lg overflow-y-auto">
+                                        <div class="bg-white relative shadow-lg rounded-lg">
+                                            <div class="p-4">
+                                                <div class="flex justify-between items-center">
+                                                    <h2
+                                                        class="text-lg font-bold text-gray-900 dark:text-white border-b pb-2 mb-2">
+                                                        {{ __('messages.Medical Reports') }}</h2>
+                                                    <button
+                                                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                                        data-modal-toggle="defaultModal" type="button"
+                                                        @click="openReportModal = false"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                                                        xmlns="http://www.w3.org/2000/svg">
+                                                        <path fill-rule="evenodd"
+                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                            clip-rule="evenodd"></path>
+                                                    </svg> </button>
+
+                                                    <span class="sr-only">Close modal</span>
+                                                    </button>
+                                                </div>
+
+                                                <div class="relative p-6 flex-auto">
+                                                    @if ($patient->reports->count() > 0)
+                                                        <div
+                                                            class="mb-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                                        </div>
+                                                        @foreach ($patient->reports as $report)
+                                                            <div
+                                                                class="p-2 border border-gray-200 rounded-md shadow-sm flex  justify-between items-center">
+                                                                <a href="{{ Storage::url($report->path) }}"
+                                                                    target="_blank"
+                                                                    class="text-indigo-600 hover:text-indigo-900">
+                                                                    {{ $report->name }}
+                                                                </a>
+
+                                                                <p class="text-sm text-gray-500 mt-1">{{__('messages.Uploaded')}}: {{ $report->created_at->format('d M Y, h:i A') }}</p>
+
+                                                                <form method="POST"
+                                                                    action="{{ route('reports.destroy', $report) }}"
+                                                                    onsubmit="return confirmDelete()"
+                                                                    class="inline-block mt-2">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit"
+                                                                        class="text-red-600 hover:text-red-900 px-3 py-1 bg-red-100 hover:bg-red-200 rounded-md focus:ring focus:ring-red-200 focus:outline-none transition duration-200"><i class="fas fa-trash"></i></button>
+                                                                </form>
+                                                            </div>
+                                                        @endforeach
+                                                </div>
+                                                @endif
+
+                                                <form method="POST" action="{{ route('reports.store') }}"
+                                                    enctype="multipart/form-data">
+                                                    @csrf
+                                                    <input type="hidden" name="patient_id"
+                                                        value="{{ $patient->id }}">
+
+                                                    <div class="mt-4">
+                                                        <x-input-label for="report" :value="__('messages.Upload Reports')" />
+                                                        <input type="file" name="report[]" id="report"
+                                                            class="block mt-1 w-full border border-gray-300 rounded-md focus:ring focus:ring-indigo-200 focus:border-indigo-300 transition-all duration-200"
+                                                            multiple>
+
+                                                        <x-input-error :messages="$errors->get('report')" class="mt-2" />
+                                                    </div>
+
+                                                    <div class="flex items-center justify-end mt-4">
+                                                        <x-primary-button
+                                                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition duration-300">
+                                                            {{ __('messages.Upload') }}
+                                                        </x-primary-button>
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            <div
+                                                class="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
+                                                <button
+                                                    class="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none ms-1 mb-1 ease-linear transition-all duration-150"
+                                                    type="button" @click="openReportModal = false">
+                                                    {{__('messages.Close')}}
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+
+                            {{-- Reports Button Ends here --}}
+
 
 
 
@@ -192,22 +294,28 @@
                                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                                     <thead class="bg-gray-50 text-black dark:bg-gray-700 dark:text-gray-200">
                                         <tr>
-                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            <th scope="col"
+                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                                 {{ __('messages.Created At') }}
                                             </th>
-                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            <th scope="col"
+                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                                 {{ __('नाडी') }}
                                             </th>
-                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            <th scope="col"
+                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                                 {{ __('लक्षणे') }}
                                             </th>
-                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            <th scope="col"
+                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                                 {{ __('चिकित्सा') }}
                                             </th>
-                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            <th scope="col"
+                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                                 {{ __('messages.Additional') }}
                                             </th>
-                                            <th scope="col" class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            <th scope="col"
+                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                                 {{ __('messages.Actions') }}
                                             </th>
                                         </tr>
@@ -216,7 +324,8 @@
                                     <tbody
                                         class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                                         @foreach ($patient->followUps->sortByDesc('created_at') as $followUp)
-                                            <tr class="hover:bg-gray-50 transition duration-300 dark:hover:bg-gray-700">
+                                            <tr
+                                                class="hover:bg-gray-50 transition duration-300 dark:hover:bg-gray-700">
                                                 <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
                                                     style="vertical-align: top;">
 

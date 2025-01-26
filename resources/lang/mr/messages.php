@@ -57,6 +57,13 @@ return [
     'Create User' => 'वापरकर्ता तयार करा',
     'Create Staff' => 'कर्मचारी तयार करा',
     'check_up_info' => 'चेक-अप माहिती',
+    'Medical Reports' => 'चिकित्सा अहवाल',
+    'Generate Certificate' => 'प्रमाणपत्र तयार करा',
+    'Export to PDF' => 'पीडीएफ मध्ये निर्यात करा',
+    'Upload' => 'अपलोड करा',
+    'Close' => 'बंद करा',
+    'Uploaded' => 'अपलोड केले',
+    'Upload Reports' => 'अहवाल अपलोड करा',
 
     'locale' => 'भाषा', // Label for dropdown
 

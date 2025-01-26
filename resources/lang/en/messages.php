@@ -56,6 +56,13 @@ return [
     'Delete' => 'Delete',
     'Create Staff' => 'Create Staff',
     'check_up_info' => 'Check-up Info',
+    'Medical Reports' => 'Medical Reports',
+    'Generate Certificate' => 'Generate Certificate',
+    'Export to PDF' => 'Export to PDF',
+    'Upload' => 'Upload',
+    'Close' => 'Close',
+    'Uploaded' => 'Uploaded',
+    'Upload Reports' => 'Upload Reports',
 
 
     'locale' => 'Language', // Label for dropdown

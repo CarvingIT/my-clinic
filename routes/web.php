@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FollowUpController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\App;
 
 use Illuminate\Support\Facades\Route;
@@ -71,6 +72,9 @@ Route::resource('followups', FollowUpController::class)->only(['create', 'store'
 Route::resource('followups', FollowUpController::class)->only(['store']);
 
 Route::resource('followups', FollowUpController::class)->except(['create', 'store']);
+
+Route::resource('reports', ReportController::class)->only(['store','destroy']);
+
 
 
 // Patient Routes
