@@ -63,6 +63,7 @@ return [
     'Close' => 'Close',
     'Uploaded' => 'Uploaded',
     'Upload Reports' => 'Upload Reports',
+    'Add Follow Up' => 'Add Follow Up',
 
 
     'locale' => 'Language', // Label for dropdown

@@ -87,6 +87,7 @@
                             </a>
 
                             <a href="{{ route('patients.export-pdf', $patient) }}"
+                                target="_blank"
                                 class="bg-sky-400		 hover:bg-sky-500		 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                 {{ __('messages.Export to PDF') }}
                             </a>
@@ -373,8 +374,9 @@
 
 
 
+
                                                         <div>
-                                                            <p class="mt-2"><span
+                                                            {{-- <p class="mt-2"><span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">
                                                                     {{ __('निदान') }}:</span>
                                                                 @if (isset($checkUpInfo['nidan']))
@@ -394,7 +396,36 @@
                                                                 @if (isset($checkUpInfo['salla']))
                                                                     {{ $checkUpInfo['salla'] }}
                                                                 @endif
+                                                            </p> --}}
+                                                            <p><span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('नाडी') }}:</span>
+                                                                @if (isset($checkUpInfo['nadi']))
+                                                                    {{ $checkUpInfo['nadi'] }}
+                                                                @endif
                                                             </p>
+                                                            <p><span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}:</span>
+                                                                    {{ $followUp->diagnosis }}
+                                                            </p>
+                                                            <p><span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span>
+                                                                @if (isset($checkUpInfo['chikitsa']))
+                                                                    {{ $checkUpInfo['chikitsa'] }}
+                                                                @endif
+                                                            </p>
+                                                            <p><span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('दिवस') }}:</span>
+                                                                @if (isset($checkUpInfo['days']))
+                                                                    {{ $checkUpInfo['days'] }}
+                                                                @endif
+                                                            </p>
+                                                            <p><span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('पुड्या') }}:</span>
+                                                                @if (isset($checkUpInfo['packets']))
+                                                                    {{ $checkUpInfo['packets'] }}
+                                                                @endif
+                                                            </p>
+
                                                         </div>
                                                     @endif
                                                 </td>

@@ -64,6 +64,7 @@ return [
     'Close' => 'बंद करा',
     'Uploaded' => 'अपलोड केले',
     'Upload Reports' => 'अहवाल अपलोड करा',
+    'Add Follow Up' => 'फॉलो अप जोडा',
 
     'locale' => 'भाषा', // Label for dropdown
 

@@ -53,6 +53,7 @@ class FollowUpController extends Controller
             $checkUpInfo[$key] = $value;
         }
 
+
         FollowUp::create([
             'patient_id' => $request->patient_id,
             'check_up_info' => json_encode($checkUpInfo),
@@ -103,6 +104,7 @@ class FollowUpController extends Controller
         if ($request->filled('chikitsa_combo')) {
             $checkUpInfo['chikitsa_combo'] = $request->chikitsa_combo;
         }
+
 
         $followup->update([
             'check_up_info' => json_encode($checkUpInfo),
