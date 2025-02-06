@@ -11,7 +11,7 @@
                     <span class="font-bold text-indigo-600">{{ Auth::user()->name }}</span>!
                 </p>
                 <p class="text-base sm:text-base text-gray-700 font-semibold pt-2">
-                    {{__('messages.Branch')}}: <span class="font-bold text-indigo-600">{{ session('branch_name') }}</span>
+                    {{__('messages.OPD')}}: <span class="font-bold text-indigo-600">{{ session('branch_name') }}</span>
                 </p>
             </div>
 
