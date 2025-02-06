@@ -53,6 +53,8 @@ class FollowUpController extends Controller
             $checkUpInfo[$key] = $value;
         }
 
+        $transliteratedText = $request->input('nadiInput');
+
 
         FollowUp::create([
             'patient_id' => $request->patient_id,
@@ -121,4 +123,5 @@ class FollowUpController extends Controller
         $followup->delete();
         return redirect()->route('patients.show', $patientId)->with('success', 'Follow Up Deleted Successfully');
     }
+
 }

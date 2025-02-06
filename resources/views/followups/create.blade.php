@@ -46,11 +46,11 @@
                         <div class="mb-6">
                             <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">{{ __('नाडी') }}
                             </h2>
-                            <textarea id="nadiInput" name="nadi" rows="4"
+                            <textarea id="nadiInput" name="nadiInput" rows="4"
                                 class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-                                @foreach (['वात', 'पित्त', 'कफ', 'सूक्ष्म', 'कठिन', 'साम', 'वेग', 'प्राण', 'व्यान', 'स्थूल', 'अल्प स्थूल','अनियमित', 'तीक्ष्ण', 'वेगवती'] as $nadi)
+                                @foreach (['वात', 'पित्त', 'कफ', 'सूक्ष्म', 'कठिन', 'साम', 'वेग', 'प्राण', 'व्यान', 'स्थूल', 'अल्प स्थूल', 'अनियमित', 'तीक्ष्ण', 'वेगवती'] as $nadi)
                                     <button type="button" class="nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded"
                                         onclick="appendNadi('{{ $nadi }}')">{{ $nadi }}</button>
                                 @endforeach
@@ -122,7 +122,7 @@
 
 
 
-{{--
+                        {{--
                         <!-- Treatment Section -->
                         <div>
                             <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">{{ __('चिकित्सा') }}
@@ -255,4 +255,8 @@
             textarea.value += (textarea.value ? ', ' : '') + presetText;
         });
     });
+</script>
+
+<script>
+    window.initializeTransliteration(["nadiInput"]);
 </script>
