@@ -65,6 +65,10 @@ return [
     'Uploaded' => 'अपलोड केले',
     'Upload Reports' => 'अहवाल अपलोड करा',
     'Add Follow Up' => 'फॉलो अप जोडा',
+    'Paud Road' => 'पौड रस्ता',
+    'Shukrawar Peth' => 'शुक्रवार पेठ',
+    'Kothrud' => 'कोथरुड',
+    'OPD' => 'बाह्यरोगी विभाग',
 
     'locale' => 'भाषा', // Label for dropdown
 

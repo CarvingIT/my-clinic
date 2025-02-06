@@ -8,6 +8,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Models\Branch;
+
 
 class AuthenticatedSessionController extends Controller
 {
@@ -16,7 +18,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        $branches = Branch::all();
+        return view('auth.login', compact('branches'));
     }
 
     /**
@@ -27,6 +30,11 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $request->session()->regenerate();
+
+        // Store branch information in the session after successful authentication:
+        $request->session()->put('branch_id', $request->branch_id);
+        $branch = Branch::find($request->branch_id);
+        $request->session()->put('branch_name', $branch->name);
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
@@ -44,4 +52,5 @@ class AuthenticatedSessionController extends Controller
 
         return redirect('/');
     }
+
 }

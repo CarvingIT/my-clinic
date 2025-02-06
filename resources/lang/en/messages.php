@@ -64,6 +64,10 @@ return [
     'Uploaded' => 'Uploaded',
     'Upload Reports' => 'Upload Reports',
     'Add Follow Up' => 'Add Follow Up',
+    'Paud Road' => 'Paud Road',
+    'Shukrawar Peth' => 'Shukrawar Peth',
+    'Kothrud' => 'Kothrud',
+    'OPD' => 'OPD',
 
 
     'locale' => 'Language', // Label for dropdown
