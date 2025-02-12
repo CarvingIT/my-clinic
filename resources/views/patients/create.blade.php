@@ -36,7 +36,7 @@
                             <x-input-label for="birthdate" :value="__('messages.Birthdate')" />
                             <x-text-input id="birthdate"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="date" name="birthdate" :value="old('birthdate')" />
+                                type="date" name="birthdate" />
                             <x-input-error :messages="$errors->get('birthdate')" class="mt-1" />
                         </div>
 
@@ -46,9 +46,9 @@
                             <select id="gender" name="gender"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2">
                                 <option value="">Please Select</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                                <option value="O">Other</option>
                             </select>
                             <x-input-error :messages="$errors->get('gender')" class="mt-1" />
                         </div>
@@ -94,7 +94,7 @@
                             <x-input-label for="occupation" :value="__('messages.occupation')" />
                             <x-text-input id="occupation"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="text" name="occupation" :value="old('occupation')" required />
+                                type="text" name="occupation" :value="old('occupation')" />
                             <x-input-error :messages="$errors->get('occupation')" class="mt-1" />
                         </div>
 

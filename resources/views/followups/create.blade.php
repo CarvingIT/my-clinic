@@ -79,19 +79,19 @@
 
                                 <div class="mt-4 grid grid-cols-4 gap-4">
                                     <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200"
-                                        data-preset="महासुदर्शन, संजीवनी वटी, अग्नि तुंडी वटी">
+                                        data-preset="महासुदर्शन, वैदेही, बिभितक, यष्टी, तालीसादी ">
                                         ज्वर
                                     </div>
                                     <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200"
-                                        data-preset="वण, गुगगुंळ, हरितकी">
+                                        data-preset="वरा, गुग्गुळ, विश्व, अश्वकपी, वत्स, गोक्षुर, गोदंती">
                                         संधिशूल
                                     </div>
                                     <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200"
-                                        data-preset="कुटज, मुक्ता, बिल्व">
+                                        data-preset="हरीतकी, अमृता, सारिवा ">
                                         अर्श
                                     </div>
                                     <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200"
-                                        data-preset="विश्व, अभ्र, शंखभस्म, वन्ग, अमृता, सारिवा">
+                                        data-preset="कुटज, मुस्ता, विश्व ">
                                         ग्रहणी
                                     </div>
                                 </div>
@@ -114,7 +114,34 @@
                             </div>
 
 
+
+
                         </div>
+
+
+                        <div class="mt-4">
+                            <x-input-label for="payment_method" :value="__('messages.Payment Method')" />
+                            <select id="payment_method" name="payment_method"
+                                class="border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm block mt-1 w-full transition-all duration-300 hover:border-indigo-400">
+                                <option value="">Please Select</option>
+                                <option value="cash">Cash</option>
+                                <option value="card">Card</option>
+                                <option value="online">Online</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('payment_method')" class="mt-2" />
+                        </div>
+
+                        @foreach (['amount' => 'Amount', 'balance' => 'Balance'] as $name => $label)
+                            <div class="mt-4">
+                                <x-input-label for="{{ $name }}" :value="__($label)" />
+                                <x-text-input id="{{ $name }}"
+                                    class="px-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"
+                                    type="number" name="{{ $name }}" />
+                                <x-input-error :messages="$errors->get($name)" class="mt-2" />
+                            </div>
+                        @endforeach
+
+
 
 
 

@@ -68,6 +68,8 @@ return [
     'Shukrawar Peth' => 'Shukrawar Peth',
     'Kothrud' => 'Kothrud',
     'OPD' => 'OPD',
+    'Payments' => 'Payments',
+    'Age' => 'Age',
 
 
     'locale' => 'Language', // Label for dropdown

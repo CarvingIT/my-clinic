@@ -47,9 +47,9 @@
                             <select id="gender" name="gender"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2">
                                 <option value="">Please Select</option>
-                                <option value="male" {{ $patient->gender == 'male' ? 'selected' : '' }}>Male</option>
-                                <option value="female" {{ $patient->gender == 'female' ? 'selected' : '' }}>Female</option>
-                                <option value="other" {{ $patient->gender == 'other' ? 'selected' : '' }}>Other</option>
+                                <option value="M" {{ $patient->gender == 'M' ? 'selected' : '' }}>Male</option>
+                                <option value="F" {{ $patient->gender == 'F' ? 'selected' : '' }}>Female</option>
+                                <option value="O" {{ $patient->gender == 'O' ? 'selected' : '' }}>Other</option>
                             </select>
                             <x-input-error :messages="$errors->get('gender')" class="mt-1" />
                         </div>

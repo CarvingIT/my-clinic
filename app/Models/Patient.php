@@ -27,6 +27,10 @@ class Patient extends Model
          'patient_id'
      ];
 
+     protected $casts = [
+        'birthdate' => 'date',
+    ];
+
 
      protected static function boot()
      {

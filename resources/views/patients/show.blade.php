@@ -37,24 +37,30 @@
                             </h2>
 
                             <div x-show="open" x-transition
-                                class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-600 border-b pb-4 mb-4">
+                                class="grid grid-cols-1 md:grid-cols-1 gap-6 text-gray-600 border-b pb-4 mb-4">
 
-                                <p>
+                                {{-- <p>
                                     <span class=" font-semibold text-gray-700">{{ __('messages.Birthdate') }}:</span>
                                     {{ $patient->birthdate }}
                                 </p>
                                 <p>
                                     <span class="font-semibold text-gray-700">{{ __('messages.Gender') }}:</span>
                                     {{ $patient->gender }}
-                                </p>
+                                </p> --}}
+
                                 <p>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.Age') }}/{{ __('messages.Gender') }}:</span>
+
+                                    {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
+                                </p>
+                                {{-- <p>
                                     <span class="font-semibold text-gray-700">{{ __('messages.mobile_phone') }}:</span>
                                     {{ $patient->mobile_phone }}
-                                </p>
-                                <p>
+                                </p> --}}
+                                {{-- <p>
                                     <span class="font-semibold text-gray-700">{{ __('messages.Email ID') }}:</span>
                                     {{ $patient->email_id }}
-                                </p>
+                                </p> --}}
                                 <p>
                                     <span class="font-semibold text-gray-700">{{ __('messages.address') }}:</span>
                                     {{ $patient->address }}
@@ -63,19 +69,19 @@
                                     <span class="font-semibold text-gray-700">{{ __('messages.Vishesh') }}:</span>
                                     {{ $patient->vishesh }}
                                 </p>
-                                <p>
+                                {{-- <p>
                                     <span class="font-semibold text-gray-700">{{ __('messages.occupation') }}:</span>
                                     {{ $patient->occupation }}
-                                </p>
-                                <p>
+                                </p> --}}
+                                {{-- <p>
                                     <span class="font-semibold text-gray-700">{{ __('messages.Remark') }}:</span>
                                     {{ $patient->remark }}
-                                </p>
+                                </p> --}}
 
-                                <p class="col-span-1 md:col-span-2">
+                                {{-- <p class="col-span-1 md:col-span-2">
                                     <span class="font-semibold text-gray-700">{{ __('messages.Balance') }}:</span>
                                     {{ $patient->balance }}
-                                </p>
+                                </p> --}}
                             </div>
                         </div>
 
@@ -86,8 +92,7 @@
                                 {{ __('messages.add_follow_up') }}
                             </a>
 
-                            <a href="{{ route('patients.export-pdf', $patient) }}"
-                                target="_blank"
+                            <a href="{{ route('patients.export-pdf', $patient) }}" target="_blank"
                                 class="bg-sky-400		 hover:bg-sky-500		 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                 {{ __('messages.Export to PDF') }}
                             </a>
@@ -161,7 +166,7 @@
                                                         <button
                                                             class="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none ms-1 mb-1 ease-linear transition-all duration-150"
                                                             type="button" @click="open = false">
-                                                            {{__('messages.Close')}}
+                                                            {{ __('messages.Close') }}
                                                         </button>
 
                                                         <button type="submit"
@@ -196,12 +201,13 @@
                                                     <button
                                                         class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white"
                                                         data-modal-toggle="defaultModal" type="button"
-                                                        @click="openReportModal = false"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path fill-rule="evenodd"
-                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                            clip-rule="evenodd"></path>
-                                                    </svg> </button>
+                                                        @click="openReportModal = false"> <svg class="w-5 h-5"
+                                                            fill="currentColor" viewBox="0 0 20 20"
+                                                            xmlns="http://www.w3.org/2000/svg">
+                                                            <path fill-rule="evenodd"
+                                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                clip-rule="evenodd"></path>
+                                                        </svg> </button>
 
                                                     <span class="sr-only">Close modal</span>
                                                     </button>
@@ -221,7 +227,10 @@
                                                                     {{ $report->name }}
                                                                 </a>
 
-                                                                <p class="text-sm text-gray-500 mt-1">{{__('messages.Uploaded')}}: {{ $report->created_at->format('d M Y, h:i A') }}</p>
+                                                                <p class="text-sm text-gray-500 mt-1">
+                                                                    {{ __('messages.Uploaded') }}:
+                                                                    {{ $report->created_at->format('d M Y, h:i A') }}
+                                                                </p>
 
                                                                 <form method="POST"
                                                                     action="{{ route('reports.destroy', $report) }}"
@@ -230,7 +239,8 @@
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit"
-                                                                        class="text-red-600 hover:text-red-900 px-3 py-1 bg-red-100 hover:bg-red-200 rounded-md focus:ring focus:ring-red-200 focus:outline-none transition duration-200"><i class="fas fa-trash"></i></button>
+                                                                        class="text-red-600 hover:text-red-900 px-3 py-1 bg-red-100 hover:bg-red-200 rounded-md focus:ring focus:ring-red-200 focus:outline-none transition duration-200"><i
+                                                                            class="fas fa-trash"></i></button>
                                                                 </form>
                                                             </div>
                                                         @endforeach
@@ -266,7 +276,7 @@
                                                 <button
                                                     class="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none ms-1 mb-1 ease-linear transition-all duration-150"
                                                     type="button" @click="openReportModal = false">
-                                                    {{__('messages.Close')}}
+                                                    {{ __('messages.Close') }}
                                                 </button>
 
                                             </div>
@@ -275,108 +285,125 @@
                                     </div>
                                 </div>
                             </div>
-                            </div>
-
-                            {{-- Reports Button Ends here --}}
-
-
-
-
-
-
-
-
-
                         </div>
 
-                        <h2 class="text-xl font-semibold mb-2">{{ __('messages.follow_ups') }}</h2>
-                        @if ($patient->followUps->count() > 0)
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
-                                    <thead class="bg-gray-50 text-black dark:bg-gray-700 dark:text-gray-200">
-                                        <tr>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                                {{ __('messages.Created At') }}
-                                            </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                                {{ __('नाडी') }}
-                                            </th>
-                                            <th scope="col"
+                        {{-- Reports Button Ends here --}}
+
+
+
+
+
+
+
+
+
+                    </div>
+
+                    <h2 class="text-xl font-semibold mb-2">{{ __('messages.follow_ups') }}</h2>
+                    @if ($patient->followUps->count() > 0)
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
+                                <thead class="bg-gray-50 text-black dark:bg-gray-700 dark:text-gray-200">
+                                    <tr>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            {{ __('messages.Created At') }}
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            {{ __('नाडी') }}/{{ __('लक्षणे') }}
+                                        </th>
+                                        {{-- <th scope="col"
                                                 class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                                 {{ __('लक्षणे') }}
-                                            </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                                {{ __('चिकित्सा') }}
-                                            </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                                {{ __('messages.Additional') }}
-                                            </th>
-                                            <th scope="col"
-                                                class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                                {{ __('messages.Actions') }}
-                                            </th>
-                                        </tr>
-                                    </thead>
+                                            </th> --}}
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            {{ __('चिकित्सा') }}
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            {{ __('messages.Payments') }}
+                                        </th>
+                                        <th scope="col"
+                                            class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            {{ __('messages.Actions') }}
+                                        </th>
+                                    </tr>
+                                </thead>
 
-                                    <tbody
-                                        class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
-                                        @foreach ($patient->followUps->sortByDesc('created_at') as $followUp)
-                                            <tr
-                                                class="hover:bg-gray-50 transition duration-300 dark:hover:bg-gray-700">
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
-                                                    style="vertical-align: top;">
+                                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
+                                    @foreach ($patient->followUps->sortByDesc('created_at') as $followUp)
+                                        <tr class="hover:bg-gray-50 transition duration-300 dark:hover:bg-gray-700">
+                                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                style="vertical-align: top;">
 
 
-                                                    <p class="mt-2">
-                                                        {{ $followUp->created_at->format('d M Y, h:i A') }}
-                                                    </p>
-                                                    {{-- {{ $followUp->created_at->format('d M Y, h:i A') }} --}}
-                                                </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
-                                                    style="vertical-align: top;">
-                                                    @if ($followUp->check_up_info)
-                                                        @php
-                                                            $checkUpInfo = json_decode($followUp->check_up_info, true);
-                                                        @endphp
+                                                <p class="mt-2">
+                                                    {{ $followUp->created_at->format('d M Y, h:i A') }}
+                                                </p>
+                                                {{-- {{ $followUp->created_at->format('d M Y, h:i A') }} --}}
 
-                                                        <div>
-                                                            {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">
+                                                <p><span
+                                                        class="font-bold text-gray-800 dark:text-gray-200">{{ __('S/B') }}:</span>
+                                                    @if (Auth::check())
+                                                        {{ Auth::user()->name }}
+                                                    @else
+                                                        {{ __('Doctor not set') }}
+                                                    @endif
+                                                </p>
+
+                                                <p><span
+                                                        class="font-bold text-gray-800 dark:text-gray-200">{{ __('OPD') }}:</span>
+                                                    @if (session()->has('branch_name'))
+                                                        {{ session('branch_name') }}
+                                                    @else
+                                                        {{ __('OPD not set') }}
+                                                    @endif
+                                                </p>
+
+                                            </td>
+                                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                style="vertical-align: top;">
+                                                @if ($followUp->check_up_info)
+                                                    @php
+                                                        $checkUpInfo = json_decode($followUp->check_up_info, true);
+                                                    @endphp
+
+                                                    <div>
+                                                        {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">
                                                             {{ __('नाडी') }}</h2> --}}
-                                                            @foreach ($checkUpInfo as $key => $value)
-                                                                @if (in_array($key, [
-                                                                        'वात',
-                                                                        'पित्त',
-                                                                        'कफ',
-                                                                        'सूक्ष्म',
-                                                                        'कठिन',
-                                                                        'साम',
-                                                                        'प्राण',
-                                                                        'व्यान',
-                                                                        'स्थूल',
-                                                                        'तीक्ष्ण',
-                                                                        'वेग',
-                                                                        'अनियमित',
-                                                                    ]))
-                                                                    @if (is_array($value))
-                                                                        @foreach ($value as $option)
-                                                                            <p>{{ __($option) }}</p>
-                                                                        @endforeach
-                                                                    @elseif ($value == 1)
-                                                                        <p>{{ __($key) }}</p>
-                                                                    @endif
+                                                        @foreach ($checkUpInfo as $key => $value)
+                                                            @if (in_array($key, [
+                                                                    'वात',
+                                                                    'पित्त',
+                                                                    'कफ',
+                                                                    'सूक्ष्म',
+                                                                    'कठिन',
+                                                                    'साम',
+                                                                    'प्राण',
+                                                                    'व्यान',
+                                                                    'स्थूल',
+                                                                    'तीक्ष्ण',
+                                                                    'वेग',
+                                                                    'अनियमित',
+                                                                ]))
+                                                                @if (is_array($value))
+                                                                    @foreach ($value as $option)
+                                                                        <p>{{ __($option) }}</p>
+                                                                    @endforeach
+                                                                @elseif ($value == 1)
+                                                                    <p>{{ __($key) }}</p>
                                                                 @endif
-                                                            @endforeach
-                                                        </div>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
 
 
 
 
-                                                        <div>
-                                                            {{-- <p class="mt-2"><span
+                                                    <div>
+                                                        {{-- <p class="mt-2"><span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">
                                                                     {{ __('निदान') }}:</span>
                                                                 @if (isset($checkUpInfo['nidan']))
@@ -397,82 +424,101 @@
                                                                     {{ $checkUpInfo['salla'] }}
                                                                 @endif
                                                             </p> --}}
-                                                            <p><span
+                                                        @if (isset($checkUpInfo['nadi']) && $checkUpInfo['nadi'] !== null && $checkUpInfo['nadi'] !== '')
+                                                            <p>
+                                                                <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('नाडी') }}:</span>
-                                                                @if (isset($checkUpInfo['nadi']))
-                                                                    {{ $checkUpInfo['nadi'] }}
-                                                                @endif
+                                                                {{ $checkUpInfo['nadi'] }}
                                                             </p>
-                                                            <p><span
+                                                        @endif
+
+                                                        @if (isset($followUp->diagnosis) && $followUp->diagnosis !== null && $followUp->diagnosis !== '')
+                                                            {{-- Note the change here --}}
+                                                            <p>
+                                                                <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}:</span>
-                                                                    {{ $followUp->diagnosis }}
+                                                                {{ $followUp->diagnosis }}
                                                             </p>
-                                                            <p><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span>
-                                                                @if (isset($checkUpInfo['chikitsa']))
-                                                                    {{ $checkUpInfo['chikitsa'] }}
-                                                                @endif
-                                                            </p>
-                                                            <p><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('दिवस') }}:</span>
-                                                                @if (isset($checkUpInfo['days']))
-                                                                    {{ $checkUpInfo['days'] }}
-                                                                @endif
-                                                            </p>
-                                                            <p><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('पुड्या') }}:</span>
-                                                                @if (isset($checkUpInfo['packets']))
-                                                                    {{ $checkUpInfo['packets'] }}
-                                                                @endif
-                                                            </p>
-
-                                                        </div>
-                                                    @endif
-                                                </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
-                                                    style="vertical-align: top;">
-                                                    {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}</h2> --}}
-                                                    {{ $followUp->diagnosis }}
-                                                </td>
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
-                                                    style="vertical-align: top;">
-
-                                                    {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}</h2> --}}
-                                                    @if ($followUp->treatment)
-                                                        <p>{{ $followUp->treatment }}</p>
-                                                    @endif
-                                                    @if ($followUp->check_up_info)
-                                                        @php
-                                                            $checkUpInfo = json_decode($followUp->check_up_info, true);
-                                                        @endphp
-
-                                                        @foreach ($checkUpInfo as $key => $value)
-                                                            @if (in_array($key, ['अर्श', 'ग्रहणी', 'ज्वर/प्रतिश्याय']))
-                                                                @if (is_array($value))
-                                                                    @foreach ($value as $option)
-                                                                        <p>{{ __($option) }}</p>
-                                                                    @endforeach
-                                                                @elseif($value == 1)
-                                                                    <p>{{ __($key) }}</p>
-                                                                @endif
+                                                        @endif
+                                                        {{-- <p><span
+                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span>
+                                                            @if (isset($checkUpInfo['chikitsa']))
+                                                                {{ $checkUpInfo['chikitsa'] }}
                                                             @endif
-                                                        @endforeach
-                                                    @endif
-                                                    @if (isset($checkUpInfo['chikitsa_combo']))
-                                                        <p class="mt-2"><span
-                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Chikitsa Combo') }}:
-                                                            </span> {{ $checkUpInfo['chikitsa_combo'] }}</p>
-                                                    @endif
+                                                        </p> --}}
+                                                        <p>
+                                                            @if (isset($checkUpInfo['days']) && $checkUpInfo['days'] !== null && $checkUpInfo['days'] !== '')
+                                                                <p>
+                                                                    <span
+                                                                        class="font-bold text-gray-800 dark:text-gray-200">{{ __('दिवस') }}:</span>
+                                                                    {{ $checkUpInfo['days'] }}
+                                                                </p>
+                                                            @endif
+                                                        </p>
+                                                        <p>
+                                                            @if (isset($checkUpInfo['packets']) && $checkUpInfo['packets'] !== null && $checkUpInfo['packets'] !== '')
+                                                                <p>
+                                                                    <span
+                                                                        class="font-bold text-gray-800 dark:text-gray-200">{{ __('पुड्या') }}:</span>
+                                                                    {{ $checkUpInfo['packets'] }}
+                                                                </p>
+                                                            @endif
+                                                        </p>
 
-                                                </td>
-
-
-                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            {{-- <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
                                                     style="vertical-align: top;">
-                                                    @if ($followUp->check_up_info)
-                                                        @php
-                                                            $checkUpInfo = json_decode($followUp->check_up_info, true);
-                                                        @endphp
+                                                    <h2 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}</h2>
+                                                    {{ $followUp->diagnosis }}
+                                                </td> --}}
+                                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                style="vertical-align: top;">
+
+                                                {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}</h2> --}}
+                                                @if ($followUp->treatment)
+                                                    <p>{{ $followUp->treatment }}</p>
+                                                @endif
+                                                @if ($followUp->check_up_info)
+                                                    @php
+                                                        $checkUpInfo = json_decode($followUp->check_up_info, true);
+                                                    @endphp
+
+                                                    @foreach ($checkUpInfo as $key => $value)
+                                                        @if (in_array($key, ['अर्श', 'ग्रहणी', 'ज्वर/प्रतिश्याय']))
+                                                            @if (is_array($value))
+                                                                @foreach ($value as $option)
+                                                                    <p>{{ __($option) }}</p>
+                                                                @endforeach
+                                                            @elseif($value == 1)
+                                                                <p>{{ __($key) }}</p>
+                                                            @endif
+                                                        @endif
+                                                    @endforeach
+                                                @endif
+                                                @if (isset($checkUpInfo['chikitsa_combo']))
+                                                    <p class="mt-2"><span
+                                                            class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Chikitsa Combo') }}:
+                                                        </span> {{ $checkUpInfo['chikitsa_combo'] }}</p>
+                                                @endif
+
+                                                <p>
+                                                    {{-- <span class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span> --}}
+                                                    @if (isset($checkUpInfo['chikitsa']))
+                                                        {{ $checkUpInfo['chikitsa'] }}
+                                                    @endif
+                                                </p>
+
+                                            </td>
+
+
+                                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                                style="vertical-align: top;">
+                                                @if ($followUp->check_up_info)
+                                                    @php
+                                                        $checkUpInfo = json_decode($followUp->check_up_info, true);
+                                                    @endphp
 
 
 
@@ -480,96 +526,103 @@
 
 
 
-                                                        <div>
-                                                            <p class="mt-2"><span
+                                                    <div>
+                                                        @if (isset($checkUpInfo['payment_method']) &&
+                                                                $checkUpInfo['payment_method'] !== null &&
+                                                                $checkUpInfo['payment_method'] !== '')
+                                                            <p class="mt-2">
+                                                                <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Payment Method') }}:</span>
-                                                                @if (isset($checkUpInfo['payment_method']))
-                                                                    {{ $checkUpInfo['payment_method'] }}
-                                                                @endif
+                                                                {{ $checkUpInfo['payment_method'] }}
                                                             </p>
+                                                        @endif
 
-                                                            {{-- <p><span
+                                                        {{-- <p><span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">Certificate:</span>
                                                                 @if (isset($checkUpInfo['certificate']))
                                                                     {{ $checkUpInfo['certificate'] }}
                                                                 @endif
                                                             </p> --}}
 
-                                                            <p><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Drawing') }}:</span>
-                                                                @if (isset($checkUpInfo['drawing']))
-                                                                    {{ $checkUpInfo['drawing'] }}
-                                                                @endif
-                                                            </p>
+                                                        {{-- <p><span
+                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Drawing') }}:</span>
+                                                            @if (isset($checkUpInfo['drawing']))
+                                                                {{ $checkUpInfo['drawing'] }}
+                                                            @endif
+                                                        </p> --}}
 
 
-                                                        </div>
+                                                    </div>
 
-                                                        <div>
-                                                            <p class="mt-2"><span
+                                                    <div>
+                                                        @if (isset($checkUpInfo['amount']) && $checkUpInfo['amount'] !== null && $checkUpInfo['amount'] !== '')
+                                                            <p class="mt-2">
+                                                                <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Amount') }}:</span>
-                                                                @if (isset($checkUpInfo['amount']))
-                                                                    {{ $checkUpInfo['amount'] }}
-                                                                @endif
+                                                                {{ $checkUpInfo['amount'] }}
                                                             </p>
-                                                            <p><span
+                                                        @endif
+
+                                                        @if (isset($checkUpInfo['balance']) && $checkUpInfo['balance'] !== null && $checkUpInfo['balance'] !== '')
+                                                            <p>
+                                                                <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Balance') }}:</span>
-                                                                @if (isset($checkUpInfo['balance']))
-                                                                    {{ $checkUpInfo['balance'] }}
-                                                                @endif
+                                                                {{ $checkUpInfo['balance'] }}
                                                             </p>
+                                                        @endif
 
-                                                            <p><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Branch') }}:</span>
-                                                                @if (isset($checkUpInfo['branch']))
-                                                                    {{ $checkUpInfo['branch'] }}
-                                                                @endif
-                                                            </p>
-                                                            <p><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Doctor') }}:</span>
-                                                                @if (isset($checkUpInfo['doctor']))
-                                                                    {{ $checkUpInfo['doctor'] }}
-                                                                @endif
-                                                            </p>
-                                                        </div>
-                                                    @endif
-                                                </td>
-                                                <td
-                                                    class="px-6 py-4 text-gray-600 dark:text-gray-300 flex gap-4 items-center">
-                                                    <a href="{{ route('followups.edit', ['followup' => $followUp->id]) }}"
-                                                        class="text-indigo-600 hover:text-indigo-900 font-medium"title="Edit">
+                                                        {{-- <p><span
+                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Branch') }}:</span>
+                                                            @if (isset($checkUpInfo['branch']))
+                                                                {{ $checkUpInfo['branch'] }}
+                                                            @endif
+                                                        </p> --}}
 
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    <form method="POST"
-                                                        action="{{ route('followups.destroy', ['followup' => $followUp->id]) }}"
-                                                        onsubmit="return confirmDelete()">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit"
-                                                            class="text-red-600 hover:text-red-800 font-medium"
-                                                            title="Delete">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
+                                                        {{-- <p><span
+                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('Seen by:') }}:</span>
+                                                            @if (isset($checkUpInfo['doctor']))
+                                                                {{ $checkUpInfo['doctor'] }}
+                                                            @endif
+                                                        </p> --}}
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td
+                                                class="px-6 py-4 text-gray-600 dark:text-gray-300 flex gap-4 items-center">
+                                                <a href="{{ route('followups.edit', ['followup' => $followUp->id]) }}"
+                                                    class="text-indigo-600 hover:text-indigo-900 font-medium"title="Edit">
 
-                                            </tr>
-                                        @endforeach
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="POST"
+                                                    action="{{ route('followups.destroy', ['followup' => $followUp->id]) }}"
+                                                    onsubmit="return confirmDelete()">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                        class="text-red-600 hover:text-red-800 font-medium"
+                                                        title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
 
-                                    </tbody>
-                                </table>
-                                {{ $patient->followUps->links() }}
-                            </div>
-                        @else
-                            <p class="text-gray-600 bg-gray-100 p-4 rounded-md shadow-sm">
-                                No follow-ups added for the patient.
-                            </p>
-                        @endif
-                    </div>
+                                        </tr>
+                                    @endforeach
+
+                                </tbody>
+                            </table>
+                            {{ $patient->followUps->links() }}
+                        </div>
+                    @else
+                        <p class="text-gray-600 bg-gray-100 p-4 rounded-md shadow-sm">
+                            No follow-ups added for the patient.
+                        </p>
+                    @endif
                 </div>
             </div>
         </div>
+    </div>
 </x-app-layout>
 
 <script>

@@ -69,6 +69,8 @@ return [
     'Shukrawar Peth' => 'शुक्रवार पेठ',
     'Kothrud' => 'कोथरुड',
     'OPD' => 'बाह्यरोगी विभाग',
+    'Payments' => 'पेमेंट्स',
+    'Age' => 'वय',
 
     'locale' => 'भाषा', // Label for dropdown
 

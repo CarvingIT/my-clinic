@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Models\FollowUp;
 // use Knp\Snappy\Pdf;
 use PDF;
+use Carbon\Carbon;
 
 
 class PatientController extends Controller
@@ -63,6 +64,11 @@ class PatientController extends Controller
             'balance' => ['nullable', 'numeric'],
             'patient_id' => ['required', 'string', 'unique:patients,patient_id']
         ]);
+
+        // Manually handle the birthdate:
+        if ($request->filled('birthdate')) {
+            $validatedData['birthdate'] = Carbon::parse($request->birthdate)->format('Y-m-d');
+        }
 
 
         Patient::create($request->all());
