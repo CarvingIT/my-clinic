@@ -49,7 +49,8 @@
                                 </p> --}}
 
                                 <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.Age') }}/{{ __('messages.Gender') }}:</span>
+                                    <span
+                                        class="font-semibold text-gray-700">{{ __('messages.Age') }}/{{ __('messages.Gender') }}:</span>
 
                                     {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
                                 </p>
@@ -344,23 +345,25 @@
                                                 </p>
                                                 {{-- {{ $followUp->created_at->format('d M Y, h:i A') }} --}}
 
-                                                <p><span
-                                                        class="font-bold text-gray-800 dark:text-gray-200">{{ __('S/B') }}:</span>
-                                                    @if (Auth::check())
-                                                        {{ Auth::user()->name }}
-                                                    @else
-                                                        {{ __('Doctor not set') }}
-                                                    @endif
-                                                </p>
 
-                                                <p><span
-                                                        class="font-bold text-gray-800 dark:text-gray-200">{{ __('OPD') }}:</span>
-                                                    @if (session()->has('branch_name'))
-                                                        {{ session('branch_name') }}
-                                                    @else
-                                                        {{ __('OPD not set') }}
-                                                    @endif
-                                                </p>
+
+                                                {{-- Seen by and OPD  --}}
+                                                @if (isset($checkUpInfo['user_name']))
+                                                    <p>
+                                                        <span
+                                                            class="font-bold text-gray-800 dark:text-gray-200">{{ __('S/B') }}:</span>
+                                                        {{ $checkUpInfo['user_name'] }}
+                                                    </p>
+                                                @endif
+
+                                                @if (isset($checkUpInfo['branch_name']))
+                                                    <p>
+                                                        <span
+                                                            class="font-bold text-gray-800 dark:text-gray-200">{{ __('OPD') }}:</span>
+                                                        {{ $checkUpInfo['branch_name'] }}
+                                                    </p>
+                                                @endif
+
 
                                             </td>
                                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300"

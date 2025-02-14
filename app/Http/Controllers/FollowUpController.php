@@ -8,6 +8,8 @@ use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Routing\Controller;
+use Auth;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 
 class FollowUpController extends Controller
 {
@@ -52,6 +54,12 @@ class FollowUpController extends Controller
         foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment']) as $key => $value) {
             $checkUpInfo[$key] = $value;
         }
+
+        // Adding user and branch info to $checkUpInfo
+        $checkUpInfo['user_id'] = Auth::id();
+        $checkUpInfo['user_name'] = Auth::user()->name;
+        $checkUpInfo['branch_id'] = session('branch_id');
+        $checkUpInfo['branch_name'] = session('branch_name');
 
 
         FollowUp::create([
