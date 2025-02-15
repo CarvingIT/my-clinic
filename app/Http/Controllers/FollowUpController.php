@@ -93,8 +93,9 @@ class FollowUpController extends Controller
 
     public function edit(FollowUp $followup)
     {
+        $checkUpInfo = json_decode($followup->check_up_info, true); // Decode
         $parameters = Parameter::all();
-        return view('followups.edit', compact('followup', 'parameters'));
+        return view('followups.edit', compact('followup', 'parameters', 'checkUpInfo'));
     }
 
     public function update(Request $request, FollowUp $followup)
