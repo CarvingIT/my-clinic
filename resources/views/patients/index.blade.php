@@ -70,7 +70,7 @@
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        {{ __('messages.remark') }}
+                                        {{ __('messages.Vishesh') }}
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -97,7 +97,7 @@
                                             {{ $patient->address }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            {{ $patient->remark }}
+                                            {{ $patient->vishesh }}
                                         </td>
                                         <td
                                             class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-4">

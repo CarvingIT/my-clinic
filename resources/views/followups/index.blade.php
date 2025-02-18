@@ -21,6 +21,10 @@
                                         class="px-6 py-3 text-left text-s font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
                                         {{ __('messages.Patient Name') }}
                                     </th>
+                                    <th scope="col"
+                                        class="px-6 py-3 text-left text-s font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
+                                        {{ __('messages.Payments') }}
+                                    </th>
 
                                 </tr>
                             </thead>
@@ -34,6 +38,48 @@
                                             <a href="{{ route('patients.show', $followUp->patient->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-900">{{ $followUp->patient->name }}</a>
                                         </td>
+                                        <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                        style="vertical-align: top;">
+                                        @if ($followUp->check_up_info)
+                                            @php
+                                                $checkUpInfo = json_decode($followUp->check_up_info, true);
+                                            @endphp
+
+                                            {{-- <div>
+                                                @if (isset($checkUpInfo['payment_method']) &&
+                                                        $checkUpInfo['payment_method'] !== null &&
+                                                        $checkUpInfo['payment_method'] !== '')
+                                                    <p class="mt-2">
+                                                        <span
+                                                            class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Payment Method') }}:</span>
+                                                        {{ $checkUpInfo['payment_method'] }}
+                                                    </p>
+                                                @endif
+
+
+                                            </div> --}}
+
+                                            <div>
+                                                @if (isset($checkUpInfo['amount']) && $checkUpInfo['amount'] !== null && $checkUpInfo['amount'] !== '')
+                                                    <p class="mt-2">
+                                                        <span
+                                                            class="font-bold text-gray-600 dark:text-gray-200">{{ __('messages.Amount') }}:</span>
+                                                        {{ $checkUpInfo['amount'] }}
+                                                    </p>
+                                                @endif
+
+                                                @if (isset($checkUpInfo['balance']) && $checkUpInfo['balance'] !== null && $checkUpInfo['balance'] !== '')
+                                                    <p>
+                                                        <span
+                                                            class="font-bold text-gray-600 dark:text-gray-200">{{ __('messages.Balance') }}:</span>
+                                                        {{ $checkUpInfo['balance'] }}
+                                                    </p>
+                                                @endif
+
+
+                                            </div>
+                                        @endif
+                                    </td>
 
                                     </tr>
                                 @endforeach
