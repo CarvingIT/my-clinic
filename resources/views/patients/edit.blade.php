@@ -15,13 +15,13 @@
                     <!-- Form Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <!-- Patient ID -->
-                        <div>
+                        {{-- <div>
                             <x-input-label for="patient_id" :value="__('Patient ID')" />
                             <x-text-input id="patient_id"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="text" name="patient_id" :value="$patient->patient_id" autocomplete="off" />
                             <x-input-error :messages="$errors->get('patient_id')" class="mt-1" />
-                        </div>
+                        </div> --}}
 
                         <!-- Name -->
                         <div>
@@ -35,9 +35,8 @@
                         <!-- Birthdate -->
                         <div>
                             <x-input-label for="birthdate" :value="__('Birthdate')" />
-                            <x-text-input id="birthdate"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="date" name="birthdate" :value="$patient->birthdate" />
+                            <x-text-input id="birthdate" class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2" type="date" name="birthdate" :value="$patient->birthdate ? \Carbon\Carbon::parse($patient->birthdate)->format('Y-m-d') : ''" />
+
                             <x-input-error :messages="$errors->get('birthdate')" class="mt-1" />
                         </div>
 
@@ -91,31 +90,31 @@
                         </div>
 
                         <!-- Occupation -->
-                        <div>
+                        {{-- <div>
                             <x-input-label for="occupation" :value="__('messages.occupation')" />
                             <x-text-input id="occupation"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="text" name="occupation" :value="$patient->occupation" required />
+                                type="text" name="occupation" :value="$patient->occupation" />
                             <x-input-error :messages="$errors->get('occupation')" class="mt-1" />
-                        </div>
+                        </div> --}}
 
                         <!-- Remark -->
-                        <div>
+                        {{-- <div>
                             <x-input-label for="remark" :value="__('messages.remark')" />
                             <x-text-input id="remark"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="text" name="remark" :value="$patient->remark" />
                             <x-input-error :messages="$errors->get('remark')" class="mt-1" />
-                        </div>
+                        </div> --}}
 
                         <!-- Balance -->
-                        <div>
+                        {{-- <div>
                             <x-input-label for="balance" :value="__('Balance')" />
                             <x-text-input id="balance"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="number" name="balance" :value="$patient->balance" />
                             <x-input-error :messages="$errors->get('balance')" class="mt-1" />
-                        </div>
+                        </div> --}}
                     </div>
 
                     <!-- Buttons -->

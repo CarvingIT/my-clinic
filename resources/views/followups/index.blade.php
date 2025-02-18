@@ -23,7 +23,7 @@
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-s font-semibold text-gray-500 uppercase tracking-wider dark:text-gray-400">
-                                        {{ __('messages.Payments') }}
+                                        {{ __('messages.Amount') }}
                                     </th>
 
                                 </tr>
@@ -34,10 +34,24 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             {{ $followUp->created_at->format('d M Y, h:i A') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        {{-- <td class="px-6 py-4 whitespace-nowrap">
                                             <a href="{{ route('patients.show', $followUp->patient->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-900">{{ $followUp->patient->name }}</a>
+                                        </td> --}}
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <!-- Ensure that $followUp->patient is not null before accessing its id -->
+                                            @if ($followUp->patient)
+                                                <a href="{{ route('patients.show', $followUp->patient->id) }}"
+                                                   class="text-indigo-600 hover:text-indigo-900">
+                                                    {{ $followUp->patient->name }}
+                                                </a>
+                                            @else
+                                                <!-- Fallback if patient is not found -->
+                                                <span class="text-gray-400">No Patient</span>
+                                            @endif
                                         </td>
+
+
                                         <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
                                         style="vertical-align: top;">
                                         @if ($followUp->check_up_info)
@@ -63,18 +77,18 @@
                                                 @if (isset($checkUpInfo['amount']) && $checkUpInfo['amount'] !== null && $checkUpInfo['amount'] !== '')
                                                     <p class="mt-2">
                                                         <span
-                                                            class="font-bold text-gray-600 dark:text-gray-200">{{ __('messages.Amount') }}:</span>
+                                                            class="font-bold text-gray-600 dark:text-gray-200">{{ __('') }}</span>
                                                         {{ $checkUpInfo['amount'] }}
                                                     </p>
                                                 @endif
 
-                                                @if (isset($checkUpInfo['balance']) && $checkUpInfo['balance'] !== null && $checkUpInfo['balance'] !== '')
+                                                {{-- @if (isset($checkUpInfo['balance']) && $checkUpInfo['balance'] !== null && $checkUpInfo['balance'] !== '')
                                                     <p>
                                                         <span
                                                             class="font-bold text-gray-600 dark:text-gray-200">{{ __('messages.Balance') }}:</span>
                                                         {{ $checkUpInfo['balance'] }}
                                                     </p>
-                                                @endif
+                                                @endif --}}
 
 
                                             </div>

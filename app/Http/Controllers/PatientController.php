@@ -54,7 +54,7 @@ class PatientController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
-            'occupation' => ['required', 'string', 'max:255'],
+            'occupation' => ['nullable', 'string', 'max:255'],
             'mobile_phone' => ['required', 'string', 'max:20', 'regex:/^[0-9]{10}$/'],
             'remark' => ['nullable', 'string'],
             'gender' => ['nullable', 'string'],
@@ -62,7 +62,7 @@ class PatientController extends Controller
             'email_id' => ['nullable', 'email', 'max:255'],
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
-            'patient_id' => ['required', 'string', 'unique:patients,patient_id']
+            // 'patient_id' => ['required', 'string', 'unique:patients,patient_id']
         ]);
 
         // Manually handle the birthdate:
@@ -70,8 +70,18 @@ class PatientController extends Controller
             $validatedData['birthdate'] = Carbon::parse($request->birthdate)->format('Y-m-d');
         }
 
+        // Generate Patient ID
+        $patientId = $this->generatePatientId(
+            $request->name,
+            $request->birthdate,
+            $request->mobile_phone
+        );
 
-        Patient::create($request->all());
+
+        // Patient::create($request->all());
+        // Save patient data along with generated patient_id
+        $patient = Patient::create($request->all() + ['patient_id' => $patientId]);
+
 
         return redirect()->route('patients.index')->with('success', 'Patient Created Successfully.');
     }
@@ -109,7 +119,7 @@ class PatientController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
-            'occupation' => ['required', 'string', 'max:255'],
+            'occupation' => ['nullable', 'string', 'max:255'],
             'mobile_phone' => ['required', 'string', 'max:20', 'regex:/^[0-9]{10}$/'],
             'remark' => ['nullable', 'string'],
             'gender' => ['nullable', 'string'],
@@ -117,7 +127,7 @@ class PatientController extends Controller
             'email_id' => ['nullable', 'email', 'max:255'],
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
-            'patient_id' => ['required', 'string', 'unique:patients,patient_id,' . $patient->id]
+            // 'patient_id' => ['required', 'string', 'unique:patients,patient_id,' . $patient->id]
         ]);
         $patient->update($request->all());
 
@@ -146,25 +156,41 @@ class PatientController extends Controller
      *  Generate Medical Certificate
      */
 
-     public function generateCertificate(Patient $patient, Request $request)
-     {
-         $request->validate([
-             'start_date' => 'required|date',
-             'end_date' => 'required|date',
-             'medical_condition' => 'required|string',
-         ]);
+    public function generateCertificate(Patient $patient, Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date',
+            'medical_condition' => 'required|string',
+        ]);
 
-         $checkUpInfo = json_decode($patient->followUps()->first()->check_up_info ?? '', true);
+        $checkUpInfo = json_decode($patient->followUps()->first()->check_up_info ?? '', true);
 
-         $pdf = PDF::loadView('patients.certificate', [
-             'patient' => $patient,
-             'checkUpInfo' => $checkUpInfo,
-             'startDate' => $request->start_date,
-             'endDate' => $request->end_date,
-              'medicalCondition' => $request->medical_condition,
-         ]);
+        $pdf = PDF::loadView('patients.certificate', [
+            'patient' => $patient,
+            'checkUpInfo' => $checkUpInfo,
+            'startDate' => $request->start_date,
+            'endDate' => $request->end_date,
+            'medicalCondition' => $request->medical_condition,
+        ]);
 
-         return $pdf->inline('certificate_'.$patient->name.'.pdf');
+        return $pdf->inline('certificate_' . $patient->name . '.pdf');
+    }
 
-     }
+    private function generatePatientId($name, $dob, $mobile)
+    {
+        // Get the first letter of the name
+        $initial = strtoupper(substr($name, 0, 1));
+
+        // Format DoB to DDMMYY
+        $formattedDob = Carbon::parse($dob)->format('dmy');
+
+        // Use the full mobile number
+        $mobileNumber = $mobile;
+
+        // Combine all parts to form the patient ID
+        $patientId = $initial . '-' . $formattedDob . $mobileNumber;
+
+        return $patientId;
+    }
 }
