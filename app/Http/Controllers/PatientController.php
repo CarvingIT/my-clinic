@@ -93,7 +93,7 @@ class PatientController extends Controller
     public function show(Patient $patient)
     {
 
-        $patient->followUps = $patient->followUps()->orderBy('created_at', 'desc')->paginate(5); // Paginate follow-ups
+        $patient->followUps = $patient->followUps->sortByDesc('created_at');
 
         $patient->reports = $patient->reports()->get(); // Add reports
 

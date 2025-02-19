@@ -344,9 +344,9 @@
                                                     {{ $followUp->created_at->format('d M Y, h:i A') }}
                                                 </p>
                                                 {{-- {{ $followUp->created_at->format('d M Y, h:i A') }} --}}
-
-
-
+                                                @php
+                                                    $checkUpInfo = json_decode($followUp->check_up_info, true);
+                                                @endphp
                                                 {{-- Seen by and OPD  --}}
                                                 @if (isset($checkUpInfo['user_name']))
                                                     <p>
@@ -369,9 +369,6 @@
                                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
                                                 style="vertical-align: top;">
                                                 @if ($followUp->check_up_info)
-                                                    @php
-                                                        $checkUpInfo = json_decode($followUp->check_up_info, true);
-                                                    @endphp
 
                                                     <div>
                                                         {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">
@@ -615,7 +612,7 @@
 
                                 </tbody>
                             </table>
-                            {{ $patient->followUps->links() }}
+                            {{-- $patient->followUps->links() --}}
                         </div>
                     @else
                         <p class="text-gray-600 bg-gray-100 p-4 rounded-md shadow-sm">
