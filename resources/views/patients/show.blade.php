@@ -612,7 +612,7 @@
 
                                 </tbody>
                             </table>
-                            {{-- $patient->followUps->links() --}}
+                            {{ $patient->followUps->links() }}
                         </div>
                     @else
                         <p class="text-gray-600 bg-gray-100 p-4 rounded-md shadow-sm">
