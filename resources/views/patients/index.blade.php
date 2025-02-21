@@ -48,32 +48,32 @@
                     @endif
 
                     <!-- Table Section -->
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200 rounded-lg">
+                    <div class="max-w-full overflow-x-auto">
+                        <table class="table-fixed w-full border-collapse border border-gray-300">
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th scope="col"
-                                        class="px-2 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('Id') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.name') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.mobile_phone') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.address') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.Vishesh') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.Actions') }}
                                     </th>
                                 </tr>
@@ -81,26 +81,26 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($patients as $patient)
                                     <tr class="hover:bg-gray-50 transition duration-150">
-                                        <td class="px-2 py-4 whitespace-nowrap">
+                                        <td class="px-2 py-4    truncate whitespace-nowrap">
                                             {{ $patient->patient_id }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4    truncate whitespace-nowrap">
                                             <a href="{{ route('patients.show', $patient->id) }}"
                                                 class="text-blue-600 hover:text-blue-800 font-medium">
                                                 {{ $patient->name }}
                                             </a>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4    truncate whitespace-nowrap">
                                             {{ $patient->mobile_phone }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4    truncate whitespace-nowrap">
                                             {{ $patient->address }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4    truncate whitespace-nowrap">
                                             {{ $patient->vishesh }}
                                         </td>
                                         <td
-                                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex gap-4">
+                                            class="px-6 py-4    truncate whitespace-nowrap text-right text-sm font-medium flex gap-4">
                                             <a href="{{ route('patients.edit', $patient->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-800 font-medium"
                                                 title="Edit">
@@ -137,3 +137,16 @@
         return confirm("Are you sure you want to delete this patient?");
     }
 </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll("td").forEach(td => {
+            let words = td.innerText.trim().split(/\s+/); // Split by spaces
+            if (words.length > 4) {
+                td.style.whiteSpace = "normal"; // Allow wrapping
+                td.style.wordBreak = "break-word"; // Break long words if needed
+            }
+        });
+    });
+</script>
+
