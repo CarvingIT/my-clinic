@@ -79,13 +79,19 @@
             <th>{{ __('messages.name') }}</th>
             <td>{{ $patient->name }}</td>
         </tr>
-        <tr>
+        {{-- <tr>
             <th>{{ __('messages.Birthdate') }}</th>
             <td>{{ $patient->birthdate }}</td>
         </tr>
         <tr>
             <th>{{ __('messages.Gender') }}</th>
             <td>{{ $patient->gender }}</td>
+        </tr> --}}
+        <tr>
+            <th>{{ __('messages.Age') }}/{{ __('messages.Gender') }}</th>
+            <td>
+                {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
+            </td>
         </tr>
         <tr>
             <th>{{ __('messages.mobile_phone') }}</th>
