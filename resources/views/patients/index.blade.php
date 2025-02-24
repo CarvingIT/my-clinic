@@ -8,7 +8,7 @@
     <div class="py-12 bg-gray-100">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-md sm:rounded-xl">
-                <div class="p-4 text-gray-900">
+                <div class="p-5 text-gray-900">
                     <!-- Action Section -->
                     <div class="flex justify-between items-center mb-6">
                         <!-- Add New Patient Button -->
@@ -49,7 +49,7 @@
 
                     <!-- Table Section -->
                     <div class="max-w-full overflow-x-auto">
-                        <table class="table-fixed border-collapse border border-gray-300">
+                        <table class="table-fixed border-collapse border">
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th scope="col"
