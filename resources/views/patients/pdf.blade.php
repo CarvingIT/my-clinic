@@ -13,6 +13,7 @@
             margin: 20px;
         }
 
+
         h1 {
             font-size: 2em;
             color: #2c3e50;
@@ -55,6 +56,12 @@
         .page-break {
             page-break-after: always;
         }
+
+        th,
+        td {
+            text-align: left;
+            vertical-align: top;
+        }
     </style>
 </head>
 
@@ -96,18 +103,18 @@
             <th>{{ __('messages.Vishesh') }}</th>
             <td>{{ $patient->vishesh }}</td>
         </tr>
-        <tr>
+        {{-- <tr>
             <th>{{ __('messages.occupation') }}</th>
             <td>{{ $patient->occupation }}</td>
-        </tr>
-        <tr>
+        </tr> --}}
+        {{-- <tr>
             <th>{{ __('messages.Remark') }}</th>
             <td>{{ $patient->remark }}</td>
-        </tr>
-        <tr>
+        </tr> --}}
+        {{-- <tr>
             <th>{{ __('messages.Balance') }}</th>
             <td>{{ $patient->balance }}</td>
-        </tr>
+        </tr> --}}
     </table>
 
     <h2>{{ __('messages.follow_ups') }}</h2>
@@ -118,10 +125,9 @@
             <thead>
                 <tr>
                     <th>{{ __('messages.Created At') }}</th>
-                    <th>{{ __('नाडी') }}</th>
-                    <th>{{ __('लक्षणे') }}</th>
+                    <th>{{ __('नाडी') }}/{{ __('लक्षणे') }}</th>
                     <th>{{ __('चिकित्सा') }}</th>
-                    <th>{{ __('messages.Additional') }}</th>
+                    <th>{{ __('messages.Payments') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -130,14 +136,18 @@
                         $checkUpInfo = json_decode($followUp->check_up_info, true);
                     @endphp
                     <tr>
-                        <td>{{ $followUp->created_at->format('d M Y, h:i A') }}</td>
+                        <td>{{ $followUp->created_at->format('d M Y, h:i A') }}<br>
+                            @if (isset($checkUpInfo['user_name']))
+                                <strong>{{ __('S/B') }}:</strong> {{ $checkUpInfo['user_name'] }}<br>
+                            @endif
+                            @if (isset($checkUpInfo['branch_name']))
+                                <strong>{{ __('OPD') }}:</strong> {{ $checkUpInfo['branch_name'] }}<br>
+                            @endif
+                        </td>
                         <td>
-                            <div>
+                            @if ($followUp->check_up_info)
                                 @foreach ($checkUpInfo as $key => $value)
-                                    @if (in_array($key, [
-                                            'वात', 'पित्त', 'कफ', 'सूक्ष्म', 'कठिन', 'साम',
-                                            'प्राण', 'व्यान', 'स्थूल', 'तीक्ष्ण', 'वेग', 'अनियमित',
-                                        ]))
+                                    @if (in_array($key, ['वात', 'पित्त', 'कफ', 'सूक्ष्म', 'कठिन', 'साम']))
                                         @if (is_array($value))
                                             @foreach ($value as $option)
                                                 <p>{{ __($option) }}</p>
@@ -147,39 +157,40 @@
                                         @endif
                                     @endif
                                 @endforeach
-                            </div>
-                            <div>
-                                <p><span style="font-weight: bold;">{{ __('निदान') }}:</span> {{ $checkUpInfo['nidan'] ?? '' }}</p>
-                                <p><span style="font-weight: bold;">{{ __('उपशय') }}:</span> {{ $checkUpInfo['upashay'] ?? '' }}</p>
-                                <p><span style="font-weight: bold;">{{ __('सल्ला') }}:</span> {{ $checkUpInfo['salla'] ?? '' }}</p>
-                            </div>
-                        </td>
-                        <td>{{ $followUp->diagnosis }}</td>
-                        <td>
-                            @if ($followUp->treatment)
-                                <p>{{ $followUp->treatment }}</p>
-                            @endif
-                            @foreach ($checkUpInfo as $key => $value)
-                                @if (in_array($key, ['अर्श', 'ग्रहणी', 'ज्वर/प्रतिश्याय']))
-                                    @if (is_array($value))
-                                        @foreach ($value as $option)
-                                            <p>{{ __($option) }}</p>
-                                        @endforeach
-                                    @elseif($value == 1)
-                                        <p>{{ __($key) }}</p>
-                                    @endif
+
+                                @if (isset($checkUpInfo['nadi']))
+                                    <strong>{{ __('नाडी') }}:</strong> {{ $checkUpInfo['nadi'] }}<br>
                                 @endif
-                            @endforeach
-                            @if (isset($checkUpInfo['chikitsa_combo']))
-                                <p><span style="font-weight: bold;">{{ __('messages.Chikitsa Combo') }}:</span> {{ $checkUpInfo['chikitsa_combo'] }}</p>
+                                @if (isset($followUp->diagnosis))
+                                    <strong>{{ __('लक्षणे') }}:</strong> {{ $followUp->diagnosis }}<br>
+                                @endif
+                                @if (isset($checkUpInfo['days']))
+                                    <strong>{{ __('दिवस') }}:</strong>
+                                    {{ $checkUpInfo['days'] }}<br>
+                                @endif
+                                @if (isset($checkUpInfo['packets']))
+                                    <strong>{{ __('पुड्या') }}:</strong>
+                                    {{ $checkUpInfo['packets'] }}
+                                @endif
+                            @endif
+                        </td>
+
+                        <td>
+                            @if (isset($checkUpInfo['chikitsa']))
+                                {{ $checkUpInfo['chikitsa'] }}
                             @endif
                         </td>
                         <td>
-                            <p><span style="font-weight: bold;">{{ __('messages.Payment Method') }}:</span> {{ $checkUpInfo['payment_method'] ?? '' }}</p>
-                            <p><span style="font-weight: bold;">{{ __('messages.Amount') }}:</span> {{ $checkUpInfo['amount'] ?? '' }}</p>
-                            <p><span style="font-weight: bold;">{{ __('messages.Balance') }}:</span> {{ $checkUpInfo['balance'] ?? '' }}</p>
-                            <p><span style="font-weight: bold;">{{ __('messages.Branch') }}:</span> {{ $checkUpInfo['branch'] ?? '' }}</p>
-                            <p><span style="font-weight: bold;">{{ __('messages.Doctor') }}:</span> {{ $checkUpInfo['doctor'] ?? '' }}</p>
+                            @if (isset($checkUpInfo['payment_method']))
+                                <strong>{{ __('messages.Payment Method') }}:</strong>
+                                {{ $checkUpInfo['payment_method'] }}<br>
+                            @endif
+                            @if (isset($checkUpInfo['amount']))
+                                <strong>{{ __('messages.Amount') }}:</strong> {{ $checkUpInfo['amount'] }}<br>
+                            @endif
+                            @if (isset($checkUpInfo['balance']))
+                                <strong>{{ __('messages.Balance') }}:</strong> {{ $checkUpInfo['balance'] }}<br>
+                            @endif
                         </td>
                     </tr>
                 @endforeach

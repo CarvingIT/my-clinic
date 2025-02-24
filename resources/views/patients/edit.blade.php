@@ -35,7 +35,11 @@
                         <!-- Birthdate -->
                         <div>
                             <x-input-label for="birthdate" :value="__('Birthdate')" />
-                            <x-text-input id="birthdate" class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2" type="date" name="birthdate" :value="$patient->birthdate ? \Carbon\Carbon::parse($patient->birthdate)->format('Y-m-d') : ''" />
+                            <x-text-input id="birthdate"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                                type="date" name="birthdate" :value="$patient->birthdate
+                                    ? \Carbon\Carbon::parse($patient->birthdate)->format('Y-m-d')
+                                    : ''" />
 
                             <x-input-error :messages="$errors->get('birthdate')" class="mt-1" />
                         </div>
@@ -70,6 +74,8 @@
                                 type="email" name="email_id" :value="$patient->email_id" />
                             <x-input-error :messages="$errors->get('email_id')" class="mt-1" />
                         </div>
+
+                        <br>
 
                         <!-- Address -->
                         <div>
@@ -115,6 +121,13 @@
                                 type="number" name="balance" :value="$patient->balance" />
                             <x-input-error :messages="$errors->get('balance')" class="mt-1" />
                         </div> --}}
+
+
+                        <input type="text" name="check_up_info[user_name]"
+                            value="{{ $checkUpInfo['user_name'] ?? '' }}" class="form-input">
+                        <input type="text" name="check_up_info[branch_name]"
+                            value="{{ $checkUpInfo['branch_name'] ?? '' }}" class="form-input">
+
                     </div>
 
                     <!-- Buttons -->

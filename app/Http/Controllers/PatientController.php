@@ -182,7 +182,7 @@ class PatientController extends Controller
     private function generatePatientId($name, $dob, $mobile)
     {
         // Get the first letter of the name
-        $initial = strtoupper(substr($name, 0, 1));
+        $initial = strtoupper(mb_substr($name, 0, 1, "UTF-8"));
 
         // Format DoB to DDMMYY
         $formattedDob = Carbon::parse($dob)->format('dmy');

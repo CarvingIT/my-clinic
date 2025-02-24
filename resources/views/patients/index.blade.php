@@ -81,26 +81,26 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($patients as $patient)
                                     <tr class="hover:bg-gray-50 transition duration-150">
-                                        <td class="px-2 py-4    truncate whitespace-nowrap">
+                                        <td class="px-2 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
                                             {{ $patient->patient_id }}
                                         </td>
-                                        <td class="px-6 py-4    truncate whitespace-nowrap">
+                                        <td class="px-6 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
                                             <a href="{{ route('patients.show', $patient->id) }}"
                                                 class="text-blue-600 hover:text-blue-800 font-medium">
                                                 {{ $patient->name }}
                                             </a>
                                         </td>
-                                        <td class="px-6 py-4    truncate whitespace-nowrap">
+                                        <td class="px-6 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
                                             {{ $patient->mobile_phone }}
                                         </td>
-                                        <td class="px-6 py-4    truncate whitespace-nowrap">
+                                        <td class="px-6 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
                                             {{ $patient->address }}
                                         </td>
-                                        <td class="px-6 py-4    truncate whitespace-nowrap">
+                                        <td class="px-6 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
                                             {{ $patient->vishesh }}
                                         </td>
                                         <td
-                                            class="px-6 py-4    truncate whitespace-nowrap text-right text-sm font-medium flex gap-4">
+                                            class="px-6 py-4 align-top    truncate whitespace-nowrap text-right text-sm font-medium flex gap-4" style="vertical-align: top;">
                                             <a href="{{ route('patients.edit', $patient->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-800 font-medium"
                                                 title="Edit">

@@ -71,6 +71,7 @@
                             <x-input-error :messages="$errors->get('email_id')" class="mt-1" />
                         </div>
 
+                        <br>
                         <!-- Address -->
                         <div>
                             <x-input-label for="address" :value="__('messages.address')" />
