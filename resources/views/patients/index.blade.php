@@ -8,7 +8,7 @@
     <div class="py-12 bg-gray-100">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-md sm:rounded-xl">
-                <div class="p-6 text-gray-900">
+                <div class="p-4 text-gray-900">
                     <!-- Action Section -->
                     <div class="flex justify-between items-center mb-6">
                         <!-- Add New Patient Button -->
@@ -49,7 +49,7 @@
 
                     <!-- Table Section -->
                     <div class="max-w-full overflow-x-auto">
-                        <table class="table-fixed w-full border-collapse border border-gray-300">
+                        <table class="table-fixed border-collapse border border-gray-300">
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th scope="col"
@@ -57,23 +57,23 @@
                                         {{ __('Id') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.name') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.mobile_phone') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.address') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.Vishesh') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-6 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.Actions') }}
                                     </th>
                                 </tr>
@@ -81,26 +81,26 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($patients as $patient)
                                     <tr class="hover:bg-gray-50 transition duration-150">
-                                        <td class="px-2 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
+                                        <td class="px-2 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
                                             {{ $patient->patient_id }}
                                         </td>
-                                        <td class="px-6 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
+                                        <td class="px-2 py-4 align-top   break-normal whitespace-normal" style="vertical-align: top;">
                                             <a href="{{ route('patients.show', $patient->id) }}"
                                                 class="text-blue-600 hover:text-blue-800 font-medium">
                                                 {{ $patient->name }}
                                             </a>
                                         </td>
-                                        <td class="px-6 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
+                                        <td class="px-2 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
                                             {{ $patient->mobile_phone }}
                                         </td>
-                                        <td class="px-6 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
+                                        <td class="px-2 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
                                             {{ $patient->address }}
                                         </td>
-                                        <td class="px-6 py-4 align-top    truncate whitespace-nowrap" style="vertical-align: top;">
+                                        <td class="px-2 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
                                             {{ $patient->vishesh }}
                                         </td>
                                         <td
-                                            class="px-6 py-4 align-top    truncate whitespace-nowrap text-right text-sm font-medium flex gap-4" style="vertical-align: top;">
+                                            class="px-2 py-4 align-top    break-normal whitespace-normal text-right text-sm font-medium flex gap-4" style="vertical-align: top;">
                                             <a href="{{ route('patients.edit', $patient->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-800 font-medium"
                                                 title="Edit">
