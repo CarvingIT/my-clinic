@@ -53,27 +53,27 @@
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th scope="col"
-                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-4 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('Id') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-4 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.name') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-4 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.mobile_phone') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-4 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.address') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-4 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.Vishesh') }}
                                     </th>
                                     <th scope="col"
-                                        class="px-2 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                        class="px-4 py-3    text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                                         {{ __('messages.Actions') }}
                                     </th>
                                 </tr>
@@ -81,26 +81,26 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($patients as $patient)
                                     <tr class="hover:bg-gray-50 transition duration-150">
-                                        <td class="px-2 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
                                             {{ $patient->patient_id }}
                                         </td>
-                                        <td class="px-2 py-4 align-top   break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top   break-normal whitespace-normal" style="vertical-align: top;">
                                             <a href="{{ route('patients.show', $patient->id) }}"
                                                 class="text-blue-600 hover:text-blue-800 font-medium">
                                                 {{ $patient->name }}
                                             </a>
                                         </td>
-                                        <td class="px-2 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
                                             {{ $patient->mobile_phone }}
                                         </td>
-                                        <td class="px-2 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
                                             {{ $patient->address }}
                                         </td>
-                                        <td class="px-2 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
                                             {{ $patient->vishesh }}
                                         </td>
                                         <td
-                                            class="px-2 py-4 align-top    break-normal whitespace-normal text-right text-sm font-medium flex gap-4" style="vertical-align: top;">
+                                            class="px-4 py-4 align-top    break-normal whitespace-normal text-right text-sm font-medium flex gap-4" style="vertical-align: top;">
                                             <a href="{{ route('patients.edit', $patient->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-800 font-medium"
                                                 title="Edit">
