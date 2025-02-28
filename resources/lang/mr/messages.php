@@ -72,6 +72,11 @@ return [
     'Payments' => 'पेमेंट्स',
     'Age' => 'वय',
 
+    'Total Amount' => 'एकूण रक्कम',
+    'Amount Paid' => 'दिलेली रक्कम',
+    'Balance Due' => 'शिल्लक बाकी',
+
+
     'locale' => 'भाषा', // Label for dropdown
 
 ];

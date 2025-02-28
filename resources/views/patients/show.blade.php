@@ -369,7 +369,6 @@
                                             <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
                                                 style="vertical-align: top;">
                                                 @if ($followUp->check_up_info)
-
                                                     <div>
                                                         {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">
                                                             {{ __('नाडी') }}</h2> --}}
@@ -537,25 +536,11 @@
                                                             </p>
                                                         @endif
 
-                                                        {{-- <p><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">Certificate:</span>
-                                                                @if (isset($checkUpInfo['certificate']))
-                                                                    {{ $checkUpInfo['certificate'] }}
-                                                                @endif
-                                                            </p> --}}
-
-                                                        {{-- <p><span
-                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Drawing') }}:</span>
-                                                            @if (isset($checkUpInfo['drawing']))
-                                                                {{ $checkUpInfo['drawing'] }}
-                                                            @endif
-                                                        </p> --}}
-
 
                                                     </div>
 
                                                     <div>
-                                                        @if (isset($checkUpInfo['amount']) && $checkUpInfo['amount'] !== null && $checkUpInfo['amount'] !== '')
+                                                        {{-- @if (isset($checkUpInfo['amount']) && $checkUpInfo['amount'] !== null && $checkUpInfo['amount'] !== '')
                                                             <p class="mt-2">
                                                                 <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Amount') }}:</span>
@@ -569,7 +554,38 @@
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Balance') }}:</span>
                                                                 {{ $checkUpInfo['balance'] }}
                                                             </p>
-                                                        @endif
+                                                        @endif --}}
+
+
+
+                                                        @php
+                                                            $totalPaid = $checkUpInfo['amount'] ?? 0;
+                                                            $totalDue = $checkUpInfo['balance'] ?? 0;
+                                                            $totalAmount = $totalPaid + $totalDue;
+                                                        @endphp
+
+                                                        <div>
+                                                            <p class="mt-2">
+                                                                <span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Total Amount') }}:</span>
+                                                                {{ $totalAmount }}
+                                                            </p>
+
+                                                            <p class="mt-2">
+                                                                <span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Amount Paid') }}:</span>
+                                                                {{ $totalPaid }}
+                                                            </p>
+
+                                                            <p class="mt-2">
+                                                                <span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Balance Due') }}:</span>
+                                                                {{ $totalDue }}
+                                                            </p>
+                                                        </div>
+
+
+
 
                                                         {{-- <p><span
                                                                 class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Branch') }}:</span>

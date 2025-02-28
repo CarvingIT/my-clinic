@@ -71,6 +71,11 @@ return [
     'Payments' => 'Payments',
     'Age' => 'Age',
 
+    'Total Amount' => 'Total Amount',
+    'Total Paid' => 'Total Paid',
+    'Balance Due' => 'Balance Due',
+
+
 
     'locale' => 'Language', // Label for dropdown
 ];
