@@ -33,8 +33,24 @@
 
                         <!-- Diagnosis Textarea -->
                         <div class="mt-4 mb-4">
-                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">{{ __('लक्षणे') }}
-                            </h2>
+                            <div class="flex items-center space-x-2">
+                                <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
+                                    {{ __('लक्षणे') }}
+                                </h2>
+                                <div class="space-x-2">
+                                    <!-- Up Arrow Button -->
+                                    <button type="button" onclick="insertArrow('↑')"
+                                        class="mb-1 w-12 h-7 px-2 py-1 items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-md shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                        ↑
+                                    </button>
+                                    <!-- Down Arrow Button -->
+                                    <button type="button" onclick="insertArrow('↓')"
+                                        class="w-12 h-7 px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded-md shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                        ↓
+                                    </button>
+                                </div>
+                            </div>
+
                             <textarea id="lakshane" name="diagnosis" rows="4"
                                 class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                             <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
@@ -90,7 +106,9 @@
 
 
                         <div class="mt-4">
-                            <x-input-label for="payment_method" :value="__('messages.Payment Method')" />
+                            <label for="payment_method"
+                                class="text-l font-semibold text-gray-700 dark:text-white mb-4">{{ __('messages.Payment Method') }}
+                            </label>
                             <select id="payment_method" name="payment_method"
                                 class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 text-sm">
                                 <option value="">Please Select</option>
@@ -101,7 +119,32 @@
                             <x-input-error :messages="$errors->get('payment_method')" class="mt-2" />
                         </div>
 
-                        @foreach (['amount' => 'Amount', 'balance' => 'Balance'] as $name => $label)
+                        <div class="mt-4">
+                            <label for="amount" class="text-l font-semibold text-gray-700 dark:text-white mb-4">
+                                {{ __('messages.Amount Paid') }}
+                            </label>
+                            <x-text-input id="amount"
+                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300
+                                       focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600
+                                       rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 text-sm"
+                                type="number" name="amount" required />
+                            <x-input-error :messages="$errors->get('amount')" class="mt-2" />
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="balance"
+                                class="text-l font-semibold text-gray-700 dark:text-white mb-4">{{ __('messages.Balance Due') }}
+                            </label>
+                            <x-text-input id="balance"
+                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300
+                                       focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600
+                                       rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 text-sm"
+                                type="number" name="balance" required />
+                            <x-input-error :messages="$errors->get('balance')" class="mt-2" />
+                        </div>
+
+
+                        {{-- @foreach (['amount' => 'Amount', 'balance' => 'Balance'] as $name => $label)
                             <div class="mt-4">
                                 <x-input-label for="{{ $name }}" :value="__($label)" />
                                 <x-text-input id="{{ $name }}"
@@ -109,7 +152,7 @@
                                     type="number" name="{{ $name }}" />
                                 <x-input-error :messages="$errors->get($name)" class="mt-2" />
                             </div>
-                        @endforeach
+                        @endforeach --}}
 
 
 
@@ -203,4 +246,22 @@
             textarea.value += (textarea.value ? ', ' : '') + presetText;
         });
     });
+</script>
+
+<script>
+    function insertArrow(arrow) {
+        let textarea = document.getElementById("lakshane");
+        let start = textarea.selectionStart;
+        let end = textarea.selectionEnd;
+
+        // Insert the arrow at the cursor position
+        let text = textarea.value;
+        textarea.value = text.substring(0, start) + arrow + text.substring(end);
+
+        // Move cursor after inserted arrow
+        textarea.selectionStart = textarea.selectionEnd = start + arrow.length;
+
+        // Focus back on textarea
+        textarea.focus();
+    }
 </script>

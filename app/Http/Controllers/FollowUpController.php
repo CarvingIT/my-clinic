@@ -85,7 +85,7 @@ class FollowUpController extends Controller
         $query = FollowUp::whereHas('patient'); // Ensures only follow-ups with patients are fetched
 
         // Apply date filter if selected
-        if ($request->has('from_date') && $request->has('to_date')) {
+        if ($request->filled('from_date') && $request->filled('to_date')) {
             $from = Carbon::parse($request->from_date)->startOfDay();
             $to = Carbon::parse($request->to_date)->endOfDay();
             $query->whereBetween('created_at', [$from, $to]);
@@ -101,7 +101,7 @@ class FollowUpController extends Controller
         $totalPatients = $query->count();
 
 
-        $followUps = FollowUp::with('patient')->orderBy('created_at', 'desc')->paginate(10); // Fetching follow-ups with patient details in desc order
+        // $followUps = FollowUp::with('patient')->orderBy('created_at', 'desc')->paginate(10); // Fetching follow-ups with patient details in desc order
         return view('followups.index', compact('followUps', 'totalIncome', 'totalPatients'));
     }
 

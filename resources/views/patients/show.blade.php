@@ -438,8 +438,8 @@
                                                             </p> --}}
                                                         @if (isset($checkUpInfo['nadi']) && $checkUpInfo['nadi'] !== null && $checkUpInfo['nadi'] !== '')
                                                             <p>
-                                                                <span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('नाडी') }}:</span>
+                                                                {{-- <span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('नाडी') }}:</span> --}}
                                                                 {{ $checkUpInfo['nadi'] }}
                                                             </p>
                                                         @endif
@@ -447,8 +447,8 @@
                                                         @if (isset($followUp->diagnosis) && $followUp->diagnosis !== null && $followUp->diagnosis !== '')
                                                             {{-- Note the change here --}}
                                                             <p>
-                                                                <span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}:</span>
+                                                                {{-- <span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}:</span> --}}
                                                                 {{ $followUp->diagnosis }}
                                                             </p>
                                                         @endif
@@ -458,24 +458,7 @@
                                                                 {{ $checkUpInfo['chikitsa'] }}
                                                             @endif
                                                         </p> --}}
-                                                        <p>
-                                                            @if (isset($checkUpInfo['days']) && $checkUpInfo['days'] !== null && $checkUpInfo['days'] !== '')
-                                                                <p>
-                                                                    <span
-                                                                        class="font-bold text-gray-800 dark:text-gray-200">{{ __('दिवस') }}:</span>
-                                                                    {{ $checkUpInfo['days'] }}
-                                                                </p>
-                                                            @endif
-                                                        </p>
-                                                        <p>
-                                                            @if (isset($checkUpInfo['packets']) && $checkUpInfo['packets'] !== null && $checkUpInfo['packets'] !== '')
-                                                                <p>
-                                                                    <span
-                                                                        class="font-bold text-gray-800 dark:text-gray-200">{{ __('पुड्या') }}:</span>
-                                                                    {{ $checkUpInfo['packets'] }}
-                                                                </p>
-                                                            @endif
-                                                        </p>
+
 
                                                     </div>
                                                 @endif
@@ -522,6 +505,25 @@
                                                     @endif
                                                 </p>
 
+                                                <p>
+                                                    @if (isset($checkUpInfo['days']) && $checkUpInfo['days'] !== null && $checkUpInfo['days'] !== '')
+                                                        <p>
+                                                            <span
+                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('दिवस') }}:</span>
+                                                            {{ $checkUpInfo['days'] }}
+                                                        </p>
+                                                    @endif
+                                                </p>
+                                                <p>
+                                                    @if (isset($checkUpInfo['packets']) && $checkUpInfo['packets'] !== null && $checkUpInfo['packets'] !== '')
+                                                        <p>
+                                                            <span
+                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('पुड्या') }}:</span>
+                                                            {{ $checkUpInfo['packets'] }}
+                                                        </p>
+                                                    @endif
+                                                </p>
+
                                             </td>
 
 
@@ -543,8 +545,8 @@
                                                                 $checkUpInfo['payment_method'] !== null &&
                                                                 $checkUpInfo['payment_method'] !== '')
                                                             <p class="mt-2">
-                                                                <span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Payment Method') }}:</span>
+                                                                {{-- <span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Payment Method') }}:</span> --}}
                                                                 {{ $checkUpInfo['payment_method'] }}
                                                             </p>
                                                         @endif
@@ -583,11 +585,11 @@
 
 
                                                         <div>
-                                                            <p class="mt-2">
+                                                            {{-- <p class="mt-2">
                                                                 <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Total Amount') }}:</span>
                                                                 {{ $totalAmount }}
-                                                            </p>
+                                                            </p> --}}
 
                                                             <p class="mt-2">
                                                                 <span
