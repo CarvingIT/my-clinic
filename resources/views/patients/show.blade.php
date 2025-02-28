@@ -304,14 +304,19 @@
 
                     {{-- Outstanding Balance --}}
                     @if (isset($totalDueAll))
-                        <div class="bg-red-200 p-4 rounded-md text-yellow-800 font-bold text-right pr-15">
+                        <div
+                            class="
+                                @if ($totalDueAll == 0) bg-green-200 text-green-800
+                                @elseif($totalDueAll < 2000) bg-yellow-200 text-yellow-800
+                                @else bg-red-200 text-red-800 @endif
+                                p-4 rounded-md font-bold text-right pr-15">
                             {{ __('messages.Total Outstanding Balance') }}:
                             ₹{{ number_format($totalDueAll) }}
                         </div>
                     @else
-                        <div class="text-red-600 font-bold">Error: Total
-                            Outstanding Balance not found!</div>
+                        <div class="text-red-600 font-bold">Error: Total Outstanding Balance not found!</div>
                     @endif
+
                     {{-- Outstanding Balance End --}}
 
                     @if ($patient->followUps->count() > 0)
