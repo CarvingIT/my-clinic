@@ -9,6 +9,28 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg dark:bg-gray-900">
                 <div class="p-6 text-gray-900">
+
+
+                    <form method="GET" action="{{ route('followups.index') }}" class="mb-4 flex items-center gap-4">
+                        <label for="from_date" class="font-semibold text-gray-700 dark:text-gray-300">From:</label>
+                        <input type="date" id="from_date" name="from_date" value="{{ request('from_date') }}"
+                               class="border rounded px-3 py-2 dark:bg-gray-800 dark:text-white">
+
+                        <label for="to_date" class="font-semibold text-gray-700 dark:text-gray-300">To:</label>
+                        <input type="date" id="to_date" name="to_date" value="{{ request('to_date') }}"
+                               class="border rounded px-3 py-2 dark:bg-gray-800 dark:text-white">
+
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded">Filter</button>
+                    </form>
+
+                    <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded mb-4">
+                        <p class="text-lg font-bold text-gray-800 dark:text-gray-200">Summary</p>
+                        <p>Total Patients: <span class="font-semibold">{{ $totalPatients }}</span></p>
+                        <p>Total Income: <span class="font-semibold">₹{{ number_format($totalIncome, 2) }}</span></p>
+                    </div>
+
+
+
                     <div class="overflow-hidden overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-white dark:bg-gray-900">

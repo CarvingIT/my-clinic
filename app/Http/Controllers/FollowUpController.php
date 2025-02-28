@@ -11,6 +11,7 @@ use Illuminate\Routing\Controller;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
+use Carbon\Carbon;
 
 class FollowUpController extends Controller
 {
@@ -78,17 +79,37 @@ class FollowUpController extends Controller
         return Redirect::route('patients.show', $request->patient_id)->with('success', 'Follow Up Created Successfully');
     }
 
-    public function index()
+    public function index(Request $request)
     {
+
+        $query = FollowUp::whereHas('patient'); // Ensures only follow-ups with patients are fetched
+
+        // Apply date filter if selected
+        if ($request->has('from_date') && $request->has('to_date')) {
+            $from = Carbon::parse($request->from_date)->startOfDay();
+            $to = Carbon::parse($request->to_date)->endOfDay();
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
+        $followUps = $query->latest()->paginate(10); // Get filtered results
+
+        // Calculate summary
+        $totalIncome = $query->get()->sum(function ($followUp) {
+            return optional(json_decode($followUp->check_up_info, true))['amount'] ?? 0;
+        });
+
+        $totalPatients = $query->count();
+
+
         $followUps = FollowUp::with('patient')->orderBy('created_at', 'desc')->paginate(10); // Fetching follow-ups with patient details in desc order
-        return view('followups.index', compact('followUps'));
+        return view('followups.index', compact('followUps', 'totalIncome', 'totalPatients'));
     }
+
+
+
     public function show(FollowUp $followup)
     {
-
-
-
-        return view('followups.show', compact('followup', 'followUps', 'totalDueAll', 'patient'));
+        return view('followups.show', compact('followups'));
     }
 
 

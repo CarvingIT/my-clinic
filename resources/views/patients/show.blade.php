@@ -304,9 +304,9 @@
 
                     {{-- Outstanding Balance --}}
                     @if (isset($totalDueAll))
-                        <div class="bg-red-200 p-4 rounded-md text-yellow-800 font-bold text-right pr-10">
+                        <div class="bg-red-200 p-4 rounded-md text-yellow-800 font-bold text-right pr-15">
                             {{ __('messages.Total Outstanding Balance') }}:
-                            ₹{{ number_format($totalDueAll, 2) }}
+                            ₹{{ number_format($totalDueAll) }}
                         </div>
                     @else
                         <div class="text-red-600 font-bold">Error: Total
@@ -391,7 +391,7 @@
                                                                     'पित्त',
                                                                     'कफ',
                                                                     'सूक्ष्म',
-                                                                    'कठिन',
+                                                                    'कठीण',
                                                                     'साम',
                                                                     'प्राण',
                                                                     'व्यान',

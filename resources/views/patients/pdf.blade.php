@@ -153,7 +153,7 @@
                         <td>
                             @if ($followUp->check_up_info)
                                 @foreach ($checkUpInfo as $key => $value)
-                                    @if (in_array($key, ['वात', 'पित्त', 'कफ', 'सूक्ष्म', 'कठिन', 'साम']))
+                                    @if (in_array($key, ['वात', 'पित्त', 'कफ', 'सूक्ष्म', 'कठीण', 'साम']))
                                         @if (is_array($value))
                                             @foreach ($value as $option)
                                                 <p>{{ __($option) }}</p>
