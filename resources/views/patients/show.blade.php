@@ -301,6 +301,19 @@
                     </div>
 
                     <h2 class="text-xl font-semibold mb-2">{{ __('messages.follow_ups') }}</h2>
+
+                    {{-- Outstanding Balance --}}
+                    @if (isset($totalDueAll))
+                        <div class="bg-red-200 p-4 rounded-md text-yellow-800 font-bold text-right pr-10">
+                            {{ __('messages.Total Outstanding Balance') }}:
+                            ₹{{ number_format($totalDueAll, 2) }}
+                        </div>
+                    @else
+                        <div class="text-red-600 font-bold">Error: Total
+                            Outstanding Balance not found!</div>
+                    @endif
+                    {{-- Outstanding Balance End --}}
+
                     @if ($patient->followUps->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
@@ -562,7 +575,12 @@
                                                             $totalPaid = $checkUpInfo['amount'] ?? 0;
                                                             $totalDue = $checkUpInfo['balance'] ?? 0;
                                                             $totalAmount = $totalPaid + $totalDue;
+
                                                         @endphp
+
+
+
+
 
                                                         <div>
                                                             <p class="mt-2">

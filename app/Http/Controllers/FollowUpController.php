@@ -85,7 +85,10 @@ class FollowUpController extends Controller
     }
     public function show(FollowUp $followup)
     {
-        return view('followups.show', compact('followup'));
+
+
+
+        return view('followups.show', compact('followup', 'followUps', 'totalDueAll', 'patient'));
     }
 
 
@@ -100,43 +103,43 @@ class FollowUpController extends Controller
     }
 
     public function update(Request $request, FollowUp $followup)
-{
-    $request->validate([
-        'patient_id' => ['required', 'exists:patients,id'],
-        'diagnosis' => ['nullable', 'string'],
-        'treatment' => ['nullable', 'string'],
-    ]);
+    {
+        $request->validate([
+            'patient_id' => ['required', 'exists:patients,id'],
+            'diagnosis' => ['nullable', 'string'],
+            'treatment' => ['nullable', 'string'],
+        ]);
 
-    // Decode
-    $existingCheckUpInfo = json_decode($followup->check_up_info, true) ?? [];
+        // Decode
+        $existingCheckUpInfo = json_decode($followup->check_up_info, true) ?? [];
 
-    // Extract new check_up_info fields from the request
-    $newCheckUpInfo = [];
-    foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment', 'chikitsa_combo']) as $key => $value) {
-        $newCheckUpInfo[$key] = $value;
+        // Extract new check_up_info fields from the request
+        $newCheckUpInfo = [];
+        foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment', 'chikitsa_combo']) as $key => $value) {
+            $newCheckUpInfo[$key] = $value;
+        }
+
+        // Preserve existing username and branch unless updated
+        if (!isset($newCheckUpInfo['user_name']) && isset($existingCheckUpInfo['user_name'])) {
+            $newCheckUpInfo['user_name'] = $existingCheckUpInfo['user_name'];
+        }
+        if (!isset($newCheckUpInfo['branch_name']) && isset($existingCheckUpInfo['branch_name'])) {
+            $newCheckUpInfo['branch_name'] = $existingCheckUpInfo['branch_name'];
+        }
+
+
+        // Merge existing and new check_up_info
+        $updatedCheckUpInfo = array_merge($existingCheckUpInfo, $newCheckUpInfo);
+
+        // Update the follow-up
+        $followup->update([
+            'check_up_info' => json_encode($updatedCheckUpInfo),
+            'diagnosis' => $request->diagnosis,
+            'treatment' => $request->treatment,
+        ]);
+
+        return redirect()->route('patients.show', $request->patient_id)->with('success', 'Follow Up Updated Successfully');
     }
-
-    // Preserve existing username and branch unless updated
-    if (!isset($newCheckUpInfo['user_name']) && isset($existingCheckUpInfo['user_name'])) {
-        $newCheckUpInfo['user_name'] = $existingCheckUpInfo['user_name'];
-    }
-    if (!isset($newCheckUpInfo['branch_name']) && isset($existingCheckUpInfo['branch_name'])) {
-        $newCheckUpInfo['branch_name'] = $existingCheckUpInfo['branch_name'];
-    }
-
-
-    // Merge existing and new check_up_info
-    $updatedCheckUpInfo = array_merge($existingCheckUpInfo, $newCheckUpInfo);
-
-    // Update the follow-up
-    $followup->update([
-        'check_up_info' => json_encode($updatedCheckUpInfo),
-        'diagnosis' => $request->diagnosis,
-        'treatment' => $request->treatment,
-    ]);
-
-    return redirect()->route('patients.show', $request->patient_id)->with('success', 'Follow Up Updated Successfully');
-}
 
 
     public function destroy(FollowUp $followup)

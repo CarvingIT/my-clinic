@@ -75,6 +75,7 @@ return [
     'Total Amount' => 'एकूण रक्कम',
     'Amount Paid' => 'दिलेली रक्कम',
     'Balance Due' => 'शिल्लक बाकी',
+    'Total Outstanding Balance' => 'एकूण शिल्लक',
 
 
     'locale' => 'भाषा', // Label for dropdown

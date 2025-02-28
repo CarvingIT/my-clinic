@@ -74,6 +74,7 @@ return [
     'Total Amount' => 'Total Amount',
     'Total Paid' => 'Total Paid',
     'Balance Due' => 'Balance Due',
+    'Total Outstanding Balance' => 'Total Outstanding Balance',
 
 
 
