@@ -75,6 +75,12 @@ return [
     'Total Paid' => 'Total Paid',
     'Balance Due' => 'Balance Due',
     'Total Outstanding Balance' => 'Total Outstanding Balance',
+    'All Branches' => 'All Branches',
+    'Selected Date Range' => 'Selected Date Range',
+    'Total Patients' => 'Total Patients',
+    'Total Follow-ups' => 'Total Follow-ups',
+    'Total Payment Received' => 'Total Payment Received',
+    'Insights' => 'Insights',
 
 
 

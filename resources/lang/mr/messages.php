@@ -76,6 +76,13 @@ return [
     'Amount Paid' => 'दिलेली रक्कम',
     'Balance Due' => 'शिल्लक बाकी',
     'Total Outstanding Balance' => 'एकूण शिल्लक',
+    'All Branches' => 'सर्व शाखा',
+    'Selected Date Range' => 'निवडलेली तारीख सीमा',
+    'Total Patients' => 'एकूण रुग्ण',
+    'Total Follow-ups' => 'एकूण फॉलो अप्स',
+    'Total Payment Received' => 'एकूण पेमेंट प्राप्त',
+    'Summary' => 'सारांश',
+    'Insights' => 'सखोल माहिती',
 
 
     'locale' => 'भाषा', // Label for dropdown
