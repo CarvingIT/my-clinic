@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\FollowUp;
 use App\Models\Parameter;
 use App\Models\Patient;
+use App\Models\Branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Routing\Controller;
@@ -12,6 +13,8 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
 
 class FollowUpController extends Controller
 {
@@ -81,8 +84,21 @@ class FollowUpController extends Controller
 
     public function index(Request $request)
     {
+        $branches = FollowUp::selectRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) as branch_name")
+            ->whereNotNull(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name'))"))
+            ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name'))"), '!=', '')
+            ->distinct()
+            ->pluck('branch_name'); // Get unique branch names from JSON
+
+        // Default to "all"
+        $selectedBranch = $request->input('branch_name', 'all');
 
         $query = FollowUp::whereHas('patient'); // Ensures only follow-ups with patients are fetched
+
+        // Apply branch filter only if a specific branch is selected
+        if ($selectedBranch !== 'all' && !empty($selectedBranch)) {
+            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
+        }
 
         // Apply date filter if selected
         if ($request->filled('from_date') && $request->filled('to_date')) {
@@ -91,19 +107,40 @@ class FollowUpController extends Controller
             $query->whereBetween('created_at', [$from, $to]);
         }
 
-        $followUps = $query->latest()->paginate(10); // Get filtered results
+        // Clone query for summary calculations (to keep totals constant across pagination)
+        $queryClone = clone $query;
 
-        // Calculate summary
-        $totalIncome = $query->get()->sum(function ($followUp) {
+        // Calculate summary before applying pagination
+        $totalIncome = $queryClone->get()->sum(function ($followUp) {
             return optional(json_decode($followUp->check_up_info, true))['amount'] ?? 0;
         });
 
-        $totalPatients = $query->count();
+        $totalPatients = FollowUp::whereIn('id', $queryClone->pluck('id'))
+            ->distinct('patient_id')
+            ->count('patient_id');
+        $totalFollowUps = $queryClone->count();
 
+        // Get the patient IDs from the displayed follow-ups
+        $patientIds = $queryClone->pluck('patient_id');
 
-        // $followUps = FollowUp::with('patient')->orderBy('created_at', 'desc')->paginate(10); // Fetching follow-ups with patient details in desc order
-        return view('followups.index', compact('followUps', 'totalIncome', 'totalPatients'));
+        // Get the latest follow-up for these patients
+        $latestFollowUpIds = FollowUp::whereIn('patient_id', $patientIds)
+            ->selectRaw("MAX(id) as latest_followup_id")
+            ->groupBy('patient_id')
+            ->pluck('latest_followup_id');
+
+        // Sum the balance from the latest follow-ups of the displayed patients
+        $totalDueAll = FollowUp::whereIn('id', $latestFollowUpIds)
+            ->sum(DB::raw("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.balance')), 0)"));
+
+        // Apply pagination **AFTER** summary calculation
+        $followUps = $query->latest()->paginate(10);
+
+        return view('followups.index', compact('followUps', 'totalIncome', 'totalPatients', 'totalFollowUps', 'branches', 'selectedBranch', 'totalDueAll'));
     }
+
+
+
 
 
 

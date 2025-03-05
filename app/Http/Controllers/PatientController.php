@@ -99,13 +99,16 @@ class PatientController extends Controller
 
         $patient->reports = $patient->reports()->get(); // Add reports
 
-        // Calculate total outstanding balance
-        $totalDueAll = 0;
-        foreach ($patient->followUps as $followUp) {
-            $checkUpInfo = json_decode($followUp->check_up_info, true); // Decode JSON
-            $balance = $checkUpInfo['balance'] ?? 0; // Get balance if available
-            $totalDueAll += $balance; // Add to total
+        // Calculate outstanding balance
+        $latestFollowUp = $patient->followUps()->orderBy('created_at', 'desc')->first();
+
+        if ($latestFollowUp) {
+            $checkUpInfo = json_decode($latestFollowUp->check_up_info, true);
+            $totalDueAll = $checkUpInfo['balance'] ?? 0;
+        } else {
+            $totalDueAll = 0;
         }
+
 
         // dd($patient);
         return view('patients.show', compact('patient', 'totalDueAll'));
