@@ -89,7 +89,7 @@ return [
     'Weight' => 'वजन (kg)',
     'Amount Billed' => 'बिल केलेली रक्कम',
     'Amount Due' => 'बाकी रक्कम',
-    'All Dues' => 'सर्व बाकी',
+    'All Dues' => 'बाकी',
     'Total Due' => 'एकूण बाकी',
 
 
