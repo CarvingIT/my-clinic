@@ -109,6 +109,35 @@
             <th>{{ __('messages.Vishesh') }}</th>
             <td>{{ $patient->vishesh }}</td>
         </tr>
+        <tr>
+            <th>{{ __('messages.Height') }}</th>
+            <td>{{ $patient->height }}</td>
+        </tr>
+        <tr>
+            <th>{{ __('messages.Weight') }}</th>
+            <td>{{ $patient->weight }}</td>
+        </tr>
+        @if ($patient->height && $patient->weight)
+            @php
+                $heightInMeters = $patient->height / 100; // Convert cm to meters
+                $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
+
+                // Determine BMI category
+                if ($bmi < 18.5) {
+                    $bmiCategory = __('Underweight');
+                } elseif ($bmi >= 18.5 && $bmi < 25) {
+                    $bmiCategory = __('Healthy Weight');
+                } elseif ($bmi >= 25 && $bmi < 30) {
+                    $bmiCategory = __('Overweight');
+                } else {
+                    $bmiCategory = __('Obese');
+                }
+            @endphp
+            <tr>
+                <th>{{ __('messages.BMI') }}</th>
+                <td>{{ number_format($bmi, 2) }} ({{ $bmiCategory }})</td>
+            </tr>
+        @endif
         {{-- <tr>
             <th>{{ __('messages.occupation') }}</th>
             <td>{{ $patient->occupation }}</td>
@@ -170,7 +199,6 @@
                                 @if (isset($followUp->diagnosis))
                                     <strong>{{ __('लक्षणे') }}:</strong> {{ $followUp->diagnosis }}<br>
                                 @endif
-
                             @endif
                         </td>
 
@@ -179,13 +207,13 @@
                                 {{ $checkUpInfo['chikitsa'] }}
                             @endif
                             @if (isset($checkUpInfo['days']))
-                                    <strong>{{ __('दिवस') }}:</strong>
-                                    {{ $checkUpInfo['days'] }}<br>
-                                @endif
-                                @if (isset($checkUpInfo['packets']))
-                                    <strong>{{ __('पुड्या') }}:</strong>
-                                    {{ $checkUpInfo['packets'] }}
-                                @endif
+                                <strong>{{ __('दिवस') }}:</strong>
+                                {{ $checkUpInfo['days'] }}<br>
+                            @endif
+                            @if (isset($checkUpInfo['packets']))
+                                <strong>{{ __('पुड्या') }}:</strong>
+                                {{ $checkUpInfo['packets'] }}
+                            @endif
                         </td>
                         <td>
                             @if (isset($checkUpInfo['payment_method']))
