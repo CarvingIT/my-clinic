@@ -170,14 +170,7 @@
                                 @if (isset($followUp->diagnosis))
                                     <strong>{{ __('लक्षणे') }}:</strong> {{ $followUp->diagnosis }}<br>
                                 @endif
-                                @if (isset($checkUpInfo['days']))
-                                    <strong>{{ __('दिवस') }}:</strong>
-                                    {{ $checkUpInfo['days'] }}<br>
-                                @endif
-                                @if (isset($checkUpInfo['packets']))
-                                    <strong>{{ __('पुड्या') }}:</strong>
-                                    {{ $checkUpInfo['packets'] }}
-                                @endif
+
                             @endif
                         </td>
 
@@ -185,18 +178,33 @@
                             @if (isset($checkUpInfo['chikitsa']))
                                 {{ $checkUpInfo['chikitsa'] }}
                             @endif
+                            @if (isset($checkUpInfo['days']))
+                                    <strong>{{ __('दिवस') }}:</strong>
+                                    {{ $checkUpInfo['days'] }}<br>
+                                @endif
+                                @if (isset($checkUpInfo['packets']))
+                                    <strong>{{ __('पुड्या') }}:</strong>
+                                    {{ $checkUpInfo['packets'] }}
+                                @endif
                         </td>
                         <td>
                             @if (isset($checkUpInfo['payment_method']))
                                 <strong>{{ __('messages.Payment Method') }}:</strong>
                                 {{ $checkUpInfo['payment_method'] }}<br>
                             @endif
-                            @if (isset($checkUpInfo['amount']))
-                                <strong>{{ __('messages.Amount') }}:</strong> {{ $checkUpInfo['amount'] }}<br>
-                            @endif
-                            @if (isset($checkUpInfo['balance']))
-                                <strong>{{ __('messages.Balance') }}:</strong> {{ $checkUpInfo['balance'] }}<br>
-                            @endif
+                            <strong>{{ __('messages.Amount Billed') }}:</strong>
+                            ₹{{ number_format($followUp->amount_billed ?? 0, 2) }}<br>
+                            <strong>{{ __('messages.Amount Paid') }}:</strong>
+                            ₹{{ number_format($followUp->amount_paid ?? 0, 2) }}<br>
+
+                            @php
+                                $totalDue = max(($followUp->amount_billed ?? 0) - ($followUp->amount_paid ?? 0), 0);
+                            @endphp
+
+                            <strong>{{ __('messages.Amount Due') }}:</strong>
+                            <span class="{{ $totalDue == 0 ? 'text-green-600' : 'text-red-600' }}">
+                                ₹{{ number_format($totalDue, 2) }}
+                            </span><br>
                         </td>
                     </tr>
                 @endforeach
