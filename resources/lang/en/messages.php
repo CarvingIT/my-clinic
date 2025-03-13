@@ -83,6 +83,13 @@ return [
     'Total Payment Received' => 'Total Payment Received',
     'Insights' => 'Insights',
 
+    'Height' => 'Height (cm)',
+    'Weight' => 'Weight (kg)',
+    'Amount Billed' => 'Amount Billed',
+    'Amount Due' => 'Amount Due',
+    'All Dues' => 'All Dues',
+    'Total Due' => 'Total Due',
+
 
 
     'locale' => 'Language', // Label for dropdown

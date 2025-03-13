@@ -85,6 +85,13 @@ return [
     'Summary' => 'सारांश',
     'Insights' => 'सखोल माहिती',
 
+    'Height' => 'उंची (cm)',
+    'Weight' => 'वजन (kg)',
+    'Amount Billed' => 'बिल केलेली रक्कम',
+    'Amount Due' => 'बाकी रक्कम',
+    'All Dues' => 'सर्व बाकी',
+    'Total Due' => 'एकूण बाकी',
+
 
     'locale' => 'भाषा', // Label for dropdown
 

@@ -63,6 +63,8 @@ class PatientController extends Controller
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
             // 'patient_id' => ['required', 'string', 'unique:patients,patient_id']
+            'height' => ['nullable', 'numeric', 'min:1'],
+            'weight' => ['nullable', 'numeric', 'min:1'],
         ]);
 
         // Manually handle the birthdate:
@@ -92,25 +94,19 @@ class PatientController extends Controller
      */
     public function show(Patient $patient)
     {
+        $patient->fresh(); // Ensure latest data is loaded
 
-        // $patient->followUps = $patient->followUps->sortByDesc('created_at');
+        // Get total amount billed and total amount paid across all follow-ups
+        $totalBilled = $patient->followUps()->sum('amount_billed');
+        $totalPaid = $patient->followUps()->sum('amount_paid');
 
-        $patient->followUps = $patient->followUps()->orderBy('created_at', 'desc')->paginate(5); // Paginate follow-ups
+        // Calculate total outstanding balance (Total Due)
+        $totalDueAll = max($totalBilled - $totalPaid, 0);
 
-        $patient->reports = $patient->reports()->get(); // Add reports
+        // Load paginated follow-ups and reports
+        $patient->followUps = $patient->followUps()->orderBy('created_at', 'desc')->paginate(5);
+        $patient->reports = $patient->reports()->get();
 
-        // Calculate outstanding balance
-        $latestFollowUp = $patient->followUps()->orderBy('created_at', 'desc')->first();
-
-        if ($latestFollowUp) {
-            $checkUpInfo = json_decode($latestFollowUp->check_up_info, true);
-            $totalDueAll = $checkUpInfo['balance'] ?? 0;
-        } else {
-            $totalDueAll = 0;
-        }
-
-
-        // dd($patient);
         return view('patients.show', compact('patient', 'totalDueAll'));
     }
 
@@ -141,6 +137,8 @@ class PatientController extends Controller
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
             // 'patient_id' => ['required', 'string', 'unique:patients,patient_id,' . $patient->id]
+            'height' => 'required|numeric|min:50|max:250', // Height in cm
+            'weight' => 'required|numeric|min:10|max:300', // Weight in kg
         ]);
         $patient->update($request->all());
 

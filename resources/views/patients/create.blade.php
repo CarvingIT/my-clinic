@@ -89,6 +89,26 @@
                                 type="text" name="vishesh" :value="old('vishesh')" />
                             <x-input-error :messages="$errors->get('vishesh')" class="mt-1" />
                         </div>
+                        <br>
+
+                        <!-- Height -->
+                        <div>
+                            <x-input-label for="height" :value="__('messages.Height')" />
+                            <x-text-input id="height"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                                type="number" step="0.01" name="height" :value="old('height')" />
+                            <x-input-error :messages="$errors->get('height')" class="mt-1" />
+                        </div>
+
+                        <!-- Weight -->
+                        <div>
+                            <x-input-label for="weight" :value="__('messages.Weight')" />
+                            <x-text-input id="weight"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                                type="number" step="0.01" name="weight" :value="old('weight')" />
+                            <x-input-error :messages="$errors->get('weight')" class="mt-1" />
+                        </div>
+
 
                         <!-- Occupation -->
                         {{-- <div>

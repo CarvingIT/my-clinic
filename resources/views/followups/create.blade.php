@@ -120,28 +120,71 @@
                         </div>
 
                         <div class="mt-4">
-                            <label for="amount" class="text-l font-semibold text-gray-700 dark:text-white mb-4">
-                                {{ __('messages.Amount Paid') }}
+                            <label for="all_dues" class="text-l font-semibold text-gray-700 dark:text-white mb-4">
+                                {{ __('messages.All Dues') }}
                             </label>
-                            <x-text-input id="amount"
-                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300
-                                       focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600
-                                       rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 text-sm"
-                                type="number" name="amount" required />
-                            <x-input-error :messages="$errors->get('amount')" class="mt-2" />
+                            <x-text-input id="all_dues"
+                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
+                                type="number" name="all_dues" value="{{ old('all_dues', $totalDueAll ?? 0) }}" readonly />
                         </div>
 
                         <div class="mt-4">
-                            <label for="balance"
-                                class="text-l font-semibold text-gray-700 dark:text-white mb-4">{{ __('messages.Balance Due') }}
+                            <label for="amount_billed" class="text-l font-semibold text-gray-700 dark:text-white mb-4">
+                                {{ __('messages.Amount Billed') }}
                             </label>
-                            <x-text-input id="balance"
-                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300
-                                       focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600
-                                       rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 text-sm"
-                                type="number" name="balance" required />
-                            <x-input-error :messages="$errors->get('balance')" class="mt-2" />
+                            <x-text-input id="amount_billed"
+                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
+                                type="number" name="amount_billed" required />
                         </div>
+
+                        <div class="mt-4">
+                            <label for="amount_paid" class="text-l font-semibold text-gray-700 dark:text-white mb-4">
+                                {{ __('messages.Amount Paid') }}
+                            </label>
+                            <x-text-input id="amount_paid"
+                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
+                                type="number" name="amount_paid" required />
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="total_due" class="text-l font-semibold text-gray-700 dark:text-white mb-4">
+                                {{ __('messages.Total Due') }}
+                            </label>
+                            <x-text-input id="total_due"
+                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
+                                type="number" name="total_due" readonly />
+                        </div>
+
+                        <script>
+                            function calculateTotalDue() {
+                                let allDues = parseFloat(document.getElementById('all_dues').value) || 0;
+                                let amountBilled = parseFloat(document.getElementById('amount_billed').value) || 0;
+                                let amountPaid = parseFloat(document.getElementById('amount_paid').value) || 0;
+
+                                let totalDue = (allDues + amountBilled - amountPaid);
+                                totalDue = totalDue > 0 ? totalDue : 0; // Prevent negative values
+
+                                document.getElementById('total_due').value = totalDue.toFixed(2); // Ensure 2 decimal places
+                            }
+
+                            // Ensure script runs after page load
+                            window.onload = function() {
+                                calculateTotalDue();
+
+                                document.getElementById('amount_billed').addEventListener('input', calculateTotalDue);
+                                document.getElementById('amount_paid').addEventListener('input', calculateTotalDue);
+                            };
+                        </script>
+
+
+
+
+
+
+
+
+
+
 
 
                         {{-- @foreach (['amount' => 'Amount', 'balance' => 'Balance'] as $name => $label)
@@ -265,3 +308,5 @@
         textarea.focus();
     }
 </script>
+
+

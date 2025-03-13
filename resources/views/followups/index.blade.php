@@ -117,15 +117,16 @@
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Created At') }} 📅</th>
                                 <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Patient Name') }} 👤</th>
-                                <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Amount') }} 💰</th>
-                                <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Balance') }} ⚠️ </th>
+                                <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Amount Billed') }} 💳</th>
+                                <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Amount Paid') }} 💰</th>
+                                <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Total Due') }} ⚠️</th>
                             </tr>
                         </thead>
+
                         <tbody class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200">
                             @foreach ($followUps as $followUp)
                                 @if ($followUp->patient)
-                                    <tr
-                                        class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                    <tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
                                         <td class="px-4 py-3">{{ $followUp->created_at->format('d M Y, h:i A') }}</td>
                                         <td class="px-4 py-3">
                                             <a href="{{ route('patients.show', $followUp->patient->id) }}"
@@ -133,16 +134,20 @@
                                                 {{ $followUp->patient->name }}
                                             </a>
                                         </td>
+                                        <td class="px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
+                                            ₹{{ number_format($followUp->amount_billed, 2) }}
+                                        </td>
                                         <td class="px-4 py-3 font-semibold text-green-600 dark:text-green-300">
-                                            ₹{{ $followUp->check_up_info ? json_decode($followUp->check_up_info, true)['amount'] ?? 'N/A' : 'N/A' }}
+                                            ₹{{ number_format($followUp->amount_paid, 2) }}
                                         </td>
                                         <td class="px-4 py-3 font-semibold text-red-600 dark:text-red-300">
-                                            ₹{{ $followUp->check_up_info ? json_decode($followUp->check_up_info, true)['balance'] ?? 'N/A' : 'N/A' }}
+                                            ₹{{ number_format($followUp->total_due, 2) }}
                                         </td>
                                     </tr>
                                 @endif
                             @endforeach
                         </tbody>
+
                     </table>
                 </div>
 

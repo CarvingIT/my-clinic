@@ -145,23 +145,36 @@
                             <select id="payment_method" name="payment_method"
                                 class="border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm block mt-1 w-full transition-all duration-300 hover:border-indigo-400">
                                 <option value="">Please Select</option>
-                                <option value="cash" @if (isset($checkUpInfo['payment_method']) && $checkUpInfo['payment_method'] == 'cash') selected @endif>Cash</option>
-                                <option value="card" @if (isset($checkUpInfo['payment_method']) && $checkUpInfo['payment_method'] == 'card') selected @endif>Card</option>
-                                <option value="online" @if (isset($checkUpInfo['payment_method']) && $checkUpInfo['payment_method'] == 'online') selected @endif>Online</option>
+                                <option value="cash" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'cash') selected @endif>Cash</option>
+                                <option value="card" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'card') selected @endif>Card</option>
+                                <option value="online" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'online') selected @endif>Online</option>
                             </select>
                             <x-input-error :messages="$errors->get('payment_method')" class="mt-2" />
                         </div>
 
-                        @foreach (['amount' => 'Amount', 'balance' => 'Balance'] as $name => $label)
-                            <div class="mt-4">
-                                <x-input-label for="{{ $name }}" :value="__($label)" />
-                                <x-text-input id="{{ $name }}"
-                                    class="px-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"
-                                    type="number" name="{{ $name }}"
-                                    value="{{ $checkUpInfo[$name] ?? '' }}" />
-                                <x-input-error :messages="$errors->get($name)" class="mt-2" />
-                            </div>
-                        @endforeach
+                        <div class="mt-4">
+                            <label for="amount_billed" class="text-l font-semibold text-gray-700 dark:text-white mb-4">
+                                {{ __('messages.Amount Billed') }}
+                            </label>
+                            <x-text-input id="amount_billed"
+                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
+                                type="number" name="amount_billed"
+                                value="{{ old('amount_billed', $followup->amount_billed ?? 0) }}" required />
+                        </div>
+
+                        <div class="mt-4">
+                            <label for="amount_paid" class="text-l font-semibold text-gray-700 dark:text-white mb-4">
+                                {{ __('messages.Amount Paid') }}
+                            </label>
+                            <x-text-input id="amount_paid"
+                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
+                                type="number" name="amount_paid"
+                                value="{{ old('amount_paid', $followup->amount_paid ?? 0) }}" required />
+                        </div>
+
+
+
+
 
 
 

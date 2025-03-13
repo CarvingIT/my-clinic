@@ -70,6 +70,36 @@
                                     <span class="font-semibold text-gray-700">{{ __('messages.Vishesh') }}:</span>
                                     {{ $patient->vishesh }}
                                 </p>
+                                <p>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.Height') }}:</span>
+                                    {{ $patient->height }}
+                                </p>
+                                <p>
+                                    <span class="font-semibold text-gray-700">{{ __('messages.Weight') }}:</span>
+                                    {{ $patient->weight }}
+                                </p>
+                                @if ($patient->height && $patient->weight)
+                                    @php
+                                        $heightInMeters = $patient->height / 100; // Convert cm to meters
+                                        $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
+
+                                        // Determine BMI category
+                                        if ($bmi < 18.5) {
+                                            $bmiCategory = 'Underweight';
+                                        } elseif ($bmi >= 18.5 && $bmi < 25) {
+                                            $bmiCategory = 'Healthy Weight';
+                                        } elseif ($bmi >= 25 && $bmi < 30) {
+                                            $bmiCategory = 'Overweight';
+                                        } else {
+                                            $bmiCategory = 'Obese';
+                                        }
+                                    @endphp
+                                    <p>
+                                        <span class="font-semibold text-gray-700">{{ __('BMI') }}:</span>
+                                        {{ number_format($bmi, 2) }} ({{ $bmiCategory }})
+                                    </p>
+                                @endif
+
                                 {{-- <p>
                                     <span class="font-semibold text-gray-700">{{ __('messages.occupation') }}:</span>
                                     {{ $patient->occupation }}
@@ -311,7 +341,7 @@
                                 @else bg-red-200 text-red-800 @endif
                                 p-4 rounded-md font-bold text-right pr-15">
                             {{ __('messages.Total Outstanding Balance') }}:
-                            ₹{{ number_format($totalDueAll) }}
+                            ₹{{ number_format($totalDueAll, 2) }}
                         </div>
                     @else
                         <div class="text-red-600 font-bold">Error: Total Outstanding Balance not found!</div>
@@ -539,12 +569,6 @@
                                                         $checkUpInfo = json_decode($followUp->check_up_info, true);
                                                     @endphp
 
-
-
-
-
-
-
                                                     <div>
                                                         @if (isset($checkUpInfo['payment_method']) &&
                                                                 $checkUpInfo['payment_method'] !== null &&
@@ -558,73 +582,37 @@
 
 
                                                     </div>
-
                                                     <div>
-                                                        {{-- @if (isset($checkUpInfo['amount']) && $checkUpInfo['amount'] !== null && $checkUpInfo['amount'] !== '')
-                                                            <p class="mt-2">
-                                                                <span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Amount') }}:</span>
-                                                                {{ $checkUpInfo['amount'] }}
-                                                            </p>
-                                                        @endif
-
-                                                        @if (isset($checkUpInfo['balance']) && $checkUpInfo['balance'] !== null && $checkUpInfo['balance'] !== '')
-                                                            <p>
-                                                                <span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Balance') }}:</span>
-                                                                {{ $checkUpInfo['balance'] }}
-                                                            </p>
-                                                        @endif --}}
-
-
-
+                                                        {{-- @foreach ($patient->followUps as $followUp) --}}
                                                         @php
-                                                            $totalPaid = $checkUpInfo['amount'] ?? 0;
-                                                            $totalDue = $checkUpInfo['balance'] ?? 0;
-                                                            $totalAmount = $totalPaid + $totalDue;
-
+                                                            $amountBilled = $followUp->amount_billed ?? 0; // Total amount billed
+                                                            $amountPaid = $followUp->amount_paid ?? 0; // Amount patient paid
+                                                            $totalDue = max($amountBilled - $amountPaid, 0); // Due for this follow-up
                                                         @endphp
 
-
-
-
-
-                                                        <div>
-                                                            {{-- <p class="mt-2">
+                                                        <div class="    ">
+                                                            <p class="">
                                                                 <span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Total Amount') }}:</span>
-                                                                {{ $totalAmount }}
-                                                            </p> --}}
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Amount Billed') }}:</span>
+                                                                ₹{{ number_format($amountBilled, 2) }}
+                                                            </p>
 
-                                                            <p class="mt-2">
+                                                            <p class="">
                                                                 <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Amount Paid') }}:</span>
-                                                                {{ $totalPaid }}
+                                                                ₹{{ number_format($amountPaid, 2) }}
                                                             </p>
 
-                                                            <p class="mt-2">
-                                                                <span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Balance Due') }}:</span>
-                                                                {{ $totalDue }}
+                                                            <p class="{{ $totalDue == 0 ? 'text-green-600' : 'text-red-600' }} font-bold">
+                                                                <span class="font-bold text-gray-800 dark:text-gray-200">
+                                                                    {{ __('messages.Amount Due') }}:
+                                                                </span>
+                                                                ₹{{ number_format($totalDue, 2) }}
                                                             </p>
+
                                                         </div>
+                                                        {{-- @endforeach --}}
 
-
-
-
-                                                        {{-- <p><span
-                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Branch') }}:</span>
-                                                            @if (isset($checkUpInfo['branch']))
-                                                                {{ $checkUpInfo['branch'] }}
-                                                            @endif
-                                                        </p> --}}
-
-                                                        {{-- <p><span
-                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('Seen by:') }}:</span>
-                                                            @if (isset($checkUpInfo['doctor']))
-                                                                {{ $checkUpInfo['doctor'] }}
-                                                            @endif
-                                                        </p> --}}
                                                     </div>
                                                 @endif
                                             </td>

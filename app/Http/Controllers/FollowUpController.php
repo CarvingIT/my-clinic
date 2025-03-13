@@ -32,9 +32,16 @@ class FollowUpController extends Controller
         if (!$patient) {
             abort(404);
         }
+        // Calculate total due using simple subtraction
+        $totalBilled = $patient->followUps()->sum('amount_billed');
+        $totalPaid = $patient->followUps()->sum('amount_paid');
+        $totalDueAll = max($totalBilled - $totalPaid, 0);
+
         $parameters = Parameter::orderBy('display_order')->get();
-        return view('followups.create', compact('patient', 'parameters'));
+
+        return view('followups.create', compact('patient', 'parameters', 'totalDueAll'));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -45,6 +52,8 @@ class FollowUpController extends Controller
             'patient_id' => ['required', 'exists:patients,id'],
             'diagnosis' => ['nullable', 'string'],
             'treatment' => ['nullable', 'string'],
+            'amount_billed' => ['required', 'numeric', 'min:0'],
+            'amount_paid' => ['required', 'numeric', 'min:0'],
             // 'amount' => ['nullable', 'numeric'],
             // 'balance' => ['nullable', 'numeric'],
             // 'payment_method' => ['nullable', 'string'],
@@ -55,8 +64,19 @@ class FollowUpController extends Controller
             // 'salla' => ['nullable', 'string'],
         ]);
 
+        // Get the last follow-up for the patient
+        $lastFollowUp = FollowUp::where('patient_id', $request->patient_id)
+            ->latest()
+            ->first();
+
+        // Calculate previous due
+        $previous_due = $lastFollowUp ? $lastFollowUp->total_due : 0;
+
+        // Ensure amount paid does not exceed total due
+        $amount_paid = min($request->amount_paid, ($request->amount_billed + $previous_due));
+
         $checkUpInfo = [];
-        foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment']) as $key => $value) {
+        foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment', 'amount_billed', 'amount_paid']) as $key => $value) {
             $checkUpInfo[$key] = $value;
         }
 
@@ -72,6 +92,8 @@ class FollowUpController extends Controller
             'check_up_info' => json_encode($checkUpInfo),
             'diagnosis' => $request->diagnosis,
             'treatment' => $request->treatment,
+            'amount_billed' => $request->amount_billed,
+            'amount_paid' => $amount_paid, // Ensuring it does not exceed the total_due
             // 'nidan' => $request->nidan,
             // 'upashay' => $request->upashay,
             // 'salla' => $request->salla,
@@ -110,30 +132,20 @@ class FollowUpController extends Controller
         // Clone query for summary calculations (to keep totals constant across pagination)
         $queryClone = clone $query;
 
-        // Calculate summary before applying pagination
-        $totalIncome = $queryClone->get()->sum(function ($followUp) {
-            return optional(json_decode($followUp->check_up_info, true))['amount'] ?? 0;
-        });
+        // Total Income Calculationyy
+        $totalIncome = $queryClone->sum('amount_paid');
 
         $totalPatients = FollowUp::whereIn('id', $queryClone->pluck('id'))
             ->distinct('patient_id')
             ->count('patient_id');
         $totalFollowUps = $queryClone->count();
 
-        // Get the patient IDs from the displayed follow-ups
-        $patientIds = $queryClone->pluck('patient_id');
+        // Balance Calculation.. Total Outstanding Due**
+        $totalBilled = $queryClone->sum('amount_billed');
+        $totalPaid = $queryClone->sum('amount_paid');
+        $totalDueAll = max($totalBilled - $totalPaid, 0); // Ensure no negative balance
 
-        // Get the latest follow-up for these patients
-        $latestFollowUpIds = FollowUp::whereIn('patient_id', $patientIds)
-            ->selectRaw("MAX(id) as latest_followup_id")
-            ->groupBy('patient_id')
-            ->pluck('latest_followup_id');
-
-        // Sum the balance from the latest follow-ups of the displayed patients
-        $totalDueAll = FollowUp::whereIn('id', $latestFollowUpIds)
-            ->sum(DB::raw("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.balance')), 0)"));
-
-        // Apply pagination **AFTER** summary calculation
+        // Apply pagination AFTER summary calculation
         $followUps = $query->latest()->paginate(10);
 
         return view('followups.index', compact('followUps', 'totalIncome', 'totalPatients', 'totalFollowUps', 'branches', 'selectedBranch', 'totalDueAll'));
@@ -155,10 +167,27 @@ class FollowUpController extends Controller
 
     public function edit(FollowUp $followup)
     {
-        $checkUpInfo = json_decode($followup->check_up_info, true); // Decode
+        $checkUpInfo = json_decode($followup->check_up_info, true) ?? []; // Decode check_up_info
+
+        // Fetch values directly from FollowUp model
+        $totalDueAll = $followup->total_due_all ?? 0;
+        $totalDue = $followup->balance ?? 0; // Assuming balance is stored here
+        $amountBilled = $followup->amount_billed ?? '';
+        $amountPaid = $followup->amount_paid ?? '';
+
         $parameters = Parameter::all();
-        return view('followups.edit', compact('followup', 'parameters', 'checkUpInfo'));
+
+        return view('followups.edit', compact(
+            'followup',
+            'parameters',
+            'checkUpInfo',
+            'totalDueAll',
+            'totalDue',
+            'amountBilled',
+            'amountPaid'
+        ));
     }
+
 
     public function update(Request $request, FollowUp $followup)
     {
@@ -166,6 +195,8 @@ class FollowUpController extends Controller
             'patient_id' => ['required', 'exists:patients,id'],
             'diagnosis' => ['nullable', 'string'],
             'treatment' => ['nullable', 'string'],
+            'amount_billed' => ['required', 'numeric'],
+            'amount_paid' => ['required', 'numeric'],
         ]);
 
         // Decode
@@ -173,7 +204,7 @@ class FollowUpController extends Controller
 
         // Extract new check_up_info fields from the request
         $newCheckUpInfo = [];
-        foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment', 'chikitsa_combo']) as $key => $value) {
+        foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment', 'chikitsa_combo', 'amount_billed', 'amount_paid']) as $key => $value) {
             $newCheckUpInfo[$key] = $value;
         }
 
@@ -194,6 +225,8 @@ class FollowUpController extends Controller
             'check_up_info' => json_encode($updatedCheckUpInfo),
             'diagnosis' => $request->diagnosis,
             'treatment' => $request->treatment,
+            'amount_billed' => $request->amount_billed,
+            'amount_paid' => $request->amount_paid,
         ]);
 
         return redirect()->route('patients.show', $request->patient_id)->with('success', 'Follow Up Updated Successfully');
