@@ -161,8 +161,8 @@
                                 let amountBilled = parseFloat(document.getElementById('amount_billed').value) || 0;
                                 let amountPaid = parseFloat(document.getElementById('amount_paid').value) || 0;
 
-                                let totalDue = (allDues + amountBilled - amountPaid);
-                                totalDue = totalDue > 0 ? totalDue : 0; // Prevent negative values
+                                let totalDue = allDues + amountBilled - amountPaid;
+                                // totalDue = totalDue > 0 ? totalDue : 0; // Prevent negative values
 
                                 document.getElementById('total_due').value = totalDue.toFixed(2); // Ensure 2 decimal places
                             }

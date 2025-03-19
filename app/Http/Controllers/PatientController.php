@@ -101,7 +101,7 @@ class PatientController extends Controller
         $totalPaid = $patient->followUps()->sum('amount_paid');
 
         // Calculate total outstanding balance (Total Due)
-        $totalDueAll = max($totalBilled - $totalPaid, 0);
+        $totalDueAll =$totalBilled - $totalPaid;
 
         // Load paginated follow-ups and reports
         $patient->followUps = $patient->followUps()->orderBy('created_at', 'desc')->paginate(5);
@@ -137,8 +137,8 @@ class PatientController extends Controller
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
             // 'patient_id' => ['required', 'string', 'unique:patients,patient_id,' . $patient->id]
-            'height' => 'required|numeric|min:50|max:250', // Height in cm
-            'weight' => 'required|numeric|min:10|max:300', // Weight in kg
+            'height' => 'nullable|numeric|min:50|max:250', // Height in cm
+            'weight' => 'nullable|numeric|min:10|max:300', // Weight in kg
         ]);
         $patient->update($request->all());
 

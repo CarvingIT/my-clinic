@@ -100,7 +100,7 @@
                             <x-input-label for="height" :value="__('messages.Height')" />
                             <x-text-input id="height"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="number" name="height" value="{{ old('height', $patient->height) }}" required />
+                                type="number" name="height" value="{{ old('height', $patient->height) }}" />
                             <x-input-error :messages="$errors->get('height')" class="mt-1" />
                         </div>
 
@@ -109,7 +109,7 @@
                             <x-input-label for="weight" :value="__('messages.Weight')" />
                             <x-text-input id="weight"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="number" name="weight" value="{{ old('weight', $patient->weight) }}" required />
+                                type="number" name="weight" value="{{ old('weight', $patient->weight) }}" />
                             <x-input-error :messages="$errors->get('weight')" class="mt-1" />
                         </div>
 

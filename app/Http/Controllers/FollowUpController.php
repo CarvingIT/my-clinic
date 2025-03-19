@@ -35,7 +35,7 @@ class FollowUpController extends Controller
         // Calculate total due using simple subtraction
         $totalBilled = $patient->followUps()->sum('amount_billed');
         $totalPaid = $patient->followUps()->sum('amount_paid');
-        $totalDueAll = max($totalBilled - $totalPaid, 0);
+        $totalDueAll = $totalBilled - $totalPaid;
 
         $parameters = Parameter::orderBy('display_order')->get();
 
@@ -52,8 +52,8 @@ class FollowUpController extends Controller
             'patient_id' => ['required', 'exists:patients,id'],
             'diagnosis' => ['nullable', 'string'],
             'treatment' => ['nullable', 'string'],
-            'amount_billed' => ['required', 'numeric', 'min:0'],
-            'amount_paid' => ['required', 'numeric', 'min:0'],
+            'amount_billed' => ['required', 'numeric'],
+            'amount_paid' => ['required', 'numeric'],
             // 'amount' => ['nullable', 'numeric'],
             // 'balance' => ['nullable', 'numeric'],
             // 'payment_method' => ['nullable', 'string'],
@@ -73,7 +73,10 @@ class FollowUpController extends Controller
         $previous_due = $lastFollowUp ? $lastFollowUp->total_due : 0;
 
         // Ensure amount paid does not exceed total due
-        $amount_paid = min($request->amount_paid, ($request->amount_billed + $previous_due));
+        // $amount_paid = min($request->amount_paid, ($request->amount_billed + $previous_due));
+
+        $amount_paid = $request->amount_paid;  // Allow any amount to be paid
+
 
         $checkUpInfo = [];
         foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment', 'amount_billed', 'amount_paid']) as $key => $value) {
@@ -143,7 +146,7 @@ class FollowUpController extends Controller
         // Balance Calculation.. Total Outstanding Due**
         $totalBilled = $queryClone->sum('amount_billed');
         $totalPaid = $queryClone->sum('amount_paid');
-        $totalDueAll = max($totalBilled - $totalPaid, 0); // Ensure no negative balance
+        $totalDueAll = $totalBilled - $totalPaid; // Ensure negative balance
 
         // Apply pagination AFTER summary calculation
         $followUps = $query->latest()->paginate(10);

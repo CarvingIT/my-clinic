@@ -337,6 +337,7 @@
                         <div
                             class="
                                 @if ($totalDueAll == 0) bg-green-200 text-green-800
+                                @elseif($totalDueAll < 0) bg-blue-200 text-blue-800
                                 @elseif($totalDueAll < 2000) bg-yellow-200 text-yellow-800
                                 @else bg-red-200 text-red-800 @endif
                                 p-4 rounded-md font-bold text-right pr-15">
@@ -367,7 +368,7 @@
                                                 {{ __('लक्षणे') }}
                                             </th> --}}
                                         <th scope="col"
-                                            class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                                            class="px-2 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                             {{ __('चिकित्सा') }}
                                         </th>
                                         <th scope="col"
@@ -384,11 +385,11 @@
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
                                     @foreach ($patient->followUps->sortByDesc('created_at') as $followUp)
                                         <tr class="hover:bg-gray-50 transition duration-300 dark:hover:bg-gray-700">
-                                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
+                                            <td class="w-[220px] px-6 py-4 text-gray-600 dark:text-gray-300"
                                                 style="vertical-align: top;">
 
 
-                                                <p class="mt-2">
+                                                <p class="">
                                                     {{ $followUp->created_at->format('d M Y, h:i A') }}
                                                 </p>
                                                 {{-- {{ $followUp->created_at->format('d M Y, h:i A') }} --}}
@@ -414,8 +415,8 @@
 
 
                                             </td>
-                                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
-                                                style="vertical-align: top;">
+                                            <td class="px-6 py-4 align-top text-gray-600 dark:text-gray-300 max-w-xs break-words whitespace-normal"
+                                                style="word-break: break-word; overflow-wrap: break-word;">
                                                 @if ($followUp->check_up_info)
                                                     <div>
                                                         {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">
@@ -450,27 +451,7 @@
 
 
                                                     <div>
-                                                        {{-- <p class="mt-2"><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">
-                                                                    {{ __('निदान') }}:</span>
-                                                                @if (isset($checkUpInfo['nidan']))
-                                                                    {{ $checkUpInfo['nidan'] }}
-                                                                @endif
-                                                            </p>
 
-                                                            <p><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('उपशय') }}:</span>
-                                                                @if (isset($checkUpInfo['upashay']))
-                                                                    {{ $checkUpInfo['upashay'] }}
-                                                                @endif
-                                                            </p>
-
-                                                            <p><span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('सल्ला') }}:</span>
-                                                                @if (isset($checkUpInfo['salla']))
-                                                                    {{ $checkUpInfo['salla'] }}
-                                                                @endif
-                                                            </p> --}}
                                                         @if (isset($checkUpInfo['nadi']) && $checkUpInfo['nadi'] !== null && $checkUpInfo['nadi'] !== '')
                                                             <p>
                                                                 {{-- <span
@@ -503,35 +484,8 @@
                                                     <h2 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}</h2>
                                                     {{ $followUp->diagnosis }}
                                                 </td> --}}
-                                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
-                                                style="vertical-align: top;">
-
-                                                {{-- <h2 class="font-semibold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}</h2> --}}
-                                                @if ($followUp->treatment)
-                                                    <p>{{ $followUp->treatment }}</p>
-                                                @endif
-                                                @if ($followUp->check_up_info)
-                                                    @php
-                                                        $checkUpInfo = json_decode($followUp->check_up_info, true);
-                                                    @endphp
-
-                                                    @foreach ($checkUpInfo as $key => $value)
-                                                        @if (in_array($key, ['अर्श', 'ग्रहणी', 'ज्वर/प्रतिश्याय']))
-                                                            @if (is_array($value))
-                                                                @foreach ($value as $option)
-                                                                    <p>{{ __($option) }}</p>
-                                                                @endforeach
-                                                            @elseif($value == 1)
-                                                                <p>{{ __($key) }}</p>
-                                                            @endif
-                                                        @endif
-                                                    @endforeach
-                                                @endif
-                                                @if (isset($checkUpInfo['chikitsa_combo']))
-                                                    <p class="mt-2"><span
-                                                            class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Chikitsa Combo') }}:
-                                                        </span> {{ $checkUpInfo['chikitsa_combo'] }}</p>
-                                                @endif
+                                            <td class="px-2 py-4 align-top text-gray-600 dark:text-gray-300 max-w-xs break-words whitespace-normal"
+                                                style=" word-break: break-word; overflow-wrap: break-word;">
 
                                                 <p>
                                                     {{-- <span class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span> --}}
@@ -562,8 +516,8 @@
                                             </td>
 
 
-                                            <td class="px-6 py-4 text-gray-600 dark:text-gray-300"
-                                                style="vertical-align: top;">
+                                            <td class="w-[250px] px-6 py-2 align-top text-gray-600 dark:text-gray-300"
+                                                style="">
                                                 @if ($followUp->check_up_info)
                                                     @php
                                                         $checkUpInfo = json_decode($followUp->check_up_info, true);
@@ -573,7 +527,7 @@
                                                         @if (isset($checkUpInfo['payment_method']) &&
                                                                 $checkUpInfo['payment_method'] !== null &&
                                                                 $checkUpInfo['payment_method'] !== '')
-                                                            <p class="mt-2">
+                                                            <p class="">
                                                                 {{-- <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Payment Method') }}:</span> --}}
                                                                 {{ $checkUpInfo['payment_method'] }}
@@ -587,7 +541,7 @@
                                                         @php
                                                             $amountBilled = $followUp->amount_billed ?? 0; // Total amount billed
                                                             $amountPaid = $followUp->amount_paid ?? 0; // Amount patient paid
-                                                            $totalDue = max($amountBilled - $amountPaid, 0); // Due for this follow-up
+                                                            $totalDue = $amountBilled - $amountPaid; // Due for this follow-up
                                                         @endphp
 
                                                         <div class="    ">
@@ -603,8 +557,10 @@
                                                                 ₹{{ number_format($amountPaid, 2) }}
                                                             </p>
 
-                                                            <p class="{{ $totalDue == 0 ? 'text-green-600' : 'text-red-600' }} font-bold">
-                                                                <span class="font-bold text-gray-800 dark:text-gray-200">
+                                                            <p
+                                                                class="{{ $totalDue < 0 ? 'text-blue-600' : ($totalDue == 0 ? 'text-green-600' : 'text-red-600') }} font-bold">
+                                                                <span
+                                                                    class="font-bold text-gray-800 dark:text-gray-200">
                                                                     {{ __('messages.Amount Due') }}:
                                                                 </span>
                                                                 ₹{{ number_format($totalDue, 2) }}
