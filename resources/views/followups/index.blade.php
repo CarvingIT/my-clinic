@@ -44,10 +44,14 @@
                     </button>
                 </form>
 
-                <button id="exportCSV"
-                    class="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">
-                    Export CSV
-                </button>
+                <div class="flex justify-end">
+                    {{-- Export CSV Button --}}
+                    <button id="exportCSV"
+                        class="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">
+                        Export CSV
+                    </button>
+                </div>
+
 
 
                 {{-- Insights Section --}}
@@ -169,32 +173,33 @@
 
 <script>
     document.getElementById("exportCSV").addEventListener("click", function() {
-        let from_date = document.getElementById("from_date").value;
-        let to_date = document.getElementById("to_date").value;
-        let branch_name = document.getElementById("branch_name").value;
-
-        let params = new URLSearchParams({
-            from_date: from_date,
-            to_date: to_date,
-            branch_name: branch_name
-        });
-
-        fetch("{{ route('followups.export') }}?" + params.toString(), {
-            method: "GET",
-            headers: {
-                "X-Requested-With": "XMLHttpRequest",
-            },
-        })
-        .then(response => response.blob())
-        .then(blob => {
-            let a = document.createElement("a");
-            a.href = window.URL.createObjectURL(blob);
-            a.download = "followups_" + new Date().toISOString().slice(0, 19).replace(/:/g, "-") + ".csv";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        })
-        .catch(error => console.error("Error exporting CSV:", error));
+    fetch("{{ route('followups.export') }}", {
+        method: "GET",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest",
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errorData => {
+                throw new Error(errorData.message || "Failed to export CSV.");
+            });
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        let a = document.createElement("a");
+        a.href = window.URL.createObjectURL(blob);
+        a.download = "followups_" + new Date().toISOString().slice(0, 19).replace(/:/g, "-") + ".csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    })
+    .catch(error => {
+        alert(error.message);
+        console.error("Error exporting CSV:", error);
     });
-    </script>
+});
 
+
+</script>

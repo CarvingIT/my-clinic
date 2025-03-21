@@ -80,6 +80,9 @@ Route::get('/followups', [FollowUpController::class, 'index'])->name('followups.
 
 Route::get('/followups/export', [FollowUpController::class, 'exportCSV'])->name('followups.export');
 
+Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])->name('followups.export');
+
+
 
 // Patient Routes
 // Route::get('patients', [PatientController::class, 'index'])->name('patients.index');
