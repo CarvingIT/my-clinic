@@ -78,6 +78,8 @@ Route::resource('reports', ReportController::class)->only(['store','destroy']);
 
 Route::get('/followups', [FollowUpController::class, 'index'])->name('followups.index');
 
+Route::get('/followups/export', [FollowUpController::class, 'exportCSV'])->name('followups.export');
+
 
 // Patient Routes
 // Route::get('patients', [PatientController::class, 'index'])->name('patients.index');

@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
+
 
 
 class FollowUpController extends Controller
@@ -241,5 +243,70 @@ class FollowUpController extends Controller
         $patientId = $followup->patient_id;
         $followup->delete();
         return redirect()->route('patients.show', $patientId)->with('success', 'Follow Up Deleted Successfully');
+    }
+
+    public function exportCSV(Request $request)
+    {
+        $query = FollowUp::with('patient');
+
+        // Apply filters
+        if ($request->has('from_date')) {
+            $query->whereDate('created_at', '>=', $request->from_date);
+        }
+        if ($request->has('to_date')) {
+            $query->whereDate('created_at', '<=', $request->to_date);
+        }
+        if ($request->branch_name && $request->branch_name !== 'all') {
+            $query->whereHas('patient', function ($q) use ($request) {
+                $q->where('branch_name', $request->branch_name);
+            });
+        }
+
+        $followUps = $query->get();
+
+        // Define CSV headers
+        $csvHeaders = [
+            'Created At',
+            'Patient Name',
+            'Amount Billed',
+            'Amount Paid',
+            'Total Due'
+        ];
+
+        // Create CSV data
+        $csvData = [];
+        foreach ($followUps as $followUp) {
+            if ($followUp->patient) {
+                $csvData[] = [
+                    $followUp->created_at->format('d M Y, h:i A'),
+                    $followUp->patient->name,
+                    $followUp->amount_billed,
+                    $followUp->amount_paid,
+                    $followUp->total_due,
+                ];
+            }
+        }
+
+        // Create CSV content
+        $filename = "followups_" . now()->format('Y-m-d_H-i-s') . ".csv";
+        $handle = fopen('php://temp', 'w+');
+
+        // Add BOM for UTF-8 support
+        fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+        // Add headers and data to CSV
+        fputcsv($handle, $csvHeaders);
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+
+        rewind($handle);
+        $csvOutput = stream_get_contents($handle);
+        fclose($handle);
+
+        return Response::make($csvOutput, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 }
