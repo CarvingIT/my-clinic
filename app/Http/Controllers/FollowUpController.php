@@ -21,6 +21,7 @@ use App\Exports\FollowUpExport;
 
 
 
+
 class FollowUpController extends Controller
 {
     public function __construct()
@@ -44,7 +45,9 @@ class FollowUpController extends Controller
 
         $parameters = Parameter::orderBy('display_order')->get();
 
-        return view('followups.create', compact('patient', 'parameters', 'totalDueAll'));
+        $followUps = $patient->followUps()->orderBy('created_at', 'desc')->get();
+
+        return view('followups.create', compact('patient', 'parameters','followUps', 'totalDueAll'));
     }
 
 
