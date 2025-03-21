@@ -126,11 +126,10 @@
                         <thead class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Created At') }} 📅</th>
-                                <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Patient Name') }} 👤</th>
-                                <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Amount Billed') }} 💳
+                                <th class="px-4 py-3 text-center font-semibold">{{ __('messages.Patient Name') }} 👤</th>
+                                <th class="px-4 py-3 text-center font-semibold">💳{{ __('messages.Amount Billed') }}
                                 </th>
-                                <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Amount Paid') }} 💰</th>
-                                <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Total Due') }} ⚠️</th>
+                                <th class="px-4 py-3 text-right font-semibold"> 💰{{ __('messages.Amount Paid') }} </th>
                             </tr>
                         </thead>
 
@@ -139,21 +138,18 @@
                                 @if ($followUp->patient)
                                     <tr
                                         class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-4 py-3">{{ $followUp->created_at->format('d M Y, h:i A') }}</td>
-                                        <td class="px-4 py-3">
+                                        <td class="text-left px-4 py-3">{{ $followUp->created_at->format('d M Y, h:i A') }}</td>
+                                        <td class="text-center px-4 py-3">
                                             <a href="{{ route('patients.show', $followUp->patient->id) }}"
                                                 class="text-indigo-700 dark:text-indigo-400 hover:underline font-semibold">
                                                 {{ $followUp->patient->name }}
                                             </a>
                                         </td>
-                                        <td class="px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
+                                        <td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
                                             ₹{{ number_format($followUp->amount_billed, 2) }}
                                         </td>
-                                        <td class="px-4 py-3 font-semibold text-green-600 dark:text-green-300">
+                                        <td class="text-right px-4 py-3 font-semibold text-green-600 dark:text-green-300">
                                             ₹{{ number_format($followUp->amount_paid, 2) }}
-                                        </td>
-                                        <td class="px-4 py-3 font-semibold text-red-600 dark:text-red-300">
-                                            ₹{{ number_format($followUp->total_due, 2) }}
                                         </td>
                                     </tr>
                                 @endif

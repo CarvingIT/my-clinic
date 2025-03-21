@@ -62,14 +62,25 @@ class PatientController extends Controller
             'email_id' => ['nullable', 'email', 'max:255'],
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],
+            'age' => ['nullable', 'integer', 'min:0', 'max:150'],
             // 'patient_id' => ['required', 'string', 'unique:patients,patient_id']
             'height' => ['nullable', 'numeric', 'min:1'],
             'weight' => ['nullable', 'numeric', 'min:1'],
         ]);
 
         // Manually handle the birthdate:
+        // if ($request->filled('birthdate')) {
+        //     $validatedData['birthdate'] = Carbon::parse($request->birthdate)->format('Y-m-d');
+        // }
+
+        // If birthdate is provided, format it
         if ($request->filled('birthdate')) {
             $validatedData['birthdate'] = Carbon::parse($request->birthdate)->format('Y-m-d');
+        }
+        // If age is provided but no birthdate, calculate approximate birthdate
+        elseif ($request->filled('age')) {
+            $birthYear = now()->year - $request->age;
+            $validatedData['birthdate'] = Carbon::createFromDate($birthYear, 1, 1)->format('Y-m-d'); // Default: Jan 1st
         }
 
         // Generate Patient ID
@@ -101,7 +112,7 @@ class PatientController extends Controller
         $totalPaid = $patient->followUps()->sum('amount_paid');
 
         // Calculate total outstanding balance (Total Due)
-        $totalDueAll =$totalBilled - $totalPaid;
+        $totalDueAll = $totalBilled - $totalPaid;
 
         // Load paginated follow-ups and reports
         $patient->followUps = $patient->followUps()->orderBy('created_at', 'desc')->paginate(5);
@@ -133,6 +144,7 @@ class PatientController extends Controller
             'remark' => ['nullable', 'string'],
             'gender' => ['nullable', 'string'],
             'birthdate' => ['nullable', 'date'],
+            'age' => ['nullable', 'integer', 'min:0', 'max:150'],
             'email_id' => ['nullable', 'email', 'max:255'],
             'vishesh' => ['nullable', 'string'],
             'balance' => ['nullable', 'numeric'],

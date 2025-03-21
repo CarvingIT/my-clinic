@@ -19,80 +19,62 @@
                     @endif
 
                     <div class="mb-4">
-                        <div x-data="{ open: false }">
-                            <h2 @click="open = !open"
-                                class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400"
+                        <div>
+                            <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400"
                                 style="cursor: pointer;">
                                 {{ $patient->name }} ({{ $patient->patient_id }})
-                                <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ms-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                                </svg>
-                                <svg x-show="open" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 ms-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
-                                </svg>
                             </h2>
 
                             <div x-show="open" x-transition
                                 class="grid grid-cols-1 md:grid-cols-1 gap-6 text-gray-600 border-b pb-4 mb-4">
 
-                                {{-- <p>
-                                    <span class=" font-semibold text-gray-700">{{ __('messages.Birthdate') }}:</span>
-                                    {{ $patient->birthdate }}
-                                </p>
-                                <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.Gender') }}:</span>
-                                    {{ $patient->gender }}
-                                </p> --}}
+                                @if ($patient->birthdate || $patient->gender)
+                                    <p>
+                                        <span
+                                            class="font-semibold text-gray-700">{{ __('messages.Age') }}/{{ __('messages.Gender') }}:</span>
+                                        {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
+                                    </p>
+                                @endif
 
-                                <p>
-                                    <span
-                                        class="font-semibold text-gray-700">{{ __('messages.Age') }}/{{ __('messages.Gender') }}:</span>
+                                @if ($patient->address)
+                                    <p>
+                                        <span class="font-semibold text-gray-700">{{ __('messages.address') }}:</span>
+                                        {{ $patient->address }}
+                                    </p>
+                                @endif
 
-                                    {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
-                                </p>
-                                {{-- <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.mobile_phone') }}:</span>
-                                    {{ $patient->mobile_phone }}
-                                </p> --}}
-                                {{-- <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.Email ID') }}:</span>
-                                    {{ $patient->email_id }}
-                                </p> --}}
-                                <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.address') }}:</span>
-                                    {{ $patient->address }}
-                                </p>
-                                <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.Vishesh') }}:</span>
-                                    {{ $patient->vishesh }}
-                                </p>
-                                <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.Height') }}:</span>
-                                    {{ $patient->height }}
-                                </p>
-                                <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.Weight') }}:</span>
-                                    {{ $patient->weight }}
-                                </p>
+                                @if ($patient->vishesh)
+                                    <p>
+                                        <span class="font-semibold text-gray-700">{{ __('messages.Vishesh') }}:</span>
+                                        {{ $patient->vishesh }}
+                                    </p>
+                                @endif
+
+                                @if ($patient->height)
+                                    <p>
+                                        <span class="font-semibold text-gray-700">{{ __('messages.Height') }}:</span>
+                                        {{ $patient->height }}
+                                    </p>
+                                @endif
+
+                                @if ($patient->weight)
+                                    <p>
+                                        <span class="font-semibold text-gray-700">{{ __('messages.Weight') }}:</span>
+                                        {{ $patient->weight }}
+                                    </p>
+                                @endif
+
                                 @if ($patient->height && $patient->weight)
                                     @php
-                                        $heightInMeters = $patient->height / 100; // Convert cm to meters
+                                        $heightInMeters = $patient->height / 100;
                                         $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
 
-                                        // Determine BMI category
-                                        if ($bmi < 18.5) {
-                                            $bmiCategory = 'Underweight';
-                                        } elseif ($bmi >= 18.5 && $bmi < 25) {
-                                            $bmiCategory = 'Healthy Weight';
-                                        } elseif ($bmi >= 25 && $bmi < 30) {
-                                            $bmiCategory = 'Overweight';
-                                        } else {
-                                            $bmiCategory = 'Obese';
-                                        }
+                                        $bmiCategory = match (true) {
+                                            $bmi < 18.5 => 'Underweight',
+                                            $bmi >= 18.5 && $bmi < 25 => 'Healthy Weight',
+                                            $bmi >= 25 && $bmi < 30 => 'Overweight',
+                                            default => 'Obese',
+                                        };
                                     @endphp
                                     <p>
                                         <span class="font-semibold text-gray-700">{{ __('BMI') }}:</span>
@@ -100,21 +82,9 @@
                                     </p>
                                 @endif
 
-                                {{-- <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.occupation') }}:</span>
-                                    {{ $patient->occupation }}
-                                </p> --}}
-                                {{-- <p>
-                                    <span class="font-semibold text-gray-700">{{ __('messages.Remark') }}:</span>
-                                    {{ $patient->remark }}
-                                </p> --}}
-
-                                {{-- <p class="col-span-1 md:col-span-2">
-                                    <span class="font-semibold text-gray-700">{{ __('messages.Balance') }}:</span>
-                                    {{ $patient->balance }}
-                                </p> --}}
                             </div>
                         </div>
+
 
                         <!-- Add Follow Up Button -->
                         <div class="flex justify-end mb-8">

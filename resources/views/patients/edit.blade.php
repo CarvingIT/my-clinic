@@ -32,29 +32,25 @@
                             <x-input-error :messages="$errors->get('name')" class="mt-1" />
                         </div>
 
-                        <!-- Birthdate -->
+                        <!-- Birthdate Field -->
                         <div>
                             <x-input-label for="birthdate" :value="__('Birthdate')" />
                             <x-text-input id="birthdate"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="date" name="birthdate" :value="$patient->birthdate
-                                    ? \Carbon\Carbon::parse($patient->birthdate)->format('Y-m-d')
-                                    : ''" />
-
+                                type="date" name="birthdate"
+                                value="{{ old('birthdate', isset($patient->birthdate) ? \Carbon\Carbon::parse($patient->birthdate)->format('Y-m-d') : '') }}"
+                                oninput="calculateAgeFromBirthdate()" />
                             <x-input-error :messages="$errors->get('birthdate')" class="mt-1" />
                         </div>
 
-                        <!-- Gender -->
-                        <div>
-                            <x-input-label for="gender" :value="__('Gender')" />
-                            <select id="gender" name="gender"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2">
-                                <option value="">Please Select</option>
-                                <option value="M" {{ $patient->gender == 'M' ? 'selected' : '' }}>Male</option>
-                                <option value="F" {{ $patient->gender == 'F' ? 'selected' : '' }}>Female</option>
-                                <option value="O" {{ $patient->gender == 'O' ? 'selected' : '' }}>Other</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('gender')" class="mt-1" />
+                        <!-- Age Field -->
+                        <div class="mt-2">
+                            <x-input-label for="age" :value="__('Age')" />
+                            <x-text-input id="age"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                                type="number" name="age" placeholder="Enter Age (If no birthdate)"
+                                value="{{ old('age', isset($patient->birthdate) ? \Carbon\Carbon::parse($patient->birthdate)->age : '') }}"
+                                oninput="calculateBirthdateFromAge()" />
                         </div>
 
                         <!-- Mobile Phone -->
@@ -75,7 +71,25 @@
                             <x-input-error :messages="$errors->get('email_id')" class="mt-1" />
                         </div>
 
-                        <br>
+                        <!-- Gender -->
+                        <div>
+                            <x-input-label for="gender" :value="__('Gender')" />
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center space-x-1">
+                                    <input type="radio" id="male" name="gender" value="M"
+                                        class="border-gray-400 focus:ring-0 focus:border-gray-500"
+                                        {{ $patient->gender == 'M' ? 'checked' : '' }}>
+                                    <span>Male</span>
+                                </label>
+                                <label class="flex items-center space-x-1">
+                                    <input type="radio" id="female" name="gender" value="F"
+                                        class="border-gray-400 focus:ring-0 focus:border-gray-500"
+                                        {{ $patient->gender == 'F' ? 'checked' : '' }}>
+                                    <span>Female</span>
+                                </label>
+                            </div>
+                            <x-input-error :messages="$errors->get('gender')" class="mt-1" />
+                        </div>
 
                         <!-- Address -->
                         <div>
@@ -165,3 +179,30 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    function calculateAgeFromBirthdate() {
+        let birthdate = document.getElementById('birthdate').value;
+        if (birthdate) {
+            let birthYear = new Date(birthdate).getFullYear();
+            let currentYear = new Date().getFullYear();
+            let age = currentYear - birthYear;
+            document.getElementById('age').value = age; // Auto-fill age
+        }
+    }
+
+    function calculateBirthdateFromAge() {
+        let age = document.getElementById('age').value;
+        if (age) {
+            let currentYear = new Date().getFullYear();
+            let birthYear = currentYear - age;
+            let birthdate = `${birthYear}-01-01`; // Default to Jan 1st
+            document.getElementById('birthdate').value = birthdate;
+        }
+    }
+
+    // Run this when the page loads to ensure proper values are set
+    document.addEventListener('DOMContentLoaded', function() {
+        calculateAgeFromBirthdate();
+    });
+</script>

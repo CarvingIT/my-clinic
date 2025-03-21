@@ -31,27 +31,28 @@
                             <x-input-error :messages="$errors->get('name')" class="mt-1" />
                         </div>
 
-                        <!-- Birthdate -->
+                        <!-- Birthdate Field -->
                         <div>
-                            <x-input-label for="birthdate" :value="__('messages.Birthdate')" />
+                            <x-input-label for="birthdate" :value="__('Birthdate')" />
                             <x-text-input id="birthdate"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="date" name="birthdate" />
+                                type="date" name="birthdate"
+                                value="{{ old('birthdate', $patient->birthdate ?? '') }}"
+                                oninput="calculateAgeFromBirthdate()" />
                             <x-input-error :messages="$errors->get('birthdate')" class="mt-1" />
                         </div>
 
-                        <!-- Gender -->
-                        <div>
-                            <x-input-label for="gender" :value="__('messages.Gender')" />
-                            <select id="gender" name="gender"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2">
-                                <option value="">Please Select</option>
-                                <option value="M">Male</option>
-                                <option value="F">Female</option>
-                                <option value="O">Other</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('gender')" class="mt-1" />
+                        <!-- Age Field -->
+                        <div class="mt-2">
+                            <x-input-label for="age" :value="__('Age')" />
+                            <x-text-input id="age"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                                type="number" name="age" placeholder="Enter Age (If no birthdate)"
+                                oninput="calculateBirthdateFromAge()" />
                         </div>
+
+
+
 
                         <!-- Mobile Phone -->
                         <div>
@@ -71,7 +72,25 @@
                             <x-input-error :messages="$errors->get('email_id')" class="mt-1" />
                         </div>
 
-                        <br>
+                        <!-- Gender -->
+                        <div>
+                            <x-input-label for="gender" :value="__('messages.Gender')" />
+                            <div class="flex items-center space-x-4">
+                                <label class="flex items-center space-x-1">
+                                    <input type="radio" id="male" name="gender" value="M"
+                                        class="border-gray-400 focus:ring-0 focus:border-gray-500">
+                                    <span>Male</span>
+                                </label>
+                                <label class="flex items-center space-x-1">
+                                    <input type="radio" id="female" name="gender" value="F"
+                                        class="border-gray-400 focus:ring-0 focus:border-gray-500">
+                                    <span>Female</span>
+                                </label>
+                            </div>
+                            <x-input-error :messages="$errors->get('gender')" class="mt-1" />
+                        </div>
+
+
                         <!-- Address -->
                         <div>
                             <x-input-label for="address" :value="__('messages.address')" />
@@ -155,3 +174,25 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    function calculateAgeFromBirthdate() {
+        let birthdate = document.getElementById('birthdate').value;
+        if (birthdate) {
+            let birthYear = new Date(birthdate).getFullYear();
+            let currentYear = new Date().getFullYear();
+            let age = currentYear - birthYear;
+            document.getElementById('age').value = age; // Auto-fill age
+        }
+    }
+
+    function calculateBirthdateFromAge() {
+        let age = document.getElementById('age').value;
+        if (age) {
+            let currentYear = new Date().getFullYear();
+            let birthYear = currentYear - age;
+            let birthdate = `${birthYear}-01-01`; // Default to Jan 1st
+            document.getElementById('birthdate').value = birthdate;
+        }
+    }
+</script>
