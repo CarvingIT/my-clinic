@@ -20,70 +20,70 @@
 
                     <div class="mb-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400"
-                                style="cursor: pointer;">
+                            <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
                                 {{ $patient->name }} ({{ $patient->patient_id }})
                             </h2>
 
-                            <div x-show="open" x-transition
-                                class="grid grid-cols-1 md:grid-cols-1 gap-6 text-gray-600 border-b pb-4 mb-4">
+                            <div x-show="open" x-transition class="grid grid-cols-5 text-gray-600 border-b pb-4 mb-4">
+                                <div class="flex flex-col space-y-1">
+                                    @if ($patient->birthdate || $patient->gender)
+                                        <p>
+                                            <span class="font-semibold text-gray-700">{{ __('messages.Age') }}/{{ __('messages.Gender') }}:</span>
+                                            {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
+                                        </p>
+                                    @endif
 
-                                @if ($patient->birthdate || $patient->gender)
-                                    <p>
-                                        <span
-                                            class="font-semibold text-gray-700">{{ __('messages.Age') }}/{{ __('messages.Gender') }}:</span>
-                                        {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
-                                    </p>
-                                @endif
+                                    @if ($patient->address)
+                                        <p>
+                                            <span class="font-semibold text-gray-700">{{ __('messages.address') }}:</span>
+                                            {{ $patient->address }}
+                                        </p>
+                                    @endif
 
-                                @if ($patient->address)
-                                    <p>
-                                        <span class="font-semibold text-gray-700">{{ __('messages.address') }}:</span>
-                                        {{ $patient->address }}
-                                    </p>
-                                @endif
+                                    @if ($patient->vishesh)
+                                        <p>
+                                            <span class="font-semibold text-gray-700">{{ __('messages.Vishesh') }}:</span>
+                                            {{ $patient->vishesh }}
+                                        </p>
+                                    @endif
+                                </div>
 
-                                @if ($patient->vishesh)
-                                    <p>
-                                        <span class="font-semibold text-gray-700">{{ __('messages.Vishesh') }}:</span>
-                                        {{ $patient->vishesh }}
-                                    </p>
-                                @endif
+                                <div class="flex flex-col space-y-1">
+                                    @if ($patient->height)
+                                        <p>
+                                            <span class="font-semibold text-gray-700">{{ __('messages.Height') }}:</span>
+                                            {{ $patient->height }}
+                                        </p>
+                                    @endif
 
-                                @if ($patient->height)
-                                    <p>
-                                        <span class="font-semibold text-gray-700">{{ __('messages.Height') }}:</span>
-                                        {{ $patient->height }}
-                                    </p>
-                                @endif
+                                    @if ($patient->weight)
+                                        <p>
+                                            <span class="font-semibold text-gray-700">{{ __('messages.Weight') }}:</span>
+                                            {{ $patient->weight }}
+                                        </p>
+                                    @endif
 
-                                @if ($patient->weight)
-                                    <p>
-                                        <span class="font-semibold text-gray-700">{{ __('messages.Weight') }}:</span>
-                                        {{ $patient->weight }}
-                                    </p>
-                                @endif
-
-                                @if ($patient->height && $patient->weight)
-                                    @php
-                                        $heightInMeters = $patient->height / 100;
-                                        $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
-
-                                        $bmiCategory = match (true) {
-                                            $bmi < 18.5 => 'Underweight',
-                                            $bmi >= 18.5 && $bmi < 25 => 'Healthy Weight',
-                                            $bmi >= 25 && $bmi < 30 => 'Overweight',
-                                            default => 'Obese',
-                                        };
-                                    @endphp
-                                    <p>
-                                        <span class="font-semibold text-gray-700">{{ __('BMI') }}:</span>
-                                        {{ number_format($bmi, 2) }} ({{ $bmiCategory }})
-                                    </p>
-                                @endif
-
+                                    @if ($patient->height && $patient->weight)
+                                        @php
+                                            $heightInMeters = $patient->height / 100;
+                                            $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
+                                            $bmiCategory = match (true) {
+                                                $bmi < 18.5 => 'Underweight',
+                                                $bmi >= 18.5 && $bmi < 25 => 'Healthy Weight',
+                                                $bmi >= 25 && $bmi < 30 => 'Overweight',
+                                                default => 'Obese',
+                                            };
+                                        @endphp
+                                        <p>
+                                            <span class="font-semibold text-gray-700">{{ __('BMI') }}:</span>
+                                            {{ number_format($bmi, 2) }}
+                                        </p>
+                                    @endif
+                                </div>
                             </div>
                         </div>
+
+
 
 
                         <!-- Add Follow Up Button -->

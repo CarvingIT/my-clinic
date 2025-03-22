@@ -86,6 +86,11 @@
                                         class="border-gray-400 focus:ring-0 focus:border-gray-500">
                                     <span>Female</span>
                                 </label>
+                                <label class="flex items-center space-x-1">
+                                    <input type="radio" id="other" name="gender" value="O"
+                                        class="border-gray-400 focus:ring-0 focus:border-gray-500">
+                                    <span>Other</span>
+                                </label>
                             </div>
                             <x-input-error :messages="$errors->get('gender')" class="mt-1" />
                         </div>

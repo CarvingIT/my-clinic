@@ -45,7 +45,10 @@ class FollowUpController extends Controller
 
         $parameters = Parameter::orderBy('display_order')->get();
 
-        $followUps = $patient->followUps()->orderBy('created_at', 'desc')->get();
+        $followUps = $patient->followUps()
+            ->orderBy('created_at', 'desc')
+            ->take(2)
+            ->get();
 
         return view('followups.create', compact('patient', 'parameters','followUps', 'totalDueAll'));
     }

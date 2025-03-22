@@ -85,8 +85,8 @@ return [
     'Summary' => 'सारांश',
     'Insights' => 'सखोल माहिती',
 
-    'Height' => 'उंची (cm)',
-    'Weight' => 'वजन (kg)',
+    'Height' => 'उंची',
+    'Weight' => 'वजन',
     'Amount Billed' => 'बिल केलेली रक्कम',
     'Amount Due' => 'बाकी रक्कम',
     'All Dues' => 'बाकी',

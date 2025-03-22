@@ -1,7 +1,36 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight px-52">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight px-5">
             {{ __('messages.Add Follow Up') }} - {{ $patient->name }}
+
+            <span class="text-gray-600 text-sm">
+                @if ($patient->birthdate || $patient->gender)
+                    {{-- | {{ __('messages.Age') }}/{{ __('messages.Gender') }}: --}}
+                    {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
+                @endif
+                @if ($patient->vishesh)
+                    | {{ __('messages.Vishesh') }}: {{ $patient->vishesh }}
+                @endif
+                @if ($patient->height)
+                    | {{ __('messages.Height') }}: {{ $patient->height }} cm
+                @endif
+                @if ($patient->weight)
+                    | {{ __('messages.Weight') }}: {{ $patient->weight }} kg
+                @endif
+                @if ($patient->height && $patient->weight)
+                    @php
+                        $heightInMeters = $patient->height / 100;
+                        $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
+                        $bmiCategory = match (true) {
+                            $bmi < 18.5 => 'Underweight',
+                            $bmi >= 18.5 && $bmi < 25 => 'Healthy Weight',
+                            $bmi >= 25 && $bmi < 30 => 'Overweight',
+                            default => 'Obese',
+                        };
+                    @endphp
+                    | {{ __('BMI') }}: {{ number_format($bmi, 2) }}
+                @endif
+            </span>
         </h2>
     </x-slot>
 
@@ -24,15 +53,16 @@
                                     <textarea id="nadiInput" name="nadi" rows="4"
                                         class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mt-4">
                                         @foreach (['वात', 'पित्त', 'कफ', 'सूक्ष्म', 'कठीण', 'साम', 'वेग', 'प्राण', 'व्यान', 'स्थूल', 'अल्प स्थूल', 'अनियमित', 'तीक्ष्ण', 'वेगवती'] as $nadi)
                                             <button type="button"
-                                                class="nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded"
+                                                class="nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                                                 onclick="appendNadi('{{ $nadi }}')">{{ $nadi }}</button>
                                         @endforeach
                                     </div>
                                     <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
                                 </div>
+
 
                                 <!-- Diagnosis Textarea -->
                                 <div class="mt-4 mb-4">
@@ -40,28 +70,55 @@
                                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
                                             {{ __('लक्षणे') }}
                                         </h2>
-                                        <div class="space-x-2">
-                                            <!-- Up Arrow Button -->
-                                            <button type="button" onclick="insertArrow('↑')"
-                                                class="mb-1 w-12 h-7 px-2 py-1 items-center justify-center bg-gray-200 dark:bg-gray-700 rounded-md shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
-                                                ↑
-                                            </button>
-                                            <!-- Down Arrow Button -->
-                                            <button type="button" onclick="insertArrow('↓')"
-                                                class="w-12 h-7 px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded-md shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
-                                                ↓
-                                            </button>
-                                        </div>
                                     </div>
 
                                     <textarea id="lakshane" name="diagnosis" rows="4"
                                         class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                                     <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
+
+                                    <!-- Preset and Arrow Buttons Below Textarea -->
+                                    <div class="mt-4 grid grid-cols-7 gap-2">
+                                        <button type="button" onclick="insertArrow('↑')"
+                                            class="w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                            ↑
+                                        </button>
+                                        <button type="button" onclick="insertArrow('↓')"
+                                            class="w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                            ↓
+                                        </button>
+                                        <button type="button" onclick="insertText('मल- ')"
+                                            class="w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                            मल
+                                        </button>
+                                        <button type="button" onclick="insertText('मूत्र - ')"
+                                            class="w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                            मूत्र
+                                        </button>
+                                        <button type="button" onclick="insertText('जिव्हा - ')"
+                                            class="w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                            जिव्हा
+                                        </button>
+                                        <button type="button" onclick="insertText('निद्रा - ')"
+                                            class="w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                            निद्रा
+                                        </button>
+                                        <button type="button" onclick="insertText('क्षुधा - ')"
+                                            class="w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                            क्षुधा
+                                        </button>
+                                    </div>
                                 </div>
 
 
+                                @php
+                                    // Fetch the latest follow-up's 'chikitsa' if available
+                                    $latestFollowUp = $followUps->first();
+                                    $previousChikitsa = $latestFollowUp
+                                        ? json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? ''
+                                        : '';
+                                @endphp
                                 <!-- Chikitsa Textarea -->
-                                <div class="mt-4 mb-4 flex flex-col">
+                                <div class="mt-6 mb-4 flex flex-col">
                                     <div class="flex-1">
                                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                                             {{ __('चिकित्सा') }}</h2>
@@ -69,27 +126,31 @@
                                             class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                                         <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
 
-                                        <div class="mt-4 grid grid-cols-4 gap-4">
-                                            <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200"
+                                        <div class="mt-4 grid grid-cols-5 gap-4">
+                                            <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                                                 data-preset="महासुदर्शन, वैदेही, बिभितक, यष्टी, तालीसादी ">
                                                 ज्वर
                                             </div>
-                                            <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200"
+                                            <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                                                 data-preset="वरा, गुग्गुळ, विश्व, अश्वकपी, वत्स, गोक्षुर, गोदंती">
                                                 संधिशूल
                                             </div>
-                                            <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200"
+                                            <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                                                 data-preset="हरीतकी, अमृता, सारिवा ">
                                                 अर्श
                                             </div>
-                                            <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200"
+                                            <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                                                 data-preset="कुटज, मुस्ता, विश्व ">
                                                 ग्रहणी
+                                            </div>
+                                            <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                                                data-preset="{{ $previousChikitsa }}">
+                                                चिकित्सा यथा पूर्व
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Numeric Input Boxes (Now Below) -->
+                                    <!-- Numeric Input Boxes -->
                                     <div class="flex items-center space-x-4 mt-6">
                                         <div class="flex flex-col">
                                             <h2 class="text-l font-semibold text-gray-800 dark:text-white mb-2">
@@ -129,8 +190,8 @@
                                     </label>
                                     <x-text-input id="all_dues"
                                         class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
-                                        type="number" name="all_dues" value="{{ old('all_dues', $totalDueAll ?? 0) }}"
-                                        readonly />
+                                        type="number" name="all_dues"
+                                        value="{{ old('all_dues', $totalDueAll ?? 0) }}" readonly />
                                 </div>
 
                                 <div class="mt-4">
@@ -194,7 +255,7 @@
 
                         <!-- Previous Follow-ups (Right Column) -->
                         <div
-                            class="fixed mb-3 right-40 top-48 bottom-1 max-h-[calc(100vh-80px)] w-[375px] overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 scrollbar-thin">
+                            class="fixed mb-3 right-40 top-62 max-h-[calc(100vh-80px)] w-[375px] overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 scrollbar-thin">
                             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
                                 {{ __('Previous Follow-ups') }}
                             </h3>
@@ -268,5 +329,11 @@
 
         // Focus back on textarea
         textarea.focus();
+    }
+</script>
+<script>
+    function insertText(text) {
+        let textarea = document.getElementById("lakshane");
+        textarea.value += text + " ";
     }
 </script>
