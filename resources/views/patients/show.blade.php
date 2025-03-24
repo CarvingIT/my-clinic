@@ -20,7 +20,8 @@
 
                     <div class="mb-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
+                            <h2
+                                class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
                                 {{ $patient->name }} ({{ $patient->patient_id }})
                             </h2>
                             <span class="font-bold text-gray-600 text-m">
@@ -29,13 +30,13 @@
                                     {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
                                 @endif
                                 @if ($patient->vishesh)
-                                    |  {{ $patient->vishesh }}
+                                    | {{ $patient->vishesh }}
                                 @endif
                                 @if ($patient->height)
-                                    |  {{ $patient->height }} cm
+                                    | {{ $patient->height }} cm
                                 @endif
                                 @if ($patient->weight)
-                                    |  {{ $patient->weight }} kg
+                                    | {{ $patient->weight }} kg
                                 @endif
                                 @if ($patient->height && $patient->weight)
                                     @php
@@ -469,6 +470,13 @@
                                                                 {{ $checkUpInfo['chikitsa'] }}
                                                             @endif
                                                         </p> --}}
+
+                                                        @if ($followUp->patient_photos)
+                                                            <img src="{{ route('followup.image', ['filename' => basename($followUp->patient_photos)]) }}"
+                                                                alt="Patient Photo">
+                                                        @else
+                                                            <p>No photo available.</p>
+                                                        @endif
 
 
                                                     </div>

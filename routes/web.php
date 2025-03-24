@@ -5,6 +5,8 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\FollowupImageController;
+
 use Illuminate\Support\Facades\App;
 
 use Illuminate\Support\Facades\Route;
@@ -81,6 +83,12 @@ Route::get('/followups', [FollowUpController::class, 'index'])->name('followups.
 Route::get('/followups/export', [FollowUpController::class, 'exportCSV'])->name('followups.export');
 
 Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])->name('followups.export');
+
+Route::get('/followup-images/{filename}', [FollowupImageController::class, 'show'])->name('followup.image');
+
+Route::get('/patients/{patient}/followup-images', [FollowUpImageController::class, 'showFollowUpImages'])
+    ->name('followup.images');
+
 
 
 

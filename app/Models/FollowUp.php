@@ -16,6 +16,7 @@ class FollowUp extends Model
         'treatment',
         'amount_billed',
         'amount_paid',
+        'patient_photos',
     ];
 
 

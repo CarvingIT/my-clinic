@@ -41,7 +41,7 @@
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <!-- Follow-up Creation Form (Left Column) -->
                         <div class="lg:col-span-2">
-                            <form method="POST" action="{{ route('followups.store') }}">
+                            <form method="POST" action="{{ route('followups.store') }}" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" name="patient_id" value="{{ $patient->id }}" />
 
@@ -112,10 +112,10 @@
 
                                 @php
                                     // Fetch the latest follow-up's 'chikitsa' if available
-                                    $latestFollowUp = $followUps->first();
-                                    $previousChikitsa = $latestFollowUp
-                                        ? json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? ''
-                                        : '';
+$latestFollowUp = $followUps->first();
+$previousChikitsa = $latestFollowUp
+    ? json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? ''
+    : '';
                                 @endphp
                                 <!-- Chikitsa Textarea -->
                                 <div class="mt-6 mb-4 flex flex-col">
@@ -148,6 +148,71 @@
                                                 चिकित्सा यथा पूर्व
                                             </div>
                                         </div>
+                                    </div>
+
+
+                                    <!-- Webcam Capture Section -->
+                                    <div class="mb-6">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                                            {{ __('Patient Photo') }}
+                                        </h2>
+
+                                        <!-- Standard File Input (Hidden) -->
+                                        <input type="file" id="patient_photo" name="patient_photo" accept="image/*" class="hidden" />
+
+                                        <!-- Buttons -->
+                                        <div class="flex space-x-4">
+                                            <!-- Choose File Button (Triggers File Input) -->
+                                            <label for="patient_photo"
+                                                   class="cursor-pointer bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded inline-block">
+                                                {{ __('Choose File') }}
+                                            </label>
+
+                                            <!-- Capture Photo Button (Opens Webcam Modal) -->
+                                            <button type="button" id="capturePhotoButton"
+                                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                                {{ __('Capture Photo') }}
+                                            </button>
+                                        </div>
+
+
+                                        <!-- Webcam Modal -->
+                                        <div id="webcamModal" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
+                                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md">
+                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">{{ __('Capture Photo') }}</h3>
+
+                                                <!-- Camera Selection -->
+                                                 <div class="mb-4">
+                                                    <label for="cameraSelect" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Select Camera') }}</label>
+                                                    <select id="cameraSelect" class="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                                        <!-- Options will be populated by JavaScript -->
+                                                    </select>
+                                                </div>
+
+
+                                                <video id="webcamPreview" class="w-full" autoplay playsinline></video>
+                                                <canvas id="capturedCanvas" class="hidden"></canvas> <!-- Hidden canvas for image capture -->
+
+                                                <div class="mt-4 flex justify-between">
+                                                    <button type="button" id="captureButton"
+                                                            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                                        {{ __('Capture') }}
+                                                    </button>
+                                                    <button type="button" id="retakeButton"
+                                                            class="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded hidden">
+                                                        {{ __('Retake') }}
+                                                    </button>
+                                                    <button type="button" id="closeModalButton"
+                                                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                                        {{ __('Close') }}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Preview Image -->
+                                        <img id="imagePreview" src="#" alt="Image Preview" class="mt-2 max-w-xs hidden">
+
                                     </div>
 
                                     <!-- Numeric Input Boxes -->
@@ -336,4 +401,132 @@
         let textarea = document.getElementById("lakshane");
         textarea.value += text + " ";
     }
+</script>
+
+{{-- webcam --}}
+<script>
+    const patientPhotoInput = document.getElementById('patient_photo');
+    const imagePreview = document.getElementById('imagePreview');
+    const capturePhotoButton = document.getElementById('capturePhotoButton'); // New button
+    const webcamModal = document.getElementById('webcamModal');
+    const cameraSelect = document.getElementById('cameraSelect');
+    const webcamPreview = document.getElementById('webcamPreview');
+    const capturedCanvas = document.getElementById('capturedCanvas');
+    const captureButton = document.getElementById('captureButton');
+    const retakeButton = document.getElementById('retakeButton');
+    const closeModalButton = document.getElementById('closeModalButton');
+
+    let currentStream = null;
+
+    // --- Function to open the webcam modal and get the camera list ---
+    async function openWebcam() {
+        webcamModal.classList.remove('hidden');
+        webcamModal.classList.add('flex');
+
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+
+            cameraSelect.innerHTML = '';
+            videoDevices.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.deviceId;
+                option.text = device.label || `Camera ${cameraSelect.options.length + 1}`;
+                cameraSelect.appendChild(option);
+            });
+
+            if (videoDevices.length > 0) {
+                startCamera(videoDevices[0].deviceId);
+            }
+
+        } catch (error) {
+            console.error('Error accessing media devices:', error);
+            alert('Error accessing camera. Please ensure camera permissions are granted.');
+        }
+    }
+
+       //  Function to start the camera stream
+    async function startCamera(deviceId) {
+        // Stop any existing stream
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+
+        const constraints = {
+            video: {
+                deviceId: { exact: deviceId },
+                width: { ideal: 640 }, // Adjust
+                height: { ideal: 480 }  // Adjust
+            }
+        };
+
+        try {
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            webcamPreview.srcObject = currentStream;
+             captureButton.classList.remove('hidden'); // Ensure capture button is visible
+            retakeButton.classList.add('hidden');     // Hide retake button
+        } catch (error) {
+            console.error('Error starting camera:', error);
+            alert('Error starting camera. Please check your camera connection and permissions.');
+        }
+    }
+
+    //  Event Listeners
+
+    // Open Webcam Modal when "Capture Photo" button is clicked
+    capturePhotoButton.addEventListener('click', openWebcam);
+
+
+    cameraSelect.addEventListener('change', (event) => {
+        startCamera(event.target.value);
+    });
+
+    captureButton.addEventListener('click', () => {
+        capturedCanvas.width = webcamPreview.videoWidth;
+        capturedCanvas.height = webcamPreview.videoHeight;
+        capturedCanvas.getContext('2d').drawImage(webcamPreview, 0, 0);
+
+        capturedCanvas.toBlob((blob) => {
+            const file = new File([blob], "captured_image.jpg", { type: 'image/jpeg' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            patientPhotoInput.files = dataTransfer.files;
+            // Show/hide buttons
+            captureButton.classList.add('hidden');
+            retakeButton.classList.remove('hidden');
+            patientPhotoInput.dispatchEvent(new Event('change')); // Trigger change for preview
+            closeWebcam();//close
+        }, 'image/jpeg');
+    });
+
+      retakeButton.addEventListener('click', () => {
+         startCamera(cameraSelect.value); // Restart the camera
+    });
+
+    closeModalButton.addEventListener('click', closeWebcam); //closeWebcam function call
+
+    function closeWebcam() {
+        // Stop the camera stream and hide modal
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+        webcamModal.classList.add('hidden');
+        webcamModal.classList.remove('flex');
+        webcamPreview.srcObject = null; //clear video
+    }
+
+    //  Update Preview Image
+    patientPhotoInput.addEventListener('change', () => {
+        if (patientPhotoInput.files && patientPhotoInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                imagePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(patientPhotoInput.files[0]);
+        } else {
+            imagePreview.classList.add('hidden'); //hide preview
+        }
+    });
+
 </script>

@@ -15,9 +15,15 @@ use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\FollowUpExport;
+use Illuminate\Support\Facades\Storage;
+// use Intervention\Image\Facades\Image;
+use Illuminate\Support\Str;
+
+
 
 
 
@@ -50,7 +56,7 @@ class FollowUpController extends Controller
             ->take(2)
             ->get();
 
-        return view('followups.create', compact('patient', 'parameters','followUps', 'totalDueAll'));
+        return view('followups.create', compact('patient', 'parameters', 'followUps', 'totalDueAll'));
     }
 
 
@@ -65,15 +71,36 @@ class FollowUpController extends Controller
             'treatment' => ['nullable', 'string'],
             'amount_billed' => ['required', 'numeric'],
             'amount_paid' => ['required', 'numeric'],
-            // 'amount' => ['nullable', 'numeric'],
-            // 'balance' => ['nullable', 'numeric'],
-            // 'payment_method' => ['nullable', 'string'],
-            // 'certificate' => ['nullable', 'string'],
-            // 'drawing' => ['nullable', 'string'],
-            // 'nidan' => ['nullable', 'string'],
-            // 'upashay' => ['nullable', 'string'],
-            // 'salla' => ['nullable', 'string'],
+            'patient_photo' => 'nullable|image|max:2048',
+
         ]);
+
+
+        //  Image Handling
+        $filePath = null;
+        if ($request->hasFile('patient_photo')) {
+            $file = $request->file('patient_photo');
+
+            // Validate file type
+            $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if (!in_array($file->getMimeType(), $allowedMimeTypes)) {
+                return back()->withErrors(['patient_photo' => 'Invalid image format.'])->withInput();
+            }
+
+            // Get the patient
+            $patient = Patient::findOrFail($request->patient_id);
+            $patientName = Str::slug($patient->name);
+            $filename = $patientName . '_' . now()->format('Y-m-d') . '.' . $file->getClientOriginalExtension();
+
+            // Store the file directly
+            $filePath = $file->storeAs('patient_photos', $filename, 'local');
+
+            if (!$filePath) { // Check if storage was successful
+                \Log::error('Failed to store patient photo: ' . $filename);
+                return back()->withErrors(['patient_photo' => 'Failed to save image.'])->withInput();
+            }
+        }
+
 
         // Get the last follow-up for the patient
         $lastFollowUp = FollowUp::where('patient_id', $request->patient_id)
@@ -108,6 +135,7 @@ class FollowUpController extends Controller
             'treatment' => $request->treatment,
             'amount_billed' => $request->amount_billed,
             'amount_paid' => $amount_paid, // Ensuring it does not exceed the total_due
+            'patient_photos' => $filePath, // Store the file path
             // 'nidan' => $request->nidan,
             // 'upashay' => $request->upashay,
             // 'salla' => $request->salla,
@@ -256,8 +284,8 @@ class FollowUpController extends Controller
 
     public function exportFollowUps()
     {
-    return Excel::download(new FollowUpExport(), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
-        'Content-Type' => 'text/csv; charset=UTF-8',
-    ]);
-}
+        return Excel::download(new FollowUpExport(), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
 }
