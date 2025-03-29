@@ -553,7 +553,7 @@
                                                                             ];
                                                                         })->toArray(),
                                                                 ) }}">
-                                                                <i class="fas fa-images"></i> ({{ $followUp->uploads->count() }})
+                                                                <i class="fas fa-file"></i> ({{ $followUp->uploads->count() }})
                                                             </a>
                                                         </p>
                                                     @endif
