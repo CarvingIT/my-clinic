@@ -20,7 +20,8 @@
 
                     <div class="mb-4">
                         <div>
-                            <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
+                            <h2
+                                class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
                                 {{ $patient->name }} ({{ $patient->patient_id }})
                             </h2>
                             <span class="font-bold text-gray-600 text-m">
@@ -29,13 +30,13 @@
                                     {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
                                 @endif
                                 @if ($patient->vishesh)
-                                    |  {{ $patient->vishesh }}
+                                    | {{ $patient->vishesh }}
                                 @endif
                                 @if ($patient->height)
-                                    |  {{ $patient->height }} cm
+                                    | {{ $patient->height }} cm
                                 @endif
                                 @if ($patient->weight)
-                                    |  {{ $patient->weight }} kg
+                                    | {{ $patient->weight }} kg
                                 @endif
                                 @if ($patient->height && $patient->weight)
                                     @php
@@ -508,6 +509,20 @@
                                                     @endif
                                                 </p>
 
+                                                <!-- Display Image Link if Upload Exists -->
+                                                @if ($followUp->upload)
+                                                    <p>
+                                                        <span
+                                                            class="font-bold text-gray-800 dark:text-gray-200">{{ __('Photo') }}:</span>
+                                                        <a href="#"
+                                                            class="text-blue-500 hover:underline open-image-popup"
+                                                            data-image-url="{{ route('uploads.show', $followUp->upload->id) }}"
+                                                            data-photo-type="{{ $followUp->upload->photo_type }}">
+                                                            {{ $followUp->upload->photo_type }} (View)
+                                                        </a>
+                                                    </p>
+                                                @endif
+
                                             </td>
 
 
@@ -603,10 +618,55 @@
             </div>
         </div>
     </div>
+
+    <!-- Popup Modal -->
+    <div id="imagePopup" class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg max-w-3xl w-full relative">
+            <button id="closePopup"
+                class="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100">✖</button>
+            <h3 id="popupTitle" class="text-xl font-semibold text-gray-800 dark:text-white mb-4"></h3>
+            <img id="popupImage" src="" alt="Follow-up Image" class="w-full h-auto rounded">
+        </div>
+    </div>
 </x-app-layout>
 
 <script>
     function confirmDelete() {
         return confirm("Are you sure you want to delete this followup?");
     }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const links = document.querySelectorAll('.open-image-popup');
+        const popup = document.getElementById('imagePopup');
+        const popupImage = document.getElementById('popupImage');
+        const popupTitle = document.getElementById('popupTitle');
+        const closePopup = document.getElementById('closePopup');
+
+        links.forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const imageUrl = this.getAttribute('data-image-url');
+                const photoType = this.getAttribute('data-photo-type');
+
+                popupImage.src = imageUrl;
+                popupTitle.textContent = `Photo: ${photoType}`;
+                popup.classList.remove('hidden');
+            });
+        });
+
+        closePopup.addEventListener('click', function () {
+            popup.classList.add('hidden');
+            popupImage.src = ''; // Clear image to free memory
+        });
+
+        // Close popup when clicking outside the modal
+        popup.addEventListener('click', function (e) {
+            if (e.target === popup) {
+                popup.classList.add('hidden');
+                popupImage.src = '';
+            }
+        });
+    });
 </script>

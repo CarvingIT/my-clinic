@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Response;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\FollowUpExport;
+use App\Models\Upload;
 
 
 
@@ -65,15 +66,24 @@ class FollowUpController extends Controller
             'treatment' => ['nullable', 'string'],
             'amount_billed' => ['required', 'numeric'],
             'amount_paid' => ['required', 'numeric'],
-            // 'amount' => ['nullable', 'numeric'],
-            // 'balance' => ['nullable', 'numeric'],
-            // 'payment_method' => ['nullable', 'string'],
-            // 'certificate' => ['nullable', 'string'],
-            // 'drawing' => ['nullable', 'string'],
-            // 'nidan' => ['nullable', 'string'],
-            // 'upashay' => ['nullable', 'string'],
-            // 'salla' => ['nullable', 'string'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'], // Max 2MB
+            'photo_type' => ['required_with:photo', 'in:patient_photo,lab_report'],
         ]);
+
+        // Handle file upload
+        $upload = null;
+        if ($request->hasFile('photo')) {
+            // Store the file privately in storage/app/private/uploads/
+            $filePath = $request->file('photo')->store('uploads', 'local');
+
+            // Create Upload record with photo_type and file_path
+            $upload = Upload::create([
+                'patient_id' => $request->patient_id,
+                'follow_up_id' => null, // Will be updated after follow-up creation
+                'photo_type' => $request->photo_type,
+                'file_path' => $filePath,
+            ]);
+        }
 
         // Get the last follow-up for the patient
         $lastFollowUp = FollowUp::where('patient_id', $request->patient_id)
@@ -101,7 +111,7 @@ class FollowUpController extends Controller
         $checkUpInfo['branch_name'] = session('branch_name');
 
 
-        FollowUp::create([
+        $followUp = FollowUp::create([
             'patient_id' => $request->patient_id,
             'check_up_info' => json_encode($checkUpInfo),
             'diagnosis' => $request->diagnosis,
@@ -114,6 +124,11 @@ class FollowUpController extends Controller
             // 'amount' => $request->amount,
             // 'balance' => $request->balance,
         ]);
+
+        // Link upload to follow-up
+        if ($upload) {
+            $upload->update(['follow_up_id' => $followUp->id]);
+        }
 
         return Redirect::route('patients.show', $request->patient_id)->with('success', 'Follow Up Created Successfully');
     }

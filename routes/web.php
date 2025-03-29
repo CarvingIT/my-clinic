@@ -7,6 +7,8 @@ use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\App;
 
+use App\Http\Controllers\UploadController;
+
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', function () {
@@ -81,6 +83,12 @@ Route::get('/followups', [FollowUpController::class, 'index'])->name('followups.
 Route::get('/followups/export', [FollowUpController::class, 'exportCSV'])->name('followups.export');
 
 Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])->name('followups.export');
+
+Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store'); // Route to handle file uploads
+Route::delete('/uploads/{id}', [UploadController::class, 'destroy'])->name('uploads.destroy'); // Route to delete files
+
+// Route to serve private files
+Route::get('/uploads/{id}', [UploadController::class, 'show'])->name('uploads.show');
 
 
 

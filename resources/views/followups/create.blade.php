@@ -41,9 +41,13 @@
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <!-- Follow-up Creation Form (Left Column) -->
                         <div class="lg:col-span-2">
-                            <form method="POST" action="{{ route('followups.store') }}">
+                            <form method="POST" action="{{ route('followups.store') }}" enctype="multipart/form-data"
+                                id="followUpForm">
                                 @csrf
                                 <input type="hidden" name="patient_id" value="{{ $patient->id }}" />
+                                <input type="file" name="photo" id="photoFileInput" style="display:none;"
+                                    accept="image/*">
+                                <input type="hidden" name="photo_type" id="photoTypeInput">
 
                                 <!-- Naadi Textarea -->
                                 <div class="mb-6">
@@ -112,10 +116,10 @@
 
                                 @php
                                     // Fetch the latest follow-up's 'chikitsa' if available
-                                    $latestFollowUp = $followUps->first();
-                                    $previousChikitsa = $latestFollowUp
-                                        ? json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? ''
-                                        : '';
+$latestFollowUp = $followUps->first();
+$previousChikitsa = $latestFollowUp
+    ? json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? ''
+    : '';
                                 @endphp
                                 <!-- Chikitsa Textarea -->
                                 <div class="mt-6 mb-4 flex flex-col">
@@ -149,6 +153,62 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    {{-- Capture button --}}
+                                    <div class="mt-4">
+                                        <button type="button" id="openCameraModal"
+                                            class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                            📷 Capture Photo
+                                        </button>
+                                    </div>
+
+                                    <!-- Camera Capture Modal -->
+                                    <div id="cameraModal"
+                                        class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex justify-center items-center">
+                                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-[400px]">
+                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Capture
+                                                Photo</h2>
+
+                                            <!-- Camera Selection -->
+                                            <label class="block mb-2 text-gray-700 dark:text-gray-300">Select
+                                                Camera:</label>
+                                            <select id="cameraSelect"
+                                                class="w-full px-2 py-1 border rounded mb-4"></select>
+
+                                            <!-- Photo Type Selection -->
+                                            <label class="block mb-2 text-gray-700 dark:text-gray-300">Photo
+                                                Type:</label>
+                                            <select id="photoType" class="w-full px-2 py-1 border rounded mb-4">
+                                                <option value="patient_photo">Patient Photo</option>
+                                                <option value="lab_report">Lab Report</option>
+                                            </select>
+
+                                            <!-- Camera Preview -->
+                                            <video id="cameraPreview" class="w-full bg-black rounded"></video>
+
+                                            <!-- Capture Buttons -->
+                                            <div class="flex justify-between mt-4">
+                                                <button id="captureBtn" type="button"
+                                                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">📸
+                                                    Capture</button>
+                                                <button id="closeCameraModal" type="button"
+                                                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Close</button>
+                                            </div>
+
+                                            <!-- Captured Image Preview -->
+                                            <div id="capturedPreview" class="hidden mt-4">
+                                                <img id="capturedImage" class="w-full rounded border">
+                                                <div class="flex justify-between mt-2">
+                                                    <button id="retakePhoto" type="button"
+                                                        class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Retake</button>
+                                                    <button id="donePhoto" type="button"
+                                                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Done</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
 
                                     <!-- Numeric Input Boxes -->
                                     <div class="flex items-center space-x-4 mt-6">
@@ -336,4 +396,132 @@
         let textarea = document.getElementById("lakshane");
         textarea.value += text + " ";
     }
+</script>
+
+<script>
+    let cameraStream = null;
+
+    // DOM Elements
+    const cameraModal = document.getElementById("cameraModal");
+    const openCameraModal = document.getElementById("openCameraModal");
+    const closeCameraModal = document.getElementById("closeCameraModal");
+    const captureBtn = document.getElementById("captureBtn");
+    const retakePhoto = document.getElementById("retakePhoto");
+    const donePhoto = document.getElementById("donePhoto");
+    const capturedPreview = document.getElementById("capturedPreview");
+    const capturedImage = document.getElementById("capturedImage");
+    const video = document.getElementById("cameraPreview");
+    const cameraSelect = document.getElementById("cameraSelect");
+    const photoType = document.getElementById("photoType");
+    const photoFileInput = document.getElementById("photoFileInput");
+    const photoTypeInput = document.getElementById("photoTypeInput");
+
+    // Open Camera Modal
+    openCameraModal.addEventListener("click", async (e) => {
+        e.preventDefault();
+        cameraModal.classList.remove("hidden");
+        await loadCameras();
+    });
+
+    // Close Camera Modal
+    closeCameraModal.addEventListener("click", (e) => {
+        e.preventDefault();
+        cameraModal.classList.add("hidden");
+        stopCamera();
+    });
+
+    // Load Available Cameras
+    async function loadCameras() {
+        try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === "videoinput");
+            if (videoDevices.length === 0) {
+                alert("No cameras found.");
+                return;
+            }
+            cameraSelect.innerHTML = "";
+            videoDevices.forEach((device, index) => {
+                const option = document.createElement("option");
+                option.value = device.deviceId;
+                option.text = device.label || `Camera ${index + 1}`;
+                cameraSelect.appendChild(option);
+            });
+            await startCamera(videoDevices[0]?.deviceId);
+        } catch (error) {
+            console.error("Error loading cameras:", error);
+            alert("Failed to access camera. Please allow permissions.");
+        }
+    }
+
+    // Start Camera
+    async function startCamera(deviceId) {
+        stopCamera();
+        try {
+            cameraStream = await navigator.mediaDevices.getUserMedia({
+                video: { deviceId: deviceId ? { exact: deviceId } : undefined }
+            });
+            video.srcObject = cameraStream;
+            video.play();
+        } catch (error) {
+            console.error("Error starting camera:", error);
+            alert("Camera access denied or unavailable.");
+        }
+    }
+
+    // Stop Camera
+    function stopCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
+    }
+
+    // Switch Camera
+    cameraSelect.addEventListener("change", () => {
+        startCamera(cameraSelect.value);
+    });
+
+    // Capture Photo
+    captureBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert to Blob for preview
+        canvas.toBlob((blob) => {
+            capturedImage.src = URL.createObjectURL(blob);
+            video.classList.add("hidden");
+            capturedPreview.classList.remove("hidden");
+        }, "image/png");
+    });
+
+    // Retake Photo
+    retakePhoto.addEventListener("click", (e) => {
+        e.preventDefault();
+        capturedPreview.classList.add("hidden");
+        video.classList.remove("hidden");
+        capturedImage.src = ""; // Clear preview
+    });
+
+    // Done (Save Photo as File)
+    donePhoto.addEventListener("click", (e) => {
+        e.preventDefault();
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob((blob) => {
+            const file = new File([blob], `photo_${Date.now()}.png`, { type: "image/png" });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            photoFileInput.files = dataTransfer.files;
+            photoTypeInput.value = photoType.value;
+
+            cameraModal.classList.add("hidden");
+            stopCamera();
+        }, "image/png");
+    });
 </script>

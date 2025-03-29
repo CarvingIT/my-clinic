@@ -41,4 +41,10 @@ class FollowUp extends Model
     {
         return ($this->amount_billed + $this->previous_due) - $this->amount_paid;
     }
+
+    // Define the relationship with the Upload model
+    public function upload()
+    {
+        return $this->hasOne(Upload::class, 'follow_up_id');
+    }
 }
