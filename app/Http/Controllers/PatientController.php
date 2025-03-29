@@ -119,9 +119,12 @@ class PatientController extends Controller
         $patient->reports = $patient->reports()->get();
 
         // Load follow-ups with their related uploads
-        $followUps = $patient->followUps()->with('upload')->orderBy('created_at', 'desc')->get();
+        $followUps = $patient->followUps()->with('uploads')->orderBy('created_at', 'desc')->get();
 
-        return view('patients.show', compact('patient', 'totalDueAll', 'followUps'));
+        // Load all uploads for the patient, ordered by date
+        $uploads = $patient->uploads()->orderBy('created_at', 'desc')->get();
+
+        return view('patients.show', compact('patient', 'totalDueAll', 'followUps', 'uploads'));
     }
 
     /**

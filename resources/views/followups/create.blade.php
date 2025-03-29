@@ -45,9 +45,9 @@
                                 id="followUpForm">
                                 @csrf
                                 <input type="hidden" name="patient_id" value="{{ $patient->id }}" />
-                                <input type="file" name="photo" id="photoFileInput" style="display:none;"
+                                <input type="file" name="photos[]" id="photoFileInput" style="display:none;"
                                     accept="image/*">
-                                <input type="hidden" name="photo_type" id="photoTypeInput">
+                                <input type="hidden" name="photo_types" id="photoTypesInput">
 
                                 <!-- Naadi Textarea -->
                                 <div class="mb-6">
@@ -158,52 +158,38 @@ $previousChikitsa = $latestFollowUp
                                     <div class="mt-4">
                                         <button type="button" id="openCameraModal"
                                             class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
-                                            📷 Capture Photo
+                                            📷 Capture Photos
                                         </button>
                                     </div>
 
-                                    <!-- Camera Capture Modal -->
+
+                                    <!-- Camera Modal -->
                                     <div id="cameraModal"
                                         class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex justify-center items-center">
                                         <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-[400px]">
                                             <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Capture
-                                                Photo</h2>
-
-                                            <!-- Camera Selection -->
+                                                Photos</h2>
                                             <label class="block mb-2 text-gray-700 dark:text-gray-300">Select
                                                 Camera:</label>
                                             <select id="cameraSelect"
                                                 class="w-full px-2 py-1 border rounded mb-4"></select>
-
-                                            <!-- Photo Type Selection -->
                                             <label class="block mb-2 text-gray-700 dark:text-gray-300">Photo
                                                 Type:</label>
                                             <select id="photoType" class="w-full px-2 py-1 border rounded mb-4">
                                                 <option value="patient_photo">Patient Photo</option>
                                                 <option value="lab_report">Lab Report</option>
                                             </select>
-
-                                            <!-- Camera Preview -->
-                                            <video id="cameraPreview" class="w-full bg-black rounded"></video>
-
-                                            <!-- Capture Buttons -->
+                                            <video id="cameraPreview" class="w-full bg-black rounded"
+                                                autoplay></video>
                                             <div class="flex justify-between mt-4">
                                                 <button id="captureBtn" type="button"
                                                     class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">📸
                                                     Capture</button>
                                                 <button id="closeCameraModal" type="button"
-                                                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Close</button>
+                                                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Done</button>
                                             </div>
-
-                                            <!-- Captured Image Preview -->
-                                            <div id="capturedPreview" class="hidden mt-4">
-                                                <img id="capturedImage" class="w-full rounded border">
-                                                <div class="flex justify-between mt-2">
-                                                    <button id="retakePhoto" type="button"
-                                                        class="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">Retake</button>
-                                                    <button id="donePhoto" type="button"
-                                                        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Done</button>
-                                                </div>
+                                            <div id="capturedPreview" class="mt-4 max-h-40 overflow-y-auto">
+                                                <div id="capturedImages" class="grid grid-cols-2 gap-2"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -400,37 +386,45 @@ $previousChikitsa = $latestFollowUp
 
 <script>
     let cameraStream = null;
+    let capturedFiles = []; // Array to store captured files and their types
 
-    // DOM Elements
     const cameraModal = document.getElementById("cameraModal");
     const openCameraModal = document.getElementById("openCameraModal");
     const closeCameraModal = document.getElementById("closeCameraModal");
     const captureBtn = document.getElementById("captureBtn");
-    const retakePhoto = document.getElementById("retakePhoto");
-    const donePhoto = document.getElementById("donePhoto");
-    const capturedPreview = document.getElementById("capturedPreview");
-    const capturedImage = document.getElementById("capturedImage");
+    const capturedImages = document.getElementById("capturedImages");
     const video = document.getElementById("cameraPreview");
     const cameraSelect = document.getElementById("cameraSelect");
     const photoType = document.getElementById("photoType");
     const photoFileInput = document.getElementById("photoFileInput");
-    const photoTypeInput = document.getElementById("photoTypeInput");
+    const photoTypesInput = document.getElementById("photoTypesInput");
 
-    // Open Camera Modal
+    // Safe initialization
+    if (photoFileInput && photoTypesInput) {
+        if (!photoFileInput.files || photoFileInput.files.length === 0) {
+            const dataTransfer = new DataTransfer();
+            photoFileInput.files = dataTransfer.files;
+        }
+        if (!photoTypesInput.value) {
+            photoTypesInput.value = "[]";
+        }
+    } else {
+        console.error("Photo inputs not found");
+    }
+
     openCameraModal.addEventListener("click", async (e) => {
         e.preventDefault();
         cameraModal.classList.remove("hidden");
         await loadCameras();
     });
 
-    // Close Camera Modal
     closeCameraModal.addEventListener("click", (e) => {
         e.preventDefault();
+        updateFileInput();
         cameraModal.classList.add("hidden");
         stopCamera();
     });
 
-    // Load Available Cameras
     async function loadCameras() {
         try {
             const devices = await navigator.mediaDevices.enumerateDevices();
@@ -453,7 +447,6 @@ $previousChikitsa = $latestFollowUp
         }
     }
 
-    // Start Camera
     async function startCamera(deviceId) {
         stopCamera();
         try {
@@ -468,7 +461,6 @@ $previousChikitsa = $latestFollowUp
         }
     }
 
-    // Stop Camera
     function stopCamera() {
         if (cameraStream) {
             cameraStream.getTracks().forEach(track => track.stop());
@@ -476,37 +468,11 @@ $previousChikitsa = $latestFollowUp
         }
     }
 
-    // Switch Camera
     cameraSelect.addEventListener("change", () => {
         startCamera(cameraSelect.value);
     });
 
-    // Capture Photo
     captureBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        // Convert to Blob for preview
-        canvas.toBlob((blob) => {
-            capturedImage.src = URL.createObjectURL(blob);
-            video.classList.add("hidden");
-            capturedPreview.classList.remove("hidden");
-        }, "image/png");
-    });
-
-    // Retake Photo
-    retakePhoto.addEventListener("click", (e) => {
-        e.preventDefault();
-        capturedPreview.classList.add("hidden");
-        video.classList.remove("hidden");
-        capturedImage.src = ""; // Clear preview
-    });
-
-    // Done (Save Photo as File)
-    donePhoto.addEventListener("click", (e) => {
         e.preventDefault();
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
@@ -515,13 +481,30 @@ $previousChikitsa = $latestFollowUp
 
         canvas.toBlob((blob) => {
             const file = new File([blob], `photo_${Date.now()}.png`, { type: "image/png" });
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(file);
-            photoFileInput.files = dataTransfer.files;
-            photoTypeInput.value = photoType.value;
+            const photoTypeValue = photoType.value;
 
-            cameraModal.classList.add("hidden");
-            stopCamera();
+            // Add to capturedFiles array
+            capturedFiles.push({ file, type: photoTypeValue });
+
+            // Display preview
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(blob);
+            img.classList.add("w-full", "h-auto", "rounded", "border");
+            capturedImages.appendChild(img);
         }, "image/png");
     });
+
+    function updateFileInput() {
+        const dataTransfer = new DataTransfer();
+        const types = [];
+
+        capturedFiles.forEach(({ file, type }) => {
+            dataTransfer.items.add(file);
+            types.push(type);
+        });
+
+        photoFileInput.files = dataTransfer.files;
+        photoTypesInput.value = JSON.stringify(types); // Store types as JSON string
+    }
+
 </script>

@@ -50,6 +50,11 @@ class Patient extends Model
        return $this->hasMany(FollowUp::class);
     }
 
+    public function uploads()
+    {
+        return $this->hasMany(Upload::class, 'patient_id');
+    }
+
     public function reports()
     {
         return $this->hasMany(Report::class);

@@ -43,8 +43,8 @@ class FollowUp extends Model
     }
 
     // Define the relationship with the Upload model
-    public function upload()
+    public function uploads()
     {
-        return $this->hasOne(Upload::class, 'follow_up_id');
+        return $this->hasMany(Upload::class, 'follow_up_id');
     }
 }

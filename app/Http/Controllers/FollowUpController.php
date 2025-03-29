@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Response;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\FollowUpExport;
 use App\Models\Upload;
+use Illuminate\Support\Facades\Storage;
 
 
 
@@ -66,24 +67,34 @@ class FollowUpController extends Controller
             'treatment' => ['nullable', 'string'],
             'amount_billed' => ['required', 'numeric'],
             'amount_paid' => ['required', 'numeric'],
-            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg', 'max:2048'], // Max 2MB
-            'photo_type' => ['required_with:photo', 'in:patient_photo,lab_report'],
+            'photos.*' => ['sometimes', 'image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            'photo_types' => ['sometimes', 'string', 'json'], // JSON string of types
         ]);
 
-        // Handle file upload
-        $upload = null;
-        if ($request->hasFile('photo')) {
-            // Store the file privately in storage/app/private/uploads/
-            $filePath = $request->file('photo')->store('uploads', 'local');
-
-            // Create Upload record with photo_type and file_path
-            $upload = Upload::create([
-                'patient_id' => $request->patient_id,
-                'follow_up_id' => null, // Will be updated after follow-up creation
-                'photo_type' => $request->photo_type,
-                'file_path' => $filePath,
-            ]);
+        // Decode photo types
+        $photoTypes = $request->input('photo_types') ? json_decode($request->photo_types, true) : [];
+        if (!is_array($photoTypes)) {
+            $photoTypes = []; // Fallback if JSON decoding fails
         }
+        $patient = Patient::findOrFail($request->patient_id);
+        $patientName = str_replace(' ', '_', trim($patient->name));
+
+        // // Handle multiple file uploads
+        // $uploads = [];
+        // if ($request->hasFile('photos')) {
+        //     foreach ($request->file('photos') as $index => $photo) {
+        //         $filePath = $photo->store('uploads', 'local');
+        //         $photoType = $photoTypes[$index] ?? 'patient_photo'; // Fallback if type missing
+
+        //         $upload = Upload::create([
+        //             'patient_id' => $request->patient_id,
+        //             'follow_up_id' => null, // Updated later
+        //             'photo_type' => $photoType,
+        //             'file_path' => $filePath,
+        //         ]);
+        //         $uploads[] = $upload;
+        //     }
+        // }
 
         // Get the last follow-up for the patient
         $lastFollowUp = FollowUp::where('patient_id', $request->patient_id)
@@ -118,17 +129,42 @@ class FollowUpController extends Controller
             'treatment' => $request->treatment,
             'amount_billed' => $request->amount_billed,
             'amount_paid' => $amount_paid, // Ensuring it does not exceed the total_due
-            // 'nidan' => $request->nidan,
-            // 'upashay' => $request->upashay,
-            // 'salla' => $request->salla,
-            // 'amount' => $request->amount,
-            // 'balance' => $request->balance,
+
         ]);
 
-        // Link upload to follow-up
-        if ($upload) {
-            $upload->update(['follow_up_id' => $followUp->id]);
+        // Handling multiple file uploads after follow-up creation
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $index => $photo) {
+                $photoType = $photoTypes[$index] ?? 'patient_photo';
+                $extension = $photo->getClientOriginalExtension(); // e.g., "png"
+                $baseName = "{$patientName}_{$photoType}"; // e.g., "JohnDoe_PatientPhoto"
+
+                // Find the next available number
+                $counter = 1;
+                $fileName = "{$baseName}_{$counter}.{$extension}";
+                while (Storage::disk('local')->exists("uploads/{$fileName}")) {
+                    $counter++;
+                    $fileName = "{$baseName}_{$counter}.{$extension}";
+                }
+
+                // Store the file with the custom name
+                $filePath = $photo->storeAs('uploads', $fileName, 'local');
+                $photoType = $photoTypes[$index] ?? 'patient_photo'; // Fallback
+
+                // Creating upload with follow_up_id immediately
+                Upload::create([
+                    'patient_id' => $request->patient_id,
+                    'follow_up_id' => $followUp->id, // Set directly
+                    'photo_type' => $photoType,
+                    'file_path' => $filePath,
+                ]);
+            }
         }
+
+        // // Link upload to follow-up
+        // if ($upload) {
+        //     $upload->update(['follow_up_id' => $followUp->id]);
+        // }
 
         return Redirect::route('patients.show', $request->patient_id)->with('success', 'Follow Up Created Successfully');
     }
