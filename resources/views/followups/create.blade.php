@@ -165,35 +165,61 @@ $previousChikitsa = $latestFollowUp
 
                                     <!-- Camera Modal -->
                                     <div id="cameraModal"
-                                        class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex justify-center items-center">
-                                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg w-[400px]">
-                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Capture
-                                                Photos</h2>
-                                            <label class="block mb-2 text-gray-700 dark:text-gray-300">Select
-                                                Camera:</label>
-                                            <select id="cameraSelect"
-                                                class="w-full px-2 py-1 border rounded mb-4"></select>
-                                            <label class="block mb-2 text-gray-700 dark:text-gray-300">Photo
-                                                Type:</label>
-                                            <select id="photoType" class="w-full px-2 py-1 border rounded mb-4">
-                                                <option value="patient_photo">Patient Photo</option>
-                                                <option value="lab_report">Lab Report</option>
-                                            </select>
-                                            <video id="cameraPreview" class="w-full bg-black rounded"
-                                                autoplay></video>
-                                            <div class="flex justify-between mt-4">
-                                                <button id="captureBtn" type="button"
-                                                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">📸
-                                                    Capture</button>
-                                                <button id="closeCameraModal" type="button"
-                                                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Done</button>
+                                        class="fixed inset-0 bg-gray-200 bg-opacity-75 hidden flex justify-center items-center transition-opacity duration-300 z-50">
+                                        <div
+                                            class="bg-white p-6 rounded-xl shadow-lg w-[800px] h-[650px] flex flex-row gap-6 border border-gray-300">
+                                            <!-- Left Side: Camera and Controls -->
+                                            <div class="w-1/2 flex flex-col gap-4">
+                                                <h2 class="text-2xl font-bold tracking-wider text-blue-600">Capture
+                                                    Interface</h2>
+
+                                                <label class="block text-sm text-gray-700">Camera Source:</label>
+                                                <select id="cameraSelect"
+                                                    class="w-full p-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"></select>
+
+                                                <label class="block text-sm text-gray-700">Capture Type:</label>
+                                                <select id="photoType"
+                                                    class="w-full p-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                                                    <option value="patient_photo">Patient Photo</option>
+                                                    <option value="lab_report">Lab Report</option>
+                                                </select>
+
+                                                <div
+                                                    class="flex-1 overflow-hidden rounded-lg border border-gray-300 shadow-inner bg-gray-200">
+                                                    <video id="cameraPreview" class="w-full h-full object-contain"
+                                                        autoplay></video>
+                                                </div>
+
+                                                <div class="flex justify-between">
+                                                    <button id="captureBtn" type="button"
+                                                        class="px-5 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-200 shadow-md">📸
+                                                        Capture</button>
+                                                    <button id="closeCameraModal" type="button"
+                                                        class="px-5 py-2 bg-gradient-to-r from-red-400 to-pink-400 text-white rounded-lg hover:from-red-500 hover:to-pink-500 transform hover:scale-105 transition-all duration-200 shadow-md">Close</button>
+                                                </div>
                                             </div>
-                                            <div id="capturedPreview" class="mt-4 max-h-40 overflow-y-auto">
-                                                <div id="capturedImages" class="grid grid-cols-2 gap-2"></div>
+
+                                            <!-- Right Side: Separate Preview Sections -->
+                                            <div class="w-1/2 flex flex-col gap-4">
+                                                <!-- Patient Photos Section -->
+                                                <div id="patientPhotosPreview"
+                                                    class="flex-1 flex flex-col bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Patient Photos
+                                                    </h3>
+                                                    <div id="patientPhotosImages" class="flex-1 overflow-y-auto">
+                                                    </div>
+                                                </div>
+
+                                                <!-- Lab Reports Section -->
+                                                <div id="labReportsPreview"
+                                                    class="flex-1 flex flex-col bg-gray-50 rounded-lg p-3 border border-gray-200">
+                                                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Lab Reports
+                                                    </h3>
+                                                    <div id="labReportsImages" class="flex-1 overflow-y-auto"></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
 
 
                                     <!-- Numeric Input Boxes -->
@@ -392,7 +418,8 @@ $previousChikitsa = $latestFollowUp
     const openCameraModal = document.getElementById("openCameraModal");
     const closeCameraModal = document.getElementById("closeCameraModal");
     const captureBtn = document.getElementById("captureBtn");
-    const capturedImages = document.getElementById("capturedImages");
+    const patientPhotosImages = document.getElementById("patientPhotosImages"); // N
+    const labReportsImages = document.getElementById("labReportsImages"); // N
     const video = document.getElementById("cameraPreview");
     const cameraSelect = document.getElementById("cameraSelect");
     const photoType = document.getElementById("photoType");
@@ -451,7 +478,11 @@ $previousChikitsa = $latestFollowUp
         stopCamera();
         try {
             cameraStream = await navigator.mediaDevices.getUserMedia({
-                video: { deviceId: deviceId ? { exact: deviceId } : undefined }
+                video: {
+                    deviceId: deviceId ? {
+                        exact: deviceId
+                    } : undefined
+                }
             });
             video.srcObject = cameraStream;
             video.play();
@@ -480,17 +511,49 @@ $previousChikitsa = $latestFollowUp
         canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
 
         canvas.toBlob((blob) => {
-            const file = new File([blob], `photo_${Date.now()}.png`, { type: "image/png" });
+            const file = new File([blob], `photo_${Date.now()}.png`, {
+                type: "image/png"
+            });
             const photoTypeValue = photoType.value;
 
             // Add to capturedFiles array
-            capturedFiles.push({ file, type: photoTypeValue });
+            capturedFiles.push({
+                file,
+                type: photoTypeValue
+            });
 
-            // Display preview
+            // Create preview container
+            const previewContainer = document.createElement("div");
+            previewContainer.classList.add("preview-container");
+
+            // Create image preview
             const img = document.createElement("img");
             img.src = URL.createObjectURL(blob);
-            img.classList.add("w-full", "h-auto", "rounded", "border");
-            capturedImages.appendChild(img);
+            img.classList.add("w-full", "h-full", "object-cover", "rounded", "border",
+                "border-gray-300");
+
+            // Create delete button
+            const deleteBtn = document.createElement("button");
+            deleteBtn.innerHTML = "✖";
+            deleteBtn.classList.add("delete-btn");
+            deleteBtn.addEventListener("click", () => {
+                // Remove from capturedFiles
+                const index = capturedFiles.findIndex(f => f.file === file);
+                if (index !== -1) capturedFiles.splice(index, 1);
+                // Remove preview from DOM
+                previewContainer.remove();
+            });
+
+            // Append elements
+            previewContainer.appendChild(img);
+            previewContainer.appendChild(deleteBtn);
+
+            // Append to the correct section based on photo type
+            if (photoTypeValue === "patient_photo") {
+                patientPhotosImages.appendChild(previewContainer);
+            } else if (photoTypeValue === "lab_report") {
+                labReportsImages.appendChild(previewContainer);
+            }
         }, "image/png");
     });
 
@@ -498,7 +561,10 @@ $previousChikitsa = $latestFollowUp
         const dataTransfer = new DataTransfer();
         const types = [];
 
-        capturedFiles.forEach(({ file, type }) => {
+        capturedFiles.forEach(({
+            file,
+            type
+        }) => {
             dataTransfer.items.add(file);
             types.push(type);
         });
@@ -506,5 +572,4 @@ $previousChikitsa = $latestFollowUp
         photoFileInput.files = dataTransfer.files;
         photoTypesInput.value = JSON.stringify(types); // Store types as JSON string
     }
-
 </script>

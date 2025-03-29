@@ -10,18 +10,117 @@
     color: #e2e8f0; /* Light text color */
 }
 
-/* Custom scrollbar for WebKit browsers */
-.scrollbar-thin::-webkit-scrollbar {
-    width: 3px; /* Adjust width to make it thin */
-    border-radius: 20px;
+/* Modal Container */
+#cameraModal > div {
+    max-width: 90vw; /* Responsive max width */
+    max-height: 90vh; /* Responsive max height */
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb {
-    background: rgba(100, 100, 100, 0.5); /* Subtle grayish color */
-    border-radius: 10px; /* Rounded corners */
+/* Video Container */
+#cameraModal .flex-1.overflow-hidden {
+    max-height: 100%; /* Prevents overflow */
+    background-color: #e5e7eb; /* Light gray fallback */
 }
 
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background: rgba(100, 100, 100, 0.7); /* Darker on hover */
+/* Live Video Preview */
+#cameraPreview {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+/* Preview Sections */
+#patientPhotosPreview, #labReportsPreview {
+    min-height: 0; /* Allows flex-1 to shrink properly */
+}
+
+/* Preview Images Container */
+#patientPhotosImages, #labReportsImages {
+    display: grid;
+    gap: 8px; /* Consistent spacing */
+    padding: 4px; /* Inner padding */
+}
+
+/* Dynamic Grid Adjustment */
+#patientPhotosImages:empty, #labReportsImages:empty {
+    /* No special styling needed when empty */
+}
+#patientPhotosImages:has(> :only-child), #labReportsImages:has(> :only-child) {
+    grid-template-columns: 1fr; /* Single column for one image */
+}
+#patientPhotosImages:not(:has(> :only-child)), #labReportsImages:not(:has(> :only-child)) {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Multiple images */
+}
+
+/* Scrollbars */
+#patientPhotosImages::-webkit-scrollbar,
+#labReportsImages::-webkit-scrollbar {
+    width: 8px;
+}
+#patientPhotosImages::-webkit-scrollbar-thumb,
+#labReportsImages::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #3b82f6, #06b6d4); /* Blue to cyan */
+    border-radius: 4px;
+}
+#patientPhotosImages::-webkit-scrollbar-track,
+#labReportsImages::-webkit-scrollbar-track {
+    background: #e5e7eb; /* Light gray */
+}
+
+/* Preview Container */
+.preview-container {
+    position: relative;
+    width: 100%;
+    transition: transform 0.2s ease;
+}
+.preview-container:hover {
+    /* transform: scale(1.05); */
+}
+
+/* Single Image Case */
+#patientPhotosImages:has(> :only-child) .preview-container,
+#labReportsImages:has(> :only-child) .preview-container {
+    /* height: 100%; Full height of the section */
+    width: 100%;
+    overflow: hidden;
+}
+
+/* Multiple Images Case */
+#patientPhotosImages:not(:has(> :only-child)) .preview-container,
+#labReportsImages:not(:has(> :only-child)) .preview-container {
+    height: 100px; /* Fixed height for grid */
+}
+
+/* Preview Image */
+.preview-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #d1d5db; /* Light gray border */
+}
+
+/* Delete Button */
+.delete-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    background: rgba(239, 68, 68, 0.8); /* Lighter red */
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.delete-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
 }
 

@@ -209,71 +209,73 @@
                                 </div>
                             </div>
 
-                           {{-- Reports Button --}}
-<div x-data="{ openReportModal: false, selectedImageUrl: '' }">
-    <button @click="openReportModal = true"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 ml-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-        {{ __('messages.Medical Reports') }}
-    </button>
+                            {{-- Reports Button --}}
+                            <div x-data="{ openReportModal: false, selectedImageUrl: '' }">
+                                <button @click="openReportModal = true"
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 ml-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
+                                    {{ __('messages.Medical Reports') }}
+                                </button>
 
-    <!-- Medical Reports Modal -->
-    <div x-show="openReportModal" style="background-color: rgba(0, 0, 0, 0.75)"
-        class="fixed inset-0 flex items-center justify-center z-50" x-cloak>
-        <div
-            class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col overflow-hidden">
-            <!-- Header -->
-            <div
-                class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    {{ __('messages.Medical Reports') }}
-                </h2>
-                <button @click="openReportModal = false; selectedImageUrl = ''"
-                    class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor"
-                        viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                    <span class="sr-only">Close modal</span>
-                </button>
-            </div>
-
-            <!-- Content -->
-            <div class="flex-1 overflow-y-auto p-6">
-                <template x-if="!selectedImageUrl">
-                    <div>
-                        @if ($uploads->count() > 0)
-                            <div class="grid grid-cols-1 gap-4">
-                                @foreach ($uploads as $upload)
-                                    <div @click="selectedImageUrl = '{{ route('uploads.show', $upload->id) }}'"
-                                        class="flex items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition duration-200">
-                                        <!-- Thumbnail -->
-                                        <div class="flex-shrink-0 w-20 h-20">
-                                            <img src="{{ route('uploads.show', $upload->id) }}"
-                                                alt="{{ $upload->photo_type }}"
-                                                class="w-full h-full object-cover rounded-md border border-gray-200 dark:border-gray-700">
+                                <!-- Medical Reports Modal -->
+                                <div x-show="openReportModal" style="background-color: rgba(0, 0, 0, 0.75)"
+                                    class="fixed inset-0 flex items-center justify-center z-50" x-cloak>
+                                    <div
+                                        class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col overflow-hidden">
+                                        <!-- Header -->
+                                        <div
+                                            class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                                            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                                {{ __('messages.Medical Reports') }}
+                                            </h2>
+                                            <button @click="openReportModal = false; selectedImageUrl = ''"
+                                                class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                                                    viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                                <span class="sr-only">Close modal</span>
+                                            </button>
                                         </div>
-                                        <!-- Details -->
-                                        <div class="ml-4 flex-1">
-                                            <p
-                                                class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
-                                                {{ str_replace('_', ' ', $upload->photo_type) }}
-                                            </p>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                                {{ __('messages.Uploaded') }}:
-                                                {{ $upload->created_at->format('d M Y, h:i A') }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-center text-gray-500 dark:text-gray-400 py-4">No medical
-                                reports or photos available.</p>
-                        @endif
 
-                        <!-- Upload Form -->
-                        {{-- <form method="POST" action="{{ route('uploads.store') }}"
+                                        <!-- Content -->
+                                        <div class="flex-1 overflow-y-auto p-6">
+                                            <template x-if="!selectedImageUrl">
+                                                <div>
+                                                    @if ($uploads->count() > 0)
+                                                        <div class="grid grid-cols-1 gap-4">
+                                                            @foreach ($uploads as $upload)
+                                                                <div @click="selectedImageUrl = '{{ route('uploads.show', $upload->id) }}'"
+                                                                    class="flex items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition duration-200">
+                                                                    <!-- Thumbnail -->
+                                                                    <div class="flex-shrink-0 w-20 h-20">
+                                                                        <img src="{{ route('uploads.show', $upload->id) }}"
+                                                                            alt="{{ $upload->photo_type }}"
+                                                                            class="w-full h-full object-cover rounded-md border border-gray-200 dark:border-gray-700">
+                                                                    </div>
+                                                                    <!-- Details -->
+                                                                    <div class="ml-4 flex-1">
+                                                                        <p
+                                                                            class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
+                                                                            {{ str_replace('_', ' ', $upload->photo_type) }}
+                                                                        </p>
+                                                                        <p
+                                                                            class="text-sm text-gray-500 dark:text-gray-400">
+                                                                            {{ __('messages.Uploaded') }}:
+                                                                            {{ $upload->created_at->format('d M Y, h:i A') }}
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    @else
+                                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">No
+                                                            medical
+                                                            reports or photos available.</p>
+                                                    @endif
+
+                                                    <!-- Upload Form -->
+                                                    {{-- <form method="POST" action="{{ route('uploads.store') }}"
                             enctype="multipart/form-data" class="mt-6">
                             @csrf
                             <input type="hidden" name="patient_id" value="{{ $patient->id }}">
@@ -307,39 +309,39 @@
                                 </x-primary-button>
                             </div>
                         </form> --}}
-                    </div>
-                </template>
+                                                </div>
+                                            </template>
 
-                <!-- Full-Size Image View -->
-                <template x-if="selectedImageUrl">
-                    <div class="relative h-full flex items-center justify-center">
-                        <button @click="selectedImageUrl = ''"
-                            class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200 z-10">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor"
-                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                            <span class="sr-only">Back to list</span>
-                        </button>
-                        <img :src="selectedImageUrl" alt="Full-size image"
-                            class="w-full h-auto max-h-[calc(90vh-120px)] object-contain rounded-lg">
-                    </div>
-                </template>
-            </div>
+                                            <!-- Full-Size Image View -->
+                                            <template x-if="selectedImageUrl">
+                                                <div class="relative h-full flex items-center justify-center">
+                                                    <button @click="selectedImageUrl = ''"
+                                                        class="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition duration-200 z-10">
+                                                        <svg class="w-6 h-6" fill="none" stroke="currentColor"
+                                                            viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                        </svg>
+                                                        <span class="sr-only">Back to list</span>
+                                                    </button>
+                                                    <img :src="selectedImageUrl" alt="Full-size image"
+                                                        class="w-full h-auto max-h-[calc(90vh-120px)] object-contain rounded-lg">
+                                                </div>
+                                            </template>
+                                        </div>
 
-            <!-- Footer -->
-            <div x-show="!selectedImageUrl"
-                class="flex justify-end p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-                <button @click="openReportModal = false"
-                    class="text-red-600 hover:text-red-800 font-semibold py-2 px-4 rounded-lg transition duration-200">
-                    {{ __('messages.Close') }}
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{{-- Reports Button Ends here --}}
+                                        <!-- Footer -->
+                                        <div x-show="!selectedImageUrl"
+                                            class="flex justify-end p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+                                            <button @click="openReportModal = false"
+                                                class="text-red-600 hover:text-red-800 font-semibold py-2 px-4 rounded-lg transition duration-200">
+                                                {{ __('messages.Close') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {{-- Reports Button Ends here --}}
 
 
 
@@ -551,7 +553,7 @@
                                                                             ];
                                                                         })->toArray(),
                                                                 ) }}">
-                                                                View All ({{ $followUp->uploads->count() }})
+                                                                <i class="fas fa-images"></i> ({{ $followUp->uploads->count() }})
                                                             </a>
                                                         </p>
                                                     @endif
