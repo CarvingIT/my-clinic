@@ -327,7 +327,7 @@ $previousChikitsa = $latestFollowUp
 
                         <!-- Previous Follow-ups (Right Column) -->
                         <div
-                            class="fixed mb-3 right-40 top-62 max-h-[calc(100vh-80px)] w-[375px] overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 scrollbar-thin">
+                            class="fixed mb-3 right-40 top-62 max-h-[calc(100vh-250px)] w-[375px] overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 scrollbar-thin">
                             <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
                                 {{ __('Previous Follow-ups') }}
                             </h3>

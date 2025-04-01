@@ -50,7 +50,7 @@ class FollowUpController extends Controller
 
         $followUps = $patient->followUps()
             ->orderBy('created_at', 'desc')
-            ->take(2)
+            // ->take(2)
             ->get();
 
         return view('followups.create', compact('patient', 'parameters', 'followUps', 'totalDueAll'));
