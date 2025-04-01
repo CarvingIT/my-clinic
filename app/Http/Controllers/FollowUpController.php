@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth as FacadesAuth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Log;
 
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\FollowUpExport;
@@ -52,7 +53,7 @@ class FollowUpController extends Controller
             ->take(2)
             ->get();
 
-        return view('followups.create', compact('patient', 'parameters','followUps', 'totalDueAll'));
+        return view('followups.create', compact('patient', 'parameters', 'followUps', 'totalDueAll'));
     }
 
 
@@ -307,8 +308,8 @@ class FollowUpController extends Controller
 
     public function exportFollowUps()
     {
-    return Excel::download(new FollowUpExport(), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
-        'Content-Type' => 'text/csv; charset=UTF-8',
-    ]);
-}
+        return Excel::download(new FollowUpExport(), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
+    }
 }

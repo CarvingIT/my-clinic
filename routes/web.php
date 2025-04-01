@@ -5,6 +5,8 @@ use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\FollowupImageController;
+
 use Illuminate\Support\Facades\App;
 
 use App\Http\Controllers\UploadController;
@@ -89,6 +91,11 @@ Route::delete('/uploads/{id}', [UploadController::class, 'destroy'])->name('uplo
 
 // Route to serve private files
 Route::get('/uploads/{id}', [UploadController::class, 'show'])->name('uploads.show');
+Route::get('/followup-images/{filename}', [FollowupImageController::class, 'show'])->name('followup.image');
+
+Route::get('/patients/{patient}/followup-images', [FollowUpImageController::class, 'showFollowUpImages'])
+    ->name('followup.images');
+
 
 
 

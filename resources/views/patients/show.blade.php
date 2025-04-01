@@ -500,6 +500,13 @@
                                                             @endif
                                                         </p> --}}
 
+                                                        @if ($followUp->patient_photos)
+                                                            <img src="{{ route('followup.image', ['filename' => basename($followUp->patient_photos)]) }}"
+                                                                alt="Patient Photo">
+                                                        @else
+                                                            <p>No photo available.</p>
+                                                        @endif
+
 
                                                         </div>
                                                     @endif
