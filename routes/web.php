@@ -48,23 +48,18 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/patients/{patient}/certificate', [PatientController::class, 'generateCertificate'])->name('patients.certificate');
     Route::get('/followups/{followup}/edit', [FollowUpController::class, 'edit'])->name('followups.edit');
+
+    //Routes for reports
+    Route::get('/reports/{report}/view', [ReportController::class, 'view'])->name('reports.view');
+    Route::get('/reports/{report}/download', [ReportController::class, 'download'])->name('reports.download');
+    Route::delete('/reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
+
+    // Route to serve private files (Uploads)
+    Route::get('/uploads/{id}', [UploadController::class, 'show'])->name('uploads.show');
+    Route::get('/followup-images/{filename}', [FollowupImageController::class, 'show'])->name('followup.image');
+
+    Route::get('/patients/{patient}/followup-images', [FollowUpImageController::class, 'showFollowUpImages'])->name('followup.images');
 });
-
-// Route::resource('users',UserController::class);
-// Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-
-// Route::resource('patients', PatientController::class);
-// Route::get('/patients/create', [PatientController::class, 'create'])->name('patients.create');
-// Route::get('patients/{patient}/edit', [PatientController::class, 'edit'])->name('patients.edit');
-
-// Route::get('patients/{patient}', [PatientController::class, 'show'])->name('patients.show');
-
-
-// Route::resource('followups', FollowUpController::class)->only(['store']);
-
-
-// Route::get('followups/create', [FollowUpController::class,'create'])->name('followups.create');
-// Route::post('followups', [FollowUpController::class,'store'])->name('followups.store');
 
 
 Route::resource('users', UserController::class);
@@ -77,7 +72,7 @@ Route::resource('followups', FollowUpController::class)->only(['store']);
 
 Route::resource('followups', FollowUpController::class)->except(['create', 'store']);
 
-Route::resource('reports', ReportController::class)->only(['store','destroy']);
+Route::resource('reports', ReportController::class)->only(['store', 'destroy']);
 
 
 Route::get('/followups', [FollowUpController::class, 'index'])->name('followups.index');
@@ -89,12 +84,7 @@ Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])-
 Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store'); // Route to handle file uploads
 Route::delete('/uploads/{id}', [UploadController::class, 'destroy'])->name('uploads.destroy'); // Route to delete files
 
-// Route to serve private files
-Route::get('/uploads/{id}', [UploadController::class, 'show'])->name('uploads.show');
-Route::get('/followup-images/{filename}', [FollowupImageController::class, 'show'])->name('followup.image');
 
-Route::get('/patients/{patient}/followup-images', [FollowUpImageController::class, 'showFollowUpImages'])
-    ->name('followup.images');
 
 
 
