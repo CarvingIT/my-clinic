@@ -244,14 +244,10 @@ $previousChikitsa = $latestFollowUp
                                 <div class="mt-4">
                                     <label for="payment_method"
                                         class="text-l font-semibold text-gray-700 dark:text-white mb-4">{{ __('messages.Payment Method') }}
-                                    </label>
-                                    <select id="payment_method" name="payment_method"
-                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 text-sm">
-                                        <option value="">Please Select</option>
-                                        <option value="cash">Cash</option>
-                                        <option value="card">Card</option>
-                                        <option value="online">Online</option>
-                                    </select>
+                                    </label><br/>
+                                    <input type="radio" name="payment_method" value="cash" /> Cash 
+                                    <input type="radio" name="payment_method" value="card" /> Card 
+                                    <input type="radio" name="payment_method" value="online" /> Online 
                                     <x-input-error :messages="$errors->get('payment_method')" class="mt-2" />
                                 </div>
 

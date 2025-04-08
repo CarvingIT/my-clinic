@@ -1,7 +1,10 @@
 <x-app-layout>
+            @php
+                $patient_count = \App\Models\Patient::count();
+            @endphp
     <x-slot name="header">
         <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
-            {{ __('messages.patients') }}
+            {{ __('messages.patients') }} ({{ $patient_count }})
         </h2>
     </x-slot>
 
