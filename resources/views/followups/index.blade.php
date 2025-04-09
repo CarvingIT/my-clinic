@@ -38,6 +38,24 @@
                         </select>
                     </div>
 
+                    <div class="flex flex-col">
+                        <label for="doctor" class="text-gray-800 dark:text-gray-300 font-semibold">Doctor:</label>
+                        <select id="doctor" name="doctor"
+                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            <option value="all" {{ request('doctor') == 'all' ? 'selected' : '' }}>All 
+                            </option>
+                            @php
+                                $doctors = \App\Models\User::all();
+                            @endphp
+                            @foreach ($doctors as $doctor)
+                                <option value="{{ $doctor->id }}"
+                                    {{ request('doctor') == $doctor->id ? 'selected' : '' }}>
+                                    {{ $doctor->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
                     <button type="submit"
                         class="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
                         Filter

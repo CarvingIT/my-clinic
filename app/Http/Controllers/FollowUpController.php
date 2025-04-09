@@ -122,9 +122,9 @@ class FollowUpController extends Controller
         $checkUpInfo['branch_id'] = session('branch_id');
         $checkUpInfo['branch_name'] = session('branch_name');
 
-
         $followUp = FollowUp::create([
             'patient_id' => $request->patient_id,
+            'doctor_id' => Auth::id(),
             'check_up_info' => json_encode($checkUpInfo),
             'diagnosis' => $request->diagnosis,
             'treatment' => $request->treatment,
@@ -186,6 +186,9 @@ class FollowUpController extends Controller
         // Apply branch filter only if a specific branch is selected
         if ($selectedBranch !== 'all' && !empty($selectedBranch)) {
             $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
+        }
+        if($request->input('doctor') != 'all'){
+            $query->where('doctor_id', $request->input('doctor'));
         }
 
         // Apply date filter if selected

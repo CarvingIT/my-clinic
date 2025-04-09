@@ -11,6 +11,7 @@ class FollowUp extends Model
 
     protected $fillable = [
         'patient_id',
+        'doctor_id',
         'check_up_info',
         'diagnosis',
         'treatment',
