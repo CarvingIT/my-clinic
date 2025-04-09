@@ -14,6 +14,7 @@ return [
     'remark' => 'Remark',
     'add_follow_up' => 'Add Follow Up',
     'patients' => 'Patients',
+    'doctor'=>'Doctor',
 
     'Gender' => 'Gender',
     'Birthdate' => 'Birthdate',

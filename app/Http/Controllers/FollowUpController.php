@@ -309,9 +309,9 @@ class FollowUpController extends Controller
         return redirect()->route('patients.show', $patientId)->with('success', 'Follow Up Deleted Successfully');
     }
 
-    public function exportFollowUps()
+    public function exportFollowUps(Request $request)
     {
-        return Excel::download(new FollowUpExport(), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
+        return Excel::download(new FollowUpExport($request), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }

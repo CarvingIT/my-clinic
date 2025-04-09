@@ -10,7 +10,7 @@
             <div class="bg-white dark:bg-gray-900 shadow-lg rounded-lg p-6">
 
                 {{-- Filters Section --}}
-                <form method="GET" action="{{ route('followups.index') }}" class="flex flex-wrap gap-4 mb-6 items-end">
+                <form method="GET" action="{{ route('followups.index') }}" id="follow_ups" class="flex flex-wrap gap-4 mb-6 items-end">
                     <div class="flex flex-col font-weight-semibold">
                         <label for="from_date" class="text-gray-800 dark:text-gray-300 font-semibold">From:</label>
                         <input type="date" id="from_date" name="from_date" value="{{ request('from_date') }}"
@@ -60,17 +60,9 @@
                         class="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
                         Filter
                     </button>
+                    <button id="exportCSV" onclick="csvExport();"
+                        class="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">Export to CSV</button>
                 </form>
-
-                <div class="flex justify-end">
-                    {{-- Export CSV Button --}}
-                    <button id="exportCSV"
-                        class="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">
-                        Export CSV
-                    </button>
-                </div>
-
-
 
                 {{-- Insights Section --}}
                 <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
@@ -145,6 +137,7 @@
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Created At') }} 📅</th>
                                 <th class="px-4 py-3 text-center font-semibold">{{ __('messages.Patient Name') }} 👤</th>
+                                <th class="px-4 py-3 text-center font-semibold">{{ __('messages.doctor') }} 👤</th>
                                 <th class="px-4 py-3 text-center font-semibold">💳{{ __('messages.Amount Billed') }}
                                 </th>
                                 <th class="px-4 py-3 text-right font-semibold"> 💰{{ __('messages.Amount Paid') }} </th>
@@ -163,6 +156,7 @@
                                                 {{ $followUp->patient->name }}
                                             </a>
                                         </td>
+                                        <td class="text-center px-4 py-3">{{ $followUp->doctor->name }}</td>
                                         <td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
                                             ₹{{ number_format($followUp->amount_billed, 2) }}
                                         </td>
@@ -184,36 +178,9 @@
         </div>
     </div>
 </x-app-layout>
-
 <script>
-    document.getElementById("exportCSV").addEventListener("click", function() {
-    fetch("{{ route('followups.export') }}", {
-        method: "GET",
-        headers: {
-            "X-Requested-With": "XMLHttpRequest",
-        },
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errorData => {
-                throw new Error(errorData.message || "Failed to export CSV.");
-            });
-        }
-        return response.blob();
-    })
-    .then(blob => {
-        let a = document.createElement("a");
-        a.href = window.URL.createObjectURL(blob);
-        a.download = "followups_" + new Date().toISOString().slice(0, 19).replace(/:/g, "-") + ".csv";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    })
-    .catch(error => {
-        alert(error.message);
-        console.error("Error exporting CSV:", error);
-    });
-});
-
-
+    function csvExport(){
+        document.getElementById('follow_ups').action="/export-followups";        
+        document.getElementById('follow_ups').submit();
+    }
 </script>

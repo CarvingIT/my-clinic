@@ -26,6 +26,10 @@ class FollowUp extends Model
         return $this->belongsTo(Patient::class);
     }
 
+    public function doctor(){
+        return $this->belongsTo(User::class, 'doctor_id');
+    }
+
     public function getPreviousDueAttribute()
     {
         // Get the last follow-up for the same patient

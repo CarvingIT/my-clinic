@@ -14,6 +14,7 @@ return [
     'remark' => 'शेरा',
     'add_follow_up' => 'फॉलो अप जोडा',
     'patients' => 'रुग्ण',
+    'doctor' => 'वैद्य',
 
     'Gender' => 'लिंग',
     'Birthdate' => 'जन्मदिनांक',
