@@ -403,10 +403,25 @@ $previousChikitsa = $latestFollowUp
 <script>
     function appendNadi(nadi) {
         const input = document.getElementById('nadiInput');
-        input.value += (input.value ? ', ' : '') + nadi;
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const currentValue = input.value;
+
+        const before = currentValue.substring(0, start);
+        const after = currentValue.substring(end);
+
+        // Add comma if needed before or after
+        const insert = (before && !before.endsWith(', ') ? ', ' : '') + nadi + (after && !after.startsWith(',') ? ', ' : '');
+
+        // Set updated value and focus
+        input.value = before + insert + after;
+
+        const newPosition = before.length + insert.length;
+        input.setSelectionRange(newPosition, newPosition);
         input.focus();
     }
 </script>
+
 
 <script>
     const textarea = document.getElementById('chikitsa');
@@ -415,10 +430,30 @@ $previousChikitsa = $latestFollowUp
     presetBoxes.forEach(box => {
         box.addEventListener('click', () => {
             const presetText = box.dataset.preset;
-            textarea.value += (textarea.value ? ', ' : '') + presetText;
+
+            // Get current cursor position
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const currentText = textarea.value;
+
+            // Insert presetText at cursor
+            const before = currentText.substring(0, start);
+            const after = currentText.substring(end);
+
+            // Add comma if needed before/after
+            const insert = (before && !before.endsWith(', ') ? ', ' : '') + presetText + (after && !after.startsWith(',') ? ', ' : '');
+
+            // Update textarea value
+            textarea.value = before + insert + after;
+
+            // Move the cursor after inserted text
+            const newPosition = before.length + insert.length;
+            textarea.setSelectionRange(newPosition, newPosition);
+            textarea.focus();
         });
     });
 </script>
+
 
 <script>
     function insertArrow(arrow) {
@@ -438,9 +473,18 @@ $previousChikitsa = $latestFollowUp
     }
 </script>
 <script>
-    function insertText(text) {
+     function insertText(text) {
         let textarea = document.getElementById("lakshane");
-        textarea.value += text + " ";
+        let start = textarea.selectionStart;
+        let end = textarea.selectionEnd;
+
+        // Get current text and insert the new text at cursor
+        let currentText = textarea.value;
+        textarea.value = currentText.substring(0, start) + text + currentText.substring(end);
+
+        // Move cursor to after the inserted text
+        textarea.selectionStart = textarea.selectionEnd = start + text.length;
+        textarea.focus();
     }
 </script>
 
