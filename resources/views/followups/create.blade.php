@@ -155,12 +155,12 @@ $previousChikitsa = $latestFollowUp
                                     </div>
 
                                     {{-- Capture button --}}
-                                    <div class="mt-4">
+                                    {{-- <div class="mt-4">
                                         <button type="button" id="openCameraModal"
                                             class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
                                             📷 Capture Photos
                                         </button>
-                                    </div>
+                                    </div> --}}
 
 
                                     <!-- Camera Modal -->
@@ -222,75 +222,105 @@ $previousChikitsa = $latestFollowUp
                                     </div>
 
 
-                                    <!-- Numeric Input Boxes -->
-                                    <div class="flex items-center space-x-4 mt-6">
+                                    <!-- Numeric Input Boxes + Payment Method -->
+                                    <div class="flex flex-wrap md:flex-nowrap items-start gap-10 mt-6">
+
+                                        <!-- दिवस -->
                                         <div class="flex flex-col">
                                             <h2 class="text-l font-semibold text-gray-800 dark:text-white mb-2">
-                                                {{ __('दिवस') }} </h2>
+                                                {{ __('दिवस') }}
+                                            </h2>
                                             <input type="number" name="days" id="days" placeholder=""
-                                                class="px-2 py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-21" />
+                                                class="px-2 py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
                                         </div>
+
+                                        <!-- पुड्या -->
                                         <div class="flex flex-col">
                                             <h2 class="text-l font-semibold text-gray-800 dark:text-white mb-2">
-                                                {{ __('पुड्या') }} </h2>
+                                                {{ __('पुड्या') }}
+                                            </h2>
                                             <input type="number" name="packets" id="packets" placeholder=""
-                                                class="px-2 py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-21" />
+                                                class="px-2 py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
+                                        </div>
+
+                                        <!-- Payment Method -->
+                                        <div class="flex flex-col pl-32">
+                                            <label for="payment_method"
+                                                class="text-l font-semibold text-gray-700 dark:text-white mb-2">
+                                                {{ __('messages.Payment Method') }}
+                                            </label>
+                                            <div class="flex items-center space-x-2">
+                                                <label class="flex items-center space-x-1">
+                                                    <input type="radio" name="payment_method" value="cash" />
+                                                    <span>Cash</span>
+                                                </label>
+                                                <label class="flex items-center space-x-1">
+                                                    <input type="radio" name="payment_method" value="card" />
+                                                    <span>Card</span>
+                                                </label>
+                                                <label class="flex items-center space-x-1">
+                                                    <input type="radio" name="payment_method" value="online" />
+                                                    <span>Online</span>
+                                                </label>
+                                            </div>
+                                            <x-input-error :messages="$errors->get('payment_method')" class="mt-1" />
                                         </div>
                                     </div>
+
                                 </div>
 
 
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 
-                                <div class="mt-4">
-                                    <label for="payment_method"
-                                        class="text-l font-semibold text-gray-700 dark:text-white mb-4">{{ __('messages.Payment Method') }}
-                                    </label><br/>
-                                    <input type="radio" name="payment_method" value="cash" /> Cash 
-                                    <input type="radio" name="payment_method" value="card" /> Card 
-                                    <input type="radio" name="payment_method" value="online" /> Online 
-                                    <x-input-error :messages="$errors->get('payment_method')" class="mt-2" />
+                                    <!-- All Dues -->
+                                    <div>
+                                        <label for="all_dues"
+                                            class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1 block">
+                                            {{ __('messages.All Dues') }}
+                                        </label>
+                                        <x-text-input id="all_dues"
+                                            class="px-3 py-2 block w-full border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white rounded-lg shadow-md text-md"
+                                            type="number" name="all_dues"
+                                            value="{{ old('all_dues', $totalDueAll ?? 0) }}" readonly />
+                                    </div>
+
+                                    <!-- Total Due -->
+                                    <div>
+                                        <label for="total_due"
+                                            class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1 block">
+                                            {{ __('messages.Total Due') }}
+                                        </label>
+                                        <x-text-input id="total_due"
+                                            class="px-3 py-2 block w-full border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white rounded-lg shadow-md text-md"
+                                            type="number" name="total_due" value="{{ old('total_due', 0) }}"
+                                            readonly />
+                                    </div>
+
+                                    <!-- Amount Billed -->
+                                    <div>
+                                        <label for="amount_billed"
+                                            class="text-md font-semibold text-gray-700 dark:text-white mb-1 block">
+                                            {{ __('messages.Amount Billed') }}
+                                        </label>
+                                        <x-text-input id="amount_billed"
+                                            class="px-2 py-1 block w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-md text-md"
+                                            type="number" name="amount_billed" required />
+                                    </div>
+
+                                    <!-- Amount Paid -->
+                                    <div>
+                                        <label for="amount_paid"
+                                            class="text-md font-semibold text-gray-700 dark:text-white mb-1 block">
+                                            {{ __('messages.Amount Paid') }}
+                                        </label>
+                                        <x-text-input id="amount_paid"
+                                            class="px-2 py-1 block w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-md text-md"
+                                            type="number" name="amount_paid" required />
+                                    </div>
+
                                 </div>
 
-                                <div class="mt-4">
-                                    <label for="all_dues"
-                                        class="text-l font-semibold text-gray-700 dark:text-white mb-4">
-                                        {{ __('messages.All Dues') }}
-                                    </label>
-                                    <x-text-input id="all_dues"
-                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
-                                        type="number" name="all_dues"
-                                        value="{{ old('all_dues', $totalDueAll ?? 0) }}" readonly />
-                                </div>
 
-                                <div class="mt-4">
-                                    <label for="amount_billed"
-                                        class="text-l font-semibold text-gray-700 dark:text-white mb-4">
-                                        {{ __('messages.Amount Billed') }}
-                                    </label>
-                                    <x-text-input id="amount_billed"
-                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
-                                        type="number" name="amount_billed" required />
-                                </div>
-
-                                <div class="mt-4">
-                                    <label for="amount_paid"
-                                        class="text-l font-semibold text-gray-700 dark:text-white mb-4">
-                                        {{ __('messages.Amount Paid') }}
-                                    </label>
-                                    <x-text-input id="amount_paid"
-                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
-                                        type="number" name="amount_paid" required />
-                                </div>
-
-                                <div class="mt-4">
-                                    <label for="total_due"
-                                        class="text-l font-semibold text-gray-700 dark:text-white mb-4">
-                                        {{ __('messages.Total Due') }}
-                                    </label>
-                                    <x-text-input id="total_due"
-                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-sm text-sm"
-                                        type="number" name="total_due" readonly />
-                                </div>
 
                                 <script>
                                     function calculateTotalDue() {
@@ -312,8 +342,16 @@ $previousChikitsa = $latestFollowUp
                                         document.getElementById('amount_paid').addEventListener('input', calculateTotalDue);
                                     };
                                 </script>
+
+
                                 <!-- Submit Button -->
-                                <div class="flex items-center justify-end mt-4">
+                                <div class="flex items-center justify-between mt-4">
+
+                                    <button type="button" id="openCameraModal"
+                                        class="px-5 py-2.5 ms-4 text-xs font-medium tracking-wider bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                        CAPTURE PHOTOS
+                                    </button>
+
                                     <x-primary-button class="ms-4">
                                         {{ __('Add Follow Up') }}
                                     </x-primary-button>
