@@ -30,6 +30,10 @@
                     @endphp
                     | {{ __('BMI') }}: {{ number_format($bmi, 2) }}
                 @endif
+                @if (isset($totalDueAll))
+                    | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($totalDueAll, 2) }}
+                @endif
+
             </span>
         </h2>
     </x-slot>
@@ -51,29 +55,50 @@
 
                                 <!-- Naadi Textarea -->
                                 <div class="mb-6">
-                                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                                        {{ __('नाडी') }}
-                                    </h2>
+                                    <div class="justify-between flex items-center">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                                            {{ __('नाडी') }}
+                                        </h2>
+
+                                        {{-- preset button (popup) --}}
+                                        <button type="button" onclick="toggleNadiModal(true)"
+                                            class="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600 transition text-lg">
+                                            +
+                                        </button>
+                                    </div>
+
                                     <textarea id="nadiInput" name="nadi" rows="4"
                                         class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
 
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mt-4">
+                                    <!-- Presets Container -->
+                                    <div id="nadiPresets"
+                                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mt-4">
                                         @foreach (['वात', 'पित्त', 'कफ', 'सूक्ष्म', 'कठीण', 'साम', 'वेग', 'प्राण', 'व्यान', 'स्थूल', 'अल्प स्थूल', 'अनियमित', 'तीक्ष्ण', 'वेगवती'] as $nadi)
-                                            <button type="button"
-                                                class="nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                                                onclick="appendNadi('{{ $nadi }}')">{{ $nadi }}</button>
+                                            <div class="relative">
+                                                <button type="button"
+                                                    class="nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition w-full text-left"
+                                                    onclick="appendNadi('{{ $nadi }}')">{{ $nadi }}</button>
+                                            </div>
                                         @endforeach
                                     </div>
+
+
+
                                     <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
                                 </div>
 
 
                                 <!-- Diagnosis Textarea -->
                                 <div class="mt-4 mb-4">
-                                    <div class="flex items-center space-x-2">
+                                    <div class="flex items-center justify-between space-x-2">
                                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
                                             {{ __('लक्षणे') }}
                                         </h2>
+
+                                        <button type="button" onclick="openLakshaneModal()"
+                                            class="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600 transition">
+                                            +
+                                        </button>
                                     </div>
 
                                     <textarea id="lakshane" name="diagnosis" rows="4"
@@ -124,8 +149,15 @@ $previousChikitsa = $latestFollowUp
                                 <!-- Chikitsa Textarea -->
                                 <div class="mt-6 mb-4 flex flex-col">
                                     <div class="flex-1">
-                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                                            {{ __('चिकित्सा') }}</h2>
+                                        <div class="flex items-center justify-between space-x-2">
+                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                                                {{ __('चिकित्सा') }}</h2>
+                                            <button type="button" onclick="showChikitsaModal()"
+                                                class=" w-10 h-10 rounded bg-gray-500 text-white text-xl font-bold hover:bg-gray-600 transition">
+                                                +
+                                            </button>
+                                        </div>
+
                                         <textarea id="chikitsa" name="chikitsa" rows="4"
                                             class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                                         <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
@@ -152,6 +184,10 @@ $previousChikitsa = $latestFollowUp
                                                 चिकित्सा यथा पूर्व
                                             </div>
                                         </div>
+                                        <!-- Custom Presets Container -->
+                                        <div id="chikitsaPresets"
+                                            class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mt-4"></div>
+
                                     </div>
 
                                     {{-- Capture button --}}
@@ -223,28 +259,40 @@ $previousChikitsa = $latestFollowUp
 
 
                                     <!-- Numeric Input Boxes + Payment Method -->
-                                    <div class="flex flex-wrap md:flex-nowrap items-start gap-10 mt-6">
+                                    <div class="flex flex-wrap md:flex-nowrap items-start justify-center gap-10 mt-6">
 
                                         <!-- दिवस -->
                                         <div class="flex flex-col">
-                                            <h2 class="text-l font-semibold text-gray-800 dark:text-white mb-2">
+                                            <h2 class="text-md font-semibold text-gray-800 dark:text-white mb-1">
                                                 {{ __('दिवस') }}
                                             </h2>
                                             <input type="number" name="days" id="days" placeholder=""
-                                                class="px-2 py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
+                                                class=" py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
                                         </div>
 
                                         <!-- पुड्या -->
                                         <div class="flex flex-col">
-                                            <h2 class="text-l font-semibold text-gray-800 dark:text-white mb-2">
+                                            <h2 class="text-md font-semibold text-gray-800 dark:text-white mb-1">
                                                 {{ __('पुड्या') }}
                                             </h2>
                                             <input type="number" name="packets" id="packets" placeholder=""
-                                                class="px-2 py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
+                                                class=" py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
+                                        </div>
+
+                                        <!-- Total Due -->
+                                        <div class="flex flex-col pl-2">
+                                            <label for="total_due"
+                                                class="text-md font-semibold text-gray-600 dark:text-gray-300 mb-1 block">
+                                                {{ __('messages.Total Due') }}
+                                            </label>
+                                            <x-text-input id="total_due"
+                                                class="px-3 py-1 block w-full border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white rounded-lg shadow-md text-md"
+                                                type="number" name="total_due" value="{{ old('total_due', 0) }}"
+                                                readonly />
                                         </div>
 
                                         <!-- Payment Method -->
-                                        <div class="flex flex-col pl-32">
+                                        <div class="flex flex-col pl-2">
                                             <label for="payment_method"
                                                 class="text-l font-semibold text-gray-700 dark:text-white mb-2">
                                                 {{ __('messages.Payment Method') }}
@@ -265,6 +313,8 @@ $previousChikitsa = $latestFollowUp
                                             </div>
                                             <x-input-error :messages="$errors->get('payment_method')" class="mt-1" />
                                         </div>
+
+
                                     </div>
 
                                 </div>
@@ -273,7 +323,7 @@ $previousChikitsa = $latestFollowUp
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
 
                                     <!-- All Dues -->
-                                    <div>
+                                    <div style="display: none">
                                         <label for="all_dues"
                                             class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1 block">
                                             {{ __('messages.All Dues') }}
@@ -285,7 +335,7 @@ $previousChikitsa = $latestFollowUp
                                     </div>
 
                                     <!-- Total Due -->
-                                    <div>
+                                    {{-- <div>
                                         <label for="total_due"
                                             class="text-sm font-semibold text-gray-600 dark:text-gray-300 mb-1 block">
                                             {{ __('messages.Total Due') }}
@@ -294,7 +344,7 @@ $previousChikitsa = $latestFollowUp
                                             class="px-3 py-2 block w-full border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-white rounded-lg shadow-md text-md"
                                             type="number" name="total_due" value="{{ old('total_due', 0) }}"
                                             readonly />
-                                    </div>
+                                    </div> --}}
 
                                     <!-- Amount Billed -->
                                     <div>
@@ -342,6 +392,66 @@ $previousChikitsa = $latestFollowUp
                                         document.getElementById('amount_paid').addEventListener('input', calculateTotalDue);
                                     };
                                 </script>
+
+
+                                <!-- Modal to Add New Nadi Preset -->
+                                <div id="nadiModal"
+                                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-md">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">नवीन नाडी
+                                            जोडा</h2>
+                                        <input type="text" id="modalNadiInput" placeholder="उदा. वेगवती"
+                                            class="w-full px-3 py-2 border rounded" />
+                                        <div class="mt-4 flex justify-end space-x-2">
+                                            <button type="button" onclick="toggleNadiModal(false)"
+                                                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Cancel</button>
+                                            <button type="button" onclick="saveModalNadi()"
+                                                class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal for adding Lakshane preset -->
+                                <div id="lakshaneModal"
+                                    class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden z-50">
+                                    <div class="bg-white dark:bg-gray-800 p-4 rounded shadow w-full max-w-md">
+                                        <h3 class="text-lg font-semibold mb-2 dark:text-white">नवीन लक्षणे जोडा</h3>
+                                        <input type="text" id="newLakshaneInput"
+                                            class="w-full border px-2 py-1 rounded mb-3 dark:bg-gray-900 dark:text-white"
+                                            placeholder="उदाहरण: अजीर्ण" />
+                                        <div class="flex justify-end space-x-2">
+                                            <button type="button" onclick="closeLakshaneModal()"
+                                                class="px-3 py-1 bg-gray-300 hover:bg-gray-400 rounded">Cancel</button>
+                                            <button type="button" onclick="addLakshanePreset()"
+                                                class="px-3 py-1 bg-blue-500 text-white hover:bg-blue-600 rounded">Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal for Adding Custom Chikitsa Preset -->
+                                <div id="chikitsaModal"
+                                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md w-full max-w-sm">
+                                        <h3 class="text-lg font-semibold mb-2 text-gray-800 dark:text-white">नवीन
+                                            चिकित्सा प्रीसेट</h3>
+
+                                        <input type="text" id="chikitsaPresetTitle"
+                                            placeholder="उदा. ताप / ज्वर (title)"
+                                            class="w-full px-3 py-2 border rounded mb-3 dark:bg-gray-700 dark:text-white" />
+                                        <textarea id="chikitsaPresetValue" rows="2" placeholder="उदा. महासुदर्शन, वैदेही... (value)"
+                                            class="w-full px-3 py-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"></textarea>
+
+                                        <div class="flex justify-end space-x-2">
+                                            <button type="button" onclick="hideChikitsaModal()"
+                                                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded dark:bg-gray-600 dark:hover:bg-gray-500 text-black dark:text-white">Cancel</button>
+                                            <button type="button" onclick="addChikitsaPreset()"
+                                                class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
 
 
                                 <!-- Submit Button -->
@@ -400,59 +510,204 @@ $previousChikitsa = $latestFollowUp
             </div>
         </div>
 </x-app-layout>
+
 <script>
+    const storageKey = "customNadiPresets";
+
+    // Append nadi to textarea at cursor
     function appendNadi(nadi) {
         const input = document.getElementById('nadiInput');
         const start = input.selectionStart;
         const end = input.selectionEnd;
-        const currentValue = input.value;
+        const text = input.value;
 
-        const before = currentValue.substring(0, start);
-        const after = currentValue.substring(end);
+        const before = text.substring(0, start);
+        const after = text.substring(end);
+        const insert = (before && !before.endsWith(', ') ? ', ' : '') + nadi + (after && !after.startsWith(',') ? ', ' :
+            '');
 
-        // Add comma if needed before or after
-        const insert = (before && !before.endsWith(', ') ? ', ' : '') + nadi + (after && !after.startsWith(',') ? ', ' : '');
-
-        // Set updated value and focus
         input.value = before + insert + after;
-
         const newPosition = before.length + insert.length;
         input.setSelectionRange(newPosition, newPosition);
         input.focus();
     }
+
+    function createPresetElement(text, isCustom = true) {
+        const presetDiv = document.createElement('div');
+        presetDiv.className = "relative";
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className =
+            "nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition w-full text-left pr-6";
+        button.innerText = text;
+        button.onclick = () => appendNadi(text);
+
+        presetDiv.appendChild(button);
+
+        if (isCustom) {
+            const removeBtn = document.createElement('span');
+            removeBtn.innerHTML = '❌';
+            removeBtn.className = "absolute top-1 right-1 text-red-600 cursor-pointer text-xs";
+
+            removeBtn.onclick = () => {
+                if (confirm(`Are you sure you want to delete "${text}"?`)) {
+                    presetDiv.remove();
+                    removePresetFromStorage(text);
+                }
+            };
+
+            presetDiv.appendChild(removeBtn);
+        }
+
+        document.getElementById('nadiPresets').appendChild(presetDiv);
+    }
+
+    function savePresetToStorage(value) {
+        const stored = JSON.parse(localStorage.getItem(storageKey)) || [];
+        if (!stored.includes(value)) {
+            stored.push(value);
+            localStorage.setItem(storageKey, JSON.stringify(stored));
+        }
+    }
+
+    function removePresetFromStorage(value) {
+        const stored = JSON.parse(localStorage.getItem(storageKey)) || [];
+        const updated = stored.filter(item => item !== value);
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+    }
+
+    function loadCustomPresets() {
+        const stored = JSON.parse(localStorage.getItem(storageKey)) || [];
+        stored.forEach(preset => createPresetElement(preset, true));
+    }
+
+    // Modal Logic
+    function toggleNadiModal(show) {
+        const modal = document.getElementById('nadiModal');
+        const input = document.getElementById('modalNadiInput');
+        modal.classList.toggle('hidden', !show);
+        if (show) {
+            input.value = '';
+            input.focus();
+        }
+    }
+
+    function saveModalNadi() {
+        const input = document.getElementById('modalNadiInput');
+        const value = input.value.trim();
+        if (!value) return;
+
+        createPresetElement(value, true);
+        savePresetToStorage(value);
+        toggleNadiModal(false);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCustomPresets);
 </script>
+
+
 
 
 <script>
-    const textarea = document.getElementById('chikitsa');
-    const presetBoxes = document.querySelectorAll('.preset-box');
+    const chikitsaTextarea = document.getElementById('chikitsa');
+    const chikitsaStorageKey = "customChikitsaPresets";
 
-    presetBoxes.forEach(box => {
-        box.addEventListener('click', () => {
-            const presetText = box.dataset.preset;
+    function insertChikitsaText(text) {
+        const start = chikitsaTextarea.selectionStart;
+        const end = chikitsaTextarea.selectionEnd;
+        const before = chikitsaTextarea.value.substring(0, start);
+        const after = chikitsaTextarea.value.substring(end);
+        const insert = (before && !before.endsWith(', ') ? ', ' : '') + text + (after && !after.startsWith(',') ? ', ' :
+            '');
+        chikitsaTextarea.value = before + insert + after;
+        const newPos = before.length + insert.length;
+        chikitsaTextarea.setSelectionRange(newPos, newPos);
+        chikitsaTextarea.focus();
+    }
 
-            // Get current cursor position
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const currentText = textarea.value;
+    function createChikitsaPreset(title, value, isCustom = true) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
 
-            // Insert presetText at cursor
-            const before = currentText.substring(0, start);
-            const after = currentText.substring(end);
+        const btn = document.createElement('div');
+        btn.className =
+            'border p-2 rounded cursor-pointer bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition';
+        btn.textContent = title;
+        btn.onclick = () => insertChikitsaText(value);
+        wrapper.appendChild(btn);
 
-            // Add comma if needed before/after
-            const insert = (before && !before.endsWith(', ') ? ', ' : '') + presetText + (after && !after.startsWith(',') ? ', ' : '');
+        if (isCustom) {
+            const removeBtn = document.createElement('span');
+            removeBtn.innerHTML = '❌';
+            removeBtn.className = 'absolute top-1 right-1 text-red-600 cursor-pointer text-xs';
+            removeBtn.onclick = () => {
+                if (confirm(`"${title}" प्रीसेट काढायचे आहे का?`)) {
+                    wrapper.remove();
+                    removeChikitsaFromStorage(title);
+                }
+            };
+            wrapper.appendChild(removeBtn);
+        }
 
-            // Update textarea value
-            textarea.value = before + insert + after;
+        document.getElementById('chikitsaPresets').appendChild(wrapper);
+    }
 
-            // Move the cursor after inserted text
-            const newPosition = before.length + insert.length;
-            textarea.setSelectionRange(newPosition, newPosition);
-            textarea.focus();
+    function showChikitsaModal() {
+        document.getElementById('chikitsaModal').classList.remove('hidden');
+    }
+
+    function hideChikitsaModal() {
+        document.getElementById('chikitsaModal').classList.add('hidden');
+        document.getElementById('chikitsaPresetTitle').value = '';
+        document.getElementById('chikitsaPresetValue').value = '';
+    }
+
+    function addChikitsaPreset() {
+        const title = document.getElementById('chikitsaPresetTitle').value.trim();
+        const value = document.getElementById('chikitsaPresetValue').value.trim();
+        if (!title || !value) return alert("कृपया title आणि value दोन्ही भरा.");
+
+        createChikitsaPreset(title, value, true);
+        saveChikitsaToStorage({
+            title,
+            value
+        });
+        hideChikitsaModal();
+    }
+
+    function saveChikitsaToStorage(preset) {
+        const stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
+        const exists = stored.find(p => p.title === preset.title);
+        if (!exists) {
+            stored.push(preset);
+            localStorage.setItem(chikitsaStorageKey, JSON.stringify(stored));
+        }
+    }
+
+    function removeChikitsaFromStorage(title) {
+        let stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
+        stored = stored.filter(p => p.title !== title);
+        localStorage.setItem(chikitsaStorageKey, JSON.stringify(stored));
+    }
+
+    function loadChikitsaPresets() {
+        const stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
+        stored.forEach(preset => createChikitsaPreset(preset.title, preset.value, true));
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadChikitsaPresets();
+
+        // For default presets
+        document.querySelectorAll('.preset-box').forEach(box => {
+            const value = box.dataset.preset;
+            box.addEventListener('click', () => insertChikitsaText(value));
         });
     });
 </script>
+
+
 
 
 <script>
@@ -473,20 +728,85 @@ $previousChikitsa = $latestFollowUp
     }
 </script>
 <script>
-     function insertText(text) {
-        let textarea = document.getElementById("lakshane");
-        let start = textarea.selectionStart;
-        let end = textarea.selectionEnd;
+    const lakshaneKey = 'customLakshanePresets';
 
-        // Get current text and insert the new text at cursor
-        let currentText = textarea.value;
-        textarea.value = currentText.substring(0, start) + text + currentText.substring(end);
-
-        // Move cursor to after the inserted text
-        textarea.selectionStart = textarea.selectionEnd = start + text.length;
+    function insertText(text) {
+        const textarea = document.getElementById('lakshane');
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const current = textarea.value;
+        const before = current.substring(0, start);
+        const after = current.substring(end);
+        textarea.value = before + text + after;
         textarea.focus();
+        textarea.setSelectionRange(before.length + text.length, before.length + text.length);
     }
+
+    function createLakshaneButton(text, isCustom = true) {
+        const container = document.querySelector('.grid-cols-7'); // adjust if your grid changes
+        const wrapper = document.createElement('div');
+        wrapper.className = 'relative';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className =
+            "w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition text-left pr-6";
+        button.innerText = text;
+        button.onclick = () => insertText(text);
+
+        wrapper.appendChild(button);
+
+        if (isCustom) {
+            const remove = document.createElement('span');
+            remove.innerHTML = '❌';
+            remove.className = 'absolute top-1 right-1 text-red-600 cursor-pointer text-xs';
+            remove.onclick = () => {
+                if (confirm(`"${text}" काढायचे आहे का?`)) {
+                    wrapper.remove();
+                    const stored = JSON.parse(localStorage.getItem(lakshaneKey)) || [];
+                    const updated = stored.filter(p => p !== text);
+                    localStorage.setItem(lakshaneKey, JSON.stringify(updated));
+                }
+            };
+            wrapper.appendChild(remove);
+        }
+
+        container.appendChild(wrapper);
+    }
+
+    function openLakshaneModal() {
+        document.getElementById('lakshaneModal').classList.remove('hidden');
+    }
+
+    function closeLakshaneModal() {
+        document.getElementById('lakshaneModal').classList.add('hidden');
+    }
+
+    function addLakshanePreset() {
+        const input = document.getElementById('newLakshaneInput');
+        const value = input.value.trim();
+        if (!value) return;
+
+        createLakshaneButton(value, true);
+
+        const stored = JSON.parse(localStorage.getItem(lakshaneKey)) || [];
+        if (!stored.includes(value)) {
+            stored.push(value);
+            localStorage.setItem(lakshaneKey, JSON.stringify(stored));
+        }
+
+        input.value = '';
+        closeLakshaneModal();
+    }
+
+    function loadLakshanePresets() {
+        const stored = JSON.parse(localStorage.getItem(lakshaneKey)) || [];
+        stored.forEach(p => createLakshaneButton(p, true));
+    }
+
+    document.addEventListener('DOMContentLoaded', loadLakshanePresets);
 </script>
+
 
 <script>
     let cameraStream = null;
