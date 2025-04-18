@@ -27,7 +27,7 @@ class FollowUpExport implements FromCollection, WithHeadings, WithMapping, WithC
             $follow_ups = $follow_ups->where('created_at','>=',$this->req->input('from_date'));
         }
         if(!empty($this->req->input('to_date'))){
-            $follow_ups = $follow_ups->where('created_at','<=',$this->req->input('to_date'));
+            $follow_ups = $follow_ups->where('created_at','<=',$this->req->input('to_date').' 23:59:59');
         }
         if($this->req->input('branch_name') != 'all'){
             $selectedBranch = $this->req->input('branch_name');
@@ -42,7 +42,7 @@ class FollowUpExport implements FromCollection, WithHeadings, WithMapping, WithC
 
     public function headings(): array
     {
-        return ["Date", "Patient Name", "Patient ID", "Doctor", "Amount Billed", "Amount Paid", "Branch Name"];
+        return ["Date", "Patient Name", "Patient ID", "Doctor", "Amount Billed", "Payment Method", "Amount Paid", "Branch Name"];
     }
 
     public function map($followUp): array
@@ -60,6 +60,7 @@ class FollowUpExport implements FromCollection, WithHeadings, WithMapping, WithC
             $patientId,
             $followUp->doctor->name,
             $followUp->amount_billed,
+            json_decode($followUp->check_up_info)->payment_method,
             $followUp->amount_paid,
             $branchName,
         ];

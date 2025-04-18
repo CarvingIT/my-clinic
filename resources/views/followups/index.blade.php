@@ -56,7 +56,7 @@
                         </select>
                     </div>
 
-                    <button type="submit"
+                    <button onclick="formSubmit();"
                         class="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
                         Filter
                     </button>
@@ -138,7 +138,8 @@
                                 <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Created At') }} 📅</th>
                                 <th class="px-4 py-3 text-center font-semibold">{{ __('messages.Patient Name') }} 👤</th>
                                 <th class="px-4 py-3 text-center font-semibold">{{ __('messages.doctor') }} 👤</th>
-                                <th class="px-4 py-3 text-center font-semibold">💳{{ __('messages.Amount Billed') }}
+                                <th class="px-4 py-3 text-center font-semibold">{{ __('messages.Amount Billed') }}
+                                <th class="px-4 py-3 text-center font-semibold">💳{{ __('messages.Payment Method') }}
                                 </th>
                                 <th class="px-4 py-3 text-right font-semibold"> 💰{{ __('messages.Amount Paid') }} </th>
                             </tr>
@@ -160,6 +161,13 @@
                                         <td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
                                             ₹{{ number_format($followUp->amount_billed, 2) }}
                                         </td>
+                                        <td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
+                                            @php
+                                            $checkup_info = json_decode($followUp->check_up_info);
+                                            $payment_method = $checkup_info->payment_method;
+                                            @endphp
+                                            {{ $payment_method }}
+                                        </td>
                                         <td class="text-right px-4 py-3 font-semibold text-green-600 dark:text-green-300">
                                             ₹{{ number_format($followUp->amount_paid, 2) }}
                                         </td>
@@ -179,6 +187,10 @@
     </div>
 </x-app-layout>
 <script>
+    function formSubmit(){
+        document.getElementById('follow_ups').action="/followups";        
+        document.getElementById('follow_ups').submit();
+    }
     function csvExport(){
         document.getElementById('follow_ups').action="/export-followups";        
         document.getElementById('follow_ups').submit();
