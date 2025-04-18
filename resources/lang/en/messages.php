@@ -72,6 +72,8 @@ return [
     'OPD' => 'OPD',
     'Payments' => 'Payments',
     'Age' => 'Age',
+    'job' => 'Job',
+    'reference' => 'Reference',
 
     'Total Amount' => 'Total Amount',
     'Total Paid' => 'Total Paid',

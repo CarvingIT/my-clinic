@@ -104,16 +104,23 @@
                                 type="text" name="address" :value="old('address')" required />
                             <x-input-error :messages="$errors->get('address')" class="mt-1" />
                         </div>
-
-                        <!-- Vishesh -->
+                        <!-- Occupation -->
                         <div>
-                            <x-input-label for="vishesh" :value="__('messages.Vishesh')" />
-                            <x-text-input id="vishesh"
+                            <x-input-label for="job" :value="__('messages.occupation')" />
+                            <x-text-input id="job"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="text" name="vishesh" :value="old('vishesh')" />
-                            <x-input-error :messages="$errors->get('vishesh')" class="mt-1" />
+                                type="text" name="occupation" :value="old('occupation')" required />
+                            <x-input-error :messages="$errors->get('occupation')" class="mt-1" />
                         </div>
-                        <br>
+                        <!-- Reference -->
+                        <div>
+                            <x-input-label for="reference" :value="__('messages.reference')" />
+                            <x-text-input id="reference"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                                type="text" name="reference" :value="old('reference')" required />
+                            <x-input-error :messages="$errors->get('reference')" class="mt-1" />
+                        </div>
+
 
                         <!-- Height -->
                         <div>
@@ -131,6 +138,14 @@
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="number" step="0.01" name="weight" :value="old('weight')" />
                             <x-input-error :messages="$errors->get('weight')" class="mt-1" />
+                        </div>
+                        <!-- Vishesh -->
+                        <div>
+                            <x-input-label for="vishesh" :value="__('messages.Vishesh')" />
+                            <x-text-input id="vishesh"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                                type="text" name="vishesh" :value="old('vishesh')" />
+                            <x-input-error :messages="$errors->get('vishesh')" class="mt-1" />
                         </div>
 
 

@@ -96,7 +96,8 @@ class PatientController extends Controller
         $patient = Patient::create($request->all() + ['patient_id' => $patientId]);
 
 
-        return redirect()->route('patients.index')->with('success', 'Patient Created Successfully.');
+        //return redirect()->route('patients.index')->with('success', 'Patient Created Successfully.');
+        return redirect()->to('/patients/'.$patient->id);
     }
 
 
