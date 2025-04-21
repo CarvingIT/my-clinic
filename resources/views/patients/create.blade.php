@@ -142,9 +142,14 @@
                         <!-- Vishesh -->
                         <div>
                             <x-input-label for="vishesh" :value="__('messages.Vishesh')" />
+                            <textarea id="vishesh" name="vishesh"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                            ></textarea>
+                            {{--
                             <x-text-input id="vishesh"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="text" name="vishesh" :value="old('vishesh')" />
+                            --}}
                             <x-input-error :messages="$errors->get('vishesh')" class="mt-1" />
                         </div>
 

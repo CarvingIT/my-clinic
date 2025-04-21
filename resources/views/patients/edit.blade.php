@@ -142,9 +142,14 @@
                         <!-- Vishesh -->
                         <div>
                             <x-input-label for="vishesh" :value="__('messages.Vishesh')" />
+                            {{--
                             <x-text-input id="vishesh"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
                                 type="text" name="vishesh" :value="$patient->vishesh" />
+                            --}}
+                            <textarea id="vishesh" name="vishesh"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                            >{{ $patient->vishesh }}</textarea>
                             <x-input-error :messages="$errors->get('vishesh')" class="mt-1" />
                         </div>
 
@@ -177,10 +182,12 @@
                         </div> --}}
 
 
+                        {{--
                         <input type="text" name="check_up_info[user_name]"
                             value="{{ $checkUpInfo['user_name'] ?? '' }}" class="form-input">
                         <input type="text" name="check_up_info[branch_name]"
                             value="{{ $checkUpInfo['branch_name'] ?? '' }}" class="form-input">
+                        --}}
 
                     </div>
 
