@@ -88,7 +88,7 @@
                                 </div>
 
 
-                                <!-- Diagnosis Textarea -->
+                                <!-- Lakshane Textarea -->
                                 <div class="mt-4 mb-4">
                                     <div class="flex items-center justify-between space-x-2">
                                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
@@ -136,6 +136,14 @@
                                             क्षुधा
                                         </button>
                                     </div>
+                                </div>
+                                <div class="mt-4 mb-4">
+                                    <div class="flex items-center justify-between space-x-2">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
+                                            {{ __('messages.diagnosis') }}
+                                        </h2>
+                                    </div>
+                                    <input type="text" name="nidan" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"/>
                                 </div>
 
 
