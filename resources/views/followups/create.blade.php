@@ -470,37 +470,40 @@ $previousChikitsa = $latestFollowUp
                         </div>
 
                         <!-- Previous Follow-ups (Right Column) -->
-                        <div
-                            class="fixed mb-3 right-40 top-62 max-h-[calc(100vh-250px)] w-[375px] overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 scrollbar-thin">
-                            <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
-                                {{ __('Previous Follow-ups') }}
-                            </h3>
+                        <!-- Parent container with relative positioning -->
+                        <div class="relative min-h-screen">
+                            <!-- Follow-ups div -->
+                            <div class="absolute top-[62px] right-10 w-[375px] max-h-[calc(100vh-250px)] overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 scrollbar-thin z-10 mb-3 md:static md:w-full md:mx-0 md:my-4">
+                                <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
+                                    {{ __('Previous Follow-ups') }}
+                                </h3>
 
-                            @if ($followUps->count() > 0)
-                                <div class="space-y-4">
-                                    @foreach ($followUps as $followUp)
-                                        <div
-                                            class="bg-gray-100 dark:bg-gray-700 p-4 rounded-md shadow-sm border border-gray-300 dark:border-gray-600">
-                                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                                {{ $followUp->created_at->format('d M Y, h:i A') }}
-                                            </p>
-                                            @php $checkUpInfo = json_decode($followUp->check_up_info, true); @endphp
-                                            <p class="text-sm text-gray-700 dark:text-gray-300">
-                                                <strong>{{ __('नाडी') }}:</strong>
-                                                {{ $checkUpInfo['nadi'] ?? '-' }}<br>
-                                                <strong>{{ __('लक्षणे') }}:</strong>
-                                                {{ $followUp->diagnosis ?? '-' }}<br>
-                                                <strong>{{ __('चिकित्सा') }}:</strong>
-                                                {{ $checkUpInfo['chikitsa'] ?? '-' }}
-                                            </p>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @else
-                                <p class="text-gray-600 dark:text-gray-400">
-                                    {{ __('No previous follow-ups.') }}
-                                </p>
-                            @endif
+                                @if ($followUps->count() > 0)
+                                    <div class="space-y-4">
+                                        @foreach ($followUps as $followUp)
+                                            <div
+                                                class="bg-gray-100 dark:bg-gray-700 p-4 rounded-md shadow-sm border border-gray-300 dark:border-gray-600">
+                                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                                    {{ $followUp->created_at->format('d M Y, h:i A') }}
+                                                </p>
+                                                @php $checkUpInfo = json_decode($followUp->check_up_info, true); @endphp
+                                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                                    <strong>{{ __('नाडी') }}:</strong>
+                                                    {{ $checkUpInfo['nadi'] ?? '-' }}<br>
+                                                    <strong>{{ __('लक्षणे') }}:</strong>
+                                                    {{ $followUp->diagnosis ?? '-' }}<br>
+                                                    <strong>{{ __('चिकित्सा') }}:</strong>
+                                                    {{ $checkUpInfo['chikitsa'] ?? '-' }}
+                                                </p>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        {{ __('No previous follow-ups.') }}
+                                    </p>
+                                @endif
+                            </div>
                         </div>
 
 
