@@ -59,9 +59,9 @@ class FollowUpExport implements FromCollection, WithHeadings, WithMapping, WithC
             optional($followUp->patient)->name ?? 'N/A',
             $patientId,
             $followUp->doctor->name,
-            $followUp->amount_billed,
-            json_decode($followUp->check_up_info)->payment_method,
-            $followUp->amount_paid,
+            @$followUp->amount_billed,
+            @json_decode($followUp->check_up_info)->payment_method,
+            @$followUp->amount_paid,
             $branchName,
         ];
     }

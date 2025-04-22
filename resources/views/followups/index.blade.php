@@ -159,13 +159,13 @@
                                         </td>
                                         <td class="text-center px-4 py-3">{{ $followUp->doctor->name }}</td>
                                         <td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
-                                            ₹{{ number_format($followUp->amount_billed, 2) }}
+                                            ₹{{ number_format(@$followUp->amount_billed, 2) }}
                                         </td>
                                         <td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
-                                            {{ json_decode($followUp->check_up_info)->payment_method }}
+                                            {{ @json_decode($followUp->check_up_info)->payment_method }}
                                         </td>
                                         <td class="text-right px-4 py-3 font-semibold text-green-600 dark:text-green-300">
-                                            ₹{{ number_format($followUp->amount_paid, 2) }}
+                                            ₹{{ number_format(@$followUp->amount_paid, 2) }}
                                         </td>
                                     </tr>
                                 @endif
