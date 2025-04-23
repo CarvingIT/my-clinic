@@ -18,5 +18,6 @@ class BranchSeeder extends Seeder
         Branch::create(['name' => __('messages.Paud Road')]);
         Branch::create(['name' => __('messages.Shukrawar Peth 1')]);
         Branch::create(['name' => __('messages.Shukrawar Peth 2')]);
+        Branch::create(['name' => __('messages.Shukrawar Peth 3')]);
     }
 }

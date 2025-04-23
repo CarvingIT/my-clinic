@@ -69,6 +69,7 @@ return [
     'Paud Road' => 'पौड रस्ता',
     'Shukrawar Peth 1' => 'शुक्रवार पेठ 1',
     'Shukrawar Peth 2' => 'शुक्रवार पेठ 2',
+    'Shukrawar Peth 3' => 'शुक्रवार पेठ 3',
     'Kothrud' => 'कोथरुड',
     'OPD' => 'बाह्यरोगी विभाग',
     'Payments' => 'पेमेंट्स',

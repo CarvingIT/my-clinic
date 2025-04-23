@@ -68,6 +68,7 @@ return [
     'Paud Road' => 'Paud Road',
     'Shukrawar Peth 1' => 'Shukrawar Peth 1',
     'Shukrawar Peth 2' => 'Shukrawar Peth 2',
+    'Shukrawar Peth 3' => 'Shukrawar Peth 3',
     'Kothrud' => 'Kothrud',
     'OPD' => 'OPD',
     'Payments' => 'Payments',
