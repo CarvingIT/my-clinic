@@ -110,7 +110,7 @@
                             <x-input-label for="job" :value="__('messages.occupation')" />
                             <x-text-input id="occupation"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="text" name="occupation" :value="$patient->occupation" required />
+                                type="text" name="occupation" :value="$patient->occupation" />
                             <x-input-error :messages="$errors->get('occupation')" class="mt-1" />
                         </div>
                         <!-- Reference -->
@@ -118,7 +118,7 @@
                             <x-input-label for="reference" :value="__('messages.reference')" />
                             <x-text-input id="reference"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="text" name="reference" :value="$patient->reference" required />
+                                type="text" name="reference" :value="$patient->reference" />
                             <x-input-error :messages="$errors->get('reference')" class="mt-1" />
                         </div>
 

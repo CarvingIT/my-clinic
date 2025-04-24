@@ -197,6 +197,14 @@ $previousChikitsa = $latestFollowUp
                                             class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mt-4"></div>
 
                                     </div>
+                                <div class="mt-4 mb-4">
+                                    <div class="flex items-center justify-between space-x-2">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
+                                            {{ __('messages.Vishesh') }}
+                                        </h2>
+                                    </div>
+                                    <textarea name="vishesh" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $patient->vishesh }}</textarea>
+                                </div>
 
                                     {{-- Capture button --}}
                                     {{-- <div class="mt-4">

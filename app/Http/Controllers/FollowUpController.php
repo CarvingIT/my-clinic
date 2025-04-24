@@ -133,6 +133,8 @@ class FollowUpController extends Controller
 
         ]);
 
+        $followUp->patient->update(['vishesh' => $request->vishesh]);
+
         // Handling multiple file uploads after follow-up creation
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $index => $photo) {
@@ -297,6 +299,8 @@ class FollowUpController extends Controller
             'amount_billed' => $request->amount_billed,
             'amount_paid' => $request->amount_paid,
         ]);
+
+        $followup->patient->update(['vishesh' => $request->vishesh]);
 
         return redirect()->route('patients.show', $request->patient_id)->with('success', 'Follow Up Updated Successfully');
     }
