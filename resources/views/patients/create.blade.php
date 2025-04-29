@@ -43,7 +43,7 @@
                         </div>
 
                         <!-- Age Field -->
-                        <div class="mt-2">
+                        <div>
                             <x-input-label for="age" :value="__('Age')" />
                             <x-text-input id="age"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
