@@ -47,5 +47,34 @@
                 {{ $slot }}
             </main>
         </div>
+
+        <script>
+            const marathiToEnglishMapping = {
+            '०': '0',
+            '१': '1',
+            '२': '2',
+            '३': '3',
+            '४': '4',
+            '५': '5',
+            '६': '6',
+            '७': '7',
+            '८': '8',
+            '९': '9'
+        };
+
+        function convertMarathiToEnglish(input) {
+            // Remove spaces first, then replace Marathi digits with English digits
+            return input.replace(/\s+/g, '').replace(/[०-९]/g, (match) => marathiToEnglishMapping[match]);
+        }
+
+        // Apply only to fields with the 'reverse-transliteration' class
+        document.querySelectorAll('.reverse-transliteration').forEach(inputField => {
+            inputField.addEventListener('input', function() {
+                // Convert Marathi digits and remove spaces
+                this.value = convertMarathiToEnglish(this.value);
+            });
+        });
+
+        </script>
     </body>
 </html>

@@ -46,8 +46,8 @@
                         <div class="mt-2">
                             <x-input-label for="age" :value="__('Age')" />
                             <x-text-input id="age"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="number" name="age" placeholder="Enter Age (If no birthdate)"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
+                                type="text" name="age" placeholder="Enter Age (If no birthdate)"
                                 oninput="calculateBirthdateFromAge()" />
                         </div>
 
@@ -58,7 +58,7 @@
                         <div>
                             <x-input-label for="mobile_phone" :value="__('messages.mobile_phone')" />
                             <x-text-input id="mobile_phone"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
                                 type="text" name="mobile_phone" :value="old('mobile_phone')" required />
                             <x-input-error :messages="$errors->get('mobile_phone')" class="mt-1" />
                         </div>
@@ -126,8 +126,8 @@
                         <div>
                             <x-input-label for="height" :value="__('messages.Height')" />
                             <x-text-input id="height"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="number" step="0.01" name="height" :value="old('height')" />
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
+                                type="text" step="0.01" name="height" :value="old('height')" />
                             <x-input-error :messages="$errors->get('height')" class="mt-1" />
                         </div>
 
@@ -135,8 +135,8 @@
                         <div>
                             <x-input-label for="weight" :value="__('messages.Weight')" />
                             <x-text-input id="weight"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="number" step="0.01" name="weight" :value="old('weight')" />
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
+                                type="text" step="0.01" name="weight" :value="old('weight')" />
                             <x-input-error :messages="$errors->get('weight')" class="mt-1" />
                         </div>
                         <!-- Vishesh -->
@@ -221,3 +221,5 @@
         }
     }
 </script>
+
+

@@ -282,8 +282,8 @@ $previousChikitsa = $latestFollowUp
                                             <h2 class="text-md font-semibold text-gray-800 dark:text-white mb-1">
                                                 {{ __('दिवस') }}
                                             </h2>
-                                            <input type="number" name="days" id="days" placeholder=""
-                                                class=" py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
+                                            <input type="text" name="days" id="days" placeholder=""
+                                                class=" reverse-transliteration py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
                                         </div>
 
                                         <!-- पुड्या -->
@@ -291,8 +291,8 @@ $previousChikitsa = $latestFollowUp
                                             <h2 class="text-md font-semibold text-gray-800 dark:text-white mb-1">
                                                 {{ __('पुड्या') }}
                                             </h2>
-                                            <input type="number" name="packets" id="packets" placeholder=""
-                                                class=" py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
+                                            <input type="text" name="packets" id="packets" placeholder=""
+                                                class="reverse-transliteration py-1 border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400 w-24" />
                                         </div>
 
                                         <!-- Total Due -->
@@ -369,8 +369,8 @@ $previousChikitsa = $latestFollowUp
                                             {{ __('messages.Amount Billed') }}
                                         </label>
                                         <x-text-input id="amount_billed"
-                                            class="px-2 py-1 block w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-md text-md"
-                                            type="number" name="amount_billed" required />
+                                            class="reverse-transliteration px-2 py-1 block w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-md text-md"
+                                            type="text" name="amount_billed" required />
                                     </div>
 
                                     <!-- Amount Paid -->
@@ -380,8 +380,8 @@ $previousChikitsa = $latestFollowUp
                                             {{ __('messages.Amount Paid') }}
                                         </label>
                                         <x-text-input id="amount_paid"
-                                            class="px-2 py-1 block w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-md text-md"
-                                            type="number" name="amount_paid" required />
+                                            class="reverse-transliteration px-2 py-1 block w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-md text-md"
+                                            type="text" name="amount_paid" required />
                                     </div>
 
                                 </div>
