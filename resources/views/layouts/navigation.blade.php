@@ -24,6 +24,9 @@
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
                         {{ __('messages.Staff') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('queue.index')" :active="request()->routeIs('queue.index')">
+                        {{ __('messages.Queue') }}
+                    </x-nav-link>
                     {{-- <div x-data="{ darkMode: false }" :class="{ 'dark': darkMode }">
                         <button @click="darkMode = !darkMode; document.documentElement.classList.toggle('dark', darkMode)" class="text-gray-800 dark:text-gray-200">
                             Toggle Dark Mode

@@ -13,12 +13,10 @@ return new class extends Migration
     {
         Schema::create('queues', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('patient_id');
+            $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->timestamp('in_queue_at');
-            $table->timestamps();
-            $table->unsignedBigInteger('added_by');
-
-            $table->foreign('patient_id')->references('id')->on('patients')->onDelete('cascade');
+            $table->timestamp('created_at')->useCurrent();
+            $table->foreignId('added_by')->constrained('users')->onDelete('cascade');
         });
     }
 

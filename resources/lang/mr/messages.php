@@ -96,6 +96,11 @@ return [
     'All Dues' => 'बाकी',
     'Total Due' => 'एकूण बाकी',
 
+    'Queue' => 'रुग्णांची रांग',
+    'select_date_time' => 'तारीख आणि वेळ निवडा',
+    'No patients in queue' => 'रांगेत रुग्ण नाहीत',
+
+
 
     'locale' => 'भाषा', // Label for dropdown
 

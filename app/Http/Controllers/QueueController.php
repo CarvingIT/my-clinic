@@ -1,50 +1,53 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\Queue;
-use App\Models\Patient;
 
+use App\Models\Patient;
+use App\Models\Queue;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class QueueController extends Controller
 {
-    // Show queue list
-    public function index()
+    public function listPatients()
     {
-        $queues = Queue::with('patient')->orderBy('in_queue_at')->get();
-        return view('queue.index', compact('queues'));
+        $patients = Patient::all();
+        return view('patients.index', compact('patients'));
     }
 
-    // Add patient to queue
-    public function store(Request $request)
+    public function addToQueue(Request $request, Patient $patient)
     {
         $request->validate([
-            'patient_id' => 'required|exists:patients,id',
-            'in_queue_at' => 'nullable|date_format:Y-m-d H:i:s',
+            'in_queue_at' => 'nullable|date',
         ]);
+
+        $inQueueAt = $request->input('in_queue_at') ? \Carbon\Carbon::parse($request->input('in_queue_at')) : now();
 
         Queue::create([
-            'patient_id' => $request->patient_id,
-            'in_queue_at' => $request->in_queue_at ?? now(),
+            'patient_id' => $patient->id,
+            'in_queue_at' => $inQueueAt,
+            'added_by' => Auth::id(),
         ]);
 
-        return redirect()->back()->with('success', 'Patient added to queue.');
+        return redirect()->route('patients.index')->with('success', 'Patient added to queue.');
     }
 
-    // Remove patient from queue
-    public function destroy($id)
+    public function showQueue()
     {
-        Queue::findOrFail($id)->delete();
-        return redirect()->back()->with('success', 'Patient removed from queue.');
+        $queue = Queue::with('patient', 'addedBy')->orderBy('in_queue_at')->get();
+        return view('queue.index', compact('queue'));
     }
 
-    // Mark patient as “In” and remove from queue
-    public function markIn($id)
+    public function removeFromQueue(Queue $queue)
     {
-        $queue = Queue::findOrFail($id);
+        $queue->delete();
+        return redirect()->route('queue.index')->with('success', 'Patient removed from queue.');
+    }
+
+    public function markIn(Queue $queue)
+    {
         $patientId = $queue->patient_id;
         $queue->delete();
-
-        return redirect()->route('patients.show', $patientId)->with('success', 'Patient marked as In.');
+        return redirect()->route('patients.show', $patientId)->with('success', 'Patient marked as in.');
     }
 }

@@ -94,6 +94,10 @@ return [
     'All Dues' => 'All Dues',
     'Total Due' => 'Total Due',
 
+    'Queue' => 'Queue',
+    'No patients in queue' => 'No patients in queue',
+    'select_date_time' => 'Select Date and Time',
+
 
 
     'locale' => 'Language', // Label for dropdown

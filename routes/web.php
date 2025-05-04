@@ -100,10 +100,10 @@ Route::get('/patients/{patient}/followup-images', [FollowUpImageController::clas
 
 
 // Routes for queue management
-Route::get('/queue', [QueueController::class, 'index'])->name('queue.index');
-Route::post('/queue', [QueueController::class, 'store'])->name('queue.store');
-Route::delete('/queue/{id}', [QueueController::class, 'destroy'])->name('queue.destroy');
-Route::post('/queue/{id}/in', [QueueController::class, 'markIn'])->name('queue.markIn');
+Route::post('/patients/{patient}/queue', [QueueController::class, 'addToQueue'])->name('patients.queue');
+Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index');
+Route::delete('/queue/{queue}', [QueueController::class, 'removeFromQueue'])->name('queue.remove');
+Route::post('/queue/{queue}/in', [QueueController::class, 'markIn'])->name('queue.in');
 
 
 

@@ -123,35 +123,16 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
-                                            <!-- Queue Button -->
-                                            <button class="queue-btn text-green-600 hover:text-green-800 font-medium"
-                                                data-patient-id="{{ $patient->id }}" title="Queue">
-                                                Queue
+                                            <button class="text-green-600 hover:text-green-800 font-medium"
+                                                data-bs-toggle="modal" data-bs-target="#queueModal"
+                                                onclick="setPatientId({{ $patient->id }})" title="Add to Queue">
+                                                 Queue
                                             </button>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
-
-                        <!-- Date-Time Picker Modal -->
-                        <div id="queue-modal"
-                            class="hidden fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
-                            <div class="modal-content bg-white p-5 rounded-lg">
-                                <h2 class="text-xl">Select Queue Time</h2>
-                                <input type="text" id="queue-time" class="datetime-picker form-control mt-2 w-full"
-                                    placeholder="Select Date and Time">
-                                <input type="hidden" id="patient-id">
-                                <div class="flex justify-end mt-4">
-                                    <button id="close-modal" class="bg-gray-300 px-4 py-2 mr-2 rounded">Cancel</button>
-                                    <button id="save-queue"
-                                        class="bg-blue-500 px-4 py-2 text-white rounded">Save</button>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
                     <!-- Pagination -->
                     <div class="mt-6">
                         {{ $patients->links() }}
@@ -160,7 +141,38 @@
             </div>
         </div>
     </div>
+
+
 </x-app-layout>
+{{-- queue --}}
+<div id="queueModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50 transition duration-300">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h5 class="text-xl font-semibold text-gray-800">{{ __('Add to Queue') }}</h5>
+            <button onclick="toggleQueueModal()" class="text-gray-600 hover:text-gray-800 text-2xl">&times;</button>
+        </div>
+        <form id="queueForm" method="POST">
+            @csrf
+            <input type="hidden" name="patient_id" id="patientId">
+            <div class="mb-4">
+                <label for="in_queue_at" class="block text-sm font-medium text-gray-700">{{ __('messages.select_date_time') }} (optional):</label>
+                <input type="datetime-local" name="in_queue_at" id="in_queue_at"
+                    class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div class="flex justify-end gap-2">
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                    {{ __('Add to Queue') }}
+                </button>
+                <button type="button"
+                    onclick="toggleQueueModal()"
+                    class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                    {{ __('Cancel') }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
     function confirmDelete() {
@@ -180,70 +192,17 @@
     });
 </script>
 
-{{-- For Queue --}}
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-    // Initialize flatpickr
-    flatpickr("#queue-time", {
-        enableTime: true,
-        dateFormat: "Y-m-d H:i", // Format without seconds
-        altInput: false, // Ensure input value is updated
-    });
-
-    // Set CSRF token for Axios
-    axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
-
-    const queueBtns = document.querySelectorAll(".queue-btn");
-    const modal = document.getElementById("queue-modal");
-    const closeModalBtn = document.getElementById("close-modal");
-    const saveQueueBtn = document.getElementById("save-queue");
-    const patientIdInput = document.getElementById("patient-id");
-
-    // Show modal when "Queue" button is clicked
-    queueBtns.forEach((btn) => {
-        btn.addEventListener("click", function() {
-            const patientId = this.getAttribute("data-patient-id");
-            patientIdInput.value = patientId;
-            modal.classList.remove("hidden");
-        });
-    });
-
-    // Close modal on Cancel button click
-    closeModalBtn.addEventListener("click", function() {
-        modal.classList.add("hidden");
-    });
-
-    // Handle save button click
-    saveQueueBtn.addEventListener("click", function() {
-        const queueTime = document.getElementById("queue-time").value;
-        const patientId = patientIdInput.value;
-
-        if (!queueTime) {
-            alert("Please select a date and time.");
-            return;
+    function setPatientId(patientId) {
+            console.log('Setting patient ID:', patientId);
+            document.getElementById('patientId').value = patientId;
+            document.getElementById('queueForm').action = '/patients/' + patientId + '/queue';
         }
 
-        // Add seconds to the time (format Y-m-d H:i:s)
-        const formattedQueueTime = queueTime + ":00"; // Append ':00' for seconds
-
-        // Log the value to check before sending it
-        console.log("Queue time:", formattedQueueTime);
-
-        // Send the data to the server (POST request)
-        axios.post("{{ route('queue.store') }}", {
-            patient_id: patientId,
-            in_queue_at: formattedQueueTime,
-        })
-        .then(function(response) {
-            // Reload page after success
-            window.location.reload();
-        })
-        .catch(function(error) {
-            console.error(error);
-            alert("Error saving queue time.");
-        });
-    });
-});
-
-
+        function toggleQueueModal() {
+            console.log('Toggling queue modal');
+            const modal = document.getElementById('queueModal');
+            modal.classList.toggle('hidden');
+        }
 </script>
+
