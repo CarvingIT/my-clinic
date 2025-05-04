@@ -12,44 +12,44 @@ class Patient extends Model
 {
     use HasFactory, SoftDeletes;
 
-     protected $fillable = [
-         'guid',
-         'name',
-         'address',
-         'occupation',
-         'mobile_phone',
-         'remark',
-         'gender',
-         'birthdate',
-         'email_id',
-         'vishesh',
-         'balance',
-         'patient_id',
-         'height',
-         'weight',
-         'occupation',
-         'reference'
-     ];
+    protected $fillable = [
+        'guid',
+        'name',
+        'address',
+        'occupation',
+        'mobile_phone',
+        'remark',
+        'gender',
+        'birthdate',
+        'email_id',
+        'vishesh',
+        'balance',
+        'patient_id',
+        'height',
+        'weight',
+        'occupation',
+        'reference'
+    ];
 
-     protected $casts = [
+    protected $casts = [
         'birthdate' => 'date',
     ];
 
 
-     protected static function boot()
-     {
-       parent::boot();
+    protected static function boot()
+    {
+        parent::boot();
 
-       static::creating(function ($model) {
-         $model->guid = Str::uuid();
-        //  $model->patient_id = Str::uuid();
+        static::creating(function ($model) {
+            $model->guid = Str::uuid();
+            //  $model->patient_id = Str::uuid();
 
 
         });
-     }
+    }
     public function followUps()
     {
-       return $this->hasMany(FollowUp::class);
+        return $this->hasMany(FollowUp::class);
     }
 
     public function uploads()
@@ -60,5 +60,11 @@ class Patient extends Model
     public function reports()
     {
         return $this->hasMany(Report::class);
+    }
+
+    // Queue
+    public function queues()
+    {
+        return $this->hasMany(Queue::class);
     }
 }

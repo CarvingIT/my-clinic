@@ -6,6 +6,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FollowupImageController;
+use App\Http\Controllers\QueueController;
+
 
 use Illuminate\Support\Facades\App;
 
@@ -95,6 +97,13 @@ Route::get('/followup-images/{filename}', [FollowupImageController::class, 'show
 
 Route::get('/patients/{patient}/followup-images', [FollowUpImageController::class, 'showFollowUpImages'])
     ->name('followup.images');
+
+
+// Routes for queue management
+Route::get('/queue', [QueueController::class, 'index'])->name('queue.index');
+Route::post('/queue', [QueueController::class, 'store'])->name('queue.store');
+Route::delete('/queue/{id}', [QueueController::class, 'destroy'])->name('queue.destroy');
+Route::post('/queue/{id}/in', [QueueController::class, 'markIn'])->name('queue.markIn');
 
 
 

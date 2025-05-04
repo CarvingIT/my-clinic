@@ -1,7 +1,7 @@
 <x-app-layout>
-            @php
-                $patient_count = \App\Models\Patient::count();
-            @endphp
+    @php
+        $patient_count = \App\Models\Patient::count();
+    @endphp
     <x-slot name="header">
         <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
             {{ __('messages.patients') }} ({{ $patient_count }})
@@ -84,26 +84,31 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach ($patients as $patient)
                                     <tr class="hover:bg-gray-50 transition duration-150">
-                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal"
+                                            style="vertical-align: top;">
                                             {{ $patient->patient_id }}
                                         </td>
-                                        <td class="px-4 py-4 align-top   break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top   break-normal whitespace-normal"
+                                            style="vertical-align: top;">
                                             <a href="{{ route('patients.show', $patient->id) }}"
                                                 class="text-blue-600 hover:text-blue-800 font-medium">
                                                 {{ $patient->name }}
                                             </a>
                                         </td>
-                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal"
+                                            style="vertical-align: top;">
                                             {{ $patient->mobile_phone }}
                                         </td>
-                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal"
+                                            style="vertical-align: top;">
                                             {{ $patient->address }}
                                         </td>
-                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal"
+                                            style="vertical-align: top;">
                                             {{ $patient->vishesh }}
                                         </td>
-                                        <td
-                                            class="px-4 py-4 align-top    break-normal whitespace-normal text-right text-sm font-medium flex gap-4" style="vertical-align: top;">
+                                        <td class="px-4 py-4 align-top    break-normal whitespace-normal text-right text-sm font-medium flex gap-4"
+                                            style="vertical-align: top;">
                                             <a href="{{ route('patients.edit', $patient->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-800 font-medium"
                                                 title="Edit">
@@ -118,11 +123,33 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
+                                            <!-- Queue Button -->
+                                            <button class="queue-btn text-green-600 hover:text-green-800 font-medium"
+                                                data-patient-id="{{ $patient->id }}" title="Queue">
+                                                Queue
+                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
+
+                        <!-- Date-Time Picker Modal -->
+                        <div id="queue-modal"
+                            class="hidden fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
+                            <div class="modal-content bg-white p-5 rounded-lg">
+                                <h2 class="text-xl">Select Queue Time</h2>
+                                <input type="text" id="queue-time" class="datetime-picker form-control mt-2 w-full"
+                                    placeholder="Select Date and Time">
+                                <input type="hidden" id="patient-id">
+                                <div class="flex justify-end mt-4">
+                                    <button id="close-modal" class="bg-gray-300 px-4 py-2 mr-2 rounded">Cancel</button>
+                                    <button id="save-queue"
+                                        class="bg-blue-500 px-4 py-2 text-white rounded">Save</button>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Pagination -->
@@ -142,7 +169,7 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll("td").forEach(td => {
             let words = td.innerText.trim().split(/\s+/); // Split by spaces
             if (words.length > 4) {
@@ -153,3 +180,70 @@
     });
 </script>
 
+{{-- For Queue --}}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    // Initialize flatpickr
+    flatpickr("#queue-time", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i", // Format without seconds
+        altInput: false, // Ensure input value is updated
+    });
+
+    // Set CSRF token for Axios
+    axios.defaults.headers.common['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
+
+    const queueBtns = document.querySelectorAll(".queue-btn");
+    const modal = document.getElementById("queue-modal");
+    const closeModalBtn = document.getElementById("close-modal");
+    const saveQueueBtn = document.getElementById("save-queue");
+    const patientIdInput = document.getElementById("patient-id");
+
+    // Show modal when "Queue" button is clicked
+    queueBtns.forEach((btn) => {
+        btn.addEventListener("click", function() {
+            const patientId = this.getAttribute("data-patient-id");
+            patientIdInput.value = patientId;
+            modal.classList.remove("hidden");
+        });
+    });
+
+    // Close modal on Cancel button click
+    closeModalBtn.addEventListener("click", function() {
+        modal.classList.add("hidden");
+    });
+
+    // Handle save button click
+    saveQueueBtn.addEventListener("click", function() {
+        const queueTime = document.getElementById("queue-time").value;
+        const patientId = patientIdInput.value;
+
+        if (!queueTime) {
+            alert("Please select a date and time.");
+            return;
+        }
+
+        // Add seconds to the time (format Y-m-d H:i:s)
+        const formattedQueueTime = queueTime + ":00"; // Append ':00' for seconds
+
+        // Log the value to check before sending it
+        console.log("Queue time:", formattedQueueTime);
+
+        // Send the data to the server (POST request)
+        axios.post("{{ route('queue.store') }}", {
+            patient_id: patientId,
+            in_queue_at: formattedQueueTime,
+        })
+        .then(function(response) {
+            // Reload page after success
+            window.location.reload();
+        })
+        .catch(function(error) {
+            console.error(error);
+            alert("Error saving queue time.");
+        });
+    });
+});
+
+
+</script>

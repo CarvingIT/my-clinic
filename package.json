@@ -9,7 +9,7 @@
         "@tailwindcss/forms": "^0.5.2",
         "alpinejs": "^3.4.2",
         "autoprefixer": "^10.4.20",
-        "axios": "^1.7.4",
+        "axios": "^1.9.0",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^1.0",
         "postcss": "^8.4.49",
@@ -18,5 +18,8 @@
     },
     "optionalDependencies": {
         "@rollup/rollup-win32-x64-msvc": "^4.35.0"
+    },
+    "dependencies": {
+        "flatpickr": "^4.6.13"
     }
 }

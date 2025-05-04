@@ -28,6 +28,7 @@
                 document.documentElement.classList.remove('dark');
             });
         </script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
