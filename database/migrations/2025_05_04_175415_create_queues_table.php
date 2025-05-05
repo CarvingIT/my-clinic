@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('patient_id')->constrained()->onDelete('cascade');
             $table->timestamp('in_queue_at');
-            $table->timestamp('created_at')->useCurrent();
+            // $table->timestamp('created_at')->useCurrent();
             $table->foreignId('added_by')->constrained('users')->onDelete('cascade');
+            $table->timestamps();
         });
     }
 
