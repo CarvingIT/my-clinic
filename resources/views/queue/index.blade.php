@@ -27,7 +27,7 @@
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                        {{ __('Appointment At') }}
+                                        {{ __('In at') }}
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -56,6 +56,14 @@
                                         </td>
                                         <td class="px-4 py-4 align-top break-normal whitespace-normal text-right text-sm justify-end font-medium flex gap-4"
                                             style="vertical-align: top;">
+                                            <form method="POST" action="{{ route('queue.in', $entry->id) }}"
+                                                onsubmit="return confirm('Are you sure you want to mark this patient as in?')">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="text-green-600 hover:text-green-800 font-medium" title="Mark as In">
+                                                    <i class="fas fa-user-check"></i>
+                                                </button>
+                                            </form>
                                             <form method="POST" action="{{ route('queue.remove', $entry->id) }}"
                                                 onsubmit="return confirm('Are you sure you want to remove this patient from the queue?')">
                                                 @csrf
@@ -63,14 +71,6 @@
                                                 <button type="submit"
                                                     class="text-red-600 hover:text-red-800 font-medium" title="Remove">
                                                     <i class="fas fa-times"></i>
-                                                </button>
-                                            </form>
-                                            <form method="POST" action="{{ route('queue.in', $entry->id) }}"
-                                                onsubmit="return confirm('Are you sure you want to mark this patient as in?')">
-                                                @csrf
-                                                <button type="submit"
-                                                    class="text-green-600 hover:text-green-800 font-medium" title="Mark as In">
-                                                    <i class="fas fa-check"></i> In
                                                 </button>
                                             </form>
                                         </td>

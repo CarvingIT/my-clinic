@@ -109,6 +109,11 @@
                                         </td>
                                         <td class="px-4 py-4 align-top    break-normal whitespace-normal text-right text-sm font-medium flex gap-4"
                                             style="vertical-align: top;">
+                                            <button class="text-green-600 hover:text-green-800 font-medium"
+                                                data-bs-toggle="modal" data-bs-target="#queueModal"
+                                                onclick="setPatientId({{ $patient->id }})" title="Add to Queue">
+                                                 <i class="fas fa-users-line"></i>
+                                            </button>
                                             <a href="{{ route('patients.edit', $patient->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-800 font-medium"
                                                 title="Edit">
@@ -123,11 +128,6 @@
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
-                                            <button class="text-green-600 hover:text-green-800 font-medium"
-                                                data-bs-toggle="modal" data-bs-target="#queueModal"
-                                                onclick="setPatientId({{ $patient->id }})" title="Add to Queue">
-                                                 <i class="fas fa-users-line"></i>
-                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach
