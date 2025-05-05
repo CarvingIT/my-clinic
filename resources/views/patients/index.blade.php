@@ -126,7 +126,7 @@
                                             <button class="text-green-600 hover:text-green-800 font-medium"
                                                 data-bs-toggle="modal" data-bs-target="#queueModal"
                                                 onclick="setPatientId({{ $patient->id }})" title="Add to Queue">
-                                                 Queue
+                                                 <i class="fas fa-users-line"></i>
                                             </button>
                                         </td>
                                     </tr>
