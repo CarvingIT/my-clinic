@@ -24,6 +24,8 @@ class UserRoles extends Migration
             $table->increments('id');
             $table->bigInteger('user_id')->unsigned();
             $table->integer('role_id')->unsigned();
+            $table->unique(['role_id','user_id']);
+            $table->timestamps();
         });
 
         //add foreign keys

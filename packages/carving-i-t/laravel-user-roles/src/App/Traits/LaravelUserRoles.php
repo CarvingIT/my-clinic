@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Traits;
+namespace CarvingIT\LaravelUserRoles\App\Traits;
 
 use CarvingIT\LaravelUserRoles\App\Models\Role;
 use CarvingIT\LaravelUserRoles\App\Models\UserRole;
 
-class LaravelUserRoles{
+trait LaravelUserRoles{
     public function roles(){
             return $this->hasManyThrough(Role::class, UserRole::class);
         }
@@ -22,7 +22,8 @@ class LaravelUserRoles{
                 }
                 catch(\Exception $e){
                     // some error like violation of unique constraint
-                    //return false; 
+                    echo $e->getMessage();
+                    return false; 
                 }
             }
         }
