@@ -27,6 +27,7 @@
     },
     "autoload": {
         "psr-4": {
+            "CarvingIT\\LaravelUserRoles\\":"packages/carving-i-t/laravel-user-roles/src",
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
@@ -34,6 +35,7 @@
     },
     "autoload-dev": {
         "psr-4": {
+            "CarvingIT\\LaravelUserRoles\\":"packages/carving-i-t/laravel-user-roles/src",
             "Tests\\": "tests/"
         }
     },
