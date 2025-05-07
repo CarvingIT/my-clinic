@@ -1,6 +1,9 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
+use CarvingIT\LaravelUserRoles\App\Models\Role;
 
 class RoleSeeder extends Seeder
 {
@@ -11,10 +14,15 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
-        // add the admin role in the roles table
-        DB::table('roles')->insert(
+        // add sample roles 
+        Role::create(
             [
                 'name'=>'admin'
+            ]
+        );
+        Role::create(
+            [
+                'name'=>'staff'
             ]
         );
     }

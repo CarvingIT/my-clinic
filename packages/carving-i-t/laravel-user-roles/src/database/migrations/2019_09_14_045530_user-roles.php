@@ -15,7 +15,8 @@ class UserRoles extends Migration
     {
         Schema::create('roles', function(Blueprint $table) {
             $table->increments('id');
-            $table->char('name', 100);
+            $table->char('name', 100)->unique();
+            $table->text('attributes')->nullable();
             $table->timestamps();
         });
 
