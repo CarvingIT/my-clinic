@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace CarvingIT\LaravelUserRoles\App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
