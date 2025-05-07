@@ -6,14 +6,10 @@ use CarvingIT\LaravelUserRoles\App\Models\Role;
 use CarvingIT\LaravelUserRoles\App\Models\UserRole;
 
 class LaravelUserRoles{
-    public function role(){
-            return $this->belongsTo(Role::class,'role_id');
+    public function roles(){
+            return $this->hasManyThrough(Role::class, UserRole::class);
         }
     
-    public function user(){
-        return $this->belongsTo(User::class,'user_id');
-    }   
-
     public function assignRole($role_names){
         foreach($role_names as $role_name){
             $role = Role::where('name', $role_name)->first();
