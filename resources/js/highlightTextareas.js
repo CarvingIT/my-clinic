@@ -45,10 +45,10 @@ function initializeHighlightableTextareas() {
             // Store current content for undo
             stateMap.set(textarea, textarea.value);
 
-            // Wrap selected text with [highlight]...[/highlight]
+            // Wrap selected text with [h]...[/h]
             const before = textarea.value.substring(0, start);
             const after = textarea.value.substring(end);
-            textarea.value = before + `[highlight]${selectedText}[/highlight]` + after;
+            textarea.value = before + `[h]${selectedText}[/h]` + after;
 
             // Show undo button and hide highlight button
             undoButton.classList.remove('hidden');

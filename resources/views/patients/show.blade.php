@@ -649,7 +649,7 @@
 
                                                                 {!! nl2br(
                                                                     str_replace(
-                                                                        ['[highlight]', '[/highlight]'],
+                                                                        ['[h]', '[/h]'],
                                                                         ['<span class="bg-yellow-200 px-1 rounded">', '</span>'],
                                                                         e($checkUpInfo['nadi']),
                                                                     ),
@@ -666,7 +666,7 @@
 
                                                                 {!! nl2br(
                                                                     str_replace(
-                                                                        ['[highlight]', '[/highlight]'],
+                                                                        ['[h]', '[/h]'],
                                                                         ['<span class="bg-yellow-200 px-1 rounded">', '</span>'],
                                                                         e($followUp->diagnosis),
                                                                     ),
@@ -704,7 +704,7 @@
                                                     @if (isset($checkUpInfo['chikitsa']))
                                                         {!! nl2br(
                                                             str_replace(
-                                                                ['[highlight]', '[/highlight]'],
+                                                                ['[h]', '[/h]'],
                                                                 ['<span class="bg-yellow-200 px-1 rounded">', '</span>'],
                                                                 e($checkUpInfo['chikitsa']),
                                                             ),
