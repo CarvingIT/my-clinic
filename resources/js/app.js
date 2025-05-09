@@ -4,6 +4,7 @@ import Alpine from 'alpinejs';
 import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.css";
 import axios from 'axios';
+import './highlightTextareas.js';
 
 
 window.Alpine = Alpine;

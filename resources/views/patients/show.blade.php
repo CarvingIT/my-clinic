@@ -246,7 +246,9 @@
                                                         <div class="grid grid-cols-2 gap-6">
                                                             <!-- Left Column: Patient Photos -->
                                                             <div>
-                                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Patient Photos</h3>
+                                                                <h3
+                                                                    class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                                                    Patient Photos</h3>
                                                                 <div class="space-y-4">
                                                                     @foreach ($uploads->where('photo_type', 'patient_photo') as $upload)
                                                                         <div @click="selectedImageUrl = '{{ route('uploads.show', $upload->id) }}'"
@@ -259,10 +261,12 @@
                                                                             </div>
                                                                             <!-- Details -->
                                                                             <div class="ml-4 flex-1">
-                                                                                <p class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
+                                                                                <p
+                                                                                    class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
                                                                                     {{ str_replace('_', ' ', $upload->photo_type) }}
                                                                                 </p>
-                                                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                                                <p
+                                                                                    class="text-sm text-gray-500 dark:text-gray-400">
                                                                                     {{ __('messages.Uploaded') }}:
                                                                                     {{ $upload->created_at->format('d M Y, h:i A') }}
                                                                                 </p>
@@ -270,14 +274,18 @@
                                                                         </div>
                                                                     @endforeach
                                                                     @if ($uploads->where('photo_type', 'patient_photo')->isEmpty())
-                                                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">No patient photos available.</p>
+                                                                        <p
+                                                                            class="text-center text-gray-500 dark:text-gray-400 py-4">
+                                                                            No patient photos available.</p>
                                                                     @endif
                                                                 </div>
                                                             </div>
 
                                                             <!-- Right Column: Lab Reports -->
                                                             <div>
-                                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Lab Reports</h3>
+                                                                <h3
+                                                                    class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                                                    Lab Reports</h3>
                                                                 <div class="space-y-4">
                                                                     @foreach ($uploads->where('photo_type', 'lab_report') as $upload)
                                                                         <div @click="selectedImageUrl = '{{ route('uploads.show', $upload->id) }}'"
@@ -290,10 +298,12 @@
                                                                             </div>
                                                                             <!-- Details -->
                                                                             <div class="ml-4 flex-1">
-                                                                                <p class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
+                                                                                <p
+                                                                                    class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
                                                                                     {{ str_replace('_', ' ', $upload->photo_type) }}
                                                                                 </p>
-                                                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                                                <p
+                                                                                    class="text-sm text-gray-500 dark:text-gray-400">
                                                                                     {{ __('messages.Uploaded') }}:
                                                                                     {{ $upload->created_at->format('d M Y, h:i A') }}
                                                                                 </p>
@@ -301,13 +311,16 @@
                                                                         </div>
                                                                     @endforeach
                                                                     @if ($uploads->where('photo_type', 'lab_report')->isEmpty())
-                                                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">No lab reports available.</p>
+                                                                        <p
+                                                                            class="text-center text-gray-500 dark:text-gray-400 py-4">
+                                                                            No lab reports available.</p>
                                                                     @endif
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     @else
-                                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">No medical reports or photos available.</p>
+                                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">No
+                                                            medical reports or photos available.</p>
                                                     @endif
 
                                                     <!-- Upload Form -->
@@ -387,9 +400,11 @@
                                     class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-6 h-6">
                                         <!-- White document icon -->
-                                        <path fill="white" d="M224 0v128h128L224 0zM64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H224c-17.7 0-32-14.3-32-32V0H64z"/>
+                                        <path fill="white"
+                                            d="M224 0v128h128L224 0zM64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H224c-17.7 0-32-14.3-32-32V0H64z" />
                                         <!-- Red PDF text -->
-                                        <text x="95" y="380" font-size="130" font-weight="bold" fill="red">PDF</text>
+                                        <text x="95" y="380" font-size="130" font-weight="bold"
+                                            fill="red">PDF</text>
                                     </svg>
                                 </button>
 
@@ -630,7 +645,15 @@
                                                             <p>
                                                                 {{-- <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('नाडी') }}:</span> --}}
-                                                                {{ $checkUpInfo['nadi'] }}
+                                                                {{-- {{ $checkUpInfo['nadi'] }} --}}
+
+                                                                {!! nl2br(
+                                                                    str_replace(
+                                                                        ['[highlight]', '[/highlight]'],
+                                                                        ['<span class="bg-yellow-200 px-1 rounded">', '</span>'],
+                                                                        e($checkUpInfo['nadi']),
+                                                                    ),
+                                                                ) !!}
                                                             </p>
                                                         @endif
 
@@ -639,7 +662,15 @@
                                                             <p>
                                                                 {{-- <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}:</span> --}}
-                                                                {{ $followUp->diagnosis }}
+                                                                {{-- {{ $followUp->diagnosis }} --}}
+
+                                                                {!! nl2br(
+                                                                    str_replace(
+                                                                        ['[highlight]', '[/highlight]'],
+                                                                        ['<span class="bg-yellow-200 px-1 rounded">', '</span>'],
+                                                                        e($followUp->diagnosis),
+                                                                    ),
+                                                                ) !!}
                                                             </p>
                                                         @endif
                                                         {{-- <p><span
@@ -671,7 +702,13 @@
                                                 <p>
                                                     {{-- <span class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span> --}}
                                                     @if (isset($checkUpInfo['chikitsa']))
-                                                        {{ $checkUpInfo['chikitsa'] }}
+                                                        {!! nl2br(
+                                                            str_replace(
+                                                                ['[highlight]', '[/highlight]'],
+                                                                ['<span class="bg-yellow-200 px-1 rounded">', '</span>'],
+                                                                e($checkUpInfo['chikitsa']),
+                                                            ),
+                                                        ) !!}
                                                     @endif
                                                 </p>
 
