@@ -671,8 +671,9 @@
                                                 <p>
                                                     {{-- <span class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span> --}}
                                                     @if (isset($checkUpInfo['chikitsa']))
-                                                        {{ $checkUpInfo['chikitsa'] }}
+                                                        <div class="prose dark:prose-invert max-w-none">{!! $checkUpInfo['chikitsa'] !!}</div>
                                                     @endif
+
                                                 </p>
 
                                                 <p>

@@ -74,10 +74,21 @@
                                 <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                                     {{ __('चिकित्सा') }}
                                 </h2>
-                                <textarea id="chikitsa" name="chikitsa" rows="4"
+                                {{-- <textarea id="chikitsa" name="chikitsa" rows="4"
                                     class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ old('chikitsa', isset($checkUpInfo['chikitsa']) ? $checkUpInfo['chikitsa'] : '') }}
                                 </textarea>
+                                <x-input-error :messages="$errors->get('chikitsa')" class="mt-2" /> --}}
+
+                                <!-- Quill Editor -->
+                                <div id="chikitsa-editor" class="mt-1" style="height: 200px;"></div>
+
+                                <!-- Hidden Input (for form submission) -->
+                                <input type="hidden" name="chikitsa" id="chikitsa">
+
+                                <!-- Validation Error -->
                                 <x-input-error :messages="$errors->get('chikitsa')" class="mt-2" />
+
+
 
                                 <div class="mt-4 grid grid-cols-4 gap-4">
                                     <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200"
@@ -103,7 +114,9 @@
                                             {{ __('messages.diagnosis') }}
                                         </h2>
                                     </div>
-                                    <input type="text" name="nidan" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" value="{{ old('nidan', isset($checkUpInfo['nidan']) ? $checkUpInfo['nidan'] : '') }}"/>
+                                    <input type="text" name="nidan"
+                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"
+                                        value="{{ old('nidan', isset($checkUpInfo['nidan']) ? $checkUpInfo['nidan'] : '') }}" />
                                 </div>
                                 <div class="mt-4 mb-4">
                                     <div class="flex items-center justify-between space-x-2">
@@ -111,7 +124,8 @@
                                             {{ __('messages.Vishesh') }}
                                         </h2>
                                     </div>
-                                    <textarea name="vishesh" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $followup->patient->vishesh }}</textarea>
+                                    <textarea name="vishesh"
+                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $followup->patient->vishesh }}</textarea>
                                 </div>
 
                                 <!-- Numeric Input Boxes -->
@@ -157,10 +171,14 @@
 
 
                         <div class="mt-4">
-                            <x-input-label class="text-l font-semibold text-gray-700 dark:text-white mb-4" for="payment_method" :value="__('messages.Payment Method')" />
-                            <input type="radio" name="payment_method" value="cash" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'cash') checked @endif/> Cash 
-                            <input type="radio" name="payment_method" value="card" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'card') checked @endif/> Card 
-                            <input type="radio" name="payment_method" value="online" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'online') checked @endif/> Online 
+                            <x-input-label class="text-l font-semibold text-gray-700 dark:text-white mb-4"
+                                for="payment_method" :value="__('messages.Payment Method')" />
+                            <input type="radio" name="payment_method" value="cash"
+                                @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'cash') checked @endif /> Cash
+                            <input type="radio" name="payment_method" value="card"
+                                @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'card') checked @endif /> Card
+                            <input type="radio" name="payment_method" value="online"
+                                @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'online') checked @endif /> Online
                             <x-input-error :messages="$errors->get('payment_method')" class="mt-2" />
                         </div>
 
@@ -299,3 +317,30 @@
         });
     });
 </script> --}}
+
+{{-- script for formatting toolbar --}}
+
+<script>
+    var quill = new Quill('#chikitsa-editor', {
+        theme: 'snow',
+        modules: {
+            toolbar: [
+                ['bold', 'italic', 'underline'],
+                [{ 'color': [] }, { 'background': [] }],
+                ['clean']
+            ]
+        }
+    });
+
+    // Loading existing content into Quill
+    var chikitsaContent = `{!! old('chikitsa', isset($checkUpInfo['chikitsa']) ? $checkUpInfo['chikitsa'] : '') !!}`;
+    if (chikitsaContent) {
+        quill.root.innerHTML = chikitsaContent;
+    }
+
+    // On form submit, putting Quill data into hidden input
+    document.querySelector('#followUpForm').addEventListener('submit', function() {
+        document.querySelector('#chikitsa').value = quill.root.innerHTML;
+    });
+</script>
+
