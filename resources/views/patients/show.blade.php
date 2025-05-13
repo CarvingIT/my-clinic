@@ -639,7 +639,7 @@
                                                             <p>
                                                                 {{-- <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}:</span> --}}
-                                                                {{ $followUp->diagnosis }}
+                                                                {!! $followUp->diagnosis !!}
                                                             </p>
                                                         @endif
                                                         {{-- <p><span
@@ -671,7 +671,7 @@
                                                 <p>
                                                     {{-- <span class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span> --}}
                                                     @if (isset($checkUpInfo['chikitsa']))
-                                                        {{ $checkUpInfo['chikitsa'] }}
+                                                        {!! $checkUpInfo['chikitsa'] !!}
                                                     @endif
                                                 </p>
 
