@@ -143,7 +143,8 @@
                                             {{ __('messages.diagnosis') }}
                                         </h2>
                                     </div>
-                                    <input type="text" name="nidan" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"/>
+                                    <input type="text" name="nidan"
+                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" />
                                 </div>
 
 
@@ -167,12 +168,12 @@ $previousChikitsa = $latestFollowUp
                                         </div>
 
                                         <textarea id="chikitsa" name="chikitsa" rows="4"
-                                            class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
+                                            class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                                         <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
 
                                         <div class="mt-4 grid grid-cols-5 gap-4">
                                             <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                                                data-preset="महासुदर्शन, वैदेही, बिभितक, यष्टी, तालीसादी ">
+                                                data-preset="महासुदर्शन, वैदेही, बिभितक, यष्टी, तालीसादी">
                                                 ज्वर
                                             </div>
                                             <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
@@ -180,11 +181,11 @@ $previousChikitsa = $latestFollowUp
                                                 संधिशूल
                                             </div>
                                             <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                                                data-preset="हरीतकी, अमृता, सारिवा ">
+                                                data-preset="हरीतकी, अमृता, सारिवा">
                                                 अर्श
                                             </div>
                                             <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                                                data-preset="कुटज, मुस्ता, विश्व ">
+                                                data-preset="कुटज, मुस्ता, विश्व">
                                                 ग्रहणी
                                             </div>
                                             <div class="border p-2 rounded cursor-pointer preset-box bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
@@ -197,14 +198,15 @@ $previousChikitsa = $latestFollowUp
                                             class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mt-4"></div>
 
                                     </div>
-                                <div class="mt-4 mb-4">
-                                    <div class="flex items-center justify-between space-x-2">
-                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
-                                            {{ __('messages.Vishesh') }}
-                                        </h2>
+                                    <div class="mt-4 mb-4">
+                                        <div class="flex items-center justify-between space-x-2">
+                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
+                                                {{ __('messages.Vishesh') }}
+                                            </h2>
+                                        </div>
+                                        <textarea name="vishesh"
+                                            class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $patient->vishesh }}</textarea>
                                     </div>
-                                    <textarea name="vishesh" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $patient->vishesh }}</textarea>
-                                </div>
 
                                     {{-- Capture button --}}
                                     {{-- <div class="mt-4">
@@ -489,7 +491,8 @@ $previousChikitsa = $latestFollowUp
                         <!-- Parent container with relative positioning -->
                         <div class="relative min-h-screen">
                             <!-- Follow-ups div -->
-                            <div class="absolute top-[62px] right-10 w-[375px] max-h-[calc(100vh-250px)] overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 scrollbar-thin z-10 mb-3 md:static md:w-full md:mx-0 md:my-4">
+                            <div
+                                class="absolute top-[62px] right-10 w-[375px] max-h-[calc(100vh-250px)] overflow-y-auto p-4 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 scrollbar-thin z-10 mb-3 md:static md:w-full md:mx-0 md:my-4">
                                 <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
                                     {{ __('Previous Follow-ups') }}
                                 </h3>
@@ -633,17 +636,26 @@ $previousChikitsa = $latestFollowUp
     const chikitsaStorageKey = "customChikitsaPresets";
 
     function insertChikitsaText(text) {
-        const start = chikitsaTextarea.selectionStart;
-        const end = chikitsaTextarea.selectionEnd;
-        const before = chikitsaTextarea.value.substring(0, start);
-        const after = chikitsaTextarea.value.substring(end);
-        const insert = (before && !before.endsWith(', ') ? ', ' : '') + text + (after && !after.startsWith(',') ? ', ' :
-            '');
-        chikitsaTextarea.value = before + insert + after;
-        const newPos = before.length + insert.length;
-        chikitsaTextarea.setSelectionRange(newPos, newPos);
-        chikitsaTextarea.focus();
+        const editor = tinymce.get('chikitsa');
+        if (!editor) return;
+
+        editor.focus();
+
+        const rng = editor.selection.getRng();
+        const startContainer = rng.startContainer;
+        const startOffset = rng.startOffset;
+
+        let precedingChar = '';
+        if (startContainer.nodeType === 3 && startOffset > 0) {
+            precedingChar = startContainer.data.substring(startOffset - 1, startOffset);
+        }
+
+        const needsComma = precedingChar && !precedingChar.match(/[\s,]/);
+        const insertText = (needsComma ? ', ' : '') + text;
+
+        editor.selection.setContent(insertText);
     }
+
 
     function createChikitsaPreset(title, value, isCustom = true) {
         const wrapper = document.createElement('div');
