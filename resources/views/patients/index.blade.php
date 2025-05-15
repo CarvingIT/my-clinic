@@ -105,7 +105,7 @@
                                         </td>
                                         <td class="px-4 py-4 align-top    break-normal whitespace-normal"
                                             style="vertical-align: top;">
-                                            {{ $patient->vishesh }}
+                                            {!! $patient->vishesh !!}
                                         </td>
                                         <td class="px-4 py-4 align-top    break-normal whitespace-normal text-right text-sm font-medium flex gap-4"
                                             style="vertical-align: top;">

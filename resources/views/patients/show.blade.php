@@ -30,7 +30,7 @@
                                     {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
                                 @endif
                                 @if ($patient->vishesh)
-                                    | {{ $patient->vishesh }}
+                                    | {!! $patient->vishesh !!}
                                 @endif
                                 @if ($patient->height)
                                     | {{ $patient->height }} cm
@@ -630,7 +630,7 @@
                                                             <p>
                                                                 {{-- <span
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('नाडी') }}:</span> --}}
-                                                                {{ $checkUpInfo['nadi'] }}
+                                                                {!! $checkUpInfo['nadi'] !!}
                                                             </p>
                                                         @endif
 

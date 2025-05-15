@@ -9,7 +9,7 @@
                     {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
                 @endif
                 @if ($patient->vishesh)
-                    | {{ __('messages.Vishesh') }}: {{ $patient->vishesh }}
+                    | {{ __('messages.Vishesh') }}: {!! $patient->vishesh !!}
                 @endif
                 @if ($patient->height)
                     | {{ __('messages.Height') }}: {{ $patient->height }} cm
@@ -68,7 +68,7 @@
                                     </div>
 
                                     <textarea id="nadiInput" name="nadi" rows="4"
-                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
+                                        class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
 
                                     <!-- Presets Container -->
                                     <div id="nadiPresets"
@@ -102,7 +102,7 @@
                                     </div>
 
                                     <textarea id="lakshane" name="diagnosis" rows="4"
-                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
+                                        class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                                     <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
 
                                     <!-- Preset and Arrow Buttons Below Textarea -->
@@ -144,7 +144,7 @@
                                         </h2>
                                     </div>
                                     <input type="text" name="nidan"
-                                        class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" />
+                                        class="tinymce-editor002 px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" />
                                 </div>
 
 
@@ -205,7 +205,7 @@ $previousChikitsa = $latestFollowUp
                                             </h2>
                                         </div>
                                         <textarea name="vishesh"
-                                            class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $patient->vishesh }}</textarea>
+                                            class="tinymce-editor002 px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $patient->vishesh }}</textarea>
                                     </div>
 
                                     {{-- Capture button --}}
@@ -506,14 +506,18 @@ $previousChikitsa = $latestFollowUp
                                                     {{ $followUp->created_at->format('d M Y, h:i A') }}
                                                 </p>
                                                 @php $checkUpInfo = json_decode($followUp->check_up_info, true); @endphp
-                                                <p class="text-sm text-gray-700 dark:text-gray-300">
+                                                <div
+                                                    class="text-sm leading-relaxed text-gray-700 dark:text-gray-300 [p]:m-0 [p]:text-sm [h1]:text-base [h2]:text-sm">
                                                     <strong>{{ __('नाडी') }}:</strong>
-                                                    {{ $checkUpInfo['nadi'] ?? '-' }}<br>
+                                                    {!! $checkUpInfo['nadi'] ?? '-' !!}<br>
+
                                                     <strong>{{ __('लक्षणे') }}:</strong>
-                                                    {{ $followUp->diagnosis ?? '-' }}<br>
+                                                    {!! $followUp->diagnosis ?? '-' !!}<br>
+
                                                     <strong>{{ __('चिकित्सा') }}:</strong>
-                                                    {{ $checkUpInfo['chikitsa'] ?? '-' }}
-                                                </p>
+                                                    {!! $checkUpInfo['chikitsa'] ?? '-' !!}
+                                                </div>
+
                                             </div>
                                         @endforeach
                                     </div>
@@ -538,21 +542,49 @@ $previousChikitsa = $latestFollowUp
 
     // Append nadi to textarea at cursor
     function appendNadi(nadi) {
-        const input = document.getElementById('nadiInput');
-        const start = input.selectionStart;
-        const end = input.selectionEnd;
-        const text = input.value;
+        const editor = tinymce.get('nadiInput');
+        if (!editor) {
+            console.error("TinyMCE editor with ID 'nadiInput' not found.");
+            return;
+        }
 
-        const before = text.substring(0, start);
-        const after = text.substring(end);
-        const insert = (before && !before.endsWith(', ') ? ', ' : '') + nadi + (after && !after.startsWith(',') ? ', ' :
-            '');
+        editor.focus();
 
-        input.value = before + insert + after;
-        const newPosition = before.length + insert.length;
-        input.setSelectionRange(newPosition, newPosition);
-        input.focus();
+        const selection = editor.selection;
+        const rng = selection.getRng();
+        const container = rng.startContainer;
+
+        // Get full plain text content and the cursor position
+        const fullText = editor.getContent({
+            format: 'text'
+        });
+        const cursorPos = rng.startOffset;
+        const nodeText = container.textContent || '';
+
+        // Split the node text into before and after parts
+        const beforeText = nodeText.substring(0, cursorPos);
+        const afterText = nodeText.substring(cursorPos);
+
+        // Determine if comma is needed before or after
+        const needsCommaBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(',');
+        const needsCommaAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(',');
+
+        // Construct the text to insert
+        let insertText = '';
+        if (needsCommaBefore) insertText += ', ';
+        insertText += nadi;
+        if (needsCommaAfter) insertText += ',';
+
+        // Insert the new text at the cursor
+        selection.setContent(insertText);
+
+        // Move the cursor to the end of inserted content
+        editor.selection.collapse(false);
+        editor.focus();
     }
+
+
+
 
     function createPresetElement(text, isCustom = true) {
         const presetDiv = document.createElement('div');
@@ -762,16 +794,52 @@ $previousChikitsa = $latestFollowUp
     const lakshaneKey = 'customLakshanePresets';
 
     function insertText(text) {
-        const textarea = document.getElementById('lakshane');
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const current = textarea.value;
-        const before = current.substring(0, start);
-        const after = current.substring(end);
-        textarea.value = before + text + after;
-        textarea.focus();
-        textarea.setSelectionRange(before.length + text.length, before.length + text.length);
+        const editor = tinymce.get('lakshane');
+        if (!editor) {
+            console.error("TinyMCE editor with ID 'lakshane' not found.");
+            return;
+        }
+
+        editor.focus();
+
+        const selection = editor.selection;
+        const rng = selection.getRng();
+        const container = rng.startContainer;
+
+        // Get surrounding text to decide if comma and space are needed
+        const cursorPos = rng.startOffset;
+        const nodeText = container.textContent || '';
+        const beforeText = nodeText.substring(0, cursorPos);
+        const afterText = nodeText.substring(cursorPos);
+
+        const needsCommaBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(',');
+        const needsCommaAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(',');
+
+        let insert = '';
+        if (needsCommaBefore) insert += ', ';
+        insert += text;
+        if (needsCommaAfter) insert += ',';
+
+        selection.setContent(insert);
+        editor.selection.collapse(false);
+        editor.focus();
     }
+
+    function insertArrow(arrow) {
+        const editor = tinymce.get('lakshane');
+        if (!editor) {
+            console.error("TinyMCE editor with ID 'lakshane' not found.");
+            return;
+        }
+
+        editor.focus();
+
+        // Directly insert the arrow at the current cursor position
+        editor.insertContent(arrow);
+        editor.selection.collapse(false);
+        editor.focus();
+    }
+
 
     function createLakshaneButton(text, isCustom = true) {
         const container = document.querySelector('.grid-cols-7'); // adjust if your grid changes
