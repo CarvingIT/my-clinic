@@ -100,6 +100,8 @@ return [
     'select_date_time' => 'तारीख आणि वेळ निवडा',
     'No patients in queue' => 'रांगेत रुग्ण नाहीत',
 
+    'Analysis' => 'विश्लेषण',
+
 
 
     'locale' => 'भाषा', // Label for dropdown

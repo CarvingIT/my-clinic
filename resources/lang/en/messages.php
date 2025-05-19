@@ -98,6 +98,8 @@ return [
     'No patients in queue' => 'No patients in queue',
     'select_date_time' => 'Select Date and Time',
 
+    'Analysis' => 'Analysis',
+
 
 
     'locale' => 'Language', // Label for dropdown

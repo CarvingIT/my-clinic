@@ -219,8 +219,8 @@ class FollowUpController extends Controller
         // Apply pagination AFTER summary calculation
         $followUps = $query->latest()->paginate(10);
 
-        // Chart 1: Follow-Ups Over Time
-        $followUpsOverTime = FollowUp::selectRaw('DATE(created_at) as date, COUNT(*) as count')
+        // Chart 1: Follow-Up Frequency (Daily)
+        $followUpFrequencyDaily = FollowUp::selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
@@ -229,35 +229,71 @@ class FollowUpController extends Controller
             ->orderBy('date')
             ->get();
 
-        // Chart 2: Payment Status Breakdown
-        $paymentStatus = [
-            'fully_paid' => $queryClone->whereRaw('amount_paid >= amount_billed')->count(),
-            'partially_paid' => $queryClone->whereRaw('amount_paid > 0 AND amount_paid < amount_billed')->count(),
-            'unpaid' => $queryClone->where('amount_paid', 0)->count(),
-        ];
-
-        // Chart 3: Follow-Ups by Doctor
-        $followUpsByDoctor = FollowUp::selectRaw('doctor_id, COUNT(*) as count')
+        // Chart 2: Follow-Up Frequency (Monthly)
+        $followUpFrequencyMonthly = FollowUp::selectRaw('DATE_FORMAT(created_at, "%Y-%m") as month, COUNT(*) as count')
             ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
             ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
-            ->groupBy('doctor_id')
-            ->with('doctor')
+            ->groupBy('month')
+            ->orderBy('month')
             ->get();
 
-        // Chart 4: Payment Method Distribution
-        $paymentMethods = FollowUp::selectRaw('JSON_UNQUOTE(JSON_EXTRACT(check_up_info, "$.payment_method")) as method, COUNT(*) as count')
+        // Chart 3: Follow-Up Frequency (Yearly)
+        $followUpFrequencyYearly = FollowUp::selectRaw('YEAR(created_at) as year, COUNT(*) as count')
             ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
             ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
-            ->whereNotNull('check_up_info')
-            ->groupBy('method')
+            ->groupBy('year')
+            ->orderBy('year')
             ->get();
 
+        // Chart 4: Age Distribution
+        $ageDistribution = Patient::whereHas('followUps', function ($query) use ($request) {
+            $query->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
+                ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
+                ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
+                ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor));
+        })
+            ->selectRaw('
+        CASE
+            WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) <= 18 THEN "0-18"
+            WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) <= 40 THEN "19-40"
+            WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) <= 60 THEN "41-60"
+            ELSE "61+"
+        END as age_group, COUNT(DISTINCT patients.id) as count')
+            ->whereNotNull('birthdate')
+            ->groupBy('age_group')
+            ->orderByRaw('FIELD(age_group, "0-18", "19-40", "41-60", "61+")')
+            ->get();
 
-        return view('followups.index', compact('followUps', 'totalIncome', 'totalPatients', 'totalFollowUps', 'branches', 'selectedBranch', 'totalDueAll', 'followUpsOverTime', 'paymentStatus', 'followUpsByDoctor', 'paymentMethods'));
+        // Chart 5: Payment Status
+        $paymentStatus = FollowUp::selectRaw('DATE(created_at) as date, SUM(amount_billed) as billed, SUM(amount_paid) as paid, SUM(amount_billed - amount_paid) as due')
+            ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
+            ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
+            ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Chart 6: New vs. Existing Patients
+        $newVsExistingPatients = FollowUp::whereHas('patient')
+            ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
+            ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
+            ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
+            ->groupBy('patient_id')
+            ->selectRaw('COUNT(*) as followup_count')
+            ->get()
+            ->reduce(function ($carry, $item) {
+                $carry[$item->followup_count == 1 ? 'new' : 'existing']++;
+                return $carry;
+            }, ['new' => 0, 'existing' => 0]);
+
+
+        return view('followups.index', compact('followUps', 'totalIncome', 'totalPatients', 'totalFollowUps', 'branches', 'selectedBranch', 'totalDueAll', 'followUpFrequencyDaily', 'followUpFrequencyMonthly', 'followUpFrequencyYearly', 'ageDistribution', 'paymentStatus', 'newVsExistingPatients'));
     }
 
 

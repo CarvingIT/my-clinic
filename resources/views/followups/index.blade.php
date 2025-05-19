@@ -132,24 +132,32 @@
 
                 {{-- Charts Section --}}
                 <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📈 {{ __('messages.Charts') }}
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📈 {{ __('messages.Analysis') }}
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Follow-Ups Over Time -->
+                        <!-- Follow-Up Frequency (Daily) -->
                         <div>
-                            <canvas id="followUpsOverTimeChart" height="200"></canvas>
+                            <canvas id="followUpFrequencyDailyChart" height="220"></canvas>
                         </div>
-                        <!-- Payment Status Breakdown -->
+                        <!-- Follow-Up Frequency (Monthly) -->
                         <div>
-                            <canvas id="paymentStatusChart" height="200"></canvas>
+                            <canvas id="followUpFrequencyMonthlyChart" height="220"></canvas>
                         </div>
-                        <!-- Follow-Ups by Doctor -->
+                        <!-- Follow-Up Frequency (Yearly) -->
+                        {{-- <div>
+                            <canvas id="followUpFrequencyYearlyChart" height="220"></canvas>
+                        </div> --}}
+                        <!-- Age Distribution -->
+                        {{-- <div>
+                            <canvas id="ageDistributionChart" height="220"></canvas>
+                        </div> --}}
+                        <!-- Payment Status -->
                         <div>
-                            <canvas id="followUpsByDoctorChart" height="200"></canvas>
+                            <canvas id="paymentStatusChart" height="220"></canvas>
                         </div>
-                        <!-- Payment Method Distribution -->
-                        <div>
-                            <canvas id="paymentMethodChart" height="200"></canvas>
+                        <!-- New vs. Existing Patients -->
+                        <div style="height: 400px; width: 100%;">
+                            <canvas id="newVsExistingPatientsChart" height="100"></canvas>
                         </div>
                     </div>
                 </div>
@@ -240,108 +248,308 @@
         document.getElementById('follow_ups').submit();
     }
 
-    // Chart 1: Follow-Ups Over Time
-    const followUpsOverTimeCtx = document.getElementById('followUpsOverTimeChart').getContext('2d');
-    new Chart(followUpsOverTimeCtx, {
-        type: 'line',
-        data: {
-            labels: @json($followUpsOverTime->pluck('date')),
-            datasets: [{
-                label: 'Follow-Ups',
-                data: @json($followUpsOverTime->pluck('count')),
-                borderColor: '#4A90E2',
-                backgroundColor: 'rgba(74, 144, 226, 0.2)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true, text: 'Follow-Ups Over Time' },
-                legend: { position: 'top' }
+    // Chart 1: Follow-Up Frequency (Daily)
+    if (@json($followUpFrequencyDaily->count())) {
+        const dailyCtx = document.getElementById('followUpFrequencyDailyChart').getContext('2d');
+        new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: @json($followUpFrequencyDaily->pluck('date')),
+                datasets: [{
+                    label: 'Follow-Ups',
+                    data: @json($followUpFrequencyDaily->pluck('count')),
+                    borderColor: '#4A90E2',
+                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
             },
-            scales: {
-                x: { title: { display: true, text: 'Date' } },
-                y: { title: { display: true, text: 'Number of Follow-Ups' }, beginAtZero: true }
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Daily Follow-Ups'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Number of Follow-Ups'
+                        },
+                        beginAtZero: true
+                    }
+                }
             }
-        }
-    });
+        });
+    } else {
+        document.getElementById('followUpFrequencyDailyChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No daily follow-up data available.</p>';
+    }
 
-    // Chart 2: Payment Status Breakdown
-    const paymentStatusCtx = document.getElementById('paymentStatusChart').getContext('2d');
-    new Chart(paymentStatusCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Fully Paid', 'Partially Paid', 'Unpaid'],
-            datasets: [{
-                label: 'Payment Status',
-                data: [
-                    @json($paymentStatus['fully_paid']),
-                    @json($paymentStatus['partially_paid']),
-                    @json($paymentStatus['unpaid'])
-                ],
-                backgroundColor: ['#50C878', '#FFCA28', '#FF6B6B'],
-                borderColor: ['#FFFFFF', '#FFFFFF', '#FFFFFF'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true, text: 'Payment Status Breakdown' },
-                legend: { position: 'top' }
-            }
-        }
-    });
-
-    // Chart 3: Follow-Ups by Doctor
-    const followUpsByDoctorCtx = document.getElementById('followUpsByDoctorChart').getContext('2d');
-    new Chart(followUpsByDoctorCtx, {
-        type: 'bar',
-        data: {
-            labels: @json($followUpsByDoctor->pluck('doctor.name')),
-            datasets: [{
-                label: 'Follow-Ups',
-                data: @json($followUpsByDoctor->pluck('count')),
-                backgroundColor: '#4A90E2',
-                borderColor: '#4A90E2',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true, text: 'Follow-Ups by Doctor' },
-                legend: { position: 'top' }
+    // Chart 2: Follow-Up Frequency (Monthly)
+    if (@json($followUpFrequencyMonthly->count())) {
+        const monthlyCtx = document.getElementById('followUpFrequencyMonthlyChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: @json($followUpFrequencyMonthly->pluck('month')),
+                datasets: [{
+                    label: 'Follow-Ups',
+                    data: @json($followUpFrequencyMonthly->pluck('count')),
+                    borderColor: '#50C878',
+                    backgroundColor: 'rgba(80, 200, 120, 0.2)',
+                    fill: true,
+                    tension: 0.4
+                }]
             },
-            scales: {
-                x: { title: { display: true, text: 'Doctor' } },
-                y: { title: { display: true, text: 'Number of Follow-Ups' }, beginAtZero: true }
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Monthly Follow-Ups'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Number of Follow-Ups'
+                        },
+                        beginAtZero: true
+                    }
+                }
             }
-        }
-    });
+        });
+    } else {
+        document.getElementById('followUpFrequencyMonthlyChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No monthly follow-up data available.</p>';
+    }
 
-    // Chart 4: Payment Method Distribution
-    const paymentMethodCtx = document.getElementById('paymentMethodChart').getContext('2d');
-    new Chart(paymentMethodCtx, {
-        type: 'doughnut',
-        data: {
-            labels: @json($paymentMethods->pluck('method')),
-            datasets: [{
-                label: 'Payment Methods',
-                data: @json($paymentMethods->pluck('count')),
-                backgroundColor: ['#4A90E2', '#FF6B6B', '#50C878', '#FFCA28'],
-                borderColor: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                title: { display: true, text: 'Payment Method Distribution' },
-                legend: { position: 'top' }
+    // Chart 3: Follow-Up Frequency (Yearly)
+    // if (@json($followUpFrequencyYearly->count())) {
+    //     const yearlyCtx = document.getElementById('followUpFrequencyYearlyChart').getContext('2d');
+    //     new Chart(yearlyCtx, {
+    //         type: 'line',
+    //         data: {
+    //             labels: @json($followUpFrequencyYearly->pluck('year')),
+    //             datasets: [{
+    //                 label: 'Follow-Ups',
+    //                 data: @json($followUpFrequencyYearly->pluck('count')),
+    //                 borderColor: '#FF6B6B',
+    //                 backgroundColor: 'rgba(255, 107, 107, 0.2)',
+    //                 fill: true,
+    //                 tension: 0.4
+    //             }]
+    //         },
+    //         options: {
+    //             responsive: true,
+    //             plugins: {
+    //                 title: {
+    //                     display: true,
+    //                     text: 'Yearly Follow-Ups'
+    //                 },
+    //                 legend: {
+    //                     position: 'top'
+    //                 }
+    //             },
+    //             scales: {
+    //                 x: {
+    //                     title: {
+    //                         display: true,
+    //                         text: 'Year'
+    //                     }
+    //                 },
+    //                 y: {
+    //                     title: {
+    //                         display: true,
+    //                         text: 'Number of Follow-Ups'
+    //                     },
+    //                     beginAtZero: true
+    //                 }
+    //             }
+    //         }
+    //     });
+    // } else {
+    //     document.getElementById('followUpFrequencyYearlyChart').parentElement.innerHTML =
+    //         '<p class="text-gray-600 dark:text-gray-400">No yearly follow-up data available.</p>';
+    // }
+
+    // Chart 4: Age Distribution
+    // if (@json($ageDistribution->count())) {
+    //     const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
+    //     new Chart(ageCtx, {
+    //         type: 'pie',
+    //         data: {
+    //             labels: @json($ageDistribution->pluck('age_group')),
+    //             datasets: [{
+    //                 label: 'Patients',
+    //                 data: @json($ageDistribution->pluck('count')),
+    //                 backgroundColor: '#4A90E2',
+    //                 borderColor: '#4A90E2',
+    //                 borderWidth: 1
+    //             }]
+    //         },
+    //         options: {
+    //             responsive: true,
+    //             plugins: {
+    //                 title: {
+    //                     display: true,
+    //                     text: 'Age Distribution of Patients'
+    //                 },
+    //                 legend: {
+    //                     position: 'top'
+    //                 }
+    //             },
+    //             scales: {
+    //                 x: {
+    //                     title: {
+    //                         display: true,
+    //                         text: 'Age Group'
+    //                     }
+    //                 },
+    //                 y: {
+    //                     title: {
+    //                         display: true,
+    //                         text: 'Number of Patients'
+    //                     },
+    //                     beginAtZero: true
+    //                 }
+    //             }
+    //         }
+    //     });
+    // } else {
+    //     document.getElementById('ageDistributionChart').parentElement.innerHTML =
+    //         '<p class="text-gray-600 dark:text-gray-400">No age data available.</p>';
+    // }
+
+    // Chart 5: Payment Status
+    if (@json($paymentStatus->count())) {
+        const paymentCtx = document.getElementById('paymentStatusChart').getContext('2d');
+        new Chart(paymentCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($paymentStatus->pluck('date')),
+                datasets: [{
+                        label: 'Billed',
+                        data: @json($paymentStatus->pluck('billed')),
+                        backgroundColor: '#4A90E2',
+                        stack: 'Stack 0'
+                    },
+                    {
+                        label: 'Paid',
+                        data: @json($paymentStatus->pluck('paid')),
+                        backgroundColor: '#50C878',
+                        stack: 'Stack 0'
+                    },
+                    {
+                        label: 'Due',
+                        data: @json($paymentStatus->pluck('due')),
+                        backgroundColor: '#FF6B6B',
+                        stack: 'Stack 0'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Payment Status'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        },
+                        stacked: true
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Amount (₹)'
+                        },
+                        stacked: true,
+                        beginAtZero: true
+                    }
+                }
             }
-        }
-    });
+        });
+    } else {
+        document.getElementById('paymentStatusChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No payment data available.</p>';
+    }
+
+    // Chart 6: New vs. Existing Patients
+    if (@json($newVsExistingPatients['new'] + $newVsExistingPatients['existing'])) {
+        const newVsExistingCtx = document.getElementById('newVsExistingPatientsChart').getContext('2d');
+        new Chart(newVsExistingCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['New Patients', 'Existing Patients'],
+                datasets: [{
+                    label: 'Patient Count',
+                    data: [@json($newVsExistingPatients['new']), @json($newVsExistingPatients['existing'])],
+                    backgroundColor: ['#4A90E2', '#FFCA28'],
+                    borderColor: ['#4A90E2', '#FFCA28'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'New vs. Existing Patients'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Patient Type'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Number of Patients'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('newVsExistingPatientsChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No patient data available.</p>';
+    }
 </script>
