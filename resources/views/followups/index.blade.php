@@ -258,15 +258,31 @@
                 datasets: [{
                     label: 'Follow-Ups',
                     data: @json($followUpFrequencyDaily->pluck('count')),
-                    borderColor: '#4A90E2',
-                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                    borderColor: '#60a5fa',
+                    backgroundColor: (ctx) => {
+                        const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
+                        gradient.addColorStop(0, 'rgba(96, 165, 250, 0.6)');
+                        gradient.addColorStop(1, 'rgba(96, 165, 250, 0.05)');
+                        return gradient;
+                    },
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#60a5fa',
+                    pointHoverRadius: 6
                 }]
+
             },
             options: {
                 responsive: true,
                 plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Follow-Ups: ${context.parsed.y}`;
+                            }
+                        }
+                    },
                     title: {
                         display: true,
                         text: 'Daily Follow-Ups'
@@ -307,11 +323,22 @@
                 datasets: [{
                     label: 'Follow-Ups',
                     data: @json($followUpFrequencyMonthly->pluck('count')),
-                    borderColor: '#50C878',
-                    backgroundColor: 'rgba(80, 200, 120, 0.2)',
+                    borderColor: '#34D399', // Tailwind green-400
+                    backgroundColor: (ctx) => {
+                        const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
+                        gradient.addColorStop(0, 'rgba(52, 211, 153, 0.5)'); // lighter green top
+                        gradient.addColorStop(1, 'rgba(52, 211, 153, 0.05)'); // fade to transparent
+                        return gradient;
+                    },
                     fill: true,
-                    tension: 0.4
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#34D399',
+                    pointHoverRadius: 6,
+                    pointHoverBorderWidth: 2,
+                    pointHoverBorderColor: '#10B981'
                 }]
+
             },
             options: {
                 responsive: true,
@@ -453,22 +480,30 @@
                 datasets: [{
                         label: 'Billed',
                         data: @json($paymentStatus->pluck('billed')),
-                        backgroundColor: '#4A90E2',
+                        backgroundColor: '#93c5fd',
+                        hoverBackgroundColor: '#60a5fa', // slightly darker blue
+                        hoverBorderWidth: 0.7,
                         stack: 'Stack 0'
                     },
                     {
                         label: 'Paid',
                         data: @json($paymentStatus->pluck('paid')),
-                        backgroundColor: '#50C878',
+                        backgroundColor: '#86efac',
+                        hoverBackgroundColor: '#4ade80', // slightly darker green
+                        hoverBorderWidth: 0.7,
                         stack: 'Stack 0'
                     },
                     {
                         label: 'Due',
                         data: @json($paymentStatus->pluck('due')),
-                        backgroundColor: '#FF6B6B',
+                        backgroundColor: '#fca5a5',
+                        hoverBackgroundColor: '#f87171', // slightly darker red
+                        hoverBorderWidth: 0.7,
                         stack: 'Stack 0'
                     }
                 ]
+
+
             },
             options: {
                 responsive: true,
@@ -515,9 +550,11 @@
                 datasets: [{
                     label: 'Patient Count',
                     data: [@json($newVsExistingPatients['new']), @json($newVsExistingPatients['existing'])],
-                    backgroundColor: ['#4A90E2', '#FFCA28'],
-                    borderColor: ['#4A90E2', '#FFCA28'],
-                    borderWidth: 1
+                    backgroundColor: ['#93c5fd', '#86efac'],
+                    borderColor: ['#93c5fd', '#86efac'],
+                    borderWidth: 1,
+                    hoverOffset: 20
+
                 }]
             },
             options: {
