@@ -20,6 +20,7 @@
         "@rollup/rollup-win32-x64-msvc": "^4.35.0"
     },
     "dependencies": {
+        "chart.js": "^4.4.9",
         "flatpickr": "^4.6.13"
     }
 }

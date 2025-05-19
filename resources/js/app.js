@@ -5,6 +5,9 @@ import flatpickr from "flatpickr";
 import "flatpickr/dist/flatpickr.css";
 import axios from 'axios';
 
+import Chart from 'chart.js/auto';
+window.Chart = Chart;
+
 
 window.Alpine = Alpine;
 
