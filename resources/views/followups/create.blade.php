@@ -565,15 +565,15 @@ $previousChikitsa = $latestFollowUp
         const beforeText = nodeText.substring(0, cursorPos);
         const afterText = nodeText.substring(cursorPos);
 
-        // Determine if comma is needed before or after
-        const needsCommaBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(',');
-        const needsCommaAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(',');
+        // Determine if space is needed before or after
+        const needsCommaBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
+        const needsCommaAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
 
         // Construct the text to insert
         let insertText = '';
-        if (needsCommaBefore) insertText += ', ';
+        if (needsCommaBefore) insertText += ' ';
         insertText += nadi;
-        if (needsCommaAfter) insertText += ',';
+        if (needsCommaAfter) insertText += ' ';
 
         // Insert the new text at the cursor
         selection.setContent(insertText);
@@ -682,8 +682,15 @@ $previousChikitsa = $latestFollowUp
             precedingChar = startContainer.data.substring(startOffset - 1, startOffset);
         }
 
-        const needsComma = precedingChar && !precedingChar.match(/[\s,]/);
-        const insertText = (needsComma ? ', ' : '') + text;
+        // For Commas
+        // const needsComma = precedingChar && !precedingChar.match(/[\s,]/);
+        // const insertText = (needsComma ? ', ' : '') + text;
+
+        // For Spaces
+        const needsSpace = precedingChar && !precedingChar.match(/\s/);
+        const cleanText = text.replace(/,/g, ''); // 🔥 removes commas from the preset
+        const insertText = (needsSpace ? ' ' : '') + cleanText;
+
 
         editor.selection.setContent(insertText);
     }
@@ -807,18 +814,33 @@ $previousChikitsa = $latestFollowUp
         const container = rng.startContainer;
 
         // Get surrounding text to decide if comma and space are needed
+        // const cursorPos = rng.startOffset;
+        // const nodeText = container.textContent || '';
+        // const beforeText = nodeText.substring(0, cursorPos);
+        // const afterText = nodeText.substring(cursorPos);
+
+        // const needsCommaBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(',');
+        // const needsCommaAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(',');
+
+        // let insert = '';
+        // if (needsCommaBefore) insert += ', ';
+        // insert += text;
+        // if (needsCommaAfter) insert += ',';
+
+        // Get surrounding text to decide if space is needed
         const cursorPos = rng.startOffset;
         const nodeText = container.textContent || '';
         const beforeText = nodeText.substring(0, cursorPos);
         const afterText = nodeText.substring(cursorPos);
 
-        const needsCommaBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(',');
-        const needsCommaAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(',');
+        const needsSpaceBefore = beforeText.length > 0 && !beforeText.endsWith(' ');
+        const needsSpaceAfter = afterText.length > 0 && !afterText.startsWith(' ');
 
         let insert = '';
-        if (needsCommaBefore) insert += ', ';
+        if (needsSpaceBefore) insert += ' ';
         insert += text;
-        if (needsCommaAfter) insert += ',';
+        if (needsSpaceAfter) insert += ' ';
+
 
         selection.setContent(insert);
         editor.selection.collapse(false);
