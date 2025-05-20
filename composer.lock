@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ce3a5d4466907789b551f2531e2c1506",
+    "content-hash": "20587246438a582cf01398b7ba3debbb",
     "packages": [
         {
             "name": "barryvdh/laravel-snappy",
@@ -212,6 +212,53 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
+        },
+        {
+            "name": "carving-i-t/laravel-user-roles",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/CarvingIT/laravel-user-roles.git",
+                "reference": "dd42aa20a319fb90008fe6ec83b2fefb281b0d2f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/CarvingIT/laravel-user-roles/zipball/dd42aa20a319fb90008fe6ec83b2fefb281b0d2f",
+                "reference": "dd42aa20a319fb90008fe6ec83b2fefb281b0d2f",
+                "shasum": ""
+            },
+            "require": {
+                "laravel/framework": "^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "CarvingIT\\LaravelUserRoles\\LaravelUserRolesServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "CarvingIT\\LaravelUserRoles\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ketan Kulkarni",
+                    "email": "ketan@carvingit.com"
+                }
+            ],
+            "description": "Composer package for user roles in a Laravel project",
+            "support": {
+                "issues": "https://github.com/CarvingIT/laravel-user-roles/issues",
+                "source": "https://github.com/CarvingIT/laravel-user-roles/tree/v1.0.0"
+            },
+            "time": "2025-05-07T05:33:44+00:00"
         },
         {
             "name": "composer/pcre",
@@ -9996,12 +10043,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": {},
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

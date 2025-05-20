@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-snappy": "^1.0",
+        "carving-i-t/laravel-user-roles": "^1.0",
         "h4cc/wkhtmltopdf-i386": "0.12.x",
         "intervention/image": "^3.11",
         "laravel/framework": "^11.31",
