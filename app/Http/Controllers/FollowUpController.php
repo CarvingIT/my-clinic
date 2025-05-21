@@ -270,14 +270,15 @@ class FollowUpController extends Controller
             ->get();
 
         // Chart 5: Payment Status
-        $paymentStatus = FollowUp::selectRaw('DATE_FORMAT(created_at, "%d-%m-%y") as date, SUM(amount_billed) as billed, SUM(amount_paid) as paid, SUM(amount_billed - amount_paid) as due')
+        $paymentStatus = FollowUp::selectRaw('DATE(created_at) as raw_date, DATE_FORMAT(created_at, "%d-%m-%y") as date, SUM(amount_billed) as billed, SUM(amount_paid) as paid, SUM(amount_billed - amount_paid) as due')
             ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
             ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
-            ->groupBy('date')
-            ->orderBy('date')
+            ->groupBy('raw_date', 'date')
+            ->orderBy('raw_date', 'asc')
             ->get();
+
 
         // Chart 6: New vs. Existing Patients
         $newVsExistingPatients = FollowUp::whereHas('patient')
