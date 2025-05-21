@@ -251,6 +251,7 @@ class FollowUpController extends Controller
             ->get();
 
         // Chart 4: Age Distribution
+        // Chart 4: Age Distribution
         $ageDistribution = Patient::whereHas('followUps', function ($query) use ($request) {
             $query->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
                 ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
@@ -258,15 +259,27 @@ class FollowUpController extends Controller
                 ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor));
         })
             ->selectRaw('
-        CASE
-            WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) <= 18 THEN "0-18"
-            WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) <= 40 THEN "19-40"
-            WHEN TIMESTAMPDIFF(YEAR, birthdate, CURDATE()) <= 60 THEN "41-60"
-            ELSE "61+"
-        END as age_group, COUNT(DISTINCT patients.id) as count')
-            ->whereNotNull('birthdate')
+    CASE
+        WHEN birthdate IS NULL THEN "Unknown"
+        WHEN TIMESTAMPDIFF(YEAR, birthdate, follow_ups.created_at) <= 18 THEN "0-18"
+        WHEN TIMESTAMPDIFF(YEAR, birthdate, follow_ups.created_at) <= 45 THEN "19-45"
+        ELSE "46+"
+    END as age_group, COUNT(DISTINCT patients.id) as count')
+            // ->join('follow_ups', function ($join) {
+            //     $join->on('patients.id', '=', 'follow_ups.patient_id');
+            // })
+
+            //For the latest follow-up
+            ->join('follow_ups', function ($join) {
+                $join->on('patients.id', '=', 'follow_ups.patient_id')
+                    ->where('follow_ups.created_at', function ($query) {
+                        $query->selectRaw('MAX(created_at)')
+                            ->from('follow_ups')
+                            ->whereColumn('patient_id', 'patients.id');
+                    });
+            })
             ->groupBy('age_group')
-            ->orderByRaw('FIELD(age_group, "0-18", "19-40", "41-60", "61+")')
+            ->orderByRaw('FIELD(age_group, "0-18", "19-45", "46+", "Unknown")')
             ->get();
 
         // Chart 5: Payment Status

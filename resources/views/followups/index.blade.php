@@ -147,18 +147,26 @@
                         {{-- <div>
                             <canvas id="followUpFrequencyYearlyChart" height="220"></canvas>
                         </div> --}}
-                        <!-- Age Distribution -->
-                        {{-- <div>
-                            <canvas id="ageDistributionChart" height="220"></canvas>
-                        </div> --}}
                         <!-- Payment Status -->
-                        <div>
-                            <canvas id="paymentStatusChart" height="220"></canvas>
+                        <div class="md:col-span-2">
+                            <canvas id="paymentStatusChart" height="120"></canvas>
                         </div>
-                        <!-- New vs. Existing Patients -->
-                        <div style="height: 400px; width: 100%;">
-                            <canvas id="newVsExistingPatientsChart" height="100"></canvas>
+                        <div class="flex justify-center items-start gap-36 w-full md:col-span-2">
+                            <!-- New vs. Existing Patients -->
+                            <div class="flex-1 max-w-md">
+                                <div class="h-[450px] w-full">
+                                    <canvas id="newVsExistingPatientsChart" height="100"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Age Distribution -->
+                            <div class="flex-1 max-w-md">
+                                <div class="h-[450px] w-full">
+                                    <canvas id="ageDistributionChart" height="100"></canvas>
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -423,54 +431,40 @@
     // }
 
     // Chart 4: Age Distribution
-    // if (@json($ageDistribution->count())) {
-    //     const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
-    //     new Chart(ageCtx, {
-    //         type: 'pie',
-    //         data: {
-    //             labels: @json($ageDistribution->pluck('age_group')),
-    //             datasets: [{
-    //                 label: 'Patients',
-    //                 data: @json($ageDistribution->pluck('count')),
-    //                 backgroundColor: '#4A90E2',
-    //                 borderColor: '#4A90E2',
-    //                 borderWidth: 1
-    //             }]
-    //         },
-    //         options: {
-    //             responsive: true,
-    //             plugins: {
-    //                 title: {
-    //                     display: true,
-    //                     text: 'Age Distribution of Patients'
-    //                 },
-    //                 legend: {
-    //                     position: 'top'
-    //                 }
-    //             },
-    //             scales: {
-    //                 x: {
-    //                     title: {
-    //                         display: true,
-    //                         text: 'Age Group'
-    //                     }
-    //                 },
-    //                 y: {
-    //                     title: {
-    //                         display: true,
-    //                         text: 'Number of Patients'
-    //                     },
-    //                     beginAtZero: true
-    //                 }
-    //             }
-    //         }
-    //     });
-    // } else {
-    //     document.getElementById('ageDistributionChart').parentElement.innerHTML =
-    //         '<p class="text-gray-600 dark:text-gray-400">No age data available.</p>';
-    // }
+    if (@json($ageDistribution->count())) {
+        const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
+        new Chart(ageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @json($ageDistribution->pluck('age_group')),
+                datasets: [{
+                    label: 'Patient Count',
+                    data: @json($ageDistribution->pluck('count')),
+                    backgroundColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
+                    borderColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
+                    borderWidth: 1,
+                    hoverOffset: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Age Distribution of Patients'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('ageDistributionChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No age data available.</p>';
+    }
 
-    //Chart5
+    // Chart 5: Payment Status
     if (@json($paymentStatus->count())) {
         const paymentCtx = document.getElementById('paymentStatusChart').getContext('2d');
 
@@ -495,8 +489,9 @@
                         data: @json($paymentStatus->pluck('billed')),
                         borderColor: '#60a5fa', // Tailwind blue-400
                         backgroundColor: gradientBilled,
+                        borderWidth: 1,
                         fill: true,
-                        pointRadius: 4,
+                        pointRadius: 2,
                         pointBackgroundColor: '#60a5fa',
                         pointHoverRadius: 6,
                         tension: 0.4
@@ -506,8 +501,9 @@
                         data: @json($paymentStatus->pluck('paid')),
                         borderColor: '#34d399', // Tailwind green-400
                         backgroundColor: gradientPaid,
+                        borderWidth: 1,
                         fill: true,
-                        pointRadius: 4,
+                        pointRadius: 2,
                         pointBackgroundColor: '#34d399',
                         pointHoverRadius: 6,
                         tension: 0.4
@@ -517,8 +513,9 @@
                         data: @json($paymentStatus->pluck('due')),
                         borderColor: '#f87171', // Tailwind red-400
                         backgroundColor: gradientDue,
+                        borderWidth: 1,
                         fill: true,
-                        pointRadius: 4,
+                        pointRadius: 2,
                         pointBackgroundColor: '#f87171',
                         pointHoverRadius: 6,
                         tension: 0.4
@@ -572,7 +569,7 @@
         new Chart(newVsExistingCtx, {
             type: 'doughnut',
             data: {
-                labels: ['New Patients', 'Existing Patients'],
+                labels: ['New Patients', 'Old Patients'],
                 datasets: [{
                     label: 'Patient Count',
                     data: [@json($newVsExistingPatients['new']), @json($newVsExistingPatients['existing'])],
