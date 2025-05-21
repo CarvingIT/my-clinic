@@ -470,44 +470,71 @@
     //         '<p class="text-gray-600 dark:text-gray-400">No age data available.</p>';
     // }
 
-    // Chart 5: Payment Status
+    //Chart5
     if (@json($paymentStatus->count())) {
         const paymentCtx = document.getElementById('paymentStatusChart').getContext('2d');
+
+        const gradientBilled = paymentCtx.createLinearGradient(0, 0, 0, 300);
+        gradientBilled.addColorStop(0, 'rgba(147, 197, 253, 0.6)'); // Tailwind blue-300
+        gradientBilled.addColorStop(1, 'rgba(147, 197, 253, 0.05)');
+
+        const gradientPaid = paymentCtx.createLinearGradient(0, 0, 0, 300);
+        gradientPaid.addColorStop(0, 'rgba(134, 239, 172, 0.6)'); // Tailwind green-300
+        gradientPaid.addColorStop(1, 'rgba(134, 239, 172, 0.05)');
+
+        const gradientDue = paymentCtx.createLinearGradient(0, 0, 0, 300);
+        gradientDue.addColorStop(0, 'rgba(252, 165, 165, 0.6)'); // Tailwind red-300
+        gradientDue.addColorStop(1, 'rgba(252, 165, 165, 0.05)');
+
         new Chart(paymentCtx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: @json($paymentStatus->pluck('date')),
                 datasets: [{
                         label: 'Billed',
                         data: @json($paymentStatus->pluck('billed')),
-                        backgroundColor: '#93c5fd',
-                        hoverBackgroundColor: '#60a5fa', // slightly darker blue
-                        hoverBorderWidth: 0.7,
-                        stack: 'Stack 0'
+                        borderColor: '#60a5fa', // Tailwind blue-400
+                        backgroundColor: gradientBilled,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#60a5fa',
+                        pointHoverRadius: 6,
+                        tension: 0.4
                     },
                     {
                         label: 'Paid',
                         data: @json($paymentStatus->pluck('paid')),
-                        backgroundColor: '#86efac',
-                        hoverBackgroundColor: '#4ade80', // slightly darker green
-                        hoverBorderWidth: 0.7,
-                        stack: 'Stack 0'
+                        borderColor: '#34d399', // Tailwind green-400
+                        backgroundColor: gradientPaid,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#34d399',
+                        pointHoverRadius: 6,
+                        tension: 0.4
                     },
                     {
                         label: 'Due',
                         data: @json($paymentStatus->pluck('due')),
-                        backgroundColor: '#fca5a5',
-                        hoverBackgroundColor: '#f87171', // slightly darker red
-                        hoverBorderWidth: 0.7,
-                        stack: 'Stack 0'
+                        borderColor: '#f87171', // Tailwind red-400
+                        backgroundColor: gradientDue,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#f87171',
+                        pointHoverRadius: 6,
+                        tension: 0.4
                     }
                 ]
-
-
             },
             options: {
                 responsive: true,
                 plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ₹${context.parsed.y}`;
+                            }
+                        }
+                    },
                     title: {
                         display: true,
                         text: 'Payment Status'
@@ -521,15 +548,13 @@
                         title: {
                             display: true,
                             text: 'Date'
-                        },
-                        stacked: true
+                        }
                     },
                     y: {
                         title: {
                             display: true,
                             text: 'Amount (₹)'
                         },
-                        stacked: true,
                         beginAtZero: true
                     }
                 }
@@ -539,6 +564,7 @@
         document.getElementById('paymentStatusChart').parentElement.innerHTML =
             '<p class="text-gray-600 dark:text-gray-400">No payment data available.</p>';
     }
+
 
     // Chart 6: New vs. Existing Patients
     if (@json($newVsExistingPatients['new'] + $newVsExistingPatients['existing'])) {
@@ -562,27 +588,13 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'New vs. Existing Patients'
+                        text: 'New vs. Old Patients'
                     },
                     legend: {
                         position: 'top'
                     }
                 },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Patient Type'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Number of Patients'
-                        },
-                        beginAtZero: true
-                    }
-                }
+
             }
         });
     } else {
