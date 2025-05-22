@@ -7,6 +7,7 @@ use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FollowupImageController;
 use App\Http\Controllers\QueueController;
+use App\Http\Controllers\AnalyticsController;
 
 
 use Illuminate\Support\Facades\App;
@@ -104,6 +105,9 @@ Route::post('/patients/{patient}/queue', [QueueController::class, 'addToQueue'])
 Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index');
 Route::delete('/queue/{queue}', [QueueController::class, 'removeFromQueue'])->name('queue.remove');
 Route::post('/queue/{queue}/in', [QueueController::class, 'markIn'])->name('queue.in');
+
+// Routes for Analytics
+Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
 
 
 

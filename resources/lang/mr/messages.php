@@ -101,6 +101,8 @@ return [
     'No patients in queue' => 'रांगेत रुग्ण नाहीत',
 
     'Analysis' => 'विश्लेषण',
+    'Ledger' => 'लेजर',
+
 
 
 

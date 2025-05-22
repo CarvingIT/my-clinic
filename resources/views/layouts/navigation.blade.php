@@ -19,7 +19,10 @@
                         {{ __('messages.patients') }}
                     </x-nav-link>
                     <x-nav-link :href="route('followups.index')" :active="request()->routeIs('followups.index')">
-                        {{ __('messages.Follow ups') }}
+                        {{ __('messages.Ledger') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('analytics.index')" :active="request()->routeIs('analytics.index')">
+                        {{ __('messages.Analysis') }}
                     </x-nav-link>
                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
                         {{ __('messages.Staff') }}

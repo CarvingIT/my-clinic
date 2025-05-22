@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-xl text-gray-900 dark:text-gray-100 leading-tight">
-            {{ __('messages.All Follow Ups') }}
+            {{ __('messages.Ledger') }}
         </h2>
     </x-slot>
 
@@ -131,7 +131,7 @@
                 </div>
 
                 {{-- Charts Section --}}
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                {{-- <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📈 {{ __('messages.Analysis') }}
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -144,9 +144,9 @@
                             <canvas id="followUpFrequencyMonthlyChart" height="220"></canvas>
                         </div>
                         <!-- Follow-Up Frequency (Yearly) -->
-                        {{-- <div>
+                        <div>
                             <canvas id="followUpFrequencyYearlyChart" height="220"></canvas>
-                        </div> --}}
+                        </div>
                         <!-- Payment Status -->
                         <div class="md:col-span-2">
                             <canvas id="paymentStatusChart" height="120"></canvas>
@@ -168,7 +168,7 @@
                         </div>
 
                     </div>
-                </div>
+                </div> --}}
 
 
 

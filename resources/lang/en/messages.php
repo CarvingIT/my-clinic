@@ -99,6 +99,8 @@ return [
     'select_date_time' => 'Select Date and Time',
 
     'Analysis' => 'Analysis',
+    'Ledger' => 'Ledger',
+    'Analytics' => 'Analytics',
 
 
 
