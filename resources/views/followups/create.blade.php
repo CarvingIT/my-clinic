@@ -9,8 +9,10 @@
                     {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
                 @endif
                 @if ($patient->vishesh)
-                    | {{ __('messages.Vishesh') }}: {!! $patient->vishesh !!}
+                    | {{ __('messages.Vishesh') }}:
+                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $patient->vishesh) !!}
                 @endif
+
                 @if ($patient->height)
                     | {{ __('messages.Height') }}: {{ $patient->height }} cm
                 @endif
@@ -508,15 +510,37 @@ $previousChikitsa = $latestFollowUp
                                                 @php $checkUpInfo = json_decode($followUp->check_up_info, true); @endphp
                                                 <div
                                                     class="text-sm leading-relaxed text-gray-700 dark:text-gray-300 [p]:m-0 [p]:text-sm [h1]:text-base [h2]:text-sm">
-                                                    <strong>{{ __('नाडी') }}:</strong>
-                                                    {!! $checkUpInfo['nadi'] ?? '-' !!}<br>
+                                                    <strong>नाडी:</strong>
+                                                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $checkUpInfo['nadi'] ?? '-') !!}
+                                                    <br>
 
                                                     <strong>{{ __('लक्षणे') }}:</strong>
-                                                    {!! $followUp->diagnosis ?? '-' !!}<br>
+                                                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $followUp->diagnosis ?? '-') !!}
+                                                    <br>
 
                                                     <strong>{{ __('चिकित्सा') }}:</strong>
-                                                    {!! $checkUpInfo['chikitsa'] ?? '-' !!}
+                                                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $checkUpInfo['chikitsa'] ?? '-') !!}
+                                                    <br>
+
+                                                    @if (!empty($checkUpInfo['days']))
+                                                        <strong>{{ __('दिवस') }}:</strong>
+                                                        {{ $checkUpInfo['days'] }}
+                                                        <br>
+                                                    @endif
+
+                                                    @if (!empty($checkUpInfo['packets']))
+                                                        <strong>{{ __('पुड्या') }}:</strong>
+                                                        {{ $checkUpInfo['packets'] }}
+                                                        <br>
+                                                    @endif
+
+                                                    @php
+                                                        $amountPaid = $followUp->amount_paid ?? 0;
+                                                    @endphp
+                                                    <strong>{{ __('दिलेली रक्कम') }}:</strong>
+                                                        ₹{{ number_format($amountPaid, 2) }}
                                                 </div>
+
 
                                             </div>
                                         @endforeach
