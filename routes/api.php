@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -9,9 +10,12 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/login', function(Request $request){
    if (auth()->attempt(['email'=>$request->email, 'password'=>$request->password])) {
-        return ['status'=>'successful'];
+        $user = User::where('email', $request->email)->first();
+        $token = $user->createToken('app-token');
+        // generate token
+        return ['status'=>1, 'token'=>$token->plainTextToken];
    } 
    else{
-        return ['status'=>'failure'];
+        return ['status'=>0];
    }
 });
