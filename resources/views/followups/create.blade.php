@@ -8,10 +8,7 @@
                     {{-- | {{ __('messages.Age') }}/{{ __('messages.Gender') }}: --}}
                     {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
                 @endif
-                @if ($patient->vishesh)
-                    | {{ __('messages.Vishesh') }}:
-                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $patient->vishesh) !!}
-                @endif
+
 
                 @if ($patient->height)
                     | {{ __('messages.Height') }}: {{ $patient->height }} cm
@@ -34,6 +31,11 @@
                 @endif
                 @if (isset($totalDueAll))
                     | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($totalDueAll, 2) }}
+                @endif
+                <div class="my-1"></div>
+                @if ($patient->vishesh)
+                    {{ __('messages.Vishesh') }}:
+                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $patient->vishesh) !!}
                 @endif
 
             </span>
@@ -512,26 +514,26 @@ $previousChikitsa = $latestFollowUp
                                                     class="text-sm leading-relaxed text-gray-700 dark:text-gray-300 [p]:m-0 [p]:text-sm [h1]:text-base [h2]:text-sm">
                                                     <strong>नाडी:</strong>
                                                     {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $checkUpInfo['nadi'] ?? '-') !!}
-                                                    <br>
+                                                    <div class="my-0.5"></div>
 
                                                     <strong>{{ __('लक्षणे') }}:</strong>
                                                     {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $followUp->diagnosis ?? '-') !!}
-                                                    <br>
+                                                    <div class="my-0.5"></div>
 
                                                     <strong>{{ __('चिकित्सा') }}:</strong>
                                                     {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $checkUpInfo['chikitsa'] ?? '-') !!}
-                                                    <br>
+                                                    <div class="my-0.5"></div>
 
                                                     @if (!empty($checkUpInfo['days']))
                                                         <strong>{{ __('दिवस') }}:</strong>
                                                         {{ $checkUpInfo['days'] }}
-                                                        <br>
+                                                        <div class="my-0.5"></div>
                                                     @endif
 
                                                     @if (!empty($checkUpInfo['packets']))
                                                         <strong>{{ __('पुड्या') }}:</strong>
                                                         {{ $checkUpInfo['packets'] }}
-                                                        <br>
+                                                        <div class="my-0.5"></div>
                                                     @endif
 
                                                     @php
