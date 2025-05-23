@@ -23,18 +23,32 @@ class QueueController extends Controller
 
         $inQueueAt = $request->input('in_queue_at') ? \Carbon\Carbon::parse($request->input('in_queue_at')) : now();
 
+        try{
         Queue::create([
             'patient_id' => $patient->id,
             'in_queue_at' => $inQueueAt,
             'added_by' => Auth::id(),
         ]);
+        }
+        catch(\Exception $e){
+            if($request->wantsJson()){
+                return ['status'=>0, 'message'=>'Patient was not added to the queue. Already in the queue ?'];
+            }
+            return redirect()->route('patients.index')->with('failure', 'Patient not added to queue.');
+        }
 
+        if($request->wantsJson()){
+            return ['status'=>1, 'message'=>'Patient added to queue.'];
+        }
         return redirect()->route('patients.index')->with('success', 'Patient added to queue.');
     }
 
-    public function showQueue()
+    public function showQueue(Request $request)
     {
         $queue = Queue::with('patient', 'addedBy')->orderBy('in_queue_at')->get();
+        if($request->wantsJson()){
+            return $queue;
+        }
         return view('queue.index', compact('queue'));
     }
 

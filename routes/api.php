@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
+use App\Http\Controllers\QueueController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -19,3 +20,6 @@ Route::post('/login', function(Request $request){
         return ['status'=>0];
    }
 });
+
+Route::get('/queue', [QueueController::class, 'showQueue'])->middleware('auth:sanctum');
+Route::post('/patients/{patient}/queue', [QueueController::class, 'addToQueue'])->middleware('auth:sanctum');
