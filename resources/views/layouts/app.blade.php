@@ -92,6 +92,18 @@
                 branding: false,
                 statusbar: false,
                 height: 200,
+                forced_root_block: false,
+                content_style: `
+                                body {
+                                line-height: 1.4 !important;
+                                margin: 0;
+                                padding: 15px;
+                                font-size: 17px;
+                                }
+                                p {
+                                margin: 0 !important;
+                                }
+                            `,
 
             });
         </script>

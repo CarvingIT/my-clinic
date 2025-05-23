@@ -8,9 +8,8 @@
                     {{-- | {{ __('messages.Age') }}/{{ __('messages.Gender') }}: --}}
                     {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
                 @endif
-                @if ($patient->vishesh)
-                    | {{ __('messages.Vishesh') }}: {!! $patient->vishesh !!}
-                @endif
+
+
                 @if ($patient->height)
                     | {{ __('messages.Height') }}: {{ $patient->height }} cm
                 @endif
@@ -32,6 +31,11 @@
                 @endif
                 @if (isset($totalDueAll))
                     | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($totalDueAll, 2) }}
+                @endif
+                <div class="my-1"></div>
+                @if ($patient->vishesh)
+                    {{ __('messages.Vishesh') }}:
+                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $patient->vishesh) !!}
                 @endif
 
             </span>
@@ -508,15 +512,37 @@ $previousChikitsa = $latestFollowUp
                                                 @php $checkUpInfo = json_decode($followUp->check_up_info, true); @endphp
                                                 <div
                                                     class="text-sm leading-relaxed text-gray-700 dark:text-gray-300 [p]:m-0 [p]:text-sm [h1]:text-base [h2]:text-sm">
-                                                    <strong>{{ __('नाडी') }}:</strong>
-                                                    {!! $checkUpInfo['nadi'] ?? '-' !!}<br>
+                                                    <strong>नाडी:</strong>
+                                                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $checkUpInfo['nadi'] ?? '-') !!}
+                                                    <div class="my-0.5"></div>
 
                                                     <strong>{{ __('लक्षणे') }}:</strong>
-                                                    {!! $followUp->diagnosis ?? '-' !!}<br>
+                                                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $followUp->diagnosis ?? '-') !!}
+                                                    <div class="my-0.5"></div>
 
                                                     <strong>{{ __('चिकित्सा') }}:</strong>
-                                                    {!! $checkUpInfo['chikitsa'] ?? '-' !!}
+                                                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $checkUpInfo['chikitsa'] ?? '-') !!}
+                                                    <div class="my-0.5"></div>
+
+                                                    @if (!empty($checkUpInfo['days']))
+                                                        <strong>{{ __('दिवस') }}:</strong>
+                                                        {{ $checkUpInfo['days'] }}
+                                                        <div class="my-0.5"></div>
+                                                    @endif
+
+                                                    @if (!empty($checkUpInfo['packets']))
+                                                        <strong>{{ __('पुड्या') }}:</strong>
+                                                        {{ $checkUpInfo['packets'] }}
+                                                        <div class="my-0.5"></div>
+                                                    @endif
+
+                                                    @php
+                                                        $amountPaid = $followUp->amount_paid ?? 0;
+                                                    @endphp
+                                                    <strong>{{ __('दिलेली रक्कम') }}:</strong>
+                                                        ₹{{ number_format($amountPaid, 2) }}
                                                 </div>
+
 
                                             </div>
                                         @endforeach

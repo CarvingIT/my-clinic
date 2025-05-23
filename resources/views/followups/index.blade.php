@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-xl text-gray-900 dark:text-gray-100 leading-tight">
-            {{ __('messages.All Follow Ups') }}
+            {{ __('messages.Ledger') }}
         </h2>
     </x-slot>
 
@@ -131,7 +131,7 @@
                 </div>
 
                 {{-- Charts Section --}}
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                {{-- <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📈 {{ __('messages.Analysis') }}
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -144,23 +144,31 @@
                             <canvas id="followUpFrequencyMonthlyChart" height="220"></canvas>
                         </div>
                         <!-- Follow-Up Frequency (Yearly) -->
-                        {{-- <div>
-                            <canvas id="followUpFrequencyYearlyChart" height="220"></canvas>
-                        </div> --}}
-                        <!-- Age Distribution -->
-                        {{-- <div>
-                            <canvas id="ageDistributionChart" height="220"></canvas>
-                        </div> --}}
-                        <!-- Payment Status -->
                         <div>
-                            <canvas id="paymentStatusChart" height="220"></canvas>
+                            <canvas id="followUpFrequencyYearlyChart" height="220"></canvas>
                         </div>
-                        <!-- New vs. Existing Patients -->
-                        <div style="height: 400px; width: 100%;">
-                            <canvas id="newVsExistingPatientsChart" height="100"></canvas>
+                        <!-- Payment Status -->
+                        <div class="md:col-span-2">
+                            <canvas id="paymentStatusChart" height="120"></canvas>
                         </div>
+                        <div class="flex justify-center items-start gap-36 w-full md:col-span-2">
+                            <!-- New vs. Existing Patients -->
+                            <div class="flex-1 max-w-md">
+                                <div class="h-[450px] w-full">
+                                    <canvas id="newVsExistingPatientsChart" height="100"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Age Distribution -->
+                            <div class="flex-1 max-w-md">
+                                <div class="h-[450px] w-full">
+                                    <canvas id="ageDistributionChart" height="100"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
-                </div>
+                </div> --}}
 
 
 
@@ -423,91 +431,107 @@
     // }
 
     // Chart 4: Age Distribution
-    // if (@json($ageDistribution->count())) {
-    //     const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
-    //     new Chart(ageCtx, {
-    //         type: 'pie',
-    //         data: {
-    //             labels: @json($ageDistribution->pluck('age_group')),
-    //             datasets: [{
-    //                 label: 'Patients',
-    //                 data: @json($ageDistribution->pluck('count')),
-    //                 backgroundColor: '#4A90E2',
-    //                 borderColor: '#4A90E2',
-    //                 borderWidth: 1
-    //             }]
-    //         },
-    //         options: {
-    //             responsive: true,
-    //             plugins: {
-    //                 title: {
-    //                     display: true,
-    //                     text: 'Age Distribution of Patients'
-    //                 },
-    //                 legend: {
-    //                     position: 'top'
-    //                 }
-    //             },
-    //             scales: {
-    //                 x: {
-    //                     title: {
-    //                         display: true,
-    //                         text: 'Age Group'
-    //                     }
-    //                 },
-    //                 y: {
-    //                     title: {
-    //                         display: true,
-    //                         text: 'Number of Patients'
-    //                     },
-    //                     beginAtZero: true
-    //                 }
-    //             }
-    //         }
-    //     });
-    // } else {
-    //     document.getElementById('ageDistributionChart').parentElement.innerHTML =
-    //         '<p class="text-gray-600 dark:text-gray-400">No age data available.</p>';
-    // }
+    if (@json($ageDistribution->count())) {
+        const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
+        new Chart(ageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @json($ageDistribution->pluck('age_group')),
+                datasets: [{
+                    label: 'Patient Count',
+                    data: @json($ageDistribution->pluck('count')),
+                    backgroundColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
+                    borderColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
+                    borderWidth: 1,
+                    hoverOffset: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Age Distribution of Patients'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('ageDistributionChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No age data available.</p>';
+    }
 
     // Chart 5: Payment Status
     if (@json($paymentStatus->count())) {
         const paymentCtx = document.getElementById('paymentStatusChart').getContext('2d');
+
+        const gradientBilled = paymentCtx.createLinearGradient(0, 0, 0, 300);
+        gradientBilled.addColorStop(0, 'rgba(147, 197, 253, 0.6)'); // Tailwind blue-300
+        gradientBilled.addColorStop(1, 'rgba(147, 197, 253, 0.05)');
+
+        const gradientPaid = paymentCtx.createLinearGradient(0, 0, 0, 300);
+        gradientPaid.addColorStop(0, 'rgba(134, 239, 172, 0.6)'); // Tailwind green-300
+        gradientPaid.addColorStop(1, 'rgba(134, 239, 172, 0.05)');
+
+        const gradientDue = paymentCtx.createLinearGradient(0, 0, 0, 300);
+        gradientDue.addColorStop(0, 'rgba(252, 165, 165, 0.6)'); // Tailwind red-300
+        gradientDue.addColorStop(1, 'rgba(252, 165, 165, 0.05)');
+
         new Chart(paymentCtx, {
-            type: 'bar',
+            type: 'line',
             data: {
                 labels: @json($paymentStatus->pluck('date')),
                 datasets: [{
                         label: 'Billed',
                         data: @json($paymentStatus->pluck('billed')),
-                        backgroundColor: '#93c5fd',
-                        hoverBackgroundColor: '#60a5fa', // slightly darker blue
-                        hoverBorderWidth: 0.7,
-                        stack: 'Stack 0'
+                        borderColor: '#60a5fa', // Tailwind blue-400
+                        backgroundColor: gradientBilled,
+                        borderWidth: 1,
+                        fill: true,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#60a5fa',
+                        pointHoverRadius: 6,
+                        tension: 0.4
                     },
                     {
                         label: 'Paid',
                         data: @json($paymentStatus->pluck('paid')),
-                        backgroundColor: '#86efac',
-                        hoverBackgroundColor: '#4ade80', // slightly darker green
-                        hoverBorderWidth: 0.7,
-                        stack: 'Stack 0'
+                        borderColor: '#34d399', // Tailwind green-400
+                        backgroundColor: gradientPaid,
+                        borderWidth: 1,
+                        fill: true,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#34d399',
+                        pointHoverRadius: 6,
+                        tension: 0.4
                     },
                     {
                         label: 'Due',
                         data: @json($paymentStatus->pluck('due')),
-                        backgroundColor: '#fca5a5',
-                        hoverBackgroundColor: '#f87171', // slightly darker red
-                        hoverBorderWidth: 0.7,
-                        stack: 'Stack 0'
+                        borderColor: '#f87171', // Tailwind red-400
+                        backgroundColor: gradientDue,
+                        borderWidth: 1,
+                        fill: true,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#f87171',
+                        pointHoverRadius: 6,
+                        tension: 0.4
                     }
                 ]
-
-
             },
             options: {
                 responsive: true,
                 plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ₹${context.parsed.y}`;
+                            }
+                        }
+                    },
                     title: {
                         display: true,
                         text: 'Payment Status'
@@ -521,15 +545,13 @@
                         title: {
                             display: true,
                             text: 'Date'
-                        },
-                        stacked: true
+                        }
                     },
                     y: {
                         title: {
                             display: true,
                             text: 'Amount (₹)'
                         },
-                        stacked: true,
                         beginAtZero: true
                     }
                 }
@@ -540,13 +562,14 @@
             '<p class="text-gray-600 dark:text-gray-400">No payment data available.</p>';
     }
 
+
     // Chart 6: New vs. Existing Patients
     if (@json($newVsExistingPatients['new'] + $newVsExistingPatients['existing'])) {
         const newVsExistingCtx = document.getElementById('newVsExistingPatientsChart').getContext('2d');
         new Chart(newVsExistingCtx, {
             type: 'doughnut',
             data: {
-                labels: ['New Patients', 'Existing Patients'],
+                labels: ['New Patients', 'Old Patients'],
                 datasets: [{
                     label: 'Patient Count',
                     data: [@json($newVsExistingPatients['new']), @json($newVsExistingPatients['existing'])],
@@ -562,27 +585,13 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'New vs. Existing Patients'
+                        text: 'New vs. Old Patients'
                     },
                     legend: {
                         position: 'top'
                     }
                 },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Patient Type'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Number of Patients'
-                        },
-                        beginAtZero: true
-                    }
-                }
+
             }
         });
     } else {
