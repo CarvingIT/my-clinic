@@ -23,3 +23,4 @@ Route::post('/login', function(Request $request){
 
 Route::get('/queue', [QueueController::class, 'showQueue'])->middleware('auth:sanctum');
 Route::post('/patients/{patient}/queue', [QueueController::class, 'addToQueue'])->middleware('auth:sanctum');
+Route::delete('/queue/{queue}', [QueueController::class, 'removeFromQueue'])->middleware('auth:sanctum');

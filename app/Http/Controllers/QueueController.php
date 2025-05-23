@@ -52,9 +52,19 @@ class QueueController extends Controller
         return view('queue.index', compact('queue'));
     }
 
-    public function removeFromQueue(Queue $queue)
+    public function removeFromQueue(Request $request, Queue $queue)
     {
+        try{
         $queue->delete();
+        }
+        catch(\Exception $e){
+            if($request->wantsJson()){
+                return ['status'=>0, 'message'=>'There was some error.'];
+            }
+        }
+        if($request->wantsJson()){
+            return ['status'=>1, 'message'=>'Patient removed from the queue.'];
+        }
         return redirect()->route('queue.index')->with('success', 'Patient removed from queue.');
     }
 
