@@ -44,7 +44,7 @@
                             </h2>
 
                             <textarea id="nadiInput" name="nadi" rows="4"
-                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ old('nadi', isset($checkUpInfo['nadi']) ? trim($checkUpInfo['nadi']) : '') }}
+                                class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ old('nadi', isset($checkUpInfo['nadi']) ? trim($checkUpInfo['nadi']) : '') }}
                             </textarea>
 
 
@@ -64,7 +64,7 @@
                             <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-3">{{ __('लक्षणे') }}
                             </h2>
                             <textarea id="lakshane" name="diagnosis" rows="4"
-                                class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"> {{ $followup->diagnosis }}</textarea>
+                                class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"> {{ $followup->diagnosis }}</textarea>
                             <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
                         </div>
 
@@ -75,7 +75,7 @@
                                     {{ __('चिकित्सा') }}
                                 </h2>
                                 <textarea id="chikitsa" name="chikitsa" rows="4"
-                                    class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ old('chikitsa', isset($checkUpInfo['chikitsa']) ? $checkUpInfo['chikitsa'] : '') }}
+                                    class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ old('chikitsa', isset($checkUpInfo['chikitsa']) ? $checkUpInfo['chikitsa'] : '') }}
                                 </textarea>
                                 <x-input-error :messages="$errors->get('chikitsa')" class="mt-2" />
 
@@ -103,7 +103,7 @@
                                             {{ __('messages.diagnosis') }}
                                         </h2>
                                     </div>
-                                    <input type="text" name="nidan" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" value="{{ old('nidan', isset($checkUpInfo['nidan']) ? $checkUpInfo['nidan'] : '') }}"/>
+                                    <input type="text" name="nidan" class="tinymce-editor002 px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400" value="{{ old('nidan', isset($checkUpInfo['nidan']) ? $checkUpInfo['nidan'] : '') }}"/>
                                 </div>
                                 <div class="mt-4 mb-4">
                                     <div class="flex items-center justify-between space-x-2">
@@ -111,7 +111,7 @@
                                             {{ __('messages.Vishesh') }}
                                         </h2>
                                     </div>
-                                    <textarea name="vishesh" class="px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $followup->patient->vishesh }}</textarea>
+                                    <textarea name="vishesh" class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $followup->patient->vishesh }}</textarea>
                                 </div>
 
                                 <!-- Numeric Input Boxes -->
@@ -158,9 +158,9 @@
 
                         <div class="mt-4">
                             <x-input-label class="text-l font-semibold text-gray-700 dark:text-white mb-4" for="payment_method" :value="__('messages.Payment Method')" />
-                            <input type="radio" name="payment_method" value="cash" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'cash') checked @endif/> Cash 
-                            <input type="radio" name="payment_method" value="card" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'card') checked @endif/> Card 
-                            <input type="radio" name="payment_method" value="online" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'online') checked @endif/> Online 
+                            <input type="radio" name="payment_method" value="cash" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'cash') checked @endif/> Cash
+                            <input type="radio" name="payment_method" value="card" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'card') checked @endif/> Card
+                            <input type="radio" name="payment_method" value="online" @if (old('payment_method', $checkUpInfo['payment_method'] ?? '') == 'online') checked @endif/> Online
                             <x-input-error :messages="$errors->get('payment_method')" class="mt-2" />
                         </div>
 
