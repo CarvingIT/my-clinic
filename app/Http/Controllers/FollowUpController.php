@@ -329,16 +329,31 @@ class FollowUpController extends Controller
     {
         $checkUpInfo = json_decode($followup->check_up_info, true) ?? []; // Decode check_up_info
 
+        // Fetch the patient
+        $patient = $followup->patient;
+
+        // Fetch previous follow-ups for the patient, excluding the current follow-up
+        $followUps = $patient->followUps()
+            ->where('id', '!=', $followup->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Calculate total due
+        $totalBilled = $patient->followUps()->sum('amount_billed');
+        $totalPaid = $patient->followUps()->sum('amount_paid');
+        $totalDueAll = $totalBilled - $totalPaid;
+
+        // Fetch parameters
+        $parameters = Parameter::all();
+
         // Fetch values directly from FollowUp model
-        $totalDueAll = $followup->total_due_all ?? 0;
-        $totalDue = $followup->balance ?? 0; // Assuming balance is stored here
+        $totalDue = $totalDueAll; // as per create.blade.php
         $amountBilled = $followup->amount_billed ?? '';
         $amountPaid = $followup->amount_paid ?? '';
 
-        $parameters = Parameter::all();
-
         return view('followups.edit', compact(
             'followup',
+            'followUps',
             'parameters',
             'checkUpInfo',
             'totalDueAll',
