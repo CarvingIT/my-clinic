@@ -8,6 +8,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FollowupImageController;
 use App\Http\Controllers\QueueController;
 use App\Http\Controllers\AnalyticsController;
+use App\Http\Controllers\PatientDuesController;
 
 
 use Illuminate\Support\Facades\App;
@@ -108,6 +109,9 @@ Route::post('/queue/{queue}/in', [QueueController::class, 'markIn'])->name('queu
 
 // Routes for Analytics
 Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+// Route for patient dues
+Route::get('/patient-dues', [PatientDuesController::class, 'index'])->name('patient-dues.index');
 
 
 

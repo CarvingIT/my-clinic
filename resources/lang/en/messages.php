@@ -101,6 +101,10 @@ return [
     'Analysis' => 'Analysis',
     'Ledger' => 'Ledger',
     'Analytics' => 'Analytics',
+    'Patient with Dues' => 'Patients with Dues',
+    'Reports' => 'Reports',
+    'Outstanding Balance' => 'Outstanding Balance',
+    'Last Follow Up' => 'Last Follow Up',
 
 
 
