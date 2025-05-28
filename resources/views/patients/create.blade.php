@@ -139,19 +139,7 @@
                                 type="text" step="0.01" name="weight" :value="old('weight')" />
                             <x-input-error :messages="$errors->get('weight')" class="mt-1" />
                         </div>
-                        <!-- Vishesh -->
-                        <div>
-                            <x-input-label for="vishesh" :value="__('messages.Vishesh')" />
-                            <textarea id="vishesh" name="vishesh"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                            ></textarea>
-                            {{--
-                            <x-text-input id="vishesh"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="text" name="vishesh" :value="old('vishesh')" />
-                            --}}
-                            <x-input-error :messages="$errors->get('vishesh')" class="mt-1" />
-                        </div>
+
 
 
                         <!-- Occupation -->
@@ -181,6 +169,19 @@
                             <x-input-error :messages="$errors->get('balance')" class="mt-1" />
                         </div> --}}
                     </div>
+                    <!-- Vishesh -->
+                        <div>
+                            <x-input-label for="vishesh" :value="__('messages.Vishesh')" />
+                            <textarea id="vishesh" name="vishesh"
+                                class="tinymce-editor w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                            ></textarea>
+                            {{--
+                            <x-text-input id="vishesh"
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                                type="text" name="vishesh" :value="old('vishesh')" />
+                            --}}
+                            <x-input-error :messages="$errors->get('vishesh')" class="mt-1" />
+                        </div>
 
                     <!-- Buttons -->
                     <div class="flex justify-end gap-4 pt-4 border-t border-gray-200 mt-4">

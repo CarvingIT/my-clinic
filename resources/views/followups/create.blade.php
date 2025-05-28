@@ -33,10 +33,29 @@
                     | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($totalDueAll, 2) }}
                 @endif
                 <div class="my-1"></div>
-                @if ($patient->vishesh)
-                    {{ __('messages.Vishesh') }}:
-                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $patient->vishesh) !!}
-                @endif
+                <div class="flex flex-wrap items-start gap-x-2 gap-y-2 text-sm">
+                    @if ($patient->vishesh)
+                        <div>
+                            <span class="font-semibold">| {{ __('messages.Vishesh') }}:</span>
+                            <span>{!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $patient->vishesh) !!}</span>
+                        </div>
+                    @endif
+
+                    @if ($patient->occupation)
+                        <div>
+                            <span class="font-semibold">| {{ __('messages.occupation') }}:</span>
+                            <span>{{ $patient->occupation }}</span>
+                        </div>
+                    @endif
+
+                    @if ($patient->reference)
+                        <div>
+                            <span class="font-semibold">| {{ __('messages.reference') }}:</span>
+                            <span>{{ $patient->reference }}</span>
+                        </div>
+                    @endif
+                </div>
+
 
             </span>
         </h2>
@@ -540,7 +559,7 @@ $previousChikitsa = $latestFollowUp
                                                         $amountPaid = $followUp->amount_paid ?? 0;
                                                     @endphp
                                                     <strong>{{ __('दिलेली रक्कम') }}:</strong>
-                                                        ₹{{ number_format($amountPaid, 2) }}
+                                                    ₹{{ number_format($amountPaid, 2) }}
                                                 </div>
 
 

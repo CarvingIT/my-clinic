@@ -119,5 +119,18 @@
 
             });
         </script>
+        <script>
+            tinymce.init({
+                selector: '.tinymce-editor003',
+                plugins: 'lists link table textcolor',
+                toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
+                menubar: false,
+                branding: false,
+                statusbar: false,
+                height: 150,
+
+            });
+        </script>
+
     </body>
 </html>

@@ -30,10 +30,28 @@
                     | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($totalDueAll, 2) }}
                 @endif
                 <div class="my-1"></div>
-                @if ($followup->patient->vishesh)
-                    {{ __('messages.Vishesh') }}:
-                    {!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $followup->patient->vishesh) !!}
-                @endif
+                <div class="flex flex-wrap items-start gap-x-2 text-sm">
+                    @if ($followup->patient->vishesh)
+                        <div>
+                            <span class="font-semibold">| {{ __('messages.Vishesh') }}:</span>
+                            <span>{!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $followup->patient->vishesh) !!}</span>
+                        </div>
+                    @endif
+
+                    @if ($followup->patient->occupation)
+                        <div>
+                            <span class="font-semibold">| {{ __('messages.occupation') }}:</span>
+                            <span>{{ $followup->patient->occupation }}</span>
+                        </div>
+                    @endif
+
+                    @if ($followup->patient->reference)
+                        <div>
+                            <span class="font-semibold">| {{ __('messages.reference') }}:</span>
+                            <span>{{ $followup->patient->reference }}</span>
+                        </div>
+                    @endif
+                </div>
             </span>
         </h2>
     </x-slot>
