@@ -94,14 +94,16 @@
                             </p>
                         </div>
 
-                        <div
-                            class="p-4 rounded-lg bg-gradient-to-br from-red-200 to-white dark:from-red-900 dark:to-gray-900 shadow
+                        <a href="{{ route('patient-dues.index') }}">
+                            <div
+                                class="p-4 rounded-lg bg-gradient-to-br from-red-200 to-white dark:from-red-900 dark:to-gray-900 shadow
                     transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-red-200 hover:scale-105 hover:shadow-lg">
-                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">⚠️
-                                {{ __('messages.Total Outstanding Balance') }}</p>
-                            <p class="text-lg font-bold text-red-600 dark:text-red-300">
-                                ₹{{ number_format($totalDueAll) }}</p>
-                        </div>
+                                <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">⚠️
+                                    {{ __('messages.Total Outstanding Balance') }}</p>
+                                <p class="text-lg font-bold text-red-600 dark:text-red-300">
+                                    ₹{{ number_format($totalDueAll) }}</p>
+                            </div>
+                        </a>
 
                         <div
                             class="p-4 rounded-lg bg-gradient-to-br from-cyan-200 to-white dark:from-blue-900 dark:to-gray-900 shadow
@@ -199,10 +201,14 @@
                                             {{ $followUp->created_at->format('d M Y, h:i A') }}</td>
                                         <td class="text-center px-4 py-3">
                                             <a href="{{ route('patients.show', $followUp->patient->id) }}"
-                                                class="text-indigo-700 dark:text-indigo-400 hover:underline font-semibold">
+                                                class="
+                                                    font-semibold hover:underline
+                                                    {{ $followUp->amount_paid < $followUp->amount_billed ? 'text-red-600 dark:text-red-400' : 'text-indigo-700 dark:text-indigo-400' }}
+                                                ">
                                                 {{ $followUp->patient->name }}
                                             </a>
                                         </td>
+
                                         <td class="text-center px-4 py-3">{{ $followUp->doctor->name }}</td>
                                         <td
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
@@ -212,10 +218,17 @@
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
                                             {{ @json_decode($followUp->check_up_info)->payment_method }}
                                         </td>
-                                        <td
+                                        {{-- <td
                                             class="text-right px-4 py-3 font-semibold text-green-600 dark:text-green-300">
                                             ₹{{ number_format(@$followUp->amount_paid, 2) }}
+                                        </td> --}}
+                                        <td class="text-right px-4 py-3 font-semibold
+                                            {{ $followUp->amount_paid < $followUp->amount_billed ? 'text-red-600 dark:text-red-400' :
+                                            ($followUp->amount_paid > $followUp->amount_billed ? 'text-green-600 dark:text-green-300' :
+                                            'text-blue-600 dark:text-blue-300') }}">
+                                            ₹{{ number_format(@$followUp->amount_paid, 2) }}
                                         </td>
+
                                     </tr>
                                 @endif
                             @endforeach
