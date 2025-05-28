@@ -109,10 +109,15 @@
                                         </td>
                                         <td class="px-4 py-4 align-top    break-normal whitespace-normal text-right text-sm font-medium flex gap-4"
                                             style="vertical-align: top;">
-                                            <button class="text-green-600 hover:text-green-800 font-medium"
+                                            {{-- <button class="text-green-600 hover:text-green-800 font-medium"
                                                 data-bs-toggle="modal" data-bs-target="#queueModal"
                                                 onclick="setPatientId({{ $patient->id }})" title="Add to Queue">
                                                  <i class="fas fa-users-line"></i>
+                                            </button> --}}
+                                            <button class="text-green-600 hover:text-green-800 font-medium"
+                                                onclick="setPatientId({{ $patient->id }}); toggleQueueModal()"
+                                                title="Add to Queue">
+                                                <i class="fas fa-users-line"></i>
                                             </button>
                                             <a href="{{ route('patients.edit', $patient->id) }}"
                                                 class="text-indigo-600 hover:text-indigo-800 font-medium"
@@ -133,46 +138,62 @@
                                 @endforeach
                             </tbody>
                         </table>
-                    <!-- Pagination -->
-                    <div class="mt-6">
-                        {{ $patients->links() }}
+                        <!-- Pagination -->
+                        <div class="mt-6">
+                            {{ $patients->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
 
 </x-app-layout>
-{{-- queue --}}
-<div id="queueModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50 transition duration-300">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6">
+{{-- Queue Modal --}}
+<div id="queueModal" class="modal-container hidden">
+    <div class="modal-content">
         <div class="flex justify-between items-center mb-4">
             <h5 class="text-xl font-semibold text-gray-800">{{ __('Add to Queue') }}</h5>
-            <button onclick="toggleQueueModal()" class="text-gray-600 hover:text-gray-800 text-2xl">&times;</button>
+            <button type="button" onclick="toggleQueueModal()"
+                class="text-gray-600 hover:text-gray-800 text-2xl">×</button>
         </div>
         <form id="queueForm" method="POST">
             @csrf
             <input type="hidden" name="patient_id" id="patientId">
             <div class="mb-4">
-                <label for="in_queue_at" class="block text-sm font-medium text-gray-700">{{ __('messages.select_date_time') }} (optional):</label>
+                <label for="in_queue_at"
+                    class="block text-sm font-medium text-gray-700">{{ __('messages.select_date_time') }}
+                    (optional):</label>
                 <input type="datetime-local" name="in_queue_at" id="in_queue_at"
                     class="mt-1 block w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
             <div class="flex justify-end gap-2">
+                <button type="button" onclick="toggleQueueModal()"
+                    class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                    {{ __('Cancel') }}
+                </button>
                 <button type="submit"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
                     {{ __('Add to Queue') }}
-                </button>
-                <button type="button"
-                    onclick="toggleQueueModal()"
-                    class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
-                    {{ __('Cancel') }}
                 </button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function setPatientId(patientId) {
+        console.log('Setting patient ID:', patientId);
+        document.getElementById('patientId').value = patientId;
+        document.getElementById('queueForm').action = '/patients/' + patientId + '/queue';
+    }
+
+    function toggleQueueModal() {
+        console.log('Toggling queue modal');
+        const modal = document.getElementById('queueModal');
+        modal.classList.toggle('hidden');
+    }
+</script>
 
 <script>
     function confirmDelete() {
@@ -192,7 +213,7 @@
     });
 </script>
 
-<script>
+{{-- <script>
     function setPatientId(patientId) {
             console.log('Setting patient ID:', patientId);
             document.getElementById('patientId').value = patientId;
@@ -204,5 +225,4 @@
             const modal = document.getElementById('queueModal');
             modal.classList.toggle('hidden');
         }
-</script>
-
+</script> --}}

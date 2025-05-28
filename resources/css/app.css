@@ -139,3 +139,29 @@ li {
 }
 
 
+
+/* Modal Styles for Queue */
+
+.modal-container {
+    @apply fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300;
+}
+
+.modal-content {
+    @apply bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6 transform transition-transform duration-300;
+}
+
+.modal-container.hidden {
+    @apply opacity-0 pointer-events-none;
+}
+
+.modal-container.hidden .modal-content {
+    @apply scale-95;
+}
+
+.modal-container:not(.hidden) {
+    @apply opacity-100;
+}
+
+.modal-container:not(.hidden) .modal-content {
+    @apply scale-100;
+}
