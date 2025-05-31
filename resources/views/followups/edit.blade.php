@@ -29,16 +29,7 @@
                 @if (isset($totalDueAll))
                     | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($totalDueAll, 2) }}
                 @endif
-                <div class="my-1"></div>
-                <div class="flex flex-wrap items-start gap-x-2 text-sm">
-                    @if ($followup->patient->vishesh)
-                        <div>
-                            <span class="font-semibold">| {{ __('messages.Vishesh') }}:</span>
-                            <span>{!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $followup->patient->vishesh) !!}</span>
-                        </div>
-                    @endif
-
-                    @if ($followup->patient->occupation)
+                @if ($followup->patient->occupation)
                         <div>
                             <span class="font-semibold">| {{ __('messages.occupation') }}:</span>
                             <span>{{ $followup->patient->occupation }}</span>
@@ -49,6 +40,14 @@
                         <div>
                             <span class="font-semibold">| {{ __('messages.reference') }}:</span>
                             <span>{{ $followup->patient->reference }}</span>
+                        </div>
+                    @endif
+                <div class="my-1"></div>
+                <div class="flex flex-wrap items-start gap-x-2 text-sm">
+                    @if ($followup->patient->vishesh)
+                        <div>
+                            <span class="font-semibold">| {{ __('messages.Vishesh') }}:</span>
+                            <span class="font-medium">{!! ( $followup->patient->vishesh) !!}</span>
                         </div>
                     @endif
                 </div>
@@ -215,7 +214,7 @@
                                             </h2>
                                         </div>
                                         <textarea name="vishesh"
-                                            class="tinymce-editor002 px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ old('vishesh', $followup->patient->vishesh) }}</textarea>
+                                            class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ old('vishesh', $followup->patient->vishesh) }}</textarea>
                                     </div>
 
                                     <!-- Numeric Input Boxes + Payment Method -->

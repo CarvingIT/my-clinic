@@ -32,26 +32,25 @@
                 @if (isset($totalDueAll))
                     | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($totalDueAll, 2) }}
                 @endif
+                @if ($patient->occupation)
+                    <div>
+                        <span class="font-semibold">| {{ __('messages.occupation') }}:</span>
+                        <span>{{ $patient->occupation }}</span>
+                    </div>
+                @endif
+
+                @if ($patient->reference)
+                    <div>
+                        <span class="font-semibold">| {{ __('messages.reference') }}:</span>
+                        <span>{{ $patient->reference }}</span>
+                    </div>
+                @endif
                 <div class="my-1"></div>
                 <div class="flex flex-wrap items-start gap-x-2 gap-y-2 text-sm">
                     @if ($patient->vishesh)
                         <div>
                             <span class="font-semibold">| {{ __('messages.Vishesh') }}:</span>
-                            <span>{!! str_replace(['<p>', '</p>', '<div>', '</div>'], '', $patient->vishesh) !!}</span>
-                        </div>
-                    @endif
-
-                    @if ($patient->occupation)
-                        <div>
-                            <span class="font-semibold">| {{ __('messages.occupation') }}:</span>
-                            <span>{{ $patient->occupation }}</span>
-                        </div>
-                    @endif
-
-                    @if ($patient->reference)
-                        <div>
-                            <span class="font-semibold">| {{ __('messages.reference') }}:</span>
-                            <span>{{ $patient->reference }}</span>
+                            <span class="font-medium">{!! $patient->vishesh !!}</span>
                         </div>
                     @endif
                 </div>
@@ -228,7 +227,7 @@ $previousChikitsa = $latestFollowUp
                                             </h2>
                                         </div>
                                         <textarea name="vishesh"
-                                            class="tinymce-editor002 px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $patient->vishesh }}</textarea>
+                                            class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $patient->vishesh }}</textarea>
                                     </div>
 
                                     {{-- Capture button --}}
