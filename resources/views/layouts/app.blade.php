@@ -98,8 +98,10 @@
                 toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
                 menubar: false,
                 branding: false,
-                statusbar: false,
+                statusbar: true,
+                elementpath: false,
                 height: 200,
+                resize: true,
                 forced_root_block: false,
                 content_style: `
                                 body {
@@ -122,8 +124,9 @@
                 toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
                 menubar: false,
                 branding: false,
-                statusbar: false,
-                height: 100,
+                statusbar: true,
+                elementpath: false,
+                height: 150,
 
             });
         </script>
@@ -134,7 +137,8 @@
                 toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
                 menubar: false,
                 branding: false,
-                statusbar: false,
+                statusbar: true,
+                elementpath: false,
                 height: 150,
 
             });
