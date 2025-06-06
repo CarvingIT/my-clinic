@@ -10,6 +10,7 @@ use App\Http\Controllers\QueueController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\PatientDuesController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\StaffMiddleware;
 
 
 use Illuminate\Support\Facades\App;
@@ -100,14 +101,19 @@ Route::get('/set-locale/{locale}', function ($locale) {
 
 
 // Admin Routes
-Route::middleware(['auth', 'admin'])->group(function () {
+// Route::middleware(['auth', 'admin'])->group(function () {
+//     Route::resource('users', UserController::class);
+//     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+// });
+
+// Admin Routes
+Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::resource('users', UserController::class);
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
 });
 
-
 // Staff Routes
-Route::middleware(['auth', 'staff'])->group(function () {
+Route::middleware(['auth', StaffMiddleware::class])->group(function () {
     Route::resource('patients', PatientController::class)->except(['destroy']);
     Route::post('/patients/{patient}/queue', [QueueController::class, 'addToQueue'])->name('patients.queue');
     Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index');

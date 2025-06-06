@@ -70,7 +70,8 @@
                                         {{ $user->email }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-gray-700">
-                                        {{ implode(', ', $user->roles()->pluck('name')->toArray()) ?: 'None' }}
+                                        {{-- {{ implode(', ', array_map('ucfirst', $user->roles->pluck('name')->toArray())) ?: 'None' }} --}}
+                                        {{ implode(', ', array_map('ucfirst', $user->roles)) ?: 'None' }}
                                     </td>
                                     <td class="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <a href="{{ route('users.edit', $user->id) }}"

@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Routing\Controller;
 use CarvingIT\LaravelUserRoles\App\Models\Role;
+use CarvingIT\LaravelUserRoles\App\Models\UserRole;
 
 
 class UserController extends Controller
@@ -32,7 +33,8 @@ class UserController extends Controller
         $users = User::all();
         foreach ($users as $user) {
             // $user->setAttribute('roles', $user->roles()->get()); // Manually attach roles
-            $user->setAttribute('roles', $user->roles()); // Use the roles relationship to get roles
+            // $user->setAttribute('roles', $user->roles()); // Use the roles relationship to get roles
+            $user->setAttribute('roles', $user->roles()->pluck('name')->toArray()); // Ensure array for view
         }
         return view('users.index', compact('users'));
     }
@@ -59,12 +61,17 @@ class UserController extends Controller
             'roles.*' => ['exists:roles,name'],
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'remember_token' => Str::random(10),
         ]);
+
+        // Assign roles if provided
+        if ($request->has('roles') && is_array($request->roles)) {
+            $user->assignRoles(array_filter($request->roles));
+        }
 
         return redirect()->route('users.index')->with('success', 'User Created Successfully.');
     }
@@ -92,17 +99,30 @@ class UserController extends Controller
             'roles' => ['nullable', 'array'],
             'roles.*' => ['exists:roles,name'],
         ]);
-        $user->name = $request->name;
-        $user->email = $request->email;
-        if ($request->password) {
-            $user->password = Hash::make($request->password);
-        }
-        $user->save();
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => $request->password ? Hash::make($request->password) : $user->password,
+        ]);
+        // $user->name = $request->name;
+        // $user->email = $request->email;
+        // if ($request->password) {
+        //     $user->password = Hash::make($request->password);
+        // }
+        // $user->save();
 
         // Update roles
+        // $user->unassignRoles($user->roles()->pluck('name')->toArray());
+        // if ($request->roles) {
+        //     $user->assignRoles($request->roles);
+        // }
+
+        // Sync roles: assign new roles without affecting others
+        $roles = $request->has('roles') && is_array($request->roles) ? array_filter($request->roles) : [];
         $user->unassignRoles($user->roles()->pluck('name')->toArray());
-        if ($request->roles) {
-            $user->assignRoles($request->roles);
+        if (!empty($roles)) {
+            $user->assignRoles($roles);
         }
 
         return redirect()->route('users.index')->with('success', 'User Updated Successfully.');

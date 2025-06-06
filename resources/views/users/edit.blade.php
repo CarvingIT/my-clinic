@@ -53,7 +53,7 @@
                         <div class="mb-4">
                             <x-input-label for="roles" :value="__('Roles')" />
                             <select id="roles" name="roles[]" multiple
-                                class="block mt-1 w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 focus:outline-none py-1 px-3 text-base">
+                                class="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                 @foreach ($roles as $role)
                                     <option value="{{ $role->name }}"
                                         {{ in_array($role->name, $user->roles()->pluck('name')->toArray()) ? 'selected' : '' }}>
@@ -84,4 +84,14 @@
             </div>
         </div>
     </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#roles').select2({
+                placeholder: 'Select roles',
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
 </x-app-layout>

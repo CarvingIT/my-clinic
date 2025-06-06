@@ -48,9 +48,11 @@
                         <div class="mb-6">
                             <x-input-label for="roles" :value="__('Roles')" />
                             <select id="roles" name="roles[]" multiple
-                                class="block mt-1 w-full py-1 px-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm">
+                                class="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                                 @foreach ($roles as $role)
-                                    <option value="{{ $role->name }}">{{ ucfirst($role->name) }}</option>
+                                    <option value="{{ $role->name }}" {{ in_array($role->name, old('roles', [])) ? 'selected' : '' }}>
+                                        {{ ucfirst($role->name) }}
+                                    </option>
                                 @endforeach
                             </select>
                             <x-input-error :messages="$errors->get('roles')" class="mt-2 text-red-500" />
@@ -73,4 +75,14 @@
             </div>
         </div>
     </div>
+
+    <script>
+        $(document).ready(function() {
+            $('#roles').select2({
+                placeholder: 'Select roles',
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
 </x-app-layout>
