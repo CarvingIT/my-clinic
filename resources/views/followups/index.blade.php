@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-bold text-xl text-gray-900 dark:text-gray-100 leading-tight">
-            {{ __('messages.All Follow Ups') }}
+            {{ __('messages.Ledger') }}
         </h2>
     </x-slot>
 
@@ -10,7 +10,8 @@
             <div class="bg-white dark:bg-gray-900 shadow-lg rounded-lg p-6">
 
                 {{-- Filters Section --}}
-                <form method="GET" action="{{ route('followups.index') }}" id="follow_ups" class="flex flex-wrap gap-4 mb-6 items-end">
+                <form method="GET" action="{{ route('followups.index') }}" id="follow_ups"
+                    class="flex flex-wrap gap-4 mb-6 items-end">
                     <div class="flex flex-col font-weight-semibold">
                         <label for="from_date" class="text-gray-800 dark:text-gray-300 font-semibold">From:</label>
                         <input type="date" id="from_date" name="from_date" value="{{ request('from_date') }}"
@@ -42,7 +43,7 @@
                         <label for="doctor" class="text-gray-800 dark:text-gray-300 font-semibold">Doctor:</label>
                         <select id="doctor" name="doctor"
                             class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
-                            <option value="all" {{ request('doctor') == 'all' ? 'selected' : '' }}>All 
+                            <option value="all" {{ request('doctor') == 'all' ? 'selected' : '' }}>All
                             </option>
                             @php
                                 $doctors = \App\Models\User::all();
@@ -61,7 +62,8 @@
                         Filter
                     </button>
                     <button id="exportCSV" onclick="csvExport();"
-                        class="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">Export to CSV</button>
+                        class="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">Export
+                        to CSV</button>
                 </form>
 
                 {{-- Insights Section --}}
@@ -92,14 +94,16 @@
                             </p>
                         </div>
 
-                        <div
-                            class="p-4 rounded-lg bg-gradient-to-br from-red-200 to-white dark:from-red-900 dark:to-gray-900 shadow
+                        <a href="{{ route('patient-dues.index') }}">
+                            <div
+                                class="p-4 rounded-lg bg-gradient-to-br from-red-200 to-white dark:from-red-900 dark:to-gray-900 shadow
                     transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-red-200 hover:scale-105 hover:shadow-lg">
-                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">⚠️
-                                {{ __('messages.Total Outstanding Balance') }}</p>
-                            <p class="text-lg font-bold text-red-600 dark:text-red-300">
-                                ₹{{ number_format($totalDueAll) }}</p>
-                        </div>
+                                <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">⚠️
+                                    {{ __('messages.Total Outstanding Balance') }}</p>
+                                <p class="text-lg font-bold text-red-600 dark:text-red-300">
+                                    ₹{{ number_format($totalDueAll) }}</p>
+                            </div>
+                        </a>
 
                         <div
                             class="p-4 rounded-lg bg-gradient-to-br from-cyan-200 to-white dark:from-blue-900 dark:to-gray-900 shadow
@@ -128,6 +132,47 @@
                     </div>
                 </div>
 
+                {{-- Charts Section --}}
+                {{-- <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📈 {{ __('messages.Analysis') }}
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Follow-Up Frequency (Daily) -->
+                        <div>
+                            <canvas id="followUpFrequencyDailyChart" height="220"></canvas>
+                        </div>
+                        <!-- Follow-Up Frequency (Monthly) -->
+                        <div>
+                            <canvas id="followUpFrequencyMonthlyChart" height="220"></canvas>
+                        </div>
+                        <!-- Follow-Up Frequency (Yearly) -->
+                        <div>
+                            <canvas id="followUpFrequencyYearlyChart" height="220"></canvas>
+                        </div>
+                        <!-- Payment Status -->
+                        <div class="md:col-span-2">
+                            <canvas id="paymentStatusChart" height="120"></canvas>
+                        </div>
+                        <div class="flex justify-center items-start gap-36 w-full md:col-span-2">
+                            <!-- New vs. Existing Patients -->
+                            <div class="flex-1 max-w-md">
+                                <div class="h-[450px] w-full">
+                                    <canvas id="newVsExistingPatientsChart" height="100"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Age Distribution -->
+                            <div class="flex-1 max-w-md">
+                                <div class="h-[450px] w-full">
+                                    <canvas id="ageDistributionChart" height="100"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div> --}}
+
+
 
 
                 {{-- Table --}}
@@ -136,12 +181,14 @@
                         <thead class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Created At') }} 📅</th>
-                                <th class="px-4 py-3 text-center font-semibold">{{ __('messages.Patient Name') }} 👤</th>
+                                <th class="px-4 py-3 text-center font-semibold">{{ __('messages.Patient Name') }} 👤
+                                </th>
                                 <th class="px-4 py-3 text-center font-semibold">{{ __('messages.doctor') }} 👤</th>
                                 <th class="px-4 py-3 text-center font-semibold">{{ __('messages.Amount Billed') }}
                                 <th class="px-4 py-3 text-center font-semibold">💳{{ __('messages.Payment Method') }}
                                 </th>
-                                <th class="px-4 py-3 text-right font-semibold"> 💰{{ __('messages.Amount Paid') }} </th>
+                                <th class="px-4 py-3 text-right font-semibold"> 💰{{ __('messages.Amount Paid') }}
+                                </th>
                             </tr>
                         </thead>
 
@@ -150,23 +197,38 @@
                                 @if ($followUp->patient)
                                     <tr
                                         class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="text-left px-4 py-3">{{ $followUp->created_at->format('d M Y, h:i A') }}</td>
+                                        <td class="text-left px-4 py-3">
+                                            {{ $followUp->created_at->format('d M Y, h:i A') }}</td>
                                         <td class="text-center px-4 py-3">
                                             <a href="{{ route('patients.show', $followUp->patient->id) }}"
-                                                class="text-indigo-700 dark:text-indigo-400 hover:underline font-semibold">
+                                                class="
+                                                    font-semibold hover:underline
+                                                    {{ $followUp->amount_paid < $followUp->amount_billed ? 'text-red-600 dark:text-red-400' : 'text-indigo-700 dark:text-indigo-400' }}
+                                                ">
                                                 {{ $followUp->patient->name }}
                                             </a>
                                         </td>
+
                                         <td class="text-center px-4 py-3">{{ $followUp->doctor->name }}</td>
-                                        <td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
+                                        <td
+                                            class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
                                             ₹{{ number_format(@$followUp->amount_billed, 2) }}
                                         </td>
-                                        <td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
+                                        <td
+                                            class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
                                             {{ @json_decode($followUp->check_up_info)->payment_method }}
                                         </td>
-                                        <td class="text-right px-4 py-3 font-semibold text-green-600 dark:text-green-300">
+                                        {{-- <td
+                                            class="text-right px-4 py-3 font-semibold text-green-600 dark:text-green-300">
+                                            ₹{{ number_format(@$followUp->amount_paid, 2) }}
+                                        </td> --}}
+                                        <td class="text-right px-4 py-3 font-semibold
+                                            {{ $followUp->amount_paid < $followUp->amount_billed ? 'text-red-600 dark:text-red-400' :
+                                            ($followUp->amount_paid > $followUp->amount_billed ? 'text-green-600 dark:text-green-300' :
+                                            'text-blue-600 dark:text-blue-300') }}">
                                             ₹{{ number_format(@$followUp->amount_paid, 2) }}
                                         </td>
+
                                     </tr>
                                 @endif
                             @endforeach
@@ -183,12 +245,370 @@
     </div>
 </x-app-layout>
 <script>
-    function formSubmit(){
-        document.getElementById('follow_ups').action="/followups";        
+    function formSubmit() {
+        document.getElementById('follow_ups').action = "/followups";
         document.getElementById('follow_ups').submit();
     }
-    function csvExport(){
-        document.getElementById('follow_ups').action="/export-followups";        
+
+    function csvExport() {
+        document.getElementById('follow_ups').action = "/export-followups";
         document.getElementById('follow_ups').submit();
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Form submission functions
+    function formSubmit() {
+        document.getElementById('follow_ups').action = "/followups";
+        document.getElementById('follow_ups').submit();
+    }
+
+    function csvExport() {
+        document.getElementById('follow_ups').action = "/export-followups";
+        document.getElementById('follow_ups').submit();
+    }
+
+    // Chart 1: Follow-Up Frequency (Daily)
+    if (@json($followUpFrequencyDaily->count())) {
+        const dailyCtx = document.getElementById('followUpFrequencyDailyChart').getContext('2d');
+        new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: @json($followUpFrequencyDaily->pluck('date')),
+                datasets: [{
+                    label: 'Follow-Ups',
+                    data: @json($followUpFrequencyDaily->pluck('count')),
+                    borderColor: '#60a5fa',
+                    backgroundColor: (ctx) => {
+                        const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
+                        gradient.addColorStop(0, 'rgba(96, 165, 250, 0.6)');
+                        gradient.addColorStop(1, 'rgba(96, 165, 250, 0.05)');
+                        return gradient;
+                    },
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#60a5fa',
+                    pointHoverRadius: 6
+                }]
+
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Follow-Ups: ${context.parsed.y}`;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Daily Follow-Ups'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Number of Follow-Ups'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('followUpFrequencyDailyChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No daily follow-up data available.</p>';
+    }
+
+    // Chart 2: Follow-Up Frequency (Monthly)
+    if (@json($followUpFrequencyMonthly->count())) {
+        const monthlyCtx = document.getElementById('followUpFrequencyMonthlyChart').getContext('2d');
+        new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: @json($followUpFrequencyMonthly->pluck('month')),
+                datasets: [{
+                    label: 'Follow-Ups',
+                    data: @json($followUpFrequencyMonthly->pluck('count')),
+                    borderColor: '#34D399', // Tailwind green-400
+                    backgroundColor: (ctx) => {
+                        const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
+                        gradient.addColorStop(0, 'rgba(52, 211, 153, 0.5)'); // lighter green top
+                        gradient.addColorStop(1, 'rgba(52, 211, 153, 0.05)'); // fade to transparent
+                        return gradient;
+                    },
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#34D399',
+                    pointHoverRadius: 6,
+                    pointHoverBorderWidth: 2,
+                    pointHoverBorderColor: '#10B981'
+                }]
+
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Monthly Follow-Ups'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Month'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Number of Follow-Ups'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('followUpFrequencyMonthlyChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No monthly follow-up data available.</p>';
+    }
+
+    // Chart 3: Follow-Up Frequency (Yearly)
+    // if (@json($followUpFrequencyYearly->count())) {
+    //     const yearlyCtx = document.getElementById('followUpFrequencyYearlyChart').getContext('2d');
+    //     new Chart(yearlyCtx, {
+    //         type: 'line',
+    //         data: {
+    //             labels: @json($followUpFrequencyYearly->pluck('year')),
+    //             datasets: [{
+    //                 label: 'Follow-Ups',
+    //                 data: @json($followUpFrequencyYearly->pluck('count')),
+    //                 borderColor: '#FF6B6B',
+    //                 backgroundColor: 'rgba(255, 107, 107, 0.2)',
+    //                 fill: true,
+    //                 tension: 0.4
+    //             }]
+    //         },
+    //         options: {
+    //             responsive: true,
+    //             plugins: {
+    //                 title: {
+    //                     display: true,
+    //                     text: 'Yearly Follow-Ups'
+    //                 },
+    //                 legend: {
+    //                     position: 'top'
+    //                 }
+    //             },
+    //             scales: {
+    //                 x: {
+    //                     title: {
+    //                         display: true,
+    //                         text: 'Year'
+    //                     }
+    //                 },
+    //                 y: {
+    //                     title: {
+    //                         display: true,
+    //                         text: 'Number of Follow-Ups'
+    //                     },
+    //                     beginAtZero: true
+    //                 }
+    //             }
+    //         }
+    //     });
+    // } else {
+    //     document.getElementById('followUpFrequencyYearlyChart').parentElement.innerHTML =
+    //         '<p class="text-gray-600 dark:text-gray-400">No yearly follow-up data available.</p>';
+    // }
+
+    // Chart 4: Age Distribution
+    if (@json($ageDistribution->count())) {
+        const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
+        new Chart(ageCtx, {
+            type: 'doughnut',
+            data: {
+                labels: @json($ageDistribution->pluck('age_group')),
+                datasets: [{
+                    label: 'Patient Count',
+                    data: @json($ageDistribution->pluck('count')),
+                    backgroundColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
+                    borderColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
+                    borderWidth: 1,
+                    hoverOffset: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Age Distribution of Patients'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('ageDistributionChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No age data available.</p>';
+    }
+
+    // Chart 5: Payment Status
+    if (@json($paymentStatus->count())) {
+        const paymentCtx = document.getElementById('paymentStatusChart').getContext('2d');
+
+        const gradientBilled = paymentCtx.createLinearGradient(0, 0, 0, 300);
+        gradientBilled.addColorStop(0, 'rgba(147, 197, 253, 0.6)'); // Tailwind blue-300
+        gradientBilled.addColorStop(1, 'rgba(147, 197, 253, 0.05)');
+
+        const gradientPaid = paymentCtx.createLinearGradient(0, 0, 0, 300);
+        gradientPaid.addColorStop(0, 'rgba(134, 239, 172, 0.6)'); // Tailwind green-300
+        gradientPaid.addColorStop(1, 'rgba(134, 239, 172, 0.05)');
+
+        const gradientDue = paymentCtx.createLinearGradient(0, 0, 0, 300);
+        gradientDue.addColorStop(0, 'rgba(252, 165, 165, 0.6)'); // Tailwind red-300
+        gradientDue.addColorStop(1, 'rgba(252, 165, 165, 0.05)');
+
+        new Chart(paymentCtx, {
+            type: 'line',
+            data: {
+                labels: @json($paymentStatus->pluck('date')),
+                datasets: [{
+                        label: 'Billed',
+                        data: @json($paymentStatus->pluck('billed')),
+                        borderColor: '#60a5fa', // Tailwind blue-400
+                        backgroundColor: gradientBilled,
+                        borderWidth: 1,
+                        fill: true,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#60a5fa',
+                        pointHoverRadius: 6,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Paid',
+                        data: @json($paymentStatus->pluck('paid')),
+                        borderColor: '#34d399', // Tailwind green-400
+                        backgroundColor: gradientPaid,
+                        borderWidth: 1,
+                        fill: true,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#34d399',
+                        pointHoverRadius: 6,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Due',
+                        data: @json($paymentStatus->pluck('due')),
+                        borderColor: '#f87171', // Tailwind red-400
+                        backgroundColor: gradientDue,
+                        borderWidth: 1,
+                        fill: true,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#f87171',
+                        pointHoverRadius: 6,
+                        tension: 0.4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ₹${context.parsed.y}`;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Payment Status'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Amount (₹)'
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('paymentStatusChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No payment data available.</p>';
+    }
+
+
+    // Chart 6: New vs. Existing Patients
+    if (@json($newVsExistingPatients['new'] + $newVsExistingPatients['existing'])) {
+        const newVsExistingCtx = document.getElementById('newVsExistingPatientsChart').getContext('2d');
+        new Chart(newVsExistingCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['New Patients', 'Old Patients'],
+                datasets: [{
+                    label: 'Patient Count',
+                    data: [@json($newVsExistingPatients['new']), @json($newVsExistingPatients['existing'])],
+                    backgroundColor: ['#93c5fd', '#86efac'],
+                    borderColor: ['#93c5fd', '#86efac'],
+                    borderWidth: 1,
+                    hoverOffset: 20
+
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'New vs. Old Patients'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+
+            }
+        });
+    } else {
+        document.getElementById('newVsExistingPatientsChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No patient data available.</p>';
     }
 </script>

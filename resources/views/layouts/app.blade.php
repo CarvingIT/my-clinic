@@ -5,7 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        {{-- <title>{{ config('app.name', 'Laravel') }}</title> --}}
+        <title>My Clinic</title>
+
+        <!-- Favicon -->
+        <link rel="icon" href="{{ asset('favicon.png') }}">
+
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -30,6 +35,10 @@
         </script>
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
+
+        <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
@@ -78,5 +87,62 @@
         });
 
         </script>
+
+        <script src="{{ asset('tinymce/tinymce.min.js') }}"></script>
+
+
+        <script>
+            tinymce.init({
+                selector: '.tinymce-editor',
+                plugins: 'lists link table textcolor',
+                toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
+                menubar: false,
+                branding: false,
+                statusbar: true,
+                elementpath: false,
+                height: 200,
+                resize: true,
+                forced_root_block: false,
+                content_style: `
+                                body {
+                                line-height: 1.4 !important;
+                                margin: 0;
+                                padding: 15px;
+                                font-size: 17px;
+                                }
+                                p {
+                                margin: 0 !important;
+                                }
+                            `,
+
+            });
+        </script>
+        <script>
+            tinymce.init({
+                selector: '.tinymce-editor002',
+                plugins: 'lists link table textcolor',
+                toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
+                menubar: false,
+                branding: false,
+                statusbar: true,
+                elementpath: false,
+                height: 150,
+
+            });
+        </script>
+        <script>
+            tinymce.init({
+                selector: '.tinymce-editor003',
+                plugins: 'lists link table textcolor',
+                toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
+                menubar: false,
+                branding: false,
+                statusbar: true,
+                elementpath: false,
+                height: 150,
+
+            });
+        </script>
+
     </body>
 </html>

@@ -100,6 +100,13 @@ return [
     'select_date_time' => 'तारीख आणि वेळ निवडा',
     'No patients in queue' => 'रांगेत रुग्ण नाहीत',
 
+    'Analysis' => 'विश्लेषण',
+    'Ledger' => 'लेजर',
+    'Patient with Dues' => 'पैसे बाकी असलेले रुग्ण',
+    'Reports' => 'अहवाल',
+    'Outstanding Balance' => 'बाकी रक्कम',
+    'Last Follow Up' => 'शेवटचा फॉलो अप',
+
 
 
     'locale' => 'भाषा', // Label for dropdown

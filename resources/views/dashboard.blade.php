@@ -6,6 +6,8 @@
                 <h1 class="text-5xl font-extrabold text-indigo-800 tracking-tight sm:text-6xl mb-6">
                     क्लिनिक
                 </h1>
+                 <!-- Logo -->
+                {{-- <img src="{{ asset('images/logofullt.png') }}" alt="Clinic Logo" class="mx-auto h-24 sm:h-[13rem] filter drop-shadow-xl transition-transform duration-300 hover:scale-105"> --}}
                 <p class="text-lg sm:text-lg text-gray-700 font-semibold">
                     स्वागत आहे,
                     <span class="font-bold text-indigo-600">{{ Auth::user()->name }}</span>!
