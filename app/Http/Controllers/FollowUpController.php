@@ -29,7 +29,8 @@ class FollowUpController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
+        $this->middleware(['auth', 'doctor'])->except(['index']);
     }
     /**
      * Show the form for creating a new resource.

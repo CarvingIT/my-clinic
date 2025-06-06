@@ -14,15 +14,20 @@ class RoleSeeder extends Seeder
      */
     public function run()
     {
-        // add sample roles 
-        Role::create(
+        // add sample roles
+        Role::firstOrCreate(
             [
                 'name'=>'admin'
             ]
         );
-        Role::create(
+        Role::firstOrCreate(
             [
                 'name'=>'staff'
+            ]
+        );
+        Role::firstOrCreate(
+            [
+                'name'=>'doctor'
             ]
         );
     }

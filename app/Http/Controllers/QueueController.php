@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class QueueController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth', 'staff']);
+    }
+
     public function listPatients()
     {
         $patients = Patient::all();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Patient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 // use App\Http\Controllers\Controller;
 use Illuminate\Routing\Controller;
@@ -169,6 +170,10 @@ class PatientController extends Controller
      */
     public function destroy(Patient $patient)
     {
+        if (auth::user()->hasRole('staff')) {
+            return redirect()->route('patients.index')->with('error', 'Unauthorized: Staff cannot delete patients.');
+        }
+
         $patient->delete();
         return Redirect::route('patients.index')->with('success', 'Patient Deleted Successfully');
     }

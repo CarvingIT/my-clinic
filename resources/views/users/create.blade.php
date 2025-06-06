@@ -44,6 +44,18 @@
                             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2 text-red-500" />
                         </div>
 
+                        <!-- Roles -->
+                        <div class="mb-6">
+                            <x-input-label for="roles" :value="__('Roles')" />
+                            <select id="roles" name="roles[]" multiple
+                                class="block mt-1 w-full py-1 px-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 shadow-sm">
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->name }}">{{ ucfirst($role->name) }}</option>
+                                @endforeach
+                            </select>
+                            <x-input-error :messages="$errors->get('roles')" class="mt-2 text-red-500" />
+                        </div>
+
                         <div class="flex items-center justify-end mt-4">
 
                             <a href="{{ route('users.index') }}" class="text-gray-600 hover:text-gray-900">

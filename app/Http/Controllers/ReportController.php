@@ -8,6 +8,11 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(['auth', 'doctor']);
+    }
+
     public function store(Request $request)
     {
 

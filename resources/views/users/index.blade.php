@@ -46,6 +46,10 @@
                                     {{ __('messages.Email') }}
                                 </th>
                                 <th scope="col"
+                                    class="px-6 py-3 text-left text-s font-semibold text-gray-600 uppercase tracking-wider">
+                                    {{ __('messages.Roles') }}
+                                </th>
+                                <th scope="col"
                                     class="px-2 py-3 text-center text-s font-semibold text-gray-600 uppercase tracking-wider">
                                     {{ __('messages.Edit') }}
                                 </th>
@@ -64,6 +68,9 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-gray-700">
                                         {{ $user->email }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-gray-700">
+                                        {{ implode(', ', $user->roles()->pluck('name')->toArray()) ?: 'None' }}
                                     </td>
                                     <td class="px-2 py-4 whitespace-nowrap text-center text-sm font-medium">
                                         <a href="{{ route('users.edit', $user->id) }}"
