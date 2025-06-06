@@ -106,6 +106,7 @@ return [
     'Reports' => 'अहवाल',
     'Outstanding Balance' => 'बाकी रक्कम',
     'Last Follow Up' => 'शेवटचा फॉलो अप',
+    'Roles' => 'भूमिका',
 
 
 

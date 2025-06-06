@@ -105,6 +105,7 @@ return [
     'Reports' => 'Reports',
     'Outstanding Balance' => 'Outstanding Balance',
     'Last Follow Up' => 'Last Follow Up',
+    'Roles' => 'Roles',
 
 
 
