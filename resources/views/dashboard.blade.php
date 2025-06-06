@@ -1,19 +1,44 @@
 <x-app-layout>
     <div class="relative py-20 bg-gradient-to-b from-indigo-50 via-gray-100 to-white overflow-hidden">
         <div class="relative px-4 sm:px-6 lg:px-8">
+            <!-- Flash Messages -->
+            <div class="max-w-6xl mx-auto mb-6">
+                @if (session('error'))
+                    <div class="bg-red-100 border border-red-400 text-red-700 p-4 rounded-lg shadow-md mb-4 relative">
+                        {{ session('error') }}
+                        <button onclick="this.parentElement.remove();"
+                            class="absolute top-2 right-3 text-red-600 hover:text-red-800 text-xl font-bold focus:outline-none">
+                            &times;
+                        </button>
+                    </div>
+                @endif
+
+                @if (session('success'))
+                    <div
+                        class="bg-green-100 border border-green-400 text-green-700 p-4 rounded-lg shadow-md mb-4 relative">
+                        {{ session('success') }}
+                        <button onclick="this.parentElement.remove();"
+                            class="absolute top-2 right-3 text-green-600 hover:text-green-800 text-xl font-bold focus:outline-none">
+                            &times;
+                        </button>
+                    </div>
+                @endif
+            </div>
+
             <!-- Header Section -->
             <div class="text-center">
                 <h1 class="text-5xl font-extrabold text-indigo-800 tracking-tight sm:text-6xl mb-6">
                     क्लिनिक
                 </h1>
-                 <!-- Logo -->
+                <!-- Logo -->
                 {{-- <img src="{{ asset('images/logofullt.png') }}" alt="Clinic Logo" class="mx-auto h-24 sm:h-[13rem] filter drop-shadow-xl transition-transform duration-300 hover:scale-105"> --}}
                 <p class="text-lg sm:text-lg text-gray-700 font-semibold">
                     स्वागत आहे,
                     <span class="font-bold text-indigo-600">{{ Auth::user()->name }}</span>!
                 </p>
                 <p class="text-base sm:text-base text-gray-700 font-semibold pt-2">
-                    {{__('messages.OPD')}}: <span class="font-bold text-indigo-600">{{ session('branch_name') }}</span>
+                    {{ __('messages.OPD') }}: <span
+                        class="font-bold text-indigo-600">{{ session('branch_name') }}</span>
                 </p>
             </div>
 
@@ -25,16 +50,18 @@
 
                             <!-- Patients Section -->
                             <a href="{{ route('patients.index') }}"
-                               class="group bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl p-8 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-md">
+                                class="group bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl p-8 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-md">
                                 <div class="flex items-center justify-between mb-4">
                                     <h2 class="text-2xl font-semibold group-hover:text-indigo-200">
-                                    @php
-                                        $patient_count = \App\Models\Patient::count();
-                                    @endphp
+                                        @php
+                                            $patient_count = \App\Models\Patient::count();
+                                        @endphp
                                         {{ __('messages.patients') }} ({{ $patient_count }})
                                     </h2>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                                     </svg>
                                 </div>
                                 <p class="text-lg text-indigo-100">
@@ -44,13 +71,15 @@
 
                             <!-- Users Section -->
                             <a href="{{ route('users.index') }}"
-                               class="group bg-teal-500 hover:bg-teal-600 text-white rounded-xl p-8 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-md">
+                                class="group bg-teal-500 hover:bg-teal-600 text-white rounded-xl p-8 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-md">
                                 <div class="flex items-center justify-between mb-4">
                                     <h2 class="text-2xl font-semibold group-hover:text-teal-200">
                                         {{ __('messages.Staff') }}
                                     </h2>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.995 8.995 0 0112 21a8.995 8.995 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="w-8 h-8">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.995 8.995 0 0112 21a8.995 8.995 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
                                     </svg>
                                 </div>
                                 <p class="text-lg text-teal-100">

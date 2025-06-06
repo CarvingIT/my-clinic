@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\DB;
 use CarvingIT\LaravelUserRoles\App\Models\Role;
 use CarvingIT\LaravelUserRoles\App\Models\UserRole;
 
@@ -119,10 +120,42 @@ class UserController extends Controller
         // }
 
         // Sync roles: assign new roles without affecting others
-        $roles = $request->has('roles') && is_array($request->roles) ? array_filter($request->roles) : [];
-        $user->unassignRoles($user->roles()->pluck('name')->toArray());
-        if (!empty($roles)) {
-            $user->assignRoles($roles);
+        // $roles = $request->has('roles') && is_array($request->roles) ? array_filter($request->roles) : [];
+        // $user->unassignRoles($user->roles()->pluck('name')->toArray());
+        // if (!empty($roles)) {
+        //     $user->assignRoles($roles);
+        // }
+
+
+        // Get current and submitted roles
+        $currentRoles = $user->roles()->pluck('name')->toArray();
+        $submittedRoles = $request->has('roles') && is_array($request->roles) ? array_filter($request->roles) : [];
+
+        // Determine roles to add and remove
+        $rolesToAdd = array_diff($submittedRoles, $currentRoles); // New roles to assign
+        $rolesToRemove = array_diff($currentRoles, $submittedRoles); // Roles to unassign
+
+        // Assign new roles
+        if (!empty($rolesToAdd)) {
+            $user->assignRoles($rolesToAdd);
+        }
+
+        // Unassign removed roles
+        // if (!empty($rolesToRemove)) {
+        //     $user->unassignRoles($rolesToRemove);
+        // }
+
+        // Remove specific roles for this user only
+        if (!empty($rolesToRemove)) {
+            foreach ($rolesToRemove as $roleName) {
+                $role = Role::where('name', $roleName)->first();
+                if ($role) {
+                    \DB::table('user_roles')
+                        ->where('user_id', $user->id)
+                        ->where('role_id', $role->id)
+                        ->delete();
+                }
+            }
         }
 
         return redirect()->route('users.index')->with('success', 'User Updated Successfully.');

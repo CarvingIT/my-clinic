@@ -11,6 +11,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\PatientDuesController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\StaffMiddleware;
+use App\Http\Middleware\DoctorMiddleware;
 
 
 use Illuminate\Support\Facades\App;
@@ -108,41 +109,47 @@ Route::get('/set-locale/{locale}', function ($locale) {
 
 // Admin Routes
 Route::middleware(['auth', AdminMiddleware::class])->group(function () {
-    Route::resource('users', UserController::class);
-    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::resource('users', UserController::class); // Admin can manage users
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index'); // Admin can view analytics
+    Route::get('/followups', [FollowUpController::class, 'index'])->name('followups.index'); // List follow-ups
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit'); // Profile management
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update'); // Update profile
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy'); // Delete profile
+    Route::get('/patient-dues', [PatientDuesController::class, 'index'])->name('patient-dues.index'); // List patient dues
 });
 
 // Staff Routes
 Route::middleware(['auth', StaffMiddleware::class])->group(function () {
-    Route::resource('patients', PatientController::class)->except(['destroy']);
-    Route::post('/patients/{patient}/queue', [QueueController::class, 'addToQueue'])->name('patients.queue');
-    Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index');
-    Route::delete('/queue/{queue}', [QueueController::class, 'removeFromQueue'])->name('queue.remove');
-    Route::post('/queue/{queue}/in', [QueueController::class, 'markIn'])->name('queue.in');
+    Route::resource('patients', PatientController::class)->except(['destroy']); // Staff can manage patients except for deletion
+    Route::post('/patients/{patient}/queue', [QueueController::class, 'addToQueue'])->name('patients.queue'); // Staff can add patients to the queue
+    Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index'); // Staff can view the queue
+    Route::delete('/queue/{queue}', [QueueController::class, 'removeFromQueue'])->name('queue.remove'); // Staff can remove patients from the queue
+    // Route::post('/queue/{queue}/in', [QueueController::class, 'markIn'])->name('queue.in'); // Staff can mark patients as in
 });
 
 // Doctor Routes
-Route::middleware(['auth', 'doctor'])->group(function () {
-    Route::get('followups/create', [FollowUpController::class, 'create'])->name('followups.create');
-    Route::resource('followups', FollowUpController::class)->except(['index']);
-    Route::resource('reports', ReportController::class)->only(['store', 'destroy']);
-    Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store');
-    Route::delete('/uploads/{id}', [UploadController::class, 'destroy'])->name('uploads.destroy');
-    Route::get('/uploads/{id}', [UploadController::class, 'show'])->name('uploads.show');
-    Route::get('/patients/{patient}/certificate', [PatientController::class, 'generateCertificate'])->name('patients.certificate');
-    Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])->name('followups.export');
+Route::middleware(['auth', DoctorMiddleware::class])->group(function () {
+    Route::get('followups/create', [FollowUpController::class, 'create'])->name('followups.create'); // Doctor can create follow-ups
+    Route::resource('followups', FollowUpController::class)->except(['index']); // Doctor can manage follow-ups except for listing them
+    Route::resource('reports', ReportController::class)->only(['store', 'destroy']); // Doctor can store and delete reports
+    Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store'); // Doctor can upload files
+    Route::delete('/uploads/{id}', [UploadController::class, 'destroy'])->name('uploads.destroy'); // Doctor can delete uploaded files
+    Route::get('/uploads/{id}', [UploadController::class, 'show'])->name('uploads.show'); // Doctor can view uploaded files
+    Route::get('/patients/{patient}/certificate', [PatientController::class, 'generateCertificate'])->name('patients.certificate'); // Doctor can generate patient certificates
+    Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])->name('followups.export'); // Doctor can export follow-ups
+
+    // Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index'); // Doctors can view the queue
+    // Route::delete('/queue/{queue}', [QueueController::class, 'removeFromQueue'])->name('queue.remove'); // Doctors can remove patients from the queue
+    Route::post('/queue/{queue}/in', [QueueController::class, 'markIn'])->name('queue.in'); // Doctors can mark patients as in
 });
 
 // Shared Routes (accessible by all authenticated users)
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/patients/{patient}/export-pdf', [PatientController::class, 'exportPdf'])->name('patients.export-pdf');
-    Route::get('/followups', [FollowUpController::class, 'index'])->name('followups.index');
-    Route::get('/patient-dues', [PatientDuesController::class, 'index'])->name('patient-dues.index');
-    Route::get('/followup-images/{filename}', [FollowupImageController::class, 'show'])->name('followup.image');
-    Route::get('/patients/{patient}/followup-images', [FollowUpImageController::class, 'showFollowUpImages'])->name('followup.images');
+
+    Route::get('/patients/{patient}/export-pdf', [PatientController::class, 'exportPdf'])->name('patients.export-pdf'); // Export patient data as PDF
+
+    Route::get('/followup-images/{filename}', [FollowupImageController::class, 'show'])->name('followup.image'); // Show follow-up images
+    Route::get('/patients/{patient}/followup-images', [FollowUpImageController::class, 'showFollowUpImages'])->name('followup.images'); // Show follow-up images for a patient
 });
 
 // Patient Deletion (Admin only)

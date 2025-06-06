@@ -11,7 +11,8 @@ class QueueController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'staff']);
+        $this->middleware(['auth']);
+        // $this->middleware(['auth', 'staff']);
     }
 
     public function listPatients()
