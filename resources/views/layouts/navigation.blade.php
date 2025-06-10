@@ -18,12 +18,21 @@
                     <x-nav-link :href="route('patients.index')" :active="request()->routeIs('patients.index')">
                         {{ __('messages.patients') }}
                     </x-nav-link>
+
+                    @if (Auth::user()->hasRole('admin'))
                     <x-nav-link :href="route('followups.index')" :active="request()->routeIs('followups.index')">
                         {{ __('messages.Ledger') }}
                     </x-nav-link>
+                    @endif
+
+                    @if (Auth::user()->hasRole('admin'))
                     <x-nav-link :href="route('analytics.index')" :active="request()->routeIs('analytics.index')">
                         {{ __('messages.Analysis') }}
                     </x-nav-link>
+                    @endif
+
+                    {{-- <x-nav-link :href="route('analytics.index')" :active="request()->routeIs('analytics.index')">
+                        {{ __('messages.Analysis') }}
                     {{-- <x-nav-link :href="route('patient-dues.index')" :active="request()->routeIs('patient-dues.index')">
                         {{ __('messages.Patient with Dues') }}
                     </x-nav-link> --}}
@@ -59,9 +68,16 @@
                     </div> --}}
 
 
-                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
+                    {{-- <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
                         {{ __('messages.Staff') }}
-                    </x-nav-link>
+                    </x-nav-link> --}}
+
+                    @if (Auth::user()->hasRole('admin'))
+                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
+                            {{ __('messages.Staff') }}
+                        </x-nav-link>
+                    @endif
+
                     <x-nav-link :href="route('queue.index')" :active="request()->routeIs('queue.index')">
                         {{ __('messages.Queue') }}
                     </x-nav-link>
