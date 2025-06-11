@@ -106,6 +106,8 @@ return [
     'Outstanding Balance' => 'Outstanding Balance',
     'Last Follow Up' => 'Last Follow Up',
     'Roles' => 'Roles',
+    'Amount Paid' => 'Amount Paid',
+    'Total Outstanding Balance' => 'Total Outstanding Balance',
 
 
 
