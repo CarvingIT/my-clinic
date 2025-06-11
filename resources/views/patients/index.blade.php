@@ -140,7 +140,7 @@
                         </table>
                         <!-- Pagination -->
                         <div class="mt-6">
-                            {{ $patients->links() }}
+                            {{ $patients->appends(['search' => request('search')])->links() }}
                         </div>
                     </div>
                 </div>

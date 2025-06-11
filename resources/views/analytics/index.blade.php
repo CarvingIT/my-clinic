@@ -88,6 +88,12 @@
                                     <canvas id="ageDistributionChart" height="100"></canvas>
                                 </div>
                             </div>
+                            <!-- Gender Distribution -->
+                            <div class="flex-1 max-w-md">
+                                <div class="h-[450px] w-full">
+                                    <canvas id="genderDistributionChart" height="100"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -381,5 +387,39 @@
     } else {
         document.getElementById('newVsExistingPatientsChart').parentElement.innerHTML =
             '<p class="text-gray-600 dark:text-gray-400">No patient data available.</p>';
+    }
+
+    // Chart 7: Gender Distribution
+    if (@json($genderDistribution->count())) {
+        const genderCtx = document.getElementById('genderDistributionChart').getContext('2d');
+        new Chart(genderCtx, {
+            type: 'pie',
+            data: {
+                labels: @json($genderDistribution->pluck('gender_group')),
+                datasets: [{
+                    label: 'Patient Count',
+                    data: @json($genderDistribution->pluck('count')),
+                    backgroundColor: ['#f472b6','#60a5fa','#facc15', '#9ca3af'],
+                    borderColor: ['#f472b6','#60a5fa','#facc15', '#9ca3af'],
+                    borderWidth: 1,
+                    hoverOffset: 20
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Gender Distribution of Patients'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                }
+            }
+        });
+    } else {
+        document.getElementById('genderDistributionChart').parentElement.innerHTML =
+            '<p class="text-gray-600 dark:text-gray-400">No gender data available.</p>';
     }
 </script>

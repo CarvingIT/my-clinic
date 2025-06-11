@@ -132,6 +132,28 @@ class AnalyticsController extends Controller
                 return $carry;
             }, ['new' => 0, 'existing' => 0]);
 
+        // Chart 7: Gender Distribution
+        $genderDistribution = Patient::whereHas('followUps', function ($query) use ($request, $selectedBranch, $selectedDoctor) {
+            $query->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
+                ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
+                ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]))
+                ->when($selectedDoctor !== 'all' && !empty($selectedDoctor), fn($q) => $q->where('doctor_id', $selectedDoctor));
+        })
+            ->selectRaw('
+                COALESCE(gender, "Unknown") as gender_group,
+                COUNT(DISTINCT patients.id) as count')
+            ->join('follow_ups', function ($join) {
+                $join->on('patients.id', '=', 'follow_ups.patient_id')
+                    ->where('follow_ups.created_at', function ($query) {
+                        $query->selectRaw('MAX(created_at)')
+                            ->from('follow_ups')
+                            ->whereColumn('patient_id', 'patients.id');
+                    });
+            })
+            ->groupBy('gender_group')
+            ->orderByRaw('FIELD(gender_group, "Male", "Female", "Other", "Unknown")')
+            ->get();
+
         return view('analytics.index', compact(
             'followUpFrequencyDaily',
             'followUpFrequencyMonthly',
@@ -142,7 +164,8 @@ class AnalyticsController extends Controller
             'branches',
             'selectedBranch',
             'doctors',
-            'selectedDoctor'
+            'selectedDoctor',
+            'genderDistribution'
         ));
     }
 }
