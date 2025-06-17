@@ -12,6 +12,7 @@ use App\Http\Controllers\PatientDuesController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\StaffMiddleware;
 use App\Http\Middleware\DoctorMiddleware;
+use App\Http\Controllers\PresetController;
 
 
 use Illuminate\Support\Facades\App;
@@ -156,6 +157,13 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
 
+// Preset Routes
+// Route::middleware('auth')->group(function () {
+//     Route::get('/presets', [PresetController::class, 'index']);
+//     Route::post('/presets', [PresetController::class, 'store']);
+//     Route::put('/presets/{preset}', [PresetController::class, 'update']);
+//     Route::delete('/presets/{preset}', [PresetController::class, 'destroy']);
+// });
 
 
 require __DIR__ . '/auth.php';
