@@ -26,15 +26,15 @@ class PatientController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Patient::query();
+        $query = Patient::query()->orderByLatestFollowUp();
 
         if ($request->filled('search')) {
             $searchTerm = $request->search;
-            $query->where('name', 'like', "%{$searchTerm}%")
-                ->orWhere('mobile_phone', 'like', "%{$searchTerm}%")
-                ->orWhere('patient_id', 'like', "%{$searchTerm}%");
+            $query->where('patients.name', 'like', "%{$searchTerm}%")
+                ->orWhere('patients.mobile_phone', 'like', "%{$searchTerm}%")
+                ->orWhere('patients.patient_id', 'like', "%{$searchTerm}%");
         }
-        $patients = $query->orderBy('name')->paginate(10);
+        $patients = $query->with('followUps')->paginate(10);
         return view('patients.index', compact('patients'));
     }
 

@@ -67,4 +67,35 @@ class Patient extends Model
     {
         return $this->hasMany(Queue::class);
     }
+
+    /**
+     * Get the latest follow-up timestamp for the patient.
+     *
+     * @return \Illuminate\Support\Carbon|null
+     */
+    public function getLatestFollowUpAtAttribute()
+    {
+        return $this->followUps()->latest('created_at')->value('created_at');
+    }
+
+    /**
+     * Scope to sort patients by their latest follow-up time.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOrderByLatestFollowUp($query)
+    {
+        return $query->select('patients.*')
+            ->leftJoinSub(
+                FollowUp::select('patient_id', \DB::raw('MAX(created_at) as last_follow_up'))
+                    ->groupBy('patient_id'),
+                'latest_follow_up',
+                'patients.id',
+                '=',
+                'latest_follow_up.patient_id'
+            )
+            ->orderByRaw('COALESCE(latest_follow_up.last_follow_up, patients.created_at) DESC')
+            ->orderBy('patients.created_at', 'desc');
+    }
 }
