@@ -53,6 +53,17 @@
                         </select>
                     </div>
 
+                    <div class="flex flex-col">
+                        <label for="gender" class="text-gray-800 dark:text-gray-300 font-semibold">Gender:</label>
+                        <select id="gender" name="gender"
+                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            <option value="all" {{ request('gender') == 'all' ? 'selected' : '' }}>All</option>
+                            <option value="M" {{ request('gender') == 'M' ? 'selected' : '' }}>Male</option>
+                            <option value="F" {{ request('gender') == 'F' ? 'selected' : '' }}>Female</option>
+                            <option value="O" {{ request('gender') == 'O' ? 'selected' : '' }}>Other</option>
+                        </select>
+                    </div>
+
                     <button type="submit"
                         class="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
                         Filter
@@ -61,7 +72,6 @@
 
                 <!-- Charts Section -->
                 <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
-                    {{-- <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📈 {{ __('Analysis') }}</h3> --}}
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Follow-Up Frequency (Daily) -->
                         <div>
@@ -399,8 +409,8 @@
                 datasets: [{
                     label: 'Patient Count',
                     data: @json($genderDistribution->pluck('count')),
-                    backgroundColor: ['#f472b6','#60a5fa','#facc15', '#9ca3af'],
-                    borderColor: ['#f472b6','#60a5fa','#facc15', '#9ca3af'],
+                    backgroundColor: ['#60a5fa', '#f472b6', '#facc15', '#9ca3af'],
+                    borderColor: ['#60a5fa', '#f472b6', '#facc15', '#9ca3af'],
                     borderWidth: 1,
                     hoverOffset: 20
                 }]

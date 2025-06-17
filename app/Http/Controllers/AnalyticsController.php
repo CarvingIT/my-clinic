@@ -28,12 +28,17 @@ class AnalyticsController extends Controller
         // Default to "all"
         $selectedBranch = $request->input('branch_name', 'all');
         $selectedDoctor = $request->input('doctor', 'all');
+        $selectedGender = $request->input('gender', 'all');
 
         // Fetch doctors
         $doctors = User::all();
 
         // Base query for follow-ups
-        $query = FollowUp::whereHas('patient');
+        $query = FollowUp::whereHas('patient', function ($q) use ($selectedGender) {
+            if ($selectedGender !== 'all' && !empty($selectedGender)) {
+                $q->where('gender', $selectedGender);
+            }
+        });
 
         // Apply branch filter if a specific branch is selected
         if ($selectedBranch !== 'all' && !empty($selectedBranch)) {
@@ -58,6 +63,7 @@ class AnalyticsController extends Controller
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]))
             ->when($selectedDoctor !== 'all' && !empty($selectedDoctor), fn($q) => $q->where('doctor_id', $selectedDoctor))
+            ->when($selectedGender !== 'all' && !empty($selectedGender), fn($q) => $q->whereHas('patient', fn($pq) => $pq->where('gender', $selectedGender)))
             ->groupBy('raw_date', 'date')
             ->orderBy('raw_date', 'asc')
             ->get();
@@ -68,6 +74,7 @@ class AnalyticsController extends Controller
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]))
             ->when($selectedDoctor !== 'all' && !empty($selectedDoctor), fn($q) => $q->where('doctor_id', $selectedDoctor))
+            ->when($selectedGender !== 'all' && !empty($selectedGender), fn($q) => $q->whereHas('patient', fn($pq) => $pq->where('gender', $selectedGender)))
             ->groupBy('month')
             ->orderByRaw('MIN(created_at)')
             ->get();
@@ -78,17 +85,19 @@ class AnalyticsController extends Controller
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]))
             ->when($selectedDoctor !== 'all' && !empty($selectedDoctor), fn($q) => $q->where('doctor_id', $selectedDoctor))
+            ->when($selectedGender !== 'all' && !empty($selectedGender), fn($q) => $q->whereHas('patient', fn($pq) => $pq->where('gender', $selectedGender)))
             ->groupBy('year')
             ->orderBy('year')
             ->get();
 
         // Chart 4: Age Distribution
-        $ageDistribution = Patient::whereHas('followUps', function ($query) use ($request, $selectedBranch, $selectedDoctor) {
+        $ageDistribution = Patient::whereHas('followUps', function ($query) use ($request, $selectedBranch, $selectedDoctor, $selectedGender) {
             $query->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
                 ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
                 ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]))
                 ->when($selectedDoctor !== 'all' && !empty($selectedDoctor), fn($q) => $q->where('doctor_id', $selectedDoctor));
         })
+            ->when($selectedGender !== 'all' && !empty($selectedGender), fn($q) => $q->where('gender', $selectedGender))
             ->selectRaw('
                 CASE
                     WHEN birthdate IS NULL THEN "Unknown"
@@ -114,12 +123,17 @@ class AnalyticsController extends Controller
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]))
             ->when($selectedDoctor !== 'all' && !empty($selectedDoctor), fn($q) => $q->where('doctor_id', $selectedDoctor))
+            ->when($selectedGender !== 'all' && !empty($selectedGender), fn($q) => $q->whereHas('patient', fn($pq) => $pq->where('gender', $selectedGender)))
             ->groupBy('raw_date', 'date')
             ->orderBy('raw_date', 'asc')
             ->get();
 
         // Chart 6: New vs. Existing Patients
-        $newVsExistingPatients = FollowUp::whereHas('patient')
+        $newVsExistingPatients = FollowUp::whereHas('patient', function ($q) use ($selectedGender) {
+            if ($selectedGender !== 'all' && !empty($selectedGender)) {
+                $q->where('gender', $selectedGender);
+            }
+        })
             ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]))
@@ -139,9 +153,15 @@ class AnalyticsController extends Controller
                 ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]))
                 ->when($selectedDoctor !== 'all' && !empty($selectedDoctor), fn($q) => $q->where('doctor_id', $selectedDoctor));
         })
+            ->when($selectedGender !== 'all' && !empty($selectedGender), fn($q) => $q->where('gender', $selectedGender))
             ->selectRaw('
-                COALESCE(gender, "Unknown") as gender_group,
-                COUNT(DISTINCT patients.id) as count')
+        CASE
+            WHEN gender = "M" THEN "Male"
+            WHEN gender = "F" THEN "Female"
+            WHEN gender = "O" THEN "Other"
+            ELSE "Unknown"
+        END as gender_group,
+        COUNT(DISTINCT patients.id) as count')
             ->join('follow_ups', function ($join) {
                 $join->on('patients.id', '=', 'follow_ups.patient_id')
                     ->where('follow_ups.created_at', function ($query) {
