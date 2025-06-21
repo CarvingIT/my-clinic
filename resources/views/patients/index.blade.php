@@ -111,11 +111,78 @@
                     </div>
 
                     <!-- Success Message -->
-                    @if (session('success'))
+                    {{-- @if (session('success'))
                         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-5">
                             {{ session('success') }}
                         </div>
+                    @endif --}}
+
+                    {{-- Error Message --}}
+                    @if (session('error'))
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-5">
+                            <p class="font-bold">{{ session('error') }}</p>
+                        </div>
                     @endif
+
+
+                    <!-- Success Message -->
+                    @if (session('success'))
+                        <div id="successAlert"
+                            class="relative bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg mb-5">
+                            <!-- Dismiss button -->
+                            <button onclick="document.getElementById('successAlert').style.display='none'"
+                                class="absolute top-2 right-3 text-green-700 hover:text-green-900 text-xl font-bold focus:outline-none"
+                                aria-label="Close">&times;</button>
+
+                            <p class="font-bold">{{ session('success') }}</p>
+
+                            @if (session('import_details'))
+                                <div class="mt-2">
+                                    <p><strong>Total Patients Added:</strong>
+                                        {{ session('import_details.total_patients_affected') }}</p>
+
+                                    @if (!empty(session('import_details.created_patients')))
+                                        <p><strong>Created Patients:</strong></p>
+                                        <ul class="list-disc ml-5">
+                                            @foreach (session('import_details.created_patients') as $patient)
+                                                <li>{{ $patient['name'] }} (ID: {{ $patient['patient_id'] }})</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                    @if (!empty(session('import_details.restored_patients')))
+                                        <p><strong>Restored Patients:</strong></p>
+                                        <ul class="list-disc ml-5">
+                                            @foreach (session('import_details.restored_patients') as $patient)
+                                                <li>{{ $patient['name'] }} (ID: {{ $patient['patient_id'] }})</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+
+                                    @if (!empty(session('import_details.updated_patients')))
+                                        <p><strong>Updated Patients:</strong></p>
+                                        <ul class="list-disc ml-5">
+                                            @foreach (session('import_details.updated_patients') as $patient)
+                                                <li>{{ $patient['name'] }} (ID: {{ $patient['patient_id'] }})</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+
+                                    @if (!empty(session('import_details.total_follow_ups')))
+                                        <p><strong>Follow-Ups Added:</strong></p>
+                                        <ul class="list-disc ml-5">
+                                            @foreach (session('import_details.total_follow_ups') as $followUp)
+                                                @if ($followUp['follow_ups_added'] > 0)
+                                                    <li>{{ $followUp['name'] }} (ID: {{ $followUp['patient_id'] }}):
+                                                        {{ $followUp['follow_ups_added'] }} follow-up(s)</li>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
 
                     <!-- Table Section -->
                     <div class="max-w-full overflow-x-auto">

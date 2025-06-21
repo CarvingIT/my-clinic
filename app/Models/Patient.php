@@ -28,7 +28,10 @@ class Patient extends Model
         'height',
         'weight',
         'occupation',
-        'reference'
+        'reference',
+        'created_at',
+        'updated_at',
+
     ];
 
     protected $casts = [

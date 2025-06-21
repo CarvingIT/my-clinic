@@ -174,9 +174,9 @@ class PatientController extends Controller
      */
     public function destroy(Patient $patient)
     {
-        if (auth::user()->hasRole('staff')) {
-            return redirect()->route('patients.index')->with('error', 'Unauthorized: Staff cannot delete patients.');
-        }
+        // if (auth::user()->hasRole('staff')) {
+        //     return redirect()->route('patients.index')->with('error', 'Unauthorized: Staff cannot delete patients.');
+        // }
 
         $patient->delete();
         return Redirect::route('patients.index')->with('success', 'Patient Deleted Successfully');
@@ -339,7 +339,7 @@ class PatientController extends Controller
     {
         // Validate uploaded file
         $request->validate([
-            'file' => ['required', 'file', 'max:2048'],
+            'file' => ['required', 'file', 'mimes:json,application/octet-stream,text/plain,application/x-json', 'max:5000'],
         ]);
 
         // Log file details
@@ -373,6 +373,16 @@ class PatientController extends Controller
                 return redirect()->back()->with('error', 'Invalid JSON file structure.');
             }
 
+            // Track import details
+            $importDetails = [
+                'created_patients' => [],
+                'updated_patients' => [],
+                'restored_patients' => [],
+                'skipped_patients' => [],
+                'total_follow_ups' => [],
+                'total_patients_affected' => 0,
+            ];
+
             // Process each patient
             foreach ($data['patients'] as $patientEntry) {
                 if (!isset($patientEntry['patient']) || !isset($patientEntry['follow_ups'])) {
@@ -381,16 +391,47 @@ class PatientController extends Controller
                 }
 
                 $patientData = $patientEntry['patient'];
-                $patient = Patient::where('patient_id', $patientData['patient_id'])->first();
+                // Check for existing patient, including soft-deleted
+                $patient = Patient::withTrashed()->where('patient_id', $patientData['patient_id'])->first();
+
+
+                // Initialize follow-up count for this patient
+                $followUpCount = 0;
 
                 // Handle patient
                 if (!$patient) {
+                    // Preserve created_at and updated_at from JSON
+                    $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                    $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
                     $patient = Patient::create($patientData);
-                    Log::info('Created new patient', ['patient_id' => $patientData['patient_id']]);
+                    $importDetails['created_patients'][] = [
+                        'patient_id' => $patientData['patient_id'],
+                        'name' => $patientData['name'],
+                    ];
+                    $importDetails['total_patients_affected']++;
+                    Log::info('Created new patient', [
+                        'patient_id' => $patientData['patient_id'],
+                        'created_at' => $patientData['created_at'],
+                    ]);
                 } elseif (Carbon::parse($patientData['updated_at'])->gt($patient->updated_at)) {
+                    // Preserve created_at and updated_at from JSON
+                    $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                    $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
                     $patient->update($patientData);
-                    Log::info('Updated patient', ['patient_id' => $patientData['patient_id']]);
+                    $importDetails['updated_patients'][] = [
+                        'patient_id' => $patientData['patient_id'],
+                        'name' => $patientData['name'],
+                    ];
+                    $importDetails['total_patients_affected']++;
+                    Log::info('Updated patient', [
+                        'patient_id' => $patientData['patient_id'],
+                        'updated_at' => $patientData['updated_at'],
+                    ]);
                 } else {
+                    $importDetails['skipped_patients'][] = [
+                        'patient_id' => $patientData['patient_id'],
+                        'name' => $patientData['name'],
+                    ];
                     Log::info('Skipped patient update (not newer)', ['patient_id' => $patientData['patient_id']]);
                 }
 
@@ -429,19 +470,36 @@ class PatientController extends Controller
                         'timestamps' => $existingTimestamps,
                     ]);
 
-                    // Create new follow-up
+                    // Create new follow-up with JSON timestamps
                     $followUpData['patient_id'] = $patient->id;
                     $followUpData['doctor_id'] = User::where('name', $followUpData['doctor_name'])->first()->id ?? Auth::id();
                     $followUpData['created_at'] = $importedCreatedAt;
+                    $followUpData['updated_at'] = isset($followUpData['updated_at'])
+                        ? Carbon::parse($followUpData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s')
+                        : $importedCreatedAt;
                     FollowUp::create($followUpData);
+                    $followUpCount++;
                     Log::info('Created new follow-up', [
                         'patient_id' => $patient->id,
                         'created_at' => $importedCreatedAt,
                     ]);
+
+                    // Track follow-ups per patient
+                    $importDetails['total_follow_ups'][] = [
+                        'patient_id' => $patientData['patient_id'],
+                        'name' => $patientData['name'],
+                        'follow_ups_added' => $followUpCount,
+                    ];
                 }
             }
 
-            return redirect()->route('patients.index')->with('success', 'Clinic data imported successfully.');
+            // Log import summary
+            Log::info('Import summary', $importDetails);
+
+            return redirect()->route('patients.index')->with([
+                'success' => 'Clinic data imported successfully.',
+                'import_details' => $importDetails,
+            ]);
         } catch (\Exception $e) {
             Log::error('Error importing JSON file: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to import JSON file: ' . $e->getMessage());

@@ -154,7 +154,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // Patient Deletion (Admin only)
-Route::middleware(['auth', 'admin'])->delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
+Route::middleware(['auth', AdminMiddleware::class])->delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
 //Export Patient JSON
 // Route::middleware(['auth', DoctorMiddleware::class])->get('/patients/export/{patient}', [PatientController::class, 'exportPatientJSON'])->name('patients.export_json');

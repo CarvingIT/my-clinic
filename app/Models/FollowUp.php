@@ -18,6 +18,8 @@ class FollowUp extends Model
         'amount_billed',
         'amount_paid',
         'patient_photos',
+        'created_at',
+        'updated_at',
     ];
 
 
