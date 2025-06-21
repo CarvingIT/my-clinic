@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use App\Models\FollowUp;
+use App\Models\User;
 // use Knp\Snappy\Pdf;
 use PDF;
 use Carbon\Carbon;
@@ -227,5 +228,39 @@ class PatientController extends Controller
         $patientId = $initial . '-' . $formattedDob . $mobileNumber;
 
         return $patientId;
+    }
+
+    public function exportPatientJSON(Patient $p){
+        $patient = $p->first();
+        $follow_ups = $patient->followUps;
+        foreach($follow_ups as $f){
+            $doctor = User::find($f->doctor_id);
+            $f->doctor_name = $doctor->name;
+            unset($f->doctor_id);
+            unset($f->patient_id);
+            unset($f->id);
+            $follow_ups[] = $f;
+        }
+        unset($patient->id);
+        return ['patient'=>$patient, 'follow_ups' => $follow_ups ];
+        // We should send an email with attachment of json file ${PID}.json
+        // The email should go to the email address given in the pop up
+    }
+
+    public function importPatientJSON(Request $req){
+        // get uploaded json file
+        // validate 
+        // take the contents in a variable (json)
+        // check if the patient_id exists
+        // if not, create a new patient
+        // get the patient model, update if (updated_at) is later than the system's updated_at 
+        // save patient
+        //
+        // get follow ups array from the uploaded file
+        // foreach follow up, 
+        // Get OPD id based on the branch_name 
+        // Use that branch id when you create the follow ups.
+        // check if a follow up exists for the current patient where(created_at) matches the data in the file.
+        // store new follow up if created_at does not exist.
     }
 }
