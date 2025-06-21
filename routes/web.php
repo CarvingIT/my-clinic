@@ -12,6 +12,7 @@ use App\Http\Controllers\PatientDuesController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\StaffMiddleware;
 use App\Http\Middleware\DoctorMiddleware;
+use App\Models\FollowUp;
 
 
 use Illuminate\Support\Facades\App;
@@ -156,8 +157,18 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('patients.destroy');
 
 //Export Patient JSON
-Route::middleware(['auth', DoctorMiddleware::class])->get('/patients/export/{patient}', [PatientController::class, 'exportPatientJSON'])->name('patients.export_json');
+// Route::middleware(['auth', DoctorMiddleware::class])->get('/patients/export/{patient}', [PatientController::class, 'exportPatientJSON'])->name('patients.export_json');
 
+
+// Bulk Export Clinic Data
+Route::middleware(['auth', DoctorMiddleware::class])
+    ->post('/patients/export-all', [PatientController::class, 'exportAllPatientsJSON'])
+    ->name('patients.export_all_json');
+
+// Bulk Import Clinic Data
+Route::middleware(['auth', DoctorMiddleware::class])
+    ->post('/patients/import-all', [PatientController::class, 'importAllPatientsJSON'])
+    ->name('patients.import_all_json');
 
 
 require __DIR__ . '/auth.php';

@@ -14,6 +14,73 @@
                 <div class="p-5 text-gray-900">
                     <!-- Action Section -->
                     <div class="flex justify-between items-center mb-6">
+                        <!-- Export and Import Buttons -->
+                        <div class="flex gap-2">
+                            <!-- Export Button with Modal -->
+                            <div x-data="{ openExportModal: false }">
+                                <button @click="openExportModal = true"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                                    {{ __('Export All Data') }}
+                                </button>
+
+                                <div x-show="openExportModal" style="background-color: rgba(0, 0, 0, 0.75)"
+                                    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
+                                    <div class="relative w-auto max-w-md mx-auto my-6">
+                                        <div
+                                            class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
+                                            <!-- Header -->
+                                            <div
+                                                class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
+                                                <h3 class="text-xl font-semibold text-gray-800">
+                                                    {{ __('Export Clinic Data') }}</h3>
+                                                <button @click="openExportModal = false"
+                                                    class="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none">
+                                                    <span class="text-red-800 h-6 w-6 text-2xl block">×</span>
+                                                </button>
+                                            </div>
+                                            <!-- Body -->
+                                            <div class="relative p-6 flex-auto">
+                                                <form method="POST" action="{{ route('patients.export_all_json') }}">
+                                                    @csrf
+                                                    <div class="mb-4">
+                                                        <x-input-label for="email" :value="__('Recipient Email')" />
+                                                        <x-text-input type="email" id="email" name="email"
+                                                            class="mt-1 block w-full" required />
+                                                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                                                    </div>
+                                                    <div class="flex justify-end gap-2">
+                                                        <button type="button" @click="openExportModal = false"
+                                                            class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200">
+                                                            {{ __('Cancel') }}
+                                                        </button>
+                                                        <button type="submit"
+                                                            class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200">
+                                                            {{ __('Export') }}
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Import Form -->
+                            <form method="POST" action="{{ route('patients.import_all_json') }}"
+                                enctype="multipart/form-data" class="flex gap-2 items-center">
+                                @csrf
+                                <div class="relative">
+                                    <input type="file" name="file" accept=".json"
+                                        class="border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        required>
+                                    <x-input-error :messages="$errors->get('file')" class="mt-2" />
+                                </div>
+                                <button type="submit"
+                                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                                    {{ __('Import Data') }}
+                                </button>
+                            </form>
+                        </div>
                         <!-- Add New Patient Button -->
                         <a href="{{ route('patients.create') }}"
                             class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
@@ -124,12 +191,14 @@
                                                 title="Edit">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form method="POST" action="{{ route('patients.destroy', $patient->id) }}"
+                                            <form method="POST"
+                                                action="{{ route('patients.destroy', $patient->id) }}"
                                                 onsubmit="return confirmDelete()">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="text-red-600 hover:text-red-800 font-medium" title="Delete">
+                                                    class="text-red-600 hover:text-red-800 font-medium"
+                                                    title="Delete">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
