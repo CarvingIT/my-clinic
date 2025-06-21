@@ -14,55 +14,71 @@
                 <div class="p-5 text-gray-900">
                     <!-- Action Section -->
                     <div class="flex justify-between items-center mb-6">
+                        <!-- Add New Patient Button -->
+                        <a href="{{ route('patients.create') }}"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                            {{ __('messages.add_new_patient') }}
+                        </a>
                         <!-- Export and Import Buttons -->
                         <div class="flex gap-2">
                             <!-- Export Button with Modal -->
                             <div x-data="{ openExportModal: false }">
                                 <button @click="openExportModal = true"
                                     class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
-                                    {{ __('Export All Data') }}
+                                    {{ __('Export Data') }}
                                 </button>
 
-                                <div x-show="openExportModal" style="background-color: rgba(0, 0, 0, 0.75)"
-                                    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
-                                    <div class="relative w-auto max-w-md mx-auto my-6">
-                                        <div
-                                            class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-                                            <!-- Header -->
-                                            <div
-                                                class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
-                                                <h3 class="text-xl font-semibold text-gray-800">
-                                                    {{ __('Export Clinic Data') }}</h3>
-                                                <button @click="openExportModal = false"
-                                                    class="p-1 ml-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none">
-                                                    <span class="text-red-800 h-6 w-6 text-2xl block">×</span>
+                                <!-- Export Modal Overlay -->
+                                <div x-show="openExportModal" x-transition
+                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
+                                    <!-- Modal Card -->
+                                    <div @click.away="openExportModal = false"
+                                        class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 sm:mx-auto p-6 transition-all duration-300">
+                                        <!-- Modal Header -->
+                                        <div class="flex items-center justify-between mb-4">
+                                            <h2 class="text-xl font-bold text-gray-800">
+                                                {{ __('Export Clinic Data') }}
+                                            </h2>
+                                            <button @click="openExportModal = false"
+                                                class="text-gray-500 hover:text-red-600 transition"
+                                                aria-label="Close modal">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <!-- Modal Body -->
+                                        <form method="POST" action="{{ route('patients.export_all_json') }}"
+                                            class="space-y-5">
+                                            @csrf
+                                            <div>
+                                                <label for="email"
+                                                    class="block text-sm font-medium text-gray-700 mb-1">
+                                                    {{ __('Recipient Email') }}
+                                                </label>
+                                                <input type="email" id="email" name="email" required
+                                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 shadow-sm" />
+                                                <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                                            </div>
+
+                                            <!-- Action Buttons -->
+                                            <div class="flex justify-end gap-3 pt-2">
+                                                <button type="button" @click="openExportModal = false"
+                                                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-sm transition">
+                                                    {{ __('Cancel') }}
+                                                </button>
+                                                <button type="submit"
+                                                    class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition">
+                                                    {{ __('Export') }}
                                                 </button>
                                             </div>
-                                            <!-- Body -->
-                                            <div class="relative p-6 flex-auto">
-                                                <form method="POST" action="{{ route('patients.export_all_json') }}">
-                                                    @csrf
-                                                    <div class="mb-4">
-                                                        <x-input-label for="email" :value="__('Recipient Email')" />
-                                                        <x-text-input type="email" id="email" name="email"
-                                                            class="mt-1 block w-full" required />
-                                                        <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                                                    </div>
-                                                    <div class="flex justify-end gap-2">
-                                                        <button type="button" @click="openExportModal = false"
-                                                            class="bg-gray-300 hover:bg-gray-400 text-black font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200">
-                                                            {{ __('Cancel') }}
-                                                        </button>
-                                                        <button type="submit"
-                                                            class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200">
-                                                            {{ __('Export') }}
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
+                                        </form>
                                     </div>
                                 </div>
+
                             </div>
 
                             <!-- Import Form -->
@@ -81,11 +97,7 @@
                                 </button>
                             </form>
                         </div>
-                        <!-- Add New Patient Button -->
-                        <a href="{{ route('patients.create') }}"
-                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
-                            {{ __('messages.add_new_patient') }}
-                        </a>
+
 
                         <!-- Search Form -->
                         <form method="GET" action="{{ route('patients.index') }}" class="flex gap-2 items-center">

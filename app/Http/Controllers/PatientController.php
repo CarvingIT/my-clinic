@@ -379,9 +379,26 @@ class PatientController extends Controller
                 'updated_patients' => [],
                 'restored_patients' => [],
                 'skipped_patients' => [],
-                'total_follow_ups' => [],
+                'total_follow_ups' => [], // Will aggregate per patient
                 'total_patients_affected' => 0,
             ];
+
+            // Patient validation rules (same as store/update)
+            $patientValidator = \Validator::make([], [
+                'name' => ['required', 'string', 'max:255'],
+                'address' => ['required', 'string', 'max:255'],
+                'mobile_phone' => ['required', 'string', 'max:20', 'regex:/^[0-9]{10}$/'],
+                'occupation' => ['nullable', 'string', 'max:255'],
+                'remark' => ['nullable', 'string'],
+                'gender' => ['nullable', 'string'],
+                'birthdate' => ['nullable', 'date'],
+                'email_id' => ['nullable', 'email', 'max:255'],
+                'vishesh' => ['nullable', 'string'],
+                'balance' => ['nullable', 'numeric'],
+                'age' => ['nullable', 'integer', 'min:0', 'max:150'],
+                'height' => ['nullable', 'numeric', 'min:50', 'max:250'],
+                'weight' => ['nullable', 'numeric', 'min:10', 'max:300'],
+            ]);
 
             // Process each patient
             foreach ($data['patients'] as $patientEntry) {
@@ -391,18 +408,44 @@ class PatientController extends Controller
                 }
 
                 $patientData = $patientEntry['patient'];
+
+                // Validate patient data
+                $patientValidator->setData($patientData);
+                if ($patientValidator->fails()) {
+                    Log::warning('Invalid patient data', [
+                        'patient_id' => $patientData['patient_id'] ?? 'unknown',
+                        'errors' => $patientValidator->errors()->toArray(),
+                    ]);
+                    $importDetails['skipped_patients'][] = [
+                        'patient_id' => $patientData['patient_id'] ?? 'unknown',
+                        'name' => $patientData['name'] ?? 'Unknown',
+                    ];
+                    continue;
+                }
+
                 // Check for existing patient, including soft-deleted
                 $patient = Patient::withTrashed()->where('patient_id', $patientData['patient_id'])->first();
-
 
                 // Initialize follow-up count for this patient
                 $followUpCount = 0;
 
                 // Handle patient
                 if (!$patient) {
-                    // Preserve created_at and updated_at from JSON
-                    $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
-                    $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                    // Create new patient
+                    try {
+                        $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                        $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                    } catch (\Exception $e) {
+                        Log::error('Invalid timestamp for new patient', [
+                            'patient_id' => $patientData['patient_id'],
+                            'error' => $e->getMessage(),
+                        ]);
+                        $importDetails['skipped_patients'][] = [
+                            'patient_id' => $patientData['patient_id'],
+                            'name' => $patientData['name'],
+                        ];
+                        continue;
+                    }
                     $patient = Patient::create($patientData);
                     $importDetails['created_patients'][] = [
                         'patient_id' => $patientData['patient_id'],
@@ -413,32 +456,70 @@ class PatientController extends Controller
                         'patient_id' => $patientData['patient_id'],
                         'created_at' => $patientData['created_at'],
                     ]);
-                } elseif (Carbon::parse($patientData['updated_at'])->gt($patient->updated_at)) {
-                    // Preserve created_at and updated_at from JSON
-                    $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
-                    $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
-                    $patient->update($patientData);
-                    $importDetails['updated_patients'][] = [
-                        'patient_id' => $patientData['patient_id'],
-                        'name' => $patientData['name'],
-                    ];
-                    $importDetails['total_patients_affected']++;
-                    Log::info('Updated patient', [
-                        'patient_id' => $patientData['patient_id'],
-                        'updated_at' => $patientData['updated_at'],
-                    ]);
                 } else {
-                    $importDetails['skipped_patients'][] = [
-                        'patient_id' => $patientData['patient_id'],
-                        'name' => $patientData['name'],
-                    ];
-                    Log::info('Skipped patient update (not newer)', ['patient_id' => $patientData['patient_id']]);
+                    // Check if patient is soft-deleted
+                    if ($patient->trashed()) {
+                        // Restore soft-deleted patient
+                        $patient->restore();
+                        $importDetails['restored_patients'][] = [
+                            'patient_id' => $patientData['patient_id'],
+                            'name' => $patientData['name'],
+                        ];
+                        $importDetails['total_patients_affected']++;
+                        Log::info('Restored soft-deleted patient', [
+                            'patient_id' => $patientData['patient_id'],
+                        ]);
+                    }
+
+                    // Update if imported data is newer
+                    try {
+                        $importedUpdatedAt = Carbon::parse($patientData['updated_at']);
+                        if ($importedUpdatedAt->gt($patient->updated_at)) {
+                            $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                            $patientData['updated_at'] = $importedUpdatedAt->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                            $patient->update($patientData);
+                            $importDetails['updated_patients'][] = [
+                                'patient_id' => $patientData['patient_id'],
+                                'name' => $patientData['name'],
+                            ];
+                            $importDetails['total_patients_affected']++;
+                            Log::info('Updated patient', [
+                                'patient_id' => $patientData['patient_id'],
+                                'updated_at' => $patientData['updated_at'],
+                            ]);
+                        } else {
+                            $importDetails['skipped_patients'][] = [
+                                'patient_id' => $patientData['patient_id'],
+                                'name' => $patientData['name'],
+                            ];
+                            Log::info('Skipped patient update (not newer)', [
+                                'patient_id' => $patientData['patient_id'],
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        Log::error('Invalid timestamp for patient update', [
+                            'patient_id' => $patientData['patient_id'],
+                            'error' => $e->getMessage(),
+                        ]);
+                        $importDetails['skipped_patients'][] = [
+                            'patient_id' => $patientData['patient_id'],
+                            'name' => $patientData['name'],
+                        ];
+                        continue;
+                    }
                 }
 
                 // Handle follow-ups
                 foreach ($patientEntry['follow_ups'] as $followUpData) {
-                    // Normalize JSON created_at to Asia/Kolkata and second precision
-                    $importedCreatedAt = Carbon::parse($followUpData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                    try {
+                        $importedCreatedAt = Carbon::parse($followUpData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                    } catch (\Exception $e) {
+                        Log::error('Invalid follow-up timestamp', [
+                            'patient_id' => $patient->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                        continue;
+                    }
 
                     // Log JSON timestamp
                     Log::info('Processing follow-up', [
@@ -460,31 +541,31 @@ class PatientController extends Controller
                         continue;
                     }
 
-                    // Log existing follow-ups for debugging
-                    $existingTimestamps = FollowUp::where('patient_id', $patient->id)
-                        ->pluck('created_at')
-                        ->map(fn($date) => Carbon::parse($date)->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s'))
-                        ->toArray();
-                    Log::info('Existing follow-up timestamps', [
-                        'patient_id' => $patient->id,
-                        'timestamps' => $existingTimestamps,
-                    ]);
+                    // Create new follow-up
+                    try {
+                        $followUpData['patient_id'] = $patient->id;
+                        $followUpData['doctor_id'] = User::where('name', $followUpData['doctor_name'])->first()->id ?? Auth::id();
+                        $followUpData['created_at'] = $importedCreatedAt;
+                        $followUpData['updated_at'] = isset($followUpData['updated_at'])
+                            ? Carbon::parse($followUpData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s')
+                            : $importedCreatedAt;
+                        FollowUp::create($followUpData);
+                        $followUpCount++;
+                        Log::info('Created new follow-up', [
+                            'patient_id' => $patient->id,
+                            'created_at' => $importedCreatedAt,
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to create follow-up', [
+                            'patient_id' => $patient->id,
+                            'error' => $e->getMessage(),
+                        ]);
+                        continue;
+                    }
+                }
 
-                    // Create new follow-up with JSON timestamps
-                    $followUpData['patient_id'] = $patient->id;
-                    $followUpData['doctor_id'] = User::where('name', $followUpData['doctor_name'])->first()->id ?? Auth::id();
-                    $followUpData['created_at'] = $importedCreatedAt;
-                    $followUpData['updated_at'] = isset($followUpData['updated_at'])
-                        ? Carbon::parse($followUpData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s')
-                        : $importedCreatedAt;
-                    FollowUp::create($followUpData);
-                    $followUpCount++;
-                    Log::info('Created new follow-up', [
-                        'patient_id' => $patient->id,
-                        'created_at' => $importedCreatedAt,
-                    ]);
-
-                    // Track follow-ups per patient
+                // Track follow-ups per patient (aggregate)
+                if ($followUpCount > 0) {
                     $importDetails['total_follow_ups'][] = [
                         'patient_id' => $patientData['patient_id'],
                         'name' => $patientData['name'],
