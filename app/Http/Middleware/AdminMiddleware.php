@@ -14,6 +14,9 @@ class AdminMiddleware
             return redirect()->route('dashboard')->with('error', 'Unauthorized: Admin access required.');
         }
 
+        // Mark that AdminMiddleware was passed
+        $request->attributes->set('_admin_middleware', true);
+
         return $next($request);
     }
 }
