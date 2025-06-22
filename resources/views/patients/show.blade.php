@@ -124,6 +124,69 @@
                                 {{ __('messages.Export to PDF') }}
                             </a>
 
+                            <!-- Share Patient Button (Modal Trigger) -->
+                            <div x-data="{ openExportPatientModal: false }">
+                                @if (Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')))
+                                    <button @click="openExportPatientModal = true" title="Share Patient"
+                                        class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
+                                        <i class="fas fa-share-alt mr-2"></i> {{ __('Share Patient') }}
+                                    </button>
+                                @endif
+
+                                <!-- Modal -->
+                                <div x-show="openExportPatientModal" x-cloak x-transition.opacity
+                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                                    <div @click.away="openExportPatientModal = false"
+                                        class="relative w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl border border-blue-100 transition-all">
+
+                                        <!-- Header -->
+                                        <div
+                                            class="flex items-center justify-between px-6 py-4 bg-blue-50 border-b border-blue-100 rounded-t-2xl">
+                                            <h3 class="text-lg font-bold text-blue-800">
+                                                {{ __('Share Patient Data') }}
+                                            </h3>
+                                            <button @click="openExportPatientModal = false"
+                                                class="text-blue-800 text-2xl font-bold hover:text-red-500 transition">
+                                                &times;
+                                            </button>
+                                        </div>
+
+                                        <!-- Body -->
+                                        <div class="px-6 py-5">
+                                            <form method="POST"
+                                                action="{{ route('patients.export_json', $patient->id) }}">
+                                                @csrf
+                                                <div class="mb-5">
+                                                    <label for="email"
+                                                        class="block text-sm font-semibold text-blue-700 mb-1">
+                                                        📧 Recipient Email Address
+                                                    </label>
+                                                    <input type="email" id="email" name="email"
+                                                        placeholder="e.g. doctor@example.com"
+                                                        class="w-full border border-blue-300 rounded-lg px-4 py-2 text-sm text-blue-900 bg-blue-50 placeholder-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                        required />
+                                                    <p class="text-xs text-gray-500 mt-1">
+                                                        We'll send the exported patient data to this email address.
+                                                    </p>
+                                                    <x-input-error :messages="$errors->get('email')" class="mt-2 text-red-500" />
+                                                </div>
+
+                                                <div class="flex justify-end gap-2 mt-6">
+                                                    <button type="button" @click="openExportPatientModal = false"
+                                                        class="bg-white hover:bg-blue-100 text-blue-700 font-semibold py-2 px-4 rounded-lg border border-blue-300 transition">
+                                                        {{ __('Cancel') }}
+                                                    </button>
+                                                    <button type="submit"
+                                                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg shadow transition">
+                                                        {{ __('Share') }}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             {{-- Generate Certificate button --}}
 
                             <div x-data="{ open: false }">
@@ -132,7 +195,7 @@
                                     {{ __('messages.Generate Certificate') }}
                                 </button>
 
-                                <div x-show="open"
+                                <div x-show="open" x-cloak
                                     class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
                                     <div class="relative w-auto max-w-3xl mx-auto my-6">
                                         <!--content-->
@@ -246,7 +309,9 @@
                                                         <div class="grid grid-cols-2 gap-6">
                                                             <!-- Left Column: Patient Photos -->
                                                             <div>
-                                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Patient Photos</h3>
+                                                                <h3
+                                                                    class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                                                    Patient Photos</h3>
                                                                 <div class="space-y-4">
                                                                     @foreach ($uploads->where('photo_type', 'patient_photo') as $upload)
                                                                         <div @click="selectedImageUrl = '{{ route('uploads.show', $upload->id) }}'"
@@ -259,10 +324,12 @@
                                                                             </div>
                                                                             <!-- Details -->
                                                                             <div class="ml-4 flex-1">
-                                                                                <p class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
+                                                                                <p
+                                                                                    class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
                                                                                     {{ str_replace('_', ' ', $upload->photo_type) }}
                                                                                 </p>
-                                                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                                                <p
+                                                                                    class="text-sm text-gray-500 dark:text-gray-400">
                                                                                     {{ __('messages.Uploaded') }}:
                                                                                     {{ $upload->created_at->format('d M Y, h:i A') }}
                                                                                 </p>
@@ -270,14 +337,18 @@
                                                                         </div>
                                                                     @endforeach
                                                                     @if ($uploads->where('photo_type', 'patient_photo')->isEmpty())
-                                                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">No patient photos available.</p>
+                                                                        <p
+                                                                            class="text-center text-gray-500 dark:text-gray-400 py-4">
+                                                                            No patient photos available.</p>
                                                                     @endif
                                                                 </div>
                                                             </div>
 
                                                             <!-- Right Column: Lab Reports -->
                                                             <div>
-                                                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Lab Reports</h3>
+                                                                <h3
+                                                                    class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                                                                    Lab Reports</h3>
                                                                 <div class="space-y-4">
                                                                     @foreach ($uploads->where('photo_type', 'lab_report') as $upload)
                                                                         <div @click="selectedImageUrl = '{{ route('uploads.show', $upload->id) }}'"
@@ -290,10 +361,12 @@
                                                                             </div>
                                                                             <!-- Details -->
                                                                             <div class="ml-4 flex-1">
-                                                                                <p class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
+                                                                                <p
+                                                                                    class="text-lg font-medium text-gray-800 dark:text-gray-200 capitalize">
                                                                                     {{ str_replace('_', ' ', $upload->photo_type) }}
                                                                                 </p>
-                                                                                <p class="text-sm text-gray-500 dark:text-gray-400">
+                                                                                <p
+                                                                                    class="text-sm text-gray-500 dark:text-gray-400">
                                                                                     {{ __('messages.Uploaded') }}:
                                                                                     {{ $upload->created_at->format('d M Y, h:i A') }}
                                                                                 </p>
@@ -301,13 +374,16 @@
                                                                         </div>
                                                                     @endforeach
                                                                     @if ($uploads->where('photo_type', 'lab_report')->isEmpty())
-                                                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">No lab reports available.</p>
+                                                                        <p
+                                                                            class="text-center text-gray-500 dark:text-gray-400 py-4">
+                                                                            No lab reports available.</p>
                                                                     @endif
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     @else
-                                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">No medical reports or photos available.</p>
+                                                        <p class="text-center text-gray-500 dark:text-gray-400 py-4">No
+                                                            medical reports or photos available.</p>
                                                     @endif
 
                                                     <!-- Upload Form -->
@@ -387,9 +463,11 @@
                                     class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-6 h-6">
                                         <!-- White document icon -->
-                                        <path fill="white" d="M224 0v128h128L224 0zM64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H224c-17.7 0-32-14.3-32-32V0H64z"/>
+                                        <path fill="white"
+                                            d="M224 0v128h128L224 0zM64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H224c-17.7 0-32-14.3-32-32V0H64z" />
                                         <!-- Red PDF text -->
-                                        <text x="95" y="380" font-size="130" font-weight="bold" fill="red">PDF</text>
+                                        <text x="95" y="380" font-size="130" font-weight="bold"
+                                            fill="red">PDF</text>
                                     </svg>
                                 </button>
 

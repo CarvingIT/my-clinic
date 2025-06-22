@@ -121,7 +121,7 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
 
 // Staff Routes
 Route::middleware(['auth', StaffMiddleware::class])->group(function () {
-    Route::resource('patients', PatientController::class)->except(['destroy']); // Staff can manage patients except for deletion
+    Route::resource('patients', PatientController::class)->except(['destroy', 'show']); // Staff can manage patients except for deletion and viewing individual patient details
     Route::post('/patients/{patient}/queue', [QueueController::class, 'addToQueue'])->name('patients.queue'); // Staff can add patients to the queue
     Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index'); // Staff can view the queue
     Route::delete('/queue/{queue}', [QueueController::class, 'removeFromQueue'])->name('queue.remove'); // Staff can remove patients from the queue

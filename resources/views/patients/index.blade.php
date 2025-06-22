@@ -32,12 +32,11 @@
                             <!-- Import Patient Button + Modal -->
                             <div x-data="{ openImportModal: false }">
                                 <!-- Trigger Button -->
-                                @if(Auth::check() && Auth::user()->hasRole('admin'))
+                                @if (Auth::check() && Auth::user()->hasRole('admin', 'doctor'))
                                     <button @click="openImportModal = true"
-                                    class="bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
-                                    {{ __('Import Patient') }}
-                                </button>
-
+                                        class="bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
+                                        {{ __('Import Patient') }}
+                                    </button>
                                 @endif
 
                                 <!-- Modal Overlay -->
@@ -94,90 +93,6 @@
                             </div>
                         </div>
 
-
-
-
-
-                        <!-- Export and Import Buttons -->
-                        {{-- <div class="flex gap-2">
-                            <!-- Export Button with Modal -->
-                            <div x-data="{ openExportModal: false }">
-                                <button @click="openExportModal = true"
-                                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
-                                    {{ __('Export Data') }}
-                                </button>
-
-                                <!-- Export Modal Overlay -->
-                                <div x-show="openExportModal" x-transition
-                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
-                                    <!-- Modal Card -->
-                                    <div @click.away="openExportModal = false"
-                                        class="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 sm:mx-auto p-6 transition-all duration-300">
-                                        <!-- Modal Header -->
-                                        <div class="flex items-center justify-between mb-4">
-                                            <h2 class="text-xl font-bold text-gray-800">
-                                                {{ __('Export Clinic Data') }}
-                                            </h2>
-                                            <button @click="openExportModal = false"
-                                                class="text-gray-500 hover:text-red-600 transition"
-                                                aria-label="Close modal">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </div>
-
-                                        <!-- Modal Body -->
-                                        <form method="POST" action="{{ route('patients.export_all_json') }}"
-                                            class="space-y-5">
-                                            @csrf
-                                            <div>
-                                                <label for="email"
-                                                    class="block text-sm font-medium text-gray-700 mb-1">
-                                                    {{ __('Recipient Email') }}
-                                                </label>
-                                                <input type="email" id="email" name="email" required
-                                                    class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 shadow-sm" />
-                                                <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                                            </div>
-
-                                            <!-- Action Buttons -->
-                                            <div class="flex justify-end gap-3 pt-2">
-                                                <button type="button" @click="openExportModal = false"
-                                                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg shadow-sm transition">
-                                                    {{ __('Cancel') }}
-                                                </button>
-                                                <button type="submit"
-                                                    class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm transition">
-                                                    {{ __('Export') }}
-                                                </button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <!-- Import Form -->
-                            <form method="POST" action="{{ route('patients.import_all_json') }}"
-                                enctype="multipart/form-data" class="flex gap-2 items-center">
-                                @csrf
-                                <div class="relative">
-                                    <input type="file" name="file" accept=".json"
-                                        class="border border-gray-300 rounded-lg px-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        required>
-                                    <x-input-error :messages="$errors->get('file')" class="mt-2" />
-                                </div>
-                                <button type="submit"
-                                    class="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 py-2 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-105">
-                                    {{ __('Import Data') }}
-                                </button>
-                            </form>
-                        </div> --}}
-
-
                         <!-- Search Form -->
                         <form method="GET" action="{{ route('patients.index') }}" class="flex gap-2 items-center">
                             <div class="relative">
@@ -210,10 +125,17 @@
 
                     {{-- Error Message --}}
                     @if (session('error'))
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-5">
+                        <div id="error-alert"
+                            class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-5 relative">
                             <p class="font-bold">{{ session('error') }}</p>
+                            <button onclick="document.getElementById('error-alert').style.display = 'none';"
+                                class="absolute top-1 right-2 text-red-600 text-xl leading-none hover:text-red-800"
+                                title="Dismiss">
+                                &times;
+                            </button>
                         </div>
                     @endif
+
 
 
                     <!-- Success Message -->
@@ -334,21 +256,15 @@
                                         </td>
                                         <td class="px-4 py-4 align-top    break-normal whitespace-normal text-right text-sm font-medium flex gap-4"
                                             style="vertical-align: top;">
-                                            {{-- <button class="text-green-600 hover:text-green-800 font-medium"
-                                                data-bs-toggle="modal" data-bs-target="#queueModal"
-                                                onclick="setPatientId({{ $patient->id }})" title="Add to Queue">
-                                                 <i class="fas fa-users-line"></i>
-                                            </button> --}}
-
 
                                             <!-- Export Patient Button with Modal -->
-                                            <div x-data="{ openExportPatientModal: false }">
-                                                @if(Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')))
-
-                                                    <button @click="openExportPatientModal = true" title="Export Patient"
-                                                    class="text-purple-600 hover:text-purple-800 transition duration-200 text-l">
-                                                    <i class="fas fa-file-export"></i>
-                                                </button>
+                                            {{-- <div x-data="{ openExportPatientModal: false }">
+                                                @if (Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')))
+                                                    <button @click="openExportPatientModal = true"
+                                                        title="Export Patient"
+                                                        class="text-purple-600 hover:text-purple-800 transition duration-200 text-l">
+                                                        <i class="fas fa-file-export"></i>
+                                                    </button>
                                                 @endif
 
                                                 <!-- Modal -->
@@ -410,7 +326,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> --}}
 
 
                                             <button class="text-green-600 hover:text-green-800 font-medium"
