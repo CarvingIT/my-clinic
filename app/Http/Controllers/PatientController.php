@@ -252,19 +252,21 @@ class PatientController extends Controller
     {
         $request->validate(['email' => ['required', 'email', 'max:255']]);
 
-        $followUps = $patient->followUps->map(function ($followUp) {
+        $timezone = env('APP_TIMEZONE', 'Asia/Kolkata');
+
+        $followUps = $patient->followUps->map(function ($followUp) use ($timezone) {
             $doctor = User::find($followUp->doctor_id);
             $followUp->doctor_name = $doctor ? $doctor->name : 'Unknown';
-            $followUp->created_at = Carbon::parse($followUp->created_at)->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+            $followUp->created_at = Carbon::parse($followUp->created_at)->setTimezone($timezone)->format('Y-m-d H:i:s');
             unset($followUp->doctor_id, $followUp->patient_id, $followUp->id);
             return $followUp;
         });
 
         $patientData = $patient->toArray();
-        $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+        $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($timezone)->format('Y-m-d H:i:s');
         unset($patientData['id']);
 
-        $exportData = ['timezone' => 'Asia/Kolkata', 'patient' => $patientData, 'follow_ups' => $followUps];
+        $exportData = ['timezone' => $timezone, 'patient' => $patientData, 'follow_ups' => $followUps];
 
         Storage::disk('local')->makeDirectory('exports');
         $fileName = 'patient_' . $patient->patient_id . '_' . Carbon::now()->format('Ymd_His') . '.json';
@@ -326,12 +328,11 @@ class PatientController extends Controller
             $jsonContent = file_get_contents($file->path());
             $data = json_decode($jsonContent, true);
 
-            $systemTimezone = config('app.timezone'); // e.g., "Asia/Kolkata"
+            $systemTimezone = env('APP_TIMEZONE', 'Asia/Kolkata');
 
             // Check if JSON contains the correct timezone
             if (!isset($data['timezone']) || $data['timezone'] !== $systemTimezone) {
                 Log::error('Timezone mismatch or missing. System: ' . $systemTimezone . ', JSON: ' . ($data['timezone'] ?? 'not set'));
-
                 return redirect()->back()->with('error', 'Timezone mismatch detected! Please ensure the data was exported from a system using the timezone: ' . $systemTimezone);
             }
 
@@ -393,8 +394,8 @@ class PatientController extends Controller
             if (!$patient) {
                 // Create new patient
                 try {
-                    $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
-                    $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                    $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone($systemTimezone)->format('Y-m-d H:i:s');
+                    $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($systemTimezone)->format('Y-m-d H:i:s');
                     $patient = Patient::create($patientData);
                     $importDetails['created_patients'][] = [
                         'patient_id' => $patientData['patient_id'],
@@ -430,8 +431,8 @@ class PatientController extends Controller
                 try {
                     $importedUpdatedAt = Carbon::parse($patientData['updated_at']);
                     if ($importedUpdatedAt->gt($patient->updated_at)) {
-                        $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
-                        $patientData['updated_at'] = $importedUpdatedAt->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                        $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone($systemTimezone)->format('Y-m-d H:i:s');
+                        $patientData['updated_at'] = $importedUpdatedAt->setTimezone($systemTimezone)->format('Y-m-d H:i:s');
                         $patient->update($patientData);
                         $importDetails['updated_patients'][] = [
                             'patient_id' => $patientData['patient_id'],
@@ -455,7 +456,7 @@ class PatientController extends Controller
             // Handle follow-ups
             foreach ($data['follow_ups'] as $followUpData) {
                 try {
-                    $importedCreatedAt = Carbon::parse($followUpData['created_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s');
+                    $importedCreatedAt = Carbon::parse($followUpData['created_at'])->setTimezone($systemTimezone)->format('Y-m-d H:i:s');
                 } catch (\Exception $e) {
                     Log::error('Invalid follow-up timestamp', [
                         'patient_id' => $patient->id,
@@ -483,7 +484,7 @@ class PatientController extends Controller
                     $followUpData['doctor_id'] = User::where('name', $followUpData['doctor_name'])->first()->id ?? Auth::id();
                     $followUpData['created_at'] = $importedCreatedAt;
                     $followUpData['updated_at'] = isset($followUpData['updated_at'])
-                        ? Carbon::parse($followUpData['updated_at'])->setTimezone('Asia/Kolkata')->format('Y-m-d H:i:s')
+                        ? Carbon::parse($followUpData['updated_at'])->setTimezone($systemTimezone)->format('Y-m-d H:i:s')
                         : $importedCreatedAt;
                     FollowUp::create($followUpData);
                     $followUpCount++;
