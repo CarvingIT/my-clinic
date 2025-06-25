@@ -255,16 +255,33 @@ class PatientController extends Controller
         $timezone = env('APP_TIMEZONE', 'Asia/Kolkata');
 
         $followUps = $patient->followUps->map(function ($followUp) use ($timezone) {
-            $doctor = User::find($followUp->doctor_id);
-            $followUp->doctor_name = $doctor ? $doctor->name : 'Unknown';
-            $followUp->created_at = Carbon::parse($followUp->created_at)->setTimezone($timezone)->format('Y-m-d H:i:s');
-            unset($followUp->doctor_id, $followUp->patient_id, $followUp->id);
-            return $followUp;
-        });
+            $checkUpInfo = $followUp->check_up_info ? json_decode($followUp->check_up_info, true) : [];
+            $doctorName = 'Unknown';
+            if (!empty($checkUpInfo['user_name'])) {
+                $doctorName = $checkUpInfo['user_name'];
+            } else {
+                $doctor = User::find($followUp->doctor_id);
+                if ($doctor) {
+                    $doctorName = $doctor->name;
+                }
+            }
 
+            return [
+                'check_up_info' => $followUp->check_up_info,
+                'diagnosis' => $followUp->diagnosis,
+                'treatment' => $followUp->treatment,
+                'created_at' => Carbon::parse($followUp->created_at)->setTimezone($timezone)->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::parse($followUp->updated_at)->setTimezone($timezone)->format('Y-m-d H:i:s'),
+                'amount_billed' => $followUp->amount_billed,
+                'amount_paid' => $followUp->amount_paid,
+                'doctor_name' => $doctorName,
+            ];
+        })->toArray();
+
+        // Convert patient to array and exclude follow_ups
         $patientData = $patient->toArray();
+        unset($patientData['id'], $patientData['follow_ups']); // Remove id and follow_ups
         $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($timezone)->format('Y-m-d H:i:s');
-        unset($patientData['id']);
 
         $exportData = ['timezone' => $timezone, 'patient' => $patientData, 'follow_ups' => $followUps];
 
@@ -358,7 +375,7 @@ class PatientController extends Controller
             ];
 
             // Validate patient data
-            $patientValidator = \Validator::make($data['patient'], [
+            $patientValidator = Validator::make($data['patient'], [
                 'name' => ['required', 'string', 'max:255'],
                 'address' => ['required', 'string', 'max:255'],
                 'mobile_phone' => ['required', 'string', 'max:20', 'regex:/^[0-9]{10}$/'],
