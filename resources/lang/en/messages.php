@@ -109,6 +109,13 @@ return [
     'Amount Paid' => 'Amount Paid',
     'Total Outstanding Balance' => 'Total Outstanding Balance',
 
+    'Patient Analysis' => 'Patient Analysis',
+    'Followup Analysis' => 'Follow-up Analysis',
+    'Timestamp' => 'Timestamp',
+    'Followup Timestamp' => 'Follow-up Timestamp',
+    'Followup Data Analysis' => 'Follow-up Data Analysis',
+
+
 
 
     'locale' => 'Language', // Label for dropdown

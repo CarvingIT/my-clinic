@@ -20,16 +20,46 @@
                     </x-nav-link>
 
                     @if (Auth::user()->hasRole('admin'))
-                    <x-nav-link :href="route('followups.index')" :active="request()->routeIs('followups.index')">
-                        {{ __('messages.Ledger') }}
-                    </x-nav-link>
+                        <x-nav-link :href="route('followups.index')" :active="request()->routeIs('followups.index')">
+                            {{ __('messages.Ledger') }}
+                        </x-nav-link>
                     @endif
 
+
+                    <!-- Analysis Dropdown -->
                     @if (Auth::user()->hasRole('admin'))
+                        <div x-data="{ open: false }" class="relative">
+                            <button @click="open = !open"
+                                class="inline-flex items-center px-1 py-6 text-sm font-medium leading-5 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none">
+                                {{ __('messages.Analysis') }}
+                                <svg class="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            <div x-show="open" @click.away="open = false"
+                                class="absolute z-50 bg-white border border-gray-200 mt-2 rounded-md shadow-lg w-48"
+                                x-cloak>
+                                <x-nav-link :href="route('analytics.index')" :active="request()->routeIs('analytics.index')"
+                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    {{ __('messages.Patient Analysis') }}
+                                </x-nav-link>
+                                <x-nav-link :href="route('data-analysis.index')" :active="request()->routeIs('data-analysis.index')"
+                                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    {{ __('messages.Followup Analysis') }}
+                                </x-nav-link>
+                            </div>
+                        </div>
+                    @endif
+
+
+                    {{-- @if (Auth::user()->hasRole('admin'))
                     <x-nav-link :href="route('analytics.index')" :active="request()->routeIs('analytics.index')">
                         {{ __('messages.Analysis') }}
                     </x-nav-link>
-                    @endif
+                    @endif --}}
 
                     {{-- <x-nav-link :href="route('analytics.index')" :active="request()->routeIs('analytics.index')">
                         {{ __('messages.Analysis') }}
@@ -73,7 +103,7 @@
                     </x-nav-link> --}}
 
                     @if (Auth::user()->hasRole('admin'))
-                     <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.index')">
                             {{ __('messages.Staff') }}
                         </x-nav-link>
                     @endif
@@ -81,6 +111,9 @@
                     <x-nav-link :href="route('queue.index')" :active="request()->routeIs('queue.index')">
                         {{ __('messages.Queue') }}
                     </x-nav-link>
+                    {{-- <x-nav-link :href="route('data-analysis.index')" :active="request()->routeIs('data-analysis.index')">
+                        {{ __('Data Analysis') }}
+                    </x-nav-link> --}}
                     {{-- <div x-data="{ darkMode: false }" :class="{ 'dark': darkMode }">
                         <button @click="darkMode = !darkMode; document.documentElement.classList.toggle('dark', darkMode)" class="text-gray-800 dark:text-gray-200">
                             Toggle Dark Mode

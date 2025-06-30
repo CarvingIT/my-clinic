@@ -9,6 +9,7 @@ use App\Http\Controllers\FollowupImageController;
 use App\Http\Controllers\QueueController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\PatientDuesController;
+use App\Http\Controllers\DataAnalysisController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\StaffMiddleware;
 use App\Http\Middleware\DoctorMiddleware;
@@ -151,6 +152,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/followup-images/{filename}', [FollowupImageController::class, 'show'])->name('followup.image'); // Show follow-up images
     Route::get('/patients/{patient}/followup-images', [FollowUpImageController::class, 'showFollowUpImages'])->name('followup.images'); // Show follow-up images for a patient
+    Route::get('/analytics/data-analysis', [DataAnalysisController::class, 'index'])->name('data-analysis.index');   // Data analysis for analytics
 });
 
 // Patient Deletion (Admin only)

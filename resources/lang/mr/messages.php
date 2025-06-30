@@ -108,6 +108,12 @@ return [
     'Last Follow Up' => 'शेवटचा फॉलो अप',
     'Roles' => 'भूमिका',
 
+    'Patient Analysis' => 'रुग्ण विश्लेषण',
+    'Followup Analysis' => 'फॉलो-अप विश्लेषण',
+    'Timestamp' => 'तारीख आणि वेळ',
+    'Followup Timestamp' => 'फॉलो-अपची तारीख आणि वेळ',
+    'Followup Data Analysis' => 'फॉलो-अप डेटा विश्लेषण',
+
 
 
     'locale' => 'भाषा', // Label for dropdown
