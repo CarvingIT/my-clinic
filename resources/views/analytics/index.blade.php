@@ -112,8 +112,12 @@
     </div>
 </x-app-layout>
 
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 <script>
+    // Chart.register(ChartDataLabels);
+
     // Chart 1: Follow-Up Frequency (Daily)
     if (@json($followUpFrequencyDaily->count())) {
         const dailyCtx = document.getElementById('followUpFrequencyDailyChart').getContext('2d');
@@ -240,13 +244,19 @@
     // Chart 4: Age Distribution
     if (@json($ageDistribution->count())) {
         const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
+
+        const ageLabels = @json($ageDistribution->pluck('age_group'));
+        const ageCounts = @json($ageDistribution->pluck('count'));
+        const total = ageCounts.reduce((sum, val) => sum + val, 0);
+
         new Chart(ageCtx, {
             type: 'doughnut',
+            plugins: [ChartDataLabels],
             data: {
-                labels: @json($ageDistribution->pluck('age_group')),
+                labels: ageLabels,
                 datasets: [{
                     label: 'Patient Count',
-                    data: @json($ageDistribution->pluck('count')),
+                    data: ageCounts,
                     backgroundColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
                     borderColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
                     borderWidth: 1,
@@ -261,7 +271,36 @@
                         text: 'Age Distribution of Patients'
                     },
                     legend: {
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                const dataset = data.datasets[0];
+                                return data.labels.map((label, i) => {
+                                    const value = dataset.data[i];
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return {
+                                        text: `${label} (${percentage}%)`,
+                                        fillStyle: dataset.backgroundColor[i],
+                                        strokeStyle: dataset.borderColor[i],
+                                        lineWidth: dataset.borderWidth,
+                                        hidden: isNaN(value),
+                                        index: i
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        formatter: (value) => {
+                            return value; // Actual number on pie slice
+                        },
+                        font: {
+                            weight: 'bold'
+                        },
+                        anchor: 'center',
+                        align: 'center'
                     }
                 }
             }
@@ -270,6 +309,7 @@
         document.getElementById('ageDistributionChart').parentElement.innerHTML =
             '<p class="text-gray-600 dark:text-gray-400">No age data available.</p>';
     }
+
 
     // Chart 5: Payment Status
     if (@json($paymentStatus->count())) {
@@ -365,16 +405,20 @@
             '<p class="text-gray-600 dark:text-gray-400">No payment data available.</p>';
     }
 
-    // Chart 6: New vs. Existing Patients
     if (@json($newVsExistingPatients['new'] + $newVsExistingPatients['existing'])) {
         const newVsExistingCtx = document.getElementById('newVsExistingPatientsChart').getContext('2d');
+        const newCount = @json($newVsExistingPatients['new']);
+        const oldCount = @json($newVsExistingPatients['existing']);
+        const total = newCount + oldCount;
+
         new Chart(newVsExistingCtx, {
             type: 'doughnut',
+            plugins: [ChartDataLabels],
             data: {
                 labels: ['New Patients', 'Old Patients'],
                 datasets: [{
                     label: 'Patient Count',
-                    data: [@json($newVsExistingPatients['new']), @json($newVsExistingPatients['existing'])],
+                    data: [newCount, oldCount],
                     backgroundColor: ['#93c5fd', '#86efac'],
                     borderColor: ['#93c5fd', '#86efac'],
                     borderWidth: 1,
@@ -389,7 +433,36 @@
                         text: 'New vs. Old Patients'
                     },
                     legend: {
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                const dataset = data.datasets[0];
+                                return data.labels.map((label, i) => {
+                                    const value = dataset.data[i];
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return {
+                                        text: `${label} (${percentage}%)`,
+                                        fillStyle: dataset.backgroundColor[i],
+                                        strokeStyle: dataset.borderColor[i],
+                                        lineWidth: dataset.borderWidth,
+                                        hidden: isNaN(value),
+                                        index: i
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        formatter: (value) => {
+                            return value; // only the actual number on pie slice
+                        },
+                        font: {
+                            weight: 'bold'
+                        },
+                        anchor: 'center',
+                        align: 'center'
                     }
                 }
             }
@@ -399,16 +472,23 @@
             '<p class="text-gray-600 dark:text-gray-400">No patient data available.</p>';
     }
 
+
     // Chart 7: Gender Distribution
     if (@json($genderDistribution->count())) {
         const genderCtx = document.getElementById('genderDistributionChart').getContext('2d');
+
+        const genderLabels = @json($genderDistribution->pluck('gender_group'));
+        const genderCounts = @json($genderDistribution->pluck('count'));
+        const total = genderCounts.reduce((sum, val) => sum + val, 0);
+
         new Chart(genderCtx, {
-            type: 'pie',
+            type: 'doughnut',
+            plugins: [ChartDataLabels],
             data: {
-                labels: @json($genderDistribution->pluck('gender_group')),
+                labels: genderLabels,
                 datasets: [{
                     label: 'Patient Count',
-                    data: @json($genderDistribution->pluck('count')),
+                    data: genderCounts,
                     backgroundColor: ['#60a5fa', '#f472b6', '#facc15', '#9ca3af'],
                     borderColor: ['#60a5fa', '#f472b6', '#facc15', '#9ca3af'],
                     borderWidth: 1,
@@ -423,7 +503,36 @@
                         text: 'Gender Distribution of Patients'
                     },
                     legend: {
-                        position: 'top'
+                        position: 'top',
+                        labels: {
+                            generateLabels: function(chart) {
+                                const data = chart.data;
+                                const dataset = data.datasets[0];
+                                return data.labels.map((label, i) => {
+                                    const value = dataset.data[i];
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return {
+                                        text: `${label} (${percentage}%)`,
+                                        fillStyle: dataset.backgroundColor[i],
+                                        strokeStyle: dataset.borderColor[i],
+                                        lineWidth: dataset.borderWidth,
+                                        hidden: isNaN(value),
+                                        index: i
+                                    };
+                                });
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        formatter: (value) => {
+                            return value; // Only number on the pie slice
+                        },
+                        font: {
+                            weight: 'bold'
+                        },
+                        anchor: 'center',
+                        align: 'center'
                     }
                 }
             }

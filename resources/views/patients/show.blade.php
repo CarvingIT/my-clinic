@@ -275,6 +275,7 @@
                             {{-- Reports Button --}}
                             <div x-data="{ openReportModal: false, selectedImageUrl: '' }">
                                 <button @click="openReportModal = true"
+                                    title="{{ __('messages.View Reports') }}"
                                     class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 ml-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-15 h-10 flex items-center justify-center">
                                     <i class="fas fa-file-image text-white text-2xl"></i>
                                 </button>
@@ -460,6 +461,7 @@
 
                             <div x-data="{ openReportModal: false }">
                                 <button @click="openReportModal = true"
+                                title="{{ __('Upload/View PDF') }}"
                                     class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-6 h-6">
                                         <!-- White document icon -->

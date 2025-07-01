@@ -114,6 +114,8 @@ return [
     'Followup Timestamp' => 'फॉलो-अपची तारीख आणि वेळ',
     'Followup Data Analysis' => 'फॉलो-अप डेटा विश्लेषण',
 
+    'View Reports' => 'अहवाल पहा',
+
 
 
     'locale' => 'भाषा', // Label for dropdown

@@ -115,6 +115,8 @@ return [
     'Followup Timestamp' => 'Follow-up Timestamp',
     'Followup Data Analysis' => 'Follow-up Data Analysis',
 
+    'View Reports' => 'View Reports',
+
 
 
 
