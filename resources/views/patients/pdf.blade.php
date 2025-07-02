@@ -13,6 +13,10 @@
             margin: 20px;
         }
 
+        p {
+            margin: 0;
+            padding: 0;
+        }
 
         h1 {
             font-size: 2em;
@@ -107,7 +111,7 @@
         </tr>
         <tr>
             <th>{{ __('messages.Vishesh') }}</th>
-            <td>{{ $patient->vishesh }}</td>
+            <td>{!! $patient->vishesh !!}</td>
         </tr>
         <tr>
             <th>{{ __('messages.Height') }}</th>
@@ -194,25 +198,24 @@
                                 @endforeach
 
                                 @if (isset($checkUpInfo['nadi']))
-                                    <strong>{{ __('नाडी') }}:</strong> {{ $checkUpInfo['nadi'] }}<br>
+                                    <p><strong>{{ __('नाडी') }}:</strong> {!! $checkUpInfo['nadi'] !!}</p>
                                 @endif
+
                                 @if (isset($followUp->diagnosis))
-                                    <strong>{{ __('लक्षणे') }}:</strong> {{ $followUp->diagnosis }}<br>
+                                    <p><strong>{{ __('लक्षणे') }}:</strong> {!! $followUp->diagnosis !!}</p>
                                 @endif
                             @endif
                         </td>
 
                         <td>
                             @if (isset($checkUpInfo['chikitsa']))
-                                {{ $checkUpInfo['chikitsa'] }}
+                                {!! $checkUpInfo['chikitsa'] !!}
                             @endif
                             @if (isset($checkUpInfo['days']))
-                                <strong>{{ __('दिवस') }}:</strong>
-                                {{ $checkUpInfo['days'] }}<br>
+                                <p><strong>{{ __('दिवस') }}:</strong> {{ $checkUpInfo['days'] }}</p>
                             @endif
                             @if (isset($checkUpInfo['packets']))
-                                <strong>{{ __('पुड्या') }}:</strong>
-                                {{ $checkUpInfo['packets'] }}
+                                <p><strong>{{ __('पुड्या') }}:</strong> {{ $checkUpInfo['packets'] }}</p>
                             @endif
                         </td>
                         <td>
