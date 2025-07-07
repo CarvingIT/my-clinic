@@ -142,7 +142,9 @@
                                 <!-- Chikitsa Textarea -->
                                 @php
                                     $latestFollowUp = $followUps->first();
-                                    $previousChikitsa = $latestFollowUp ? json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? '' : '';
+                                    $previousChikitsa = $latestFollowUp
+                                        ? json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? ''
+                                        : '';
                                 @endphp
                                 <div class="mt-6 mb-4 flex flex-col">
                                     <div class="flex-1">
@@ -382,142 +384,162 @@
 
                                 <!-- Modal to Add New Nadi Preset -->
                                 <!-- Nadi Modal -->
-                                    <div id="nadiModal"
-                                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-                                        <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
-                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">नाडी प्रीसेट व्यवस्थापन</h2>
-                                            <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
-                                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">नवीन नाडी जोडा</h3>
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label class="block text-sm text-gray-700 dark:text-gray-300">बटण टेक्स्ट</label>
-                                                        <input type="text" id="nadiButtonText" placeholder="उदा. वेगवती"
-                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट टेक्स्ट</label>
-                                                        <input type="text" id="nadiPresetText" placeholder="उदा. वेगवती"
-                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
-                                                    </div>
+                                <div id="nadiModal"
+                                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">नाडी
+                                            प्रीसेट व्यवस्थापन</h2>
+                                        <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
+                                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">नवीन
+                                                नाडी जोडा</h3>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-sm text-gray-700 dark:text-gray-300">बटण
+                                                        टेक्स्ट</label>
+                                                    <input type="text" id="nadiButtonText"
+                                                        placeholder="उदा. वेगवती"
+                                                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
                                                 </div>
-                                                <div class="mt-4 flex justify-end space-x-2">
-                                                    <button type="button" onclick="clearNadiForm()"
-                                                        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
-                                                    <button type="button" onclick="saveNadiPreset()"
-                                                        class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
+                                                <div>
+                                                    <label
+                                                        class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट
+                                                        टेक्स्ट</label>
+                                                    <input type="text" id="nadiPresetText"
+                                                        placeholder="उदा. वेगवती"
+                                                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
                                                 </div>
                                             </div>
-                                            <div class="max-h-96 overflow-y-auto">
-                                                <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
-                                                    <thead>
-                                                        <tr class="bg-gray-200 dark:bg-gray-700">
-                                                            <th class="p-2">बटण टेक्स्ट</th>
-                                                            <th class="p-2">प्रीसेट टेक्स्ट</th>
-                                                            <th class="p-2">स्रोत</th>
-                                                            <th class="p-2">कृती</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="nadiPresetList"></tbody>
-                                                </table>
-                                            </div>
-                                            <div class="mt-4 flex justify-end">
-                                                <button type="button" onclick="closeNadiModal()"
-                                                    class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
+                                            <div class="mt-4 flex justify-end space-x-2">
+                                                <button type="button" onclick="clearNadiForm()"
+                                                    class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
+                                                <button type="button" onclick="saveNadiPreset()"
+                                                    class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
                                             </div>
                                         </div>
+                                        <div class="max-h-96 overflow-y-auto">
+                                            <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+                                                <thead>
+                                                    <tr class="bg-gray-200 dark:bg-gray-700">
+                                                        <th class="p-2">बटण टेक्स्ट</th>
+                                                        <th class="p-2">प्रीसेट टेक्स्ट</th>
+                                                        <th class="p-2">स्रोत</th>
+                                                        <th class="p-2">कृती</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="nadiPresetList"></tbody>
+                                            </table>
+                                        </div>
+                                        <div class="mt-4 flex justify-end">
+                                            <button type="button" onclick="closeNadiModal()"
+                                                class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
+                                        </div>
                                     </div>
+                                </div>
 
                                 <!-- Lakshane Modal -->
-                                    <div id="lakshaneModal"
-                                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-                                        <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
-                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">लक्षणे प्रीसेट व्यवस्थापन</h2>
-                                            <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
-                                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">नवीन लक्षणे जोडा</h3>
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label class="block text-sm text-gray-700 dark:text-gray-300">बटण टेक्स्ट</label>
-                                                        <input type="text" id="lakshaneButtonText" placeholder="उदा. अजीर्ण"
-                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट टेक्स्ट</label>
-                                                        <input type="text" id="lakshanePresetText" placeholder="उदा. अजीर्ण - "
-                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
-                                                    </div>
+                                <div id="lakshaneModal"
+                                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">लक्षणे
+                                            प्रीसेट व्यवस्थापन</h2>
+                                        <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
+                                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">नवीन
+                                                लक्षणे जोडा</h3>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-sm text-gray-700 dark:text-gray-300">बटण
+                                                        टेक्स्ट</label>
+                                                    <input type="text" id="lakshaneButtonText"
+                                                        placeholder="उदा. अजीर्ण"
+                                                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
                                                 </div>
-                                                <div class="mt-4 flex justify-end space-x-2">
-                                                    <button type="button" onclick="clearLakshaneForm()"
-                                                        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
-                                                    <button type="button" onclick="saveLakshanePreset()"
-                                                        class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
+                                                <div>
+                                                    <label
+                                                        class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट
+                                                        टेक्स्ट</label>
+                                                    <input type="text" id="lakshanePresetText"
+                                                        placeholder="उदा. अजीर्ण - "
+                                                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
                                                 </div>
                                             </div>
-                                            <div class="max-h-96 overflow-y-auto">
-                                                <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
-                                                    <thead>
-                                                        <tr class="bg-gray-200 dark:bg-gray-700">
-                                                            <th class="p-2">बटण टेक्स्ट</th>
-                                                            <th class="p-2">प्रीसेट टेक्स्ट</th>
-                                                            <th class="p-2">स्रोत</th>
-                                                            <th class="p-2">कृती</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="lakshanePresetList"></tbody>
-                                                </table>
-                                            </div>
-                                            <div class="mt-4 flex justify-end">
-                                                <button type="button" onclick="closeLakshaneModal()"
-                                                    class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
+                                            <div class="mt-4 flex justify-end space-x-2">
+                                                <button type="button" onclick="clearLakshaneForm()"
+                                                    class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
+                                                <button type="button" onclick="saveLakshanePreset()"
+                                                    class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
                                             </div>
                                         </div>
+                                        <div class="max-h-96 overflow-y-auto">
+                                            <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+                                                <thead>
+                                                    <tr class="bg-gray-200 dark:bg-gray-700">
+                                                        <th class="p-2">बटण टेक्स्ट</th>
+                                                        <th class="p-2">प्रीसेट टेक्स्ट</th>
+                                                        <th class="p-2">स्रोत</th>
+                                                        <th class="p-2">कृती</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="lakshanePresetList"></tbody>
+                                            </table>
+                                        </div>
+                                        <div class="mt-4 flex justify-end">
+                                            <button type="button" onclick="closeLakshaneModal()"
+                                                class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <!-- Chikitsa Modal -->
-                                    <div id="chikitsaModal"
-                                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-                                        <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
-                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">चिकित्सा प्रीसेट व्यवस्थापन</h2>
-                                            <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
-                                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">नवीन चिकित्सा जोडा</h3>
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label class="block text-sm text-gray-700 dark:text-gray-300">बटण टेक्स्ट</label>
-                                                        <input type="text" id="chikitsaButtonText" placeholder="उदा. ज्वर"
-                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
-                                                    </div>
-                                                    <div>
-                                                        <label class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट टेक्स्ट</label>
-                                                        <textarea id="chikitsaPresetText" rows="2" placeholder="उदा. महासुदर्शन, वैदेही..."
-                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white"></textarea>
-                                                    </div>
+                                <!-- Chikitsa Modal -->
+                                <div id="chikitsaModal"
+                                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">चिकित्सा
+                                            प्रीसेट व्यवस्थापन</h2>
+                                        <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
+                                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">नवीन
+                                                चिकित्सा जोडा</h3>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-sm text-gray-700 dark:text-gray-300">बटण
+                                                        टेक्स्ट</label>
+                                                    <input type="text" id="chikitsaButtonText"
+                                                        placeholder="उदा. ज्वर"
+                                                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
                                                 </div>
-                                                <div class="mt-4 flex justify-end space-x-2">
-                                                    <button type="button" onclick="clearChikitsaForm()"
-                                                        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
-                                                    <button type="button" onclick="saveChikitsaPreset()"
-                                                        class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
+                                                <div>
+                                                    <label
+                                                        class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट
+                                                        टेक्स्ट</label>
+                                                    <textarea id="chikitsaPresetText" rows="2" placeholder="उदा. महासुदर्शन, वैदेही..."
+                                                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white"></textarea>
                                                 </div>
                                             </div>
-                                            <div class="max-h-96 overflow-y-auto">
-                                                <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
-                                                    <thead>
-                                                        <tr class="bg-gray-200 dark:bg-gray-700">
-                                                            <th class="p-2">बटण टेक्स्ट</th>
-                                                            <th class="p-2">प्रीसेट टेक्स्ट</th>
-                                                            <th class="p-2">स्रोत</th>
-                                                            <th class="p-2">कृती</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="chikitsaPresetList"></tbody>
-                                                </table>
-                                            </div>
-                                            <div class="mt-4 flex justify-end">
-                                                <button type="button" onclick="closeChikitsaModal()"
-                                                    class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
+                                            <div class="mt-4 flex justify-end space-x-2">
+                                                <button type="button" onclick="clearChikitsaForm()"
+                                                    class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
+                                                <button type="button" onclick="saveChikitsaPreset()"
+                                                    class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
                                             </div>
                                         </div>
+                                        <div class="max-h-96 overflow-y-auto">
+                                            <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+                                                <thead>
+                                                    <tr class="bg-gray-200 dark:bg-gray-700">
+                                                        <th class="p-2">बटण टेक्स्ट</th>
+                                                        <th class="p-2">प्रीसेट टेक्स्ट</th>
+                                                        <th class="p-2">स्रोत</th>
+                                                        <th class="p-2">कृती</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="chikitsaPresetList"></tbody>
+                                            </table>
+                                        </div>
+                                        <div class="mt-4 flex justify-end">
+                                            <button type="button" onclick="closeChikitsaModal()"
+                                                class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
+                                        </div>
                                     </div>
+                                </div>
 
 
 
@@ -610,220 +632,113 @@
         </div>
 </x-app-layout>
 
-{{-- <script>
-    const storageKey = "customNadiPresets";
 
-    // Append nadi to textarea at cursor
-    function appendNadi(nadi) {
-        const editor = tinymce.get('nadiInput');
-        if (!editor) {
-            console.error("TinyMCE editor with ID 'nadiInput' not found.");
+{{-- Script for nadi presets --}}
+<script>
+    const nadiFieldId = {{ \App\Models\Field::where('name', 'nadi')->first()->id ?? 0 }};
+    const nadiStorageKey = 'customNadiPresets';
+
+    function getCsrfToken() {
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!token) {
+            console.error(
+                'CSRF token not found. Add <meta name="csrf-token" content="{{ csrf_token() }}"> to layout.');
+            alert('CSRF token not found. Please check your Blade layout.');
+        }
+        return token || '';
+    }
+
+    async function loadNadiPresets() {
+        const container = document.getElementById('nadiPresets');
+        if (!container) {
+            console.error('nadiPresets container not found in DOM.');
+            return;
+        }
+        container.innerHTML = '';
+
+        if (!nadiFieldId) {
+            alert('Nadi field ID is invalid (0). Check database seeding for "nadi" in fields table.');
             return;
         }
 
-        editor.focus();
+        try {
+            const response = await axios.get(`/presets?field_id=${nadiFieldId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createPresetButton(preset.button_text, preset.preset_text, preset.id, true);
+            });
+        } catch (error) {
+            console.error('Error loading nadi presets:', error.response || error);
+            alert(
+                `Failed to load nadi presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+        }
 
-        const selection = editor.selection;
-        const rng = selection.getRng();
-        const container = rng.startContainer;
-
-        // Get full plain text content and the cursor position
-        const fullText = editor.getContent({
-            format: 'text'
+        const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createPresetButton(preset, preset, null, false);
         });
-        const cursorPos = rng.startOffset;
-        const nodeText = container.textContent || '';
-
-        // Split the node text into before and after parts
-        const beforeText = nodeText.substring(0, cursorPos);
-        const afterText = nodeText.substring(cursorPos);
-
-        // Determine if space is needed before or after
-        const needsCommaBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
-        const needsCommaAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
-
-        // Construct the text to insert
-        let insertText = '';
-        if (needsCommaBefore) insertText += ' ';
-        insertText += nadi;
-        if (needsCommaAfter) insertText += ' ';
-
-        // Insert the new text at the cursor
-        selection.setContent(insertText);
-
-        // Move the cursor to the end of inserted content
-        editor.selection.collapse(false);
-        editor.focus();
     }
 
-
-
-
-    function createPresetElement(text, isCustom = true) {
+    function createPresetButton(buttonText, presetText, id, isDatabase) {
         const presetDiv = document.createElement('div');
-        presetDiv.className = "relative";
+        presetDiv.className = 'relative';
 
         const button = document.createElement('button');
         button.type = 'button';
         button.className =
-            "nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition w-full text-left pr-6";
-        button.innerText = text;
-        button.onclick = () => appendNadi(text);
+            'nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition w-full text-left pr-6';
+        button.innerText = buttonText;
+        button.onclick = () => appendNadi(presetText);
 
         presetDiv.appendChild(button);
-
-        if (isCustom) {
-            const removeBtn = document.createElement('span');
-            removeBtn.innerHTML = '❌';
-            removeBtn.className = "absolute top-1 right-1 text-red-600 cursor-pointer text-xs";
-
-            removeBtn.onclick = () => {
-                if (confirm(`Are you sure you want to delete "${text}"?`)) {
-                    presetDiv.remove();
-                    removePresetFromStorage(text);
-                }
-            };
-
-            presetDiv.appendChild(removeBtn);
-        }
-
         document.getElementById('nadiPresets').appendChild(presetDiv);
     }
 
-    function savePresetToStorage(value) {
-        const stored = JSON.parse(localStorage.getItem(storageKey)) || [];
-        if (!stored.includes(value)) {
-            stored.push(value);
-            localStorage.setItem(storageKey, JSON.stringify(stored));
+    async function loadNadiPresetList() {
+        const list = document.getElementById('nadiPresetList');
+        if (!list) {
+            console.error('nadiPresetList container not found in DOM.');
+            return;
         }
-    }
+        list.innerHTML = '';
 
-    function removePresetFromStorage(value) {
-        const stored = JSON.parse(localStorage.getItem(storageKey)) || [];
-        const updated = stored.filter(item => item !== value);
-        localStorage.setItem(storageKey, JSON.stringify(updated));
-    }
-
-    function loadCustomPresets() {
-        const stored = JSON.parse(localStorage.getItem(storageKey)) || [];
-        stored.forEach(preset => createPresetElement(preset, true));
-    }
-
-    // Modal Logic
-    function toggleNadiModal(show) {
-        const modal = document.getElementById('nadiModal');
-        const input = document.getElementById('modalNadiInput');
-        modal.classList.toggle('hidden', !show);
-        if (show) {
-            input.value = '';
-            input.focus();
+        try {
+            const response = await axios.get(`/presets?field_id=${nadiFieldId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createPresetRow(preset, true);
+            });
+        } catch (error) {
+            console.error('Error loading nadi preset list:', error.response || error);
+            alert(
+                `Failed to load nadi preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
         }
-    }
 
-    function saveModalNadi() {
-        const input = document.getElementById('modalNadiInput');
-        const value = input.value.trim();
-        if (!value) return;
-
-        createPresetElement(value, true);
-        savePresetToStorage(value);
-        toggleNadiModal(false);
-    }
-
-    document.addEventListener('DOMContentLoaded', loadCustomPresets);
-</script> --}}
-
-<script>
-    const nadiFieldId = {{ \App\Models\Field::where('name', 'nadi')->first()->id ?? 0 }};
-const nadiStorageKey = 'customNadiPresets';
-
-function getCsrfToken() {
-    const token = document.querySelector('meta[name="csrf-token"]')?.content;
-    if (!token) {
-        console.error('CSRF token not found. Add <meta name="csrf-token" content="{{ csrf_token() }}"> to layout.');
-        alert('CSRF token not found. Please check your Blade layout.');
-    }
-    return token || '';
-}
-
-async function loadNadiPresets() {
-    const container = document.getElementById('nadiPresets');
-    if (!container) {
-        console.error('nadiPresets container not found in DOM.');
-        return;
-    }
-    container.innerHTML = '';
-
-    if (!nadiFieldId) {
-        alert('Nadi field ID is invalid (0). Check database seeding for "nadi" in fields table.');
-        return;
-    }
-
-    try {
-        const response = await axios.get(`/presets?field_id=${nadiFieldId}`, {
-            headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
-            withCredentials: true
+        const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createPresetRow({
+                button_text: preset,
+                preset_text: preset,
+                id: null
+            }, false);
         });
-        response.data.forEach(preset => {
-            createPresetButton(preset.button_text, preset.preset_text, preset.id, true);
-        });
-    } catch (error) {
-        console.error('Error loading nadi presets:', error.response || error);
-        alert(`Failed to load nadi presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
     }
 
-    const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
-    localPresets.forEach(preset => {
-        createPresetButton(preset, preset, null, false);
-    });
-}
+    function createPresetRow(preset, isDatabase) {
+        const row = document.createElement('tr');
+        row.className = 'border-b dark:border-gray-600';
 
-function createPresetButton(buttonText, presetText, id, isDatabase) {
-    const presetDiv = document.createElement('div');
-    presetDiv.className = 'relative';
-
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition w-full text-left pr-6';
-    button.innerText = buttonText;
-    button.onclick = () => appendNadi(presetText);
-
-    presetDiv.appendChild(button);
-    document.getElementById('nadiPresets').appendChild(presetDiv);
-}
-
-async function loadNadiPresetList() {
-    const list = document.getElementById('nadiPresetList');
-    if (!list) {
-        console.error('nadiPresetList container not found in DOM.');
-        return;
-    }
-    list.innerHTML = '';
-
-    try {
-        const response = await axios.get(`/presets?field_id=${nadiFieldId}`, {
-            headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
-            withCredentials: true
-        });
-        response.data.forEach(preset => {
-            createPresetRow(preset, true);
-        });
-    } catch (error) {
-        console.error('Error loading nadi preset list:', error.response || error);
-        alert(`Failed to load nadi preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
-    }
-
-    const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
-    localPresets.forEach(preset => {
-        createPresetRow({ button_text: preset, preset_text: preset, id: null }, false);
-    });
-}
-
-function createPresetRow(preset, isDatabase) {
-    const row = document.createElement('tr');
-    row.className = 'border-b dark:border-gray-600';
-
-    row.innerHTML = `
+        row.innerHTML = `
         <td class="p-2">${preset.button_text}</td>
         <td class="p-2">${preset.preset_text || preset.button_text}</td>
         <td class="p-2">${isDatabase ? 'Database' : 'LocalStorage'}</td>
@@ -832,229 +747,342 @@ function createPresetRow(preset, isDatabase) {
         </td>
     `;
 
-    document.getElementById('nadiPresetList').appendChild(row);
-}
-
-function openNadiModal() {
-    const modal = document.getElementById('nadiModal');
-    if (!modal) {
-        console.error('nadiModal not found in DOM.');
-        return;
-    }
-    modal.classList.remove('hidden');
-    loadNadiPresetList();
-    clearNadiForm();
-}
-
-function closeNadiModal() {
-    document.getElementById('nadiModal').classList.add('hidden');
-}
-
-function clearNadiForm() {
-    const buttonText = document.getElementById('nadiButtonText');
-    const presetText = document.getElementById('nadiPresetText');
-    if (buttonText && presetText) {
-        buttonText.value = '';
-        presetText.value = '';
-    }
-}
-
-async function saveNadiPreset() {
-    const buttonText = document.getElementById('nadiButtonText').value.trim();
-    const presetText = document.getElementById('nadiPresetText').value.trim();
-
-    if (!buttonText) {
-        alert('Button text is required.');
-        return;
+        document.getElementById('nadiPresetList').appendChild(row);
     }
 
-    try {
-        await axios.post('/presets', {
-            field_id: nadiFieldId,
-            button_text: buttonText,
-            preset_text: presetText || buttonText,
-            display_order: 0
-        }, {
-            headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
-            withCredentials: true
-        });
-        loadNadiPresets();
+    function openNadiModal() {
+        const modal = document.getElementById('nadiModal');
+        if (!modal) {
+            console.error('nadiModal not found in DOM.');
+            return;
+        }
+        modal.classList.remove('hidden');
         loadNadiPresetList();
         clearNadiForm();
-        closeNadiModal();
-    } catch (error) {
-        console.error('Error saving nadi preset:', error.response || error);
-        alert(`Failed to save nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
     }
-}
 
-async function deleteNadiPreset(id, buttonText, isDatabase) {
-    if (confirm(`Are you sure you want to delete "${buttonText}"?`)) {
-        try {
-            if (isDatabase && id) {
-                await axios.delete(`/presets/${id}`, {
-                    headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
-                    withCredentials: true
-                });
-            } else {
-                const stored = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
-                const updated = stored.filter(item => item !== buttonText);
-                localStorage.setItem(nadiStorageKey, JSON.stringify(updated));
-            }
-            loadNadiPresets();
-            loadNadiPresetList();
-        } catch (error) {
-            console.error('Error deleting nadi preset:', error.response || error);
-            alert(`Failed to delete nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+    function closeNadiModal() {
+        document.getElementById('nadiModal').classList.add('hidden');
+    }
+
+    function clearNadiForm() {
+        const buttonText = document.getElementById('nadiButtonText');
+        const presetText = document.getElementById('nadiPresetText');
+        if (buttonText && presetText) {
+            buttonText.value = '';
+            presetText.value = '';
         }
     }
-}
 
-function appendNadi(text) {
-    const editor = tinymce.get('nadiInput');
-    if (!editor) {
-        console.error('TinyMCE editor for nadiInput not found.');
-        return;
+    async function saveNadiPreset() {
+        const buttonText = document.getElementById('nadiButtonText').value.trim();
+        const presetText = document.getElementById('nadiPresetText').value.trim();
+
+        if (!buttonText) {
+            alert('Button text is required.');
+            return;
+        }
+
+        try {
+            await axios.post('/presets', {
+                field_id: nadiFieldId,
+                button_text: buttonText,
+                preset_text: presetText || buttonText,
+                display_order: 0
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            loadNadiPresets();
+            loadNadiPresetList();
+            clearNadiForm();
+            closeNadiModal();
+        } catch (error) {
+            console.error('Error saving nadi preset:', error.response || error);
+            alert(
+                `Failed to save nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+        }
     }
 
-    editor.focus();
-    const rng = editor.selection.getRng();
-    const container = rng.startContainer;
-    const cursorPos = rng.startOffset;
-    const nodeText = container.textContent || '';
-    const beforeText = nodeText.substring(0, cursorPos);
-    const afterText = nodeText.substring(cursorPos);
+    async function deleteNadiPreset(id, buttonText, isDatabase) {
+        if (confirm(`Are you sure you want to delete "${buttonText}"?`)) {
+            try {
+                if (isDatabase && id) {
+                    await axios.delete(`/presets/${id}`, {
+                        headers: {
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                            'Accept': 'application/json'
+                        },
+                        withCredentials: true
+                    });
+                } else {
+                    const stored = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
+                    const updated = stored.filter(item => item !== buttonText);
+                    localStorage.setItem(nadiStorageKey, JSON.stringify(updated));
+                }
+                loadNadiPresets();
+                loadNadiPresetList();
+            } catch (error) {
+                console.error('Error deleting nadi preset:', error.response || error);
+                alert(
+                    `Failed to delete nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+            }
+        }
+    }
 
-    const needsSpaceBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
-    const needsSpaceAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
+    function appendNadi(text) {
+        const editor = tinymce.get('nadiInput');
+        if (!editor) {
+            console.error('TinyMCE editor for nadiInput not found.');
+            return;
+        }
 
-    let insertText = '';
-    if (needsSpaceBefore) insertText += ' ';
-    insertText += text;
-    if (needsSpaceAfter) insertText += ' ';
+        editor.focus();
+        const rng = editor.selection.getRng();
+        const container = rng.startContainer;
+        const cursorPos = rng.startOffset;
+        const nodeText = container.textContent || '';
+        const beforeText = nodeText.substring(0, cursorPos);
+        const afterText = nodeText.substring(cursorPos);
 
-    editor.selection.setContent(insertText);
-    editor.selection.collapse(false);
-}
+        const needsSpaceBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
+        const needsSpaceAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
 
-document.addEventListener('DOMContentLoaded', loadNadiPresets);
+        let insertText = '';
+        if (needsSpaceBefore) insertText += ' ';
+        insertText += text;
+        if (needsSpaceAfter) insertText += ' ';
+
+        editor.selection.setContent(insertText);
+        editor.selection.collapse(false);
+    }
+
+    document.addEventListener('DOMContentLoaded', loadNadiPresets);
 </script>
 
 
-
+{{-- Script for chikitsa --}}
 
 <script>
-    const chikitsaTextarea = document.getElementById('chikitsa');
-    const chikitsaStorageKey = "customChikitsaPresets";
+    const chikitsaFieldId = {{ \App\Models\Field::where('name', 'chikitsa')->first()->id ?? 0 }};
+    const chikitsaStorageKey = 'customChikitsaPresets';
+
+    async function loadChikitsaPresets() {
+        const container = document.getElementById('chikitsaPresets');
+        if (!container) {
+            console.error('chikitsaPresets container not found in DOM.');
+            return;
+        }
+        container.innerHTML = '';
+
+        if (!chikitsaFieldId) {
+            alert('Chikitsa field ID is invalid (0). Check database seeding for "chikitsa" in fields table.');
+            return;
+        }
+
+        try {
+            const response = await axios.get(`/presets?field_id=${chikitsaFieldId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createChikitsaPresetButton(preset.button_text, preset.preset_text, preset.id, true);
+            });
+        } catch (error) {
+            console.error('Error loading chikitsa presets:', error.response || error);
+            alert(
+                `Failed to load chikitsa presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+        }
+
+        const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createChikitsaPresetButton(preset, preset, null, false);
+        });
+    }
+
+    function createChikitsaPresetButton(buttonText, presetText, id, isDatabase) {
+        const presetDiv = document.createElement('div');
+        presetDiv.className = 'relative';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className =
+            'border p-2 rounded cursor-pointer bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition w-full text-left pr-6';
+        button.innerText = buttonText;
+        button.onclick = () => insertChikitsaText(presetText);
+
+        presetDiv.appendChild(button);
+        document.getElementById('chikitsaPresets').appendChild(presetDiv);
+    }
 
     function insertChikitsaText(text) {
         const editor = tinymce.get('chikitsa');
-        if (!editor) return;
+        if (!editor) {
+            console.error('TinyMCE editor for chikitsa not found.');
+            return;
+        }
 
         editor.focus();
-
         const rng = editor.selection.getRng();
-        const startContainer = rng.startContainer;
-        const startOffset = rng.startOffset;
+        const container = rng.startContainer;
+        const cursorPos = rng.startOffset;
+        const nodeText = container.textContent || '';
+        const beforeText = nodeText.substring(0, cursorPos);
+        const afterText = nodeText.substring(cursorPos);
 
-        let precedingChar = '';
-        if (startContainer.nodeType === 3 && startOffset > 0) {
-            precedingChar = startContainer.data.substring(startOffset - 1, startOffset);
-        }
+        const needsSpaceBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
+        const needsSpaceAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
 
-        // For Commas
-        // const needsComma = precedingChar && !precedingChar.match(/[\s,]/);
-        // const insertText = (needsComma ? ', ' : '') + text;
-
-        // For Spaces
-        const needsSpace = precedingChar && !precedingChar.match(/\s/);
-        const cleanText = text.replace(/,/g, ''); // 🔥 removes commas from the preset
-        const insertText = (needsSpace ? ' ' : '') + cleanText;
-
+        let insertText = '';
+        if (needsSpaceBefore) insertText += ' ';
+        insertText += text.replace(/,/g, '');
+        if (needsSpaceAfter) insertText += ' ';
 
         editor.selection.setContent(insertText);
+        editor.selection.collapse(false);
     }
 
+    async function loadChikitsaPresetList() {
+        const list = document.getElementById('chikitsaPresetList');
+        if (!list) {
+            console.error('chikitsaPresetList container not found in DOM.');
+            return;
+        }
+        list.innerHTML = '';
 
-    function createChikitsaPreset(title, value, isCustom = true) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'relative';
-
-        const btn = document.createElement('div');
-        btn.className =
-            'border p-2 rounded cursor-pointer bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition';
-        btn.textContent = title;
-        btn.onclick = () => insertChikitsaText(value);
-        wrapper.appendChild(btn);
-
-        if (isCustom) {
-            const removeBtn = document.createElement('span');
-            removeBtn.innerHTML = '❌';
-            removeBtn.className = 'absolute top-1 right-1 text-red-600 cursor-pointer text-xs';
-            removeBtn.onclick = () => {
-                if (confirm(`"${title}" प्रीसेट काढायचे आहे का?`)) {
-                    wrapper.remove();
-                    removeChikitsaFromStorage(title);
-                }
-            };
-            wrapper.appendChild(removeBtn);
+        try {
+            const response = await axios.get(`/presets?field_id=${chikitsaFieldId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createChikitsaPresetRow(preset, true);
+            });
+        } catch (error) {
+            console.error('Error loading chikitsa preset list:', error.response || error);
+            alert(
+                `Failed to load chikitsa preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
         }
 
-        document.getElementById('chikitsaPresets').appendChild(wrapper);
+        const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createChikitsaPresetRow({
+                button_text: preset,
+                preset_text: preset,
+                id: null
+            }, false);
+        });
     }
 
-    function showChikitsaModal() {
-        document.getElementById('chikitsaModal').classList.remove('hidden');
+    function createChikitsaPresetRow(preset, isDatabase) {
+        const row = document.createElement('tr');
+        row.className = 'border-b dark:border-gray-600';
+
+        row.innerHTML = `
+            <td class="p-2">${preset.button_text}</td>
+            <td class="p-2">${preset.preset_text || preset.button_text}</td>
+            <td class="p-2">${isDatabase ? 'Database' : 'LocalStorage'}</td>
+            <td class="p-2">
+                <button type="button" class="text-red-500 hover:text-red-700" onclick="deleteChikitsaPreset('${preset.id || ''}', '${preset.button_text}', ${isDatabase})">Delete</button>
+            </td>
+        `;
+
+        document.getElementById('chikitsaPresetList').appendChild(row);
     }
 
-    function hideChikitsaModal() {
+    function openChikitsaModal() {
+        const modal = document.getElementById('chikitsaModal');
+        if (!modal) {
+            console.error('chikitsaModal not found in DOM.');
+            return;
+        }
+        modal.classList.remove('hidden');
+        loadChikitsaPresetList();
+        clearChikitsaForm();
+    }
+
+    function closeChikitsaModal() {
         document.getElementById('chikitsaModal').classList.add('hidden');
-        document.getElementById('chikitsaPresetTitle').value = '';
-        document.getElementById('chikitsaPresetValue').value = '';
     }
 
-    function addChikitsaPreset() {
-        const title = document.getElementById('chikitsaPresetTitle').value.trim();
-        const value = document.getElementById('chikitsaPresetValue').value.trim();
-        if (!title || !value) return alert("कृपया title आणि value दोन्ही भरा.");
-
-        createChikitsaPreset(title, value, true);
-        saveChikitsaToStorage({
-            title,
-            value
-        });
-        hideChikitsaModal();
-    }
-
-    function saveChikitsaToStorage(preset) {
-        const stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
-        const exists = stored.find(p => p.title === preset.title);
-        if (!exists) {
-            stored.push(preset);
-            localStorage.setItem(chikitsaStorageKey, JSON.stringify(stored));
+    function clearChikitsaForm() {
+        const buttonText = document.getElementById('chikitsaButtonText');
+        const presetText = document.getElementById('chikitsaPresetText');
+        if (buttonText && presetText) {
+            buttonText.value = '';
+            presetText.value = '';
         }
     }
 
-    function removeChikitsaFromStorage(title) {
-        let stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
-        stored = stored.filter(p => p.title !== title);
-        localStorage.setItem(chikitsaStorageKey, JSON.stringify(stored));
+    async function saveChikitsaPreset() {
+        const buttonText = document.getElementById('chikitsaButtonText').value.trim();
+        const presetText = document.getElementById('chikitsaPresetText').value.trim();
+
+        if (!buttonText) {
+            alert('Button text is required.');
+            return;
+        }
+
+        try {
+            await axios.post('/presets', {
+                field_id: chikitsaFieldId,
+                button_text: buttonText,
+                preset_text: presetText || buttonText,
+                display_order: 0
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            loadChikitsaPresets();
+            loadChikitsaPresetList();
+            clearChikitsaForm();
+            closeChikitsaModal();
+        } catch (error) {
+            console.error('Error saving chikitsa preset:', error.response || error);
+            alert(
+                `Failed to save chikitsa preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+        }
     }
 
-    function loadChikitsaPresets() {
-        const stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
-        stored.forEach(preset => createChikitsaPreset(preset.title, preset.value, true));
+    async function deleteChikitsaPreset(id, buttonText, isDatabase) {
+        if (confirm(`Are you sure you want to delete "${buttonText}"?`)) {
+            try {
+                if (isDatabase && id) {
+                    await axios.delete(`/presets/${id}`, {
+                        headers: {
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                            'Accept': 'application/json'
+                        },
+                        withCredentials: true
+                    });
+                } else {
+                    const stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
+                    const updated = stored.filter(item => item !== buttonText);
+                    localStorage.setItem(chikitsaStorageKey, JSON.stringify(updated));
+                }
+                loadChikitsaPresets();
+                loadChikitsaPresetList();
+            } catch (error) {
+                console.error('Error deleting chikitsa preset:', error.response || error);
+                alert(
+                    `Failed to delete chikitsa preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+            }
+        }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        loadChikitsaPresets();
-
-        // For default presets
-        document.querySelectorAll('.preset-box').forEach(box => {
-            const value = box.dataset.preset;
-            box.addEventListener('click', () => insertChikitsaText(value));
-        });
-    });
+    document.addEventListener('DOMContentLoaded', loadChikitsaPresets);
 </script>
 
 
@@ -1077,132 +1105,222 @@ document.addEventListener('DOMContentLoaded', loadNadiPresets);
         textarea.focus();
     }
 </script>
-<script>
-    const lakshaneKey = 'customLakshanePresets';
 
-    function insertText(text) {
+
+<script>
+    const lakshaneFieldId = {{ \App\Models\Field::where('name', 'lakshane')->first()->id ?? 0 }};
+    const lakshaneStorageKey = 'customLakshanePresets';
+
+    async function loadLakshanePresets() {
+        const container = document.getElementById('lakshanePresets');
+        if (!container) {
+            console.error('lakshanePresets container not found in DOM.');
+            return;
+        }
+        container.innerHTML = '';
+
+        if (!lakshaneFieldId) {
+            alert('Lakshane field ID is invalid (0). Check database seeding for "lakshane" in fields table.');
+            return;
+        }
+
+        try {
+            const response = await axios.get(`/presets?field_id=${lakshaneFieldId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createLakshanePresetButton(preset.button_text, preset.preset_text, preset.id, true);
+            });
+        } catch (error) {
+            console.error('Error loading lakshane presets:', error.response || error);
+            alert(
+                `Failed to load lakshane presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+        }
+
+        const localPresets = JSON.parse(localStorage.getItem(lakshaneStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createLakshanePresetButton(preset, preset, null, false);
+        });
+    }
+
+    function createLakshanePresetButton(buttonText, presetText, id, isDatabase) {
+        const presetDiv = document.createElement('div');
+        presetDiv.className = 'relative';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className =
+            'w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition text-left pr-6';
+        button.innerText = buttonText;
+        button.onclick = () => insertLakshaneText(presetText);
+
+        presetDiv.appendChild(button);
+        document.getElementById('lakshanePresets').appendChild(presetDiv);
+    }
+
+    function insertLakshaneText(text) {
         const editor = tinymce.get('lakshane');
         if (!editor) {
-            console.error("TinyMCE editor with ID 'lakshane' not found.");
+            console.error('TinyMCE editor for lakshane not found.');
             return;
         }
 
         editor.focus();
-
-        const selection = editor.selection;
-        const rng = selection.getRng();
+        const rng = editor.selection.getRng();
         const container = rng.startContainer;
-
-        // Get surrounding text to decide if comma and space are needed
-        // const cursorPos = rng.startOffset;
-        // const nodeText = container.textContent || '';
-        // const beforeText = nodeText.substring(0, cursorPos);
-        // const afterText = nodeText.substring(cursorPos);
-
-        // const needsCommaBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(',');
-        // const needsCommaAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(',');
-
-        // let insert = '';
-        // if (needsCommaBefore) insert += ', ';
-        // insert += text;
-        // if (needsCommaAfter) insert += ',';
-
-        // Get surrounding text to decide if space is needed
         const cursorPos = rng.startOffset;
         const nodeText = container.textContent || '';
         const beforeText = nodeText.substring(0, cursorPos);
         const afterText = nodeText.substring(cursorPos);
 
-        const needsSpaceBefore = beforeText.length > 0 && !beforeText.endsWith(' ');
-        const needsSpaceAfter = afterText.length > 0 && !afterText.startsWith(' ');
+        const needsSpaceBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
+        const needsSpaceAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
 
-        let insert = '';
-        if (needsSpaceBefore) insert += ' ';
-        insert += text;
-        if (needsSpaceAfter) insert += ' ';
+        let insertText = '';
+        if (needsSpaceBefore) insertText += ' ';
+        insertText += text;
+        if (needsSpaceAfter) insertText += ' ';
 
-
-        selection.setContent(insert);
+        editor.selection.setContent(insertText);
         editor.selection.collapse(false);
-        editor.focus();
     }
 
-    function insertArrow(arrow) {
-        const editor = tinymce.get('lakshane');
-        if (!editor) {
-            console.error("TinyMCE editor with ID 'lakshane' not found.");
+    async function loadLakshanePresetList() {
+        const list = document.getElementById('lakshanePresetList');
+        if (!list) {
+            console.error('lakshanePresetList container not found in DOM.');
             return;
         }
+        list.innerHTML = '';
 
-        editor.focus();
-
-        // Directly insert the arrow at the current cursor position
-        editor.insertContent(arrow);
-        editor.selection.collapse(false);
-        editor.focus();
-    }
-
-
-    function createLakshaneButton(text, isCustom = true) {
-        const container = document.querySelector('.grid-cols-7'); // adjust if your grid changes
-        const wrapper = document.createElement('div');
-        wrapper.className = 'relative';
-
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className =
-            "w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition text-left pr-6";
-        button.innerText = text;
-        button.onclick = () => insertText(text);
-
-        wrapper.appendChild(button);
-
-        if (isCustom) {
-            const remove = document.createElement('span');
-            remove.innerHTML = '❌';
-            remove.className = 'absolute top-1 right-1 text-red-600 cursor-pointer text-xs';
-            remove.onclick = () => {
-                if (confirm(`"${text}" काढायचे आहे का?`)) {
-                    wrapper.remove();
-                    const stored = JSON.parse(localStorage.getItem(lakshaneKey)) || [];
-                    const updated = stored.filter(p => p !== text);
-                    localStorage.setItem(lakshaneKey, JSON.stringify(updated));
-                }
-            };
-            wrapper.appendChild(remove);
+        try {
+            const response = await axios.get(`/presets?field_id=${lakshaneFieldId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createLakshanePresetRow(preset, true);
+            });
+        } catch (error) {
+            console.error('Error loading lakshane preset list:', error.response || error);
+            alert(
+                `Failed to load lakshane preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
         }
 
-        container.appendChild(wrapper);
+        const localPresets = JSON.parse(localStorage.getItem(lakshaneStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createLakshanePresetRow({
+                button_text: preset,
+                preset_text: preset,
+                id: null
+            }, false);
+        });
+    }
+
+    function createLakshanePresetRow(preset, isDatabase) {
+        const row = document.createElement('tr');
+        row.className = 'border-b dark:border-gray-600';
+
+        row.innerHTML = `
+            <td class="p-2">${preset.button_text}</td>
+            <td class="p-2">${preset.preset_text || preset.button_text}</td>
+            <td class="p-2">${isDatabase ? 'Database' : 'LocalStorage'}</td>
+            <td class="p-2">
+                <button type="button" class="text-red-500 hover:text-red-700" onclick="deleteLakshanePreset('${preset.id || ''}', '${preset.button_text}', ${isDatabase})">Delete</button>
+            </td>
+        `;
+
+        document.getElementById('lakshanePresetList').appendChild(row);
     }
 
     function openLakshaneModal() {
-        document.getElementById('lakshaneModal').classList.remove('hidden');
+        const modal = document.getElementById('lakshaneModal');
+        if (!modal) {
+            console.error('lakshaneModal not found in DOM.');
+            return;
+        }
+        modal.classList.remove('hidden');
+        loadLakshanePresetList();
+        clearLakshaneForm();
     }
 
     function closeLakshaneModal() {
         document.getElementById('lakshaneModal').classList.add('hidden');
     }
 
-    function addLakshanePreset() {
-        const input = document.getElementById('newLakshaneInput');
-        const value = input.value.trim();
-        if (!value) return;
-
-        createLakshaneButton(value, true);
-
-        const stored = JSON.parse(localStorage.getItem(lakshaneKey)) || [];
-        if (!stored.includes(value)) {
-            stored.push(value);
-            localStorage.setItem(lakshaneKey, JSON.stringify(stored));
+    function clearLakshaneForm() {
+        const buttonText = document.getElementById('lakshaneButtonText');
+        const presetText = document.getElementById('lakshanePresetText');
+        if (buttonText && presetText) {
+            buttonText.value = '';
+            presetText.value = '';
         }
-
-        input.value = '';
-        closeLakshaneModal();
     }
 
-    function loadLakshanePresets() {
-        const stored = JSON.parse(localStorage.getItem(lakshaneKey)) || [];
-        stored.forEach(p => createLakshaneButton(p, true));
+    async function saveLakshanePreset() {
+        const buttonText = document.getElementById('lakshaneButtonText').value.trim();
+        const presetText = document.getElementById('lakshanePresetText').value.trim();
+
+        if (!buttonText) {
+            alert('Button text is required.');
+            return;
+        }
+
+        try {
+            await axios.post('/presets', {
+                field_id: lakshaneFieldId,
+                button_text: buttonText,
+                preset_text: presetText || buttonText,
+                display_order: 0
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            loadLakshanePresets();
+            loadLakshanePresetList();
+            clearLakshaneForm();
+            closeLakshaneModal();
+        } catch (error) {
+            console.error('Error saving lakshane preset:', error.response || error);
+            alert(
+                `Failed to save lakshane preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    async function deleteLakshanePreset(id, buttonText, isDatabase) {
+        if (confirm(`Are you sure you want to delete "${buttonText}"?`)) {
+            try {
+                if (isDatabase && id) {
+                    await axios.delete(`/presets/${id}`, {
+                        headers: {
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                            'Accept': 'application/json'
+                        },
+                        withCredentials: true
+                    });
+                } else {
+                    const stored = JSON.parse(localStorage.getItem(lakshaneStorageKey)) || [];
+                    const updated = stored.filter(item => item !== buttonText);
+                    localStorage.setItem(lakshaneStorageKey, JSON.stringify(updated));
+                }
+                loadLakshanePresets();
+                loadLakshanePresetList();
+            } catch (error) {
+                console.error('Error deleting lakshane preset:', error.response || error);
+                alert(
+                    `Failed to delete lakshane preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+            }
+        }
     }
 
     document.addEventListener('DOMContentLoaded', loadLakshanePresets);
