@@ -737,17 +737,39 @@
     const nadiFieldId = {{ \App\Models\Field::where('name', 'nadi')->first()->id ?? 0 }};
 const nadiStorageKey = 'customNadiPresets';
 
+function getCsrfToken() {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content;
+    if (!token) {
+        console.error('CSRF token not found. Add <meta name="csrf-token" content="{{ csrf_token() }}"> to layout.');
+        alert('CSRF token not found. Please check your Blade layout.');
+    }
+    return token || '';
+}
+
 async function loadNadiPresets() {
     const container = document.getElementById('nadiPresets');
+    if (!container) {
+        console.error('nadiPresets container not found in DOM.');
+        return;
+    }
     container.innerHTML = '';
 
+    if (!nadiFieldId) {
+        alert('Nadi field ID is invalid (0). Check database seeding for "nadi" in fields table.');
+        return;
+    }
+
     try {
-        const response = await axios.get(`/api/presets?field_id=${nadiFieldId}`);
+        const response = await axios.get(`/presets?field_id=${nadiFieldId}`, {
+            headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
+            withCredentials: true
+        });
         response.data.forEach(preset => {
             createPresetButton(preset.button_text, preset.preset_text, preset.id, true);
         });
     } catch (error) {
-        console.error('Error loading nadi presets:', error);
+        console.error('Error loading nadi presets:', error.response || error);
+        alert(`Failed to load nadi presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
     }
 
     const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
@@ -772,15 +794,23 @@ function createPresetButton(buttonText, presetText, id, isDatabase) {
 
 async function loadNadiPresetList() {
     const list = document.getElementById('nadiPresetList');
+    if (!list) {
+        console.error('nadiPresetList container not found in DOM.');
+        return;
+    }
     list.innerHTML = '';
 
     try {
-        const response = await axios.get(`/api/presets?field_id=${nadiFieldId}`);
+        const response = await axios.get(`/presets?field_id=${nadiFieldId}`, {
+            headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
+            withCredentials: true
+        });
         response.data.forEach(preset => {
             createPresetRow(preset, true);
         });
     } catch (error) {
-        console.error('Error loading nadi preset list:', error);
+        console.error('Error loading nadi preset list:', error.response || error);
+        alert(`Failed to load nadi preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
     }
 
     const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
@@ -806,7 +836,12 @@ function createPresetRow(preset, isDatabase) {
 }
 
 function openNadiModal() {
-    document.getElementById('nadiModal').classList.remove('hidden');
+    const modal = document.getElementById('nadiModal');
+    if (!modal) {
+        console.error('nadiModal not found in DOM.');
+        return;
+    }
+    modal.classList.remove('hidden');
     loadNadiPresetList();
     clearNadiForm();
 }
@@ -816,8 +851,12 @@ function closeNadiModal() {
 }
 
 function clearNadiForm() {
-    document.getElementById('nadiButtonText').value = '';
-    document.getElementById('nadiPresetText').value = '';
+    const buttonText = document.getElementById('nadiButtonText');
+    const presetText = document.getElementById('nadiPresetText');
+    if (buttonText && presetText) {
+        buttonText.value = '';
+        presetText.value = '';
+    }
 }
 
 async function saveNadiPreset() {
@@ -830,18 +869,22 @@ async function saveNadiPreset() {
     }
 
     try {
-        await axios.post('/api/presets', {
+        await axios.post('/presets', {
             field_id: nadiFieldId,
             button_text: buttonText,
             preset_text: presetText || buttonText,
             display_order: 0
+        }, {
+            headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
+            withCredentials: true
         });
         loadNadiPresets();
         loadNadiPresetList();
         clearNadiForm();
+        closeNadiModal();
     } catch (error) {
-        console.error('Error saving nadi preset:', error);
-        alert('Failed to save preset.');
+        console.error('Error saving nadi preset:', error.response || error);
+        alert(`Failed to save nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
     }
 }
 
@@ -849,7 +892,10 @@ async function deleteNadiPreset(id, buttonText, isDatabase) {
     if (confirm(`Are you sure you want to delete "${buttonText}"?`)) {
         try {
             if (isDatabase && id) {
-                await axios.delete(`/api/presets/${id}`);
+                await axios.delete(`/presets/${id}`, {
+                    headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
+                    withCredentials: true
+                });
             } else {
                 const stored = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
                 const updated = stored.filter(item => item !== buttonText);
@@ -858,15 +904,18 @@ async function deleteNadiPreset(id, buttonText, isDatabase) {
             loadNadiPresets();
             loadNadiPresetList();
         } catch (error) {
-            console.error('Error deleting nadi preset:', error);
-            alert('Failed to delete preset.');
+            console.error('Error deleting nadi preset:', error.response || error);
+            alert(`Failed to delete nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
         }
     }
 }
 
 function appendNadi(text) {
     const editor = tinymce.get('nadiInput');
-    if (!editor) return;
+    if (!editor) {
+        console.error('TinyMCE editor for nadiInput not found.');
+        return;
+    }
 
     editor.focus();
     const rng = editor.selection.getRng();

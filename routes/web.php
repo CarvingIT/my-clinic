@@ -158,12 +158,12 @@ Route::middleware(['auth', 'admin'])->delete('/patients/{patient}', [PatientCont
 
 
 // Preset Routes
-// Route::middleware('auth')->group(function () {
-//     Route::get('/presets', [PresetController::class, 'index']);
-//     Route::post('/presets', [PresetController::class, 'store']);
-//     Route::put('/presets/{preset}', [PresetController::class, 'update']);
-//     Route::delete('/presets/{preset}', [PresetController::class, 'destroy']);
-// });
+Route::middleware('auth')->group(function () {
+    Route::get('/presets', [PresetController::class, 'index']);
+    Route::post('/presets', [PresetController::class, 'store']);
+    Route::put('/presets/{preset}', [PresetController::class, 'update']);
+    Route::delete('/presets/{preset}', [PresetController::class, 'destroy']);
+});
 
 
 require __DIR__ . '/auth.php';
