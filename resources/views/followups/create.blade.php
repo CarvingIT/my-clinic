@@ -177,20 +177,28 @@ $previousChikitsa = $latestFollowUp
     ? json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? ''
     : '';
                                 @endphp
-                                <!-- Chikitsa Textarea -->
+
+                                <!-- Chikitsa Textarea with Dravya Popup -->
                                 <div class="mt-6 mb-4 flex flex-col">
                                     <div class="flex-1">
-                                        <div class="flex items-center justify-between space-x-2">
-                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                                                {{ __('चिकित्सा') }}</h2>
-                                            <button type="button" onclick="showChikitsaModal()"
-                                                class=" w-10 h-10 rounded bg-gray-500 text-white text-xl font-bold hover:bg-gray-600 transition">
-                                                +
-                                            </button>
+                                        <div class="flex items-start justify-between space-x-2 mb-4">
+                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
+                                                {{ __('चिकित्सा') }}
+                                            </h2>
+                                            <div>
+                                                <button type="button" onclick="showChikitsaModal()"
+                                                    class="w-10 h-10 rounded bg-gray-500 text-white text-xl font-bold hover:bg-gray-600 transition mr-2">
+                                                    +
+                                                </button>
+                                                <button type="button" onclick="showDravyaPopup()"
+                                                    class="w-24 h-10 rounded bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition">
+                                                    द्रव्य
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <textarea id="chikitsa" name="chikitsa" rows="4"
-                                            class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
+                                            class="tinymce-editor px-2 py-1 block w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                                         <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
 
                                         <div class="mt-4 grid grid-cols-5 gap-4">
@@ -218,7 +226,149 @@ $previousChikitsa = $latestFollowUp
                                         <!-- Custom Presets Container -->
                                         <div id="chikitsaPresets"
                                             class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mt-4"></div>
+                                    </div>
 
+
+                                    <!-- Modal for Adding Custom Chikitsa Preset -->
+                                    <div id="chikitsaModal"
+                                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                                        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md w-full max-w-sm">
+                                            <h3 class="text-lg font-semibold mb-2 text-gray-800 dark:text-white">नवीन
+                                                चिकित्सा प्रीसेट</h3>
+                                            <input type="text" id="chikitsaPresetTitle"
+                                                placeholder="उदा. ताप / ज्वर (title)"
+                                                class="w-full px-3 py-2 border rounded mb-3 dark:bg-gray-700 dark:text-white" />
+                                            <textarea id="chikitsaPresetValue" rows="2" placeholder="उदा. महासुदर्शन, वैदेही... (value)"
+                                                class="w-full px-3 py-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"></textarea>
+                                            <div class="flex justify-end space-x-2">
+                                                <button type="button" onclick="hideChikitsaModal()"
+                                                    class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded dark:bg-gray-600 dark:hover:bg-gray-500 text-black dark:text-white">Cancel</button>
+                                                <button type="button" onclick="addChikitsaPreset()"
+                                                    class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Add</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dravya Popup -->
+                                    <div id="dravyaPopup"
+                                        class="fixed hidden bg-white dark:bg-gray-800 p-4 rounded shadow-md border border-gray-300 dark:border-gray-600 overflow-y-auto z-50"
+                                        style="top: 200px; right: 150px; width: 400px; max-height: 70vh;">
+                                        <div class="relative">
+                                            <button type="button" onclick="hideDravyaPopup()"
+                                                class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-xl font-bold">&times;</button>
+
+                                            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">द्रव्य
+                                                प्रीसेट्स</h3>
+                                            <div class="grid grid-cols-4 gap-3">
+                                                <button type="button" onclick="insertDravya('अश्वगंधा')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">अश्वगंधा</button>
+                                                <button type="button" onclick="insertDravya('त्रिफला')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">त्रिफला</button>
+                                                <button type="button" onclick="insertDravya('गिलोय')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">गिलोय</button>
+                                                <button type="button" onclick="insertDravya('आmla')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">आmla</button>
+                                                <button type="button" onclick="insertDravya('हरीतकी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">हरीतकी</button>
+                                                <button type="button" onclick="insertDravya('बिभितकी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">बिभितकी</button>
+                                                <button type="button" onclick="insertDravya('अमलकी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">अमलकी</button>
+                                                <button type="button" onclick="insertDravya('शतावरी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">शतावरी</button>
+                                                <button type="button" onclick="insertDravya('तुलसी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">तुलसी</button>
+                                                <button type="button" onclick="insertDravya('दालचीनी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">दालचीनी</button>
+                                                <button type="button" onclick="insertDravya('नीम')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">नीम</button>
+                                                <button type="button" onclick="insertDravya('हल्दी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">हल्दी</button>
+                                                <button type="button" onclick="insertDravya('गुडूची')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">गुडूची</button>
+                                                <button type="button" onclick="insertDravya('पुनर्नवा')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">पुनर्नवा</button>
+                                                <button type="button" onclick="insertDravya('शंखपुष्पी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">शंखपुष्पी</button>
+                                                <button type="button" onclick="insertDravya('ब्राह्मी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">ब्राह्मी</button>
+                                                <button type="button" onclick="insertDravya('अर्जुन')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">अर्जुन</button>
+                                                <button type="button" onclick="insertDravya('गोक्षुर')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">गोक्षुर</button>
+                                                <button type="button" onclick="insertDravya('कुटकी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">कुटकी</button>
+                                                <button type="button" onclick="insertDravya('मंजिष्ठा')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">मंजिष्ठा</button>
+                                                <button type="button" onclick="insertDravya('चंदन')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">चंदन</button>
+                                                <button type="button" onclick="insertDravya('वच')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">वच</button>
+                                                <button type="button" onclick="insertDravya('यष्टिमधु')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">यष्टिमधु</button>
+                                                <button type="button" onclick="insertDravya('हरिद्रा')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">हरिद्रा</button>
+                                                <button type="button" onclick="insertDravya('मेथी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">मेथी</button>
+                                                <button type="button" onclick="insertDravya('सौंफ')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">सौंफ</button>
+                                                <button type="button" onclick="insertDravya('अजवायन')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">अजवायन</button>
+                                                <button type="button" onclick="insertDravya('धनिया')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">धनिया</button>
+                                                <button type="button" onclick="insertDravya('जीरा')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">जीरा</button>
+                                                <button type="button" onclick="insertDravya('लवंग')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">लवंग</button>
+                                                <button type="button" onclick="insertDravya('जटामांसी')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">जटामांसी</button>
+                                                <button type="button" onclick="insertDravya('कालीमिर्च')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">कालीमिर्च</button>
+                                                <button type="button" onclick="insertDravya('पिप्पली')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">पिप्पली</button>
+                                                <button type="button" onclick="insertDravya('सौंठ')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">सौंठ</button>
+                                                <button type="button" onclick="insertDravya('खदिर')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">खदिर</button>
+                                                <button type="button" onclick="insertDravya('पटोल')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">पटोल</button>
+                                                <button type="button" onclick="insertDravya('नागरमोथा')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">नागरमोथा</button>
+                                                <button type="button" onclick="insertDravya('कुचला')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">कुचला</button>
+                                                <button type="button" onclick="insertDravya('भृंगराज')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">भृंगराज</button>
+                                                <button type="button" onclick="insertDravya('मदार')"
+                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">मदार</button>
+                                            </div>
+                                            <div class="mt-4 flex justify-end">
+                                                <button type="button" onclick="hideDravyaPopup()"
+                                                    class="px-4 py-2 bg-red-300 hover:bg-red-400 rounded dark:bg-red-600 dark:hover:bg-red-500 text-black dark:text-white">
+                                                    Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <!-- Modal for Adding Custom Chikitsa Preset -->
+                                    <div id="chikitsaModal"
+                                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                                        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md w-full max-w-sm">
+                                            <h3 class="text-lg font-semibold mb-2 text-gray-800 dark:text-white">नवीन
+                                                चिकित्सा प्रीसेट</h3>
+                                            <input type="text" id="chikitsaPresetTitle"
+                                                placeholder="उदा. ताप / ज्वर (title)"
+                                                class="w-full px-3 py-2 border rounded mb-3 dark:bg-gray-700 dark:text-white" />
+                                            <textarea id="chikitsaPresetValue" rows="2" placeholder="उदा. महासुदर्शन, वैदेही... (value)"
+                                                class="w-full px-3 py-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"></textarea>
+                                            <div class="flex justify-end space-x-2">
+                                                <button type="button" onclick="hideChikitsaModal()"
+                                                    class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded dark:bg-gray-600 dark:hover:bg-gray-500 text-black dark:text-white">Cancel</button>
+                                                <button type="button" onclick="addChikitsaPreset()"
+                                                    class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Add</button>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="mt-4 mb-4">
                                         <div class="flex items-center justify-between space-x-2">
@@ -819,6 +969,41 @@ $previousChikitsa = $latestFollowUp
             box.addEventListener('click', () => insertChikitsaText(value));
         });
     });
+
+
+    // Dravya Modal Logic
+    function showDravyaPopup() {
+        const popup = document.getElementById('dravyaPopup');
+        popup.classList.remove('hidden');
+    }
+
+    function hideDravyaPopup() {
+        const popup = document.getElementById('dravyaPopup');
+        popup.classList.add('hidden');
+    }
+
+    function insertDravya(dravya) {
+        const editor = tinymce.get('chikitsa');
+        if (!editor) return;
+
+        editor.focus();
+
+        const rng = editor.selection.getRng();
+        const startContainer = rng.startContainer;
+        const startOffset = rng.startOffset;
+
+        let precedingChar = '';
+        if (startContainer.nodeType === 3 && startOffset > 0) {
+            precedingChar = startContainer.data.substring(startOffset - 1, startOffset);
+        }
+
+        const needsSpace = precedingChar && !precedingChar.match(/\s/);
+        const insertText = (needsSpace ? ' ' : '') + dravya;
+
+        editor.selection.setContent(insertText);
+        editor.selection.collapse(false);
+        editor.focus();
+    }
 </script>
 
 
