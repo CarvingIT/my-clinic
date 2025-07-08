@@ -675,7 +675,8 @@
         } catch (error) {
             console.error('Error loading nadi presets:', error.response || error);
             alert(
-                `Failed to load nadi presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                `Failed to load nadi presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
@@ -721,7 +722,8 @@
         } catch (error) {
             console.error('Error loading nadi preset list:', error.response || error);
             alert(
-                `Failed to load nadi preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                `Failed to load nadi preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
@@ -803,7 +805,8 @@
         } catch (error) {
             console.error('Error saving nadi preset:', error.response || error);
             alert(
-                `Failed to save nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                `Failed to save nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                );
         }
     }
 
@@ -828,7 +831,8 @@
             } catch (error) {
                 console.error('Error deleting nadi preset:', error.response || error);
                 alert(
-                    `Failed to delete nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                    `Failed to delete nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                    );
             }
         }
     }
@@ -869,6 +873,7 @@
 <script>
     const chikitsaFieldId = {{ \App\Models\Field::where('name', 'chikitsa')->first()->id ?? 0 }};
     const chikitsaStorageKey = 'customChikitsaPresets';
+    const previousChikitsa = {!! json_encode($previousChikitsa) !!};
 
     async function loadChikitsaPresets() {
         const container = document.getElementById('chikitsaPresets');
@@ -892,7 +897,9 @@
                 withCredentials: true
             });
             response.data.forEach(preset => {
-                createChikitsaPresetButton(preset.button_text, preset.preset_text, preset.id, true);
+                const presetText = preset.button_text === 'चिकित्सा यथा पूर्व' ? previousChikitsa : preset
+                    .preset_text;
+                createChikitsaPresetButton(preset.button_text, presetText, preset.id, true);
             });
         } catch (error) {
             console.error('Error loading chikitsa presets:', error.response || error);
@@ -1087,7 +1094,6 @@
 
 
 
-
 <script>
     function insertArrow(arrow) {
         let textarea = document.getElementById("lakshane");
@@ -1138,7 +1144,8 @@
         } catch (error) {
             console.error('Error loading lakshane presets:', error.response || error);
             alert(
-                `Failed to load lakshane presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                `Failed to load lakshane presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(lakshaneStorageKey)) || [];
@@ -1189,6 +1196,34 @@
         editor.selection.collapse(false);
     }
 
+
+    function insertArrow(arrow) {
+        const editor = tinymce.get('lakshane');
+        if (!editor) {
+            console.error('TinyMCE editor for lakshane not found.');
+            return;
+        }
+
+        editor.focus();
+        const rng = editor.selection.getRng();
+        const container = rng.startContainer;
+        const cursorPos = rng.startOffset;
+        const nodeText = container.textContent || '';
+        const beforeText = nodeText.substring(0, cursorPos);
+        const afterText = nodeText.substring(cursorPos);
+
+        const needsSpaceBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
+        const needsSpaceAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
+
+        let insertText = '';
+        if (needsSpaceBefore) insertText += ' ';
+        insertText += arrow;
+        if (needsSpaceAfter) insertText += ' ';
+
+        editor.selection.setContent(insertText);
+        editor.selection.collapse(false);
+    }
+
     async function loadLakshanePresetList() {
         const list = document.getElementById('lakshanePresetList');
         if (!list) {
@@ -1211,7 +1246,8 @@
         } catch (error) {
             console.error('Error loading lakshane preset list:', error.response || error);
             alert(
-                `Failed to load lakshane preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                `Failed to load lakshane preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(lakshaneStorageKey)) || [];
@@ -1293,7 +1329,8 @@
         } catch (error) {
             console.error('Error saving lakshane preset:', error.response || error);
             alert(
-                `Failed to save lakshane preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                `Failed to save lakshane preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                );
         }
     }
 
@@ -1318,7 +1355,8 @@
             } catch (error) {
                 console.error('Error deleting lakshane preset:', error.response || error);
                 alert(
-                    `Failed to delete lakshane preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                    `Failed to delete lakshane preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                    );
             }
         }
     }
