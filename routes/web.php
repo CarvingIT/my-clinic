@@ -179,8 +179,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('patients', PatientController::class);
     Route::post('patients/{patient}/export-json', [PatientController::class, 'exportPatientJSON'])->name('patients.export_json');
     Route::post('patients/import-json', [PatientController::class, 'importPatientJSON'])->name('patients.import_json');
-    Route::post('patients/export-all-json', [PatientController::class, 'exportAllPatientsJSON'])->name('patients.export_all_json');
-    Route::post('patients/import-all-json', [PatientController::class, 'importAllPatientsJSON'])->name('patients.import_all_json');
 });
 
 // Preset Routes
