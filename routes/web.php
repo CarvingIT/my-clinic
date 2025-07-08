@@ -14,6 +14,7 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\StaffMiddleware;
 use App\Http\Middleware\DoctorMiddleware;
 use App\Models\FollowUp;
+use App\Http\Controllers\PresetController;
 
 
 use Illuminate\Support\Facades\App;
@@ -180,6 +181,14 @@ Route::middleware(['auth'])->group(function () {
     Route::post('patients/import-json', [PatientController::class, 'importPatientJSON'])->name('patients.import_json');
     Route::post('patients/export-all-json', [PatientController::class, 'exportAllPatientsJSON'])->name('patients.export_all_json');
     Route::post('patients/import-all-json', [PatientController::class, 'importAllPatientsJSON'])->name('patients.import_all_json');
+});
+
+// Preset Routes
+Route::middleware('auth')->group(function () {
+    Route::get('/presets', [PresetController::class, 'index']);
+    Route::post('/presets', [PresetController::class, 'store']);
+    Route::put('/presets/{preset}', [PresetController::class, 'update']);
+    Route::delete('/presets/{preset}', [PresetController::class, 'destroy']);
 });
 
 
