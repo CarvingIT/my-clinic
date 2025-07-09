@@ -551,7 +551,7 @@ $previousChikitsa = $latestFollowUp
                                                     <tr class="bg-gray-200 dark:bg-gray-700">
                                                         <th class="p-2">बटण टेक्स्ट</th>
                                                         <th class="p-2">प्रीसेट टेक्स्ट</th>
-                                                        <th class="p-2">स्रोत</th>
+                                                        {{-- <th class="p-2">स्रोत</th> --}}
                                                         <th class="p-2">कृती</th>
                                                     </tr>
                                                 </thead>
@@ -604,7 +604,7 @@ $previousChikitsa = $latestFollowUp
                                                     <tr class="bg-gray-200 dark:bg-gray-700">
                                                         <th class="p-2">बटण टेक्स्ट</th>
                                                         <th class="p-2">प्रीसेट टेक्स्ट</th>
-                                                        <th class="p-2">स्रोत</th>
+                                                        {{-- <th class="p-2">स्रोत</th> --}}
                                                         <th class="p-2">कृती</th>
                                                     </tr>
                                                 </thead>
@@ -656,7 +656,7 @@ $previousChikitsa = $latestFollowUp
                                                     <tr class="bg-gray-200 dark:bg-gray-700">
                                                         <th class="p-2">बटण टेक्स्ट</th>
                                                         <th class="p-2">प्रीसेट टेक्स्ट</th>
-                                                        <th class="p-2">स्रोत</th>
+                                                        {{-- <th class="p-2">स्रोत</th> --}}
                                                         <th class="p-2">कृती</th>
                                                     </tr>
                                                 </thead>
@@ -872,7 +872,7 @@ $previousChikitsa = $latestFollowUp
         row.innerHTML = `
         <td class="p-2">${preset.button_text}</td>
         <td class="p-2">${preset.preset_text || preset.button_text}</td>
-        <td class="p-2">${isDatabase ? 'Database' : 'LocalStorage'}</td>
+
         <td class="p-2">
             <button type="button" class="text-red-500 hover:text-red-700" onclick="deleteNadiPreset('${preset.id || ''}', '${preset.button_text}', ${isDatabase})">Delete</button>
         </td>
@@ -1128,7 +1128,7 @@ $previousChikitsa = $latestFollowUp
         row.innerHTML = `
             <td class="p-2">${preset.button_text}</td>
             <td class="p-2">${preset.preset_text || preset.button_text}</td>
-            <td class="p-2">${isDatabase ? 'Database' : 'LocalStorage'}</td>
+
             <td class="p-2">
                 <button type="button" class="text-red-500 hover:text-red-700" onclick="deleteChikitsaPreset('${preset.id || ''}', '${preset.button_text}', ${isDatabase})">Delete</button>
             </td>
@@ -1608,7 +1608,7 @@ $previousChikitsa = $latestFollowUp
         row.innerHTML = `
             <td class="p-2">${preset.button_text}</td>
             <td class="p-2">${preset.preset_text || preset.button_text}</td>
-            <td class="p-2">${isDatabase ? 'Database' : 'LocalStorage'}</td>
+
             <td class="p-2">
                 <button type="button" class="text-red-500 hover:text-red-700" onclick="deleteLakshanePreset('${preset.id || ''}', '${preset.button_text}', ${isDatabase})">Delete</button>
             </td>
