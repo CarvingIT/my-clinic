@@ -156,7 +156,7 @@ $previousChikitsa = $latestFollowUp
                                                 {{ __('चिकित्सा') }}
                                             </h2>
                                             <div>
-                                                <button type="button" onclick="showChikitsaModal()"
+                                                <button type="button" onclick="openChikitsaModal()"
                                                     class="w-10 h-10 rounded bg-gray-500 text-white text-xl font-bold hover:bg-gray-600 transition mr-2">
                                                     +
                                                 </button>
@@ -180,19 +180,54 @@ $previousChikitsa = $latestFollowUp
                                     <!-- Modal for Adding Custom Chikitsa Preset -->
                                     <div id="chikitsaModal"
                                         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-                                        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md w-full max-w-sm">
-                                            <h3 class="text-lg font-semibold mb-2 text-gray-800 dark:text-white">नवीन
-                                                चिकित्सा प्रीसेट</h3>
-                                            <input type="text" id="chikitsaPresetTitle"
-                                                placeholder="उदा. ताप / ज्वर (title)"
-                                                class="w-full px-3 py-2 border rounded mb-3 dark:bg-gray-700 dark:text-white" />
-                                            <textarea id="chikitsaPresetValue" rows="2" placeholder="उदा. महासुदर्शन, वैदेही... (value)"
-                                                class="w-full px-3 py-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"></textarea>
-                                            <div class="flex justify-end space-x-2">
-                                                <button type="button" onclick="hideChikitsaModal()"
-                                                    class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded dark:bg-gray-600 dark:hover:bg-gray-500 text-black dark:text-white">Cancel</button>
-                                                <button type="button" onclick="addChikitsaPreset()"
-                                                    class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Add</button>
+                                        <div
+                                            class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
+                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
+                                                चिकित्सा प्रीसेट व्यवस्थापन</h2>
+                                            <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
+                                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">
+                                                    नवीन चिकित्सा जोडा</h3>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div>
+                                                        <label
+                                                            class="block text-sm text-gray-700 dark:text-gray-300">बटण
+                                                            टेक्स्ट</label>
+                                                        <input type="text" id="chikitsaButtonText"
+                                                            placeholder="उदा. ज्वर"
+                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
+                                                    </div>
+                                                    <div>
+                                                        <label
+                                                            class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट
+                                                            टेक्स्ट</label>
+                                                        <textarea id="chikitsaPresetText" rows="2" placeholder="उदा. महासुदर्शन, वैदेही..."
+                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-4 flex justify-end space-x-2">
+                                                    <button type="button" onclick="clearChikitsaForm()"
+                                                        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
+                                                    <button type="button" onclick="saveChikitsaPreset()"
+                                                        class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
+                                                </div>
+                                            </div>
+                                            <div class="max-h-96 overflow-y-auto">
+                                                <table
+                                                    class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+                                                    <thead>
+                                                        <tr class="bg-gray-200 dark:bg-gray-700">
+                                                            <th class="p-2">बटण टेक्स्ट</th>
+                                                            <th class="p-2">प्रीसेट टेक्स्ट</th>
+                                                            <th class="p-2">स्रोत</th>
+                                                            <th class="p-2">कृती</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="chikitsaPresetList"></tbody>
+                                                </table>
+                                            </div>
+                                            <div class="mt-4 flex justify-end">
+                                                <button type="button" onclick="closeChikitsaModal()"
+                                                    class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
                                             </div>
                                         </div>
                                     </div>
@@ -202,14 +237,6 @@ $previousChikitsa = $latestFollowUp
                                         class="fixed hidden bg-white dark:bg-gray-800 p-4 rounded shadow-md border border-gray-300 dark:border-gray-600 overflow-y-auto z-50"
                                         style="top: 200px; right: 150px; width: 400px; max-height: 70vh;">
                                         <div class="relative">
-                                            {{-- <button type="button" onclick="hideDravyaPopup()"
-                                                class="absolute top-2 right-6 text-red-600 hover:text-red-800 text-xxl font-bold">×</button>
-                                            <button type="button" id="editDravyaBtn"
-                                                class="absolute top-2 right-14 text-blue-600 hover:text-blue-800 text-lg font-bold"
-                                                onclick="toggleEditDravyaMode()">✎</button>
-                                            <button type="button" id="addDravyaBtn"
-                                                class="absolute top-2 right-24 bg-green-500 text-white hover:bg-green-600 rounded-full w-6 h-6 flex items-center justify-center text-lg font-bold"
-                                                onclick="toggleDravyaForm()">+</button> --}}
                                             <!-- Action Buttons Row -->
                                             <div class="absolute pb-4 right-4 flex items-center space-x-2 z-10">
                                                 <!-- Add Button -->
@@ -265,27 +292,6 @@ $previousChikitsa = $latestFollowUp
                                                     class="px-3 py-1 bg-red-300 hover:bg-red-400 rounded dark:bg-red-600 dark:hover:bg-red-500 text-black dark:text-white text-sm">
                                                     Close
                                                 </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-
-                                    <!-- Modal for Adding Custom Chikitsa Preset -->
-                                    <div id="chikitsaModal"
-                                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-                                        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-md w-full max-w-sm">
-                                            <h3 class="text-lg font-semibold mb-2 text-gray-800 dark:text-white">नवीन
-                                                चिकित्सा प्रीसेट</h3>
-                                            <input type="text" id="chikitsaPresetTitle"
-                                                placeholder="उदा. ताप / ज्वर (title)"
-                                                class="w-full px-3 py-2 border rounded mb-3 dark:bg-gray-700 dark:text-white" />
-                                            <textarea id="chikitsaPresetValue" rows="2" placeholder="उदा. महासुदर्शन, वैदेही... (value)"
-                                                class="w-full px-3 py-2 border rounded mb-4 dark:bg-gray-700 dark:text-white"></textarea>
-                                            <div class="flex justify-end space-x-2">
-                                                <button type="button" onclick="hideChikitsaModal()"
-                                                    class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded dark:bg-gray-600 dark:hover:bg-gray-500 text-black dark:text-white">Cancel</button>
-                                                <button type="button" onclick="addChikitsaPreset()"
-                                                    class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Add</button>
                                             </div>
                                         </div>
                                     </div>
