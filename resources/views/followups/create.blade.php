@@ -202,96 +202,67 @@ $previousChikitsa = $latestFollowUp
                                         class="fixed hidden bg-white dark:bg-gray-800 p-4 rounded shadow-md border border-gray-300 dark:border-gray-600 overflow-y-auto z-50"
                                         style="top: 200px; right: 150px; width: 400px; max-height: 70vh;">
                                         <div class="relative">
-                                            <button type="button" onclick="hideDravyaPopup()"
-                                                class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-xl font-bold">&times;</button>
+                                            {{-- <button type="button" onclick="hideDravyaPopup()"
+                                                class="absolute top-2 right-6 text-red-600 hover:text-red-800 text-xxl font-bold">×</button>
+                                            <button type="button" id="editDravyaBtn"
+                                                class="absolute top-2 right-14 text-blue-600 hover:text-blue-800 text-lg font-bold"
+                                                onclick="toggleEditDravyaMode()">✎</button>
+                                            <button type="button" id="addDravyaBtn"
+                                                class="absolute top-2 right-24 bg-green-500 text-white hover:bg-green-600 rounded-full w-6 h-6 flex items-center justify-center text-lg font-bold"
+                                                onclick="toggleDravyaForm()">+</button> --}}
+                                            <!-- Action Buttons Row -->
+                                            <div class="absolute pb-4 right-4 flex items-center space-x-2 z-10">
+                                                <!-- Add Button -->
+                                                <button type="button" id="addDravyaBtn" onclick="toggleDravyaForm()"
+                                                    class="bg-green-500 text-white hover:bg-green-600 w-8 h-8 rounded-full flex items-center justify-center text-base font-bold shadow">
+                                                    +
+                                                </button>
 
-                                            <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">द्रव्य
-                                                प्रीसेट्स</h3>
-                                            <div class="grid grid-cols-4 gap-3">
-                                                <button type="button" onclick="insertDravya('अश्वगंधा')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">अश्वगंधा</button>
-                                                <button type="button" onclick="insertDravya('त्रिफला')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">त्रिफला</button>
-                                                <button type="button" onclick="insertDravya('गिलोय')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">गिलोय</button>
-                                                <button type="button" onclick="insertDravya('आmla')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">आmla</button>
-                                                <button type="button" onclick="insertDravya('हरीतकी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">हरीतकी</button>
-                                                <button type="button" onclick="insertDravya('बिभितकी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">बिभितकी</button>
-                                                <button type="button" onclick="insertDravya('अमलकी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">अमलकी</button>
-                                                <button type="button" onclick="insertDravya('शतावरी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">शतावरी</button>
-                                                <button type="button" onclick="insertDravya('तुलसी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">तुलसी</button>
-                                                <button type="button" onclick="insertDravya('दालचीनी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">दालचीनी</button>
-                                                <button type="button" onclick="insertDravya('नीम')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">नीम</button>
-                                                <button type="button" onclick="insertDravya('हल्दी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">हल्दी</button>
-                                                <button type="button" onclick="insertDravya('गुडूची')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">गुडूची</button>
-                                                <button type="button" onclick="insertDravya('पुनर्नवा')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">पुनर्नवा</button>
-                                                <button type="button" onclick="insertDravya('शंखपुष्पी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">शंखपुष्पी</button>
-                                                <button type="button" onclick="insertDravya('ब्राह्मी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">ब्राह्मी</button>
-                                                <button type="button" onclick="insertDravya('अर्जुन')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">अर्जुन</button>
-                                                <button type="button" onclick="insertDravya('गोक्षुर')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">गोक्षुर</button>
-                                                <button type="button" onclick="insertDravya('कुटकी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">कुटकी</button>
-                                                <button type="button" onclick="insertDravya('मंजिष्ठा')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">मंजिष्ठा</button>
-                                                <button type="button" onclick="insertDravya('चंदन')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">चंदन</button>
-                                                <button type="button" onclick="insertDravya('वच')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">वच</button>
-                                                <button type="button" onclick="insertDravya('यष्टिमधु')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">यष्टिमधु</button>
-                                                <button type="button" onclick="insertDravya('हरिद्रा')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">हरिद्रा</button>
-                                                <button type="button" onclick="insertDravya('मेथी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">मेथी</button>
-                                                <button type="button" onclick="insertDravya('सौंफ')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">सौंफ</button>
-                                                <button type="button" onclick="insertDravya('अजवायन')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">अजवायन</button>
-                                                <button type="button" onclick="insertDravya('धनिया')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">धनिया</button>
-                                                <button type="button" onclick="insertDravya('जीरा')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">जीरा</button>
-                                                <button type="button" onclick="insertDravya('लवंग')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">लवंग</button>
-                                                <button type="button" onclick="insertDravya('जटामांसी')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">जटामांसी</button>
-                                                <button type="button" onclick="insertDravya('कालीमिर्च')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">कालीमिर्च</button>
-                                                <button type="button" onclick="insertDravya('पिप्पली')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">पिप्पली</button>
-                                                <button type="button" onclick="insertDravya('सौंठ')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">सौंठ</button>
-                                                <button type="button" onclick="insertDravya('खदिर')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">खदिर</button>
-                                                <button type="button" onclick="insertDravya('पटोल')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">पटोल</button>
-                                                <button type="button" onclick="insertDravya('नागरमोथा')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">नागरमोथा</button>
-                                                <button type="button" onclick="insertDravya('कुचला')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">कुचला</button>
-                                                <button type="button" onclick="insertDravya('भृंगराज')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">भृंगराज</button>
-                                                <button type="button" onclick="insertDravya('मदार')"
-                                                    class="p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition">मदार</button>
-                                            </div>
-                                            <div class="mt-4 flex justify-end">
+                                                <!-- Edit Button -->
+                                                <button type="button" id="editDravyaBtn"
+                                                    onclick="toggleEditDravyaMode()"
+                                                    class="text-blue-600 hover:text-blue-800 w-8 h-8 rounded-full flex items-center justify-center text-base font-bold border border-blue-600 shadow">
+                                                    ✎
+                                                </button>
+
+                                                <!-- Close Button -->
                                                 <button type="button" onclick="hideDravyaPopup()"
-                                                    class="px-4 py-2 bg-red-300 hover:bg-red-400 rounded dark:bg-red-600 dark:hover:bg-red-500 text-black dark:text-white">
+                                                    class="text-red-600 hover:text-red-800 w-8 h-8 rounded-full flex items-center justify-center text-base font-bold border border-red-600 shadow">
+                                                    ×
+                                                </button>
+                                            </div>
+
+
+                                            <h3 class="text-base font-semibold mb-3 text-gray-800 dark:text-white">
+                                                द्रव्य प्रीसेट्स</h3>
+
+                                            <!-- Inline Form for Adding New Dravya -->
+                                            <div id="dravyaForm"
+                                                class="mb-3 p-3 bg-gray-100 dark:bg-gray-700 rounded hidden">
+                                                <h4 class="text-sm font-semibold text-gray-800 dark:text-white mb-2">
+                                                    नवीन द्रव्य जोडा</h4>
+                                                <div class="grid grid-cols-1 gap-2">
+                                                    <input type="text" id="dravyaButtonText"
+                                                        placeholder="उदा. अश्वगंधा"
+                                                        class="w-full px-2 py-1 border rounded dark:bg-gray-900 dark:text-white text-sm" />
+                                                    <input type="text" id="dravyaPresetText"
+                                                        placeholder="उदा. अश्वगंधा"
+                                                        class="w-full px-2 py-1 border rounded dark:bg-gray-900 dark:text-white text-sm" />
+                                                </div>
+                                                <div class="mt-2 flex justify-end space-x-2">
+                                                    <button type="button" onclick="clearDravyaForm()"
+                                                        class="px-2 py-1 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded text-xs">Clear</button>
+                                                    <button type="button" onclick="saveDravyaPreset()"
+                                                        class="px-2 py-1 bg-blue-500 text-white hover:bg-blue-600 rounded text-xs">Save</button>
+                                                </div>
+                                            </div>
+
+                                            <!-- Dynamic Dravya Presets -->
+                                            <div id="dravyaPresets" class="grid grid-cols-4 gap-2"></div>
+
+                                            <div class="mt-3 flex justify-end">
+                                                <button type="button" onclick="hideDravyaPopup()"
+                                                    class="px-3 py-1 bg-red-300 hover:bg-red-400 rounded dark:bg-red-600 dark:hover:bg-red-500 text-black dark:text-white text-sm">
                                                     Close
                                                 </button>
                                             </div>
@@ -828,7 +799,7 @@ $previousChikitsa = $latestFollowUp
             console.error('Error loading nadi presets:', error.response || error);
             alert(
                 `Failed to load nadi presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
-                );
+            );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
@@ -875,7 +846,7 @@ $previousChikitsa = $latestFollowUp
             console.error('Error loading nadi preset list:', error.response || error);
             alert(
                 `Failed to load nadi preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
-                );
+            );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(nadiStorageKey)) || [];
@@ -958,7 +929,7 @@ $previousChikitsa = $latestFollowUp
             console.error('Error saving nadi preset:', error.response || error);
             alert(
                 `Failed to save nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
-                );
+            );
         }
     }
 
@@ -984,7 +955,7 @@ $previousChikitsa = $latestFollowUp
                 console.error('Error deleting nadi preset:', error.response || error);
                 alert(
                     `Failed to delete nadi preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
-                    );
+                );
             }
         }
     }
@@ -1056,7 +1027,8 @@ $previousChikitsa = $latestFollowUp
         } catch (error) {
             console.error('Error loading chikitsa presets:', error.response || error);
             alert(
-                `Failed to load chikitsa presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                `Failed to load chikitsa presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+            );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
@@ -1129,7 +1101,8 @@ $previousChikitsa = $latestFollowUp
         } catch (error) {
             console.error('Error loading chikitsa preset list:', error.response || error);
             alert(
-                `Failed to load chikitsa preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                `Failed to load chikitsa preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+            );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
@@ -1211,7 +1184,8 @@ $previousChikitsa = $latestFollowUp
         } catch (error) {
             console.error('Error saving chikitsa preset:', error.response || error);
             alert(
-                `Failed to save chikitsa preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                `Failed to save chikitsa preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+            );
         }
     }
 
@@ -1236,7 +1210,8 @@ $previousChikitsa = $latestFollowUp
             } catch (error) {
                 console.error('Error deleting chikitsa preset:', error.response || error);
                 alert(
-                    `Failed to delete chikitsa preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`);
+                    `Failed to delete chikitsa preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                );
             }
         }
     }
@@ -1284,6 +1259,171 @@ $previousChikitsa = $latestFollowUp
         editor.selection.setContent(insertText);
         editor.selection.collapse(false);
         editor.focus();
+    }
+</script>
+{{-- Dravya dynamic script --}}
+<script>
+    const dravyaFieldId = {{ \App\Models\Field::where('name', 'dravya')->first()->id ?? 0 }};
+    let isDravyaEditMode = false;
+
+    async function loadDravyaPresets() {
+        const container = document.getElementById('dravyaPresets');
+        if (!container) {
+            console.error('dravyaPresets container not found in DOM.');
+            return;
+        }
+        container.innerHTML = '';
+
+        if (!dravyaFieldId) {
+            alert('Dravya field ID is invalid (0). Check database seeding for "dravya" in fields table.');
+            return;
+        }
+
+        try {
+            const response = await axios.get(`/presets?field_id=${dravyaFieldId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createDravyaPresetButton(preset.button_text, preset.preset_text, preset.id);
+            });
+        } catch (error) {
+            console.error('Error loading dravya presets:', error.response || error);
+            alert(
+                `Failed to load dravya presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+            );
+        }
+    }
+
+    function createDravyaPresetButton(buttonText, presetText, id) {
+        const presetDiv = document.createElement('div');
+        presetDiv.className = 'relative';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className =
+            'p-2 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition w-full text-centre text-sm';
+        button.innerText = buttonText;
+        button.onclick = () => insertDravya(presetText);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className =
+            'absolute top-0 right-1 text-red-500 hover:text-red-700 hidden dravya-delete-btn';
+        deleteBtn.innerHTML = 'x';
+        deleteBtn.onclick = () => deleteDravyaPreset(id, buttonText);
+
+        presetDiv.appendChild(button);
+        presetDiv.appendChild(deleteBtn);
+        document.getElementById('dravyaPresets').appendChild(presetDiv);
+
+        // Toggle delete button visibility based on edit mode
+        if (isDravyaEditMode) {
+            deleteBtn.classList.remove('hidden');
+        }
+    }
+
+    function toggleEditDravyaMode() {
+        isDravyaEditMode = !isDravyaEditMode;
+        const deleteButtons = document.querySelectorAll('.dravya-delete-btn');
+        deleteButtons.forEach(btn => {
+            btn.classList.toggle('hidden');
+        });
+        const editBtn = document.getElementById('editDravyaBtn');
+        editBtn.classList.toggle('text-blue-600');
+        editBtn.classList.toggle('text-green-600');
+    }
+
+    function toggleDravyaForm() {
+        const form = document.getElementById('dravyaForm');
+        form.classList.toggle('hidden');
+        const addBtn = document.getElementById('addDravyaBtn');
+        addBtn.innerText = form.classList.contains('hidden') ? '+' : '−';
+        if (!form.classList.contains('hidden')) {
+            clearDravyaForm();
+        }
+    }
+
+    function showDravyaPopup() {
+        const popup = document.getElementById('dravyaPopup');
+        popup.classList.remove('hidden');
+        loadDravyaPresets();
+    }
+
+    function hideDravyaPopup() {
+        const popup = document.getElementById('dravyaPopup');
+        popup.classList.add('hidden');
+        isDravyaEditMode = false;
+        const deleteButtons = document.querySelectorAll('.dravya-delete-btn');
+        deleteButtons.forEach(btn => btn.classList.add('hidden'));
+        const editBtn = document.getElementById('editDravyaBtn');
+        editBtn.classList.remove('text-green-600');
+        editBtn.classList.add('text-blue-600');
+        const form = document.getElementById('dravyaForm');
+        form.classList.add('hidden');
+        const addBtn = document.getElementById('addDravyaBtn');
+        addBtn.innerText = '+';
+    }
+
+    function clearDravyaForm() {
+        document.getElementById('dravyaButtonText').value = '';
+        document.getElementById('dravyaPresetText').value = '';
+    }
+
+    async function saveDravyaPreset() {
+        const buttonText = document.getElementById('dravyaButtonText').value.trim();
+        const presetText = document.getElementById('dravyaPresetText').value.trim();
+
+        if (!buttonText) {
+            alert('Button text is required.');
+            return;
+        }
+
+        try {
+            await axios.post('/presets', {
+                field_id: dravyaFieldId,
+                button_text: buttonText,
+                preset_text: presetText || buttonText,
+                display_order: 0
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            loadDravyaPresets();
+            clearDravyaForm();
+            toggleDravyaForm(); // Hide form after saving
+        } catch (error) {
+            console.error('Error saving dravya preset:', error.response || error);
+            alert(
+                `Failed to save dravya preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+            );
+        }
+    }
+
+    async function deleteDravyaPreset(id, buttonText) {
+        if (confirm(`Are you sure you want to delete "${buttonText}"?`)) {
+            try {
+                await axios.delete(`/presets/${id}`, {
+                    headers: {
+                        'X-CSRF-TOKEN': getCsrfToken(),
+                        'Accept': 'application/json'
+                    },
+                    withCredentials: true
+                });
+                loadDravyaPresets();
+            } catch (error) {
+                console.error('Error deleting dravya preset:', error.response || error);
+                alert(
+                    `Failed to delete dravya preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                );
+            }
+        }
     }
 </script>
 
@@ -1340,7 +1480,7 @@ $previousChikitsa = $latestFollowUp
             console.error('Error loading lakshane presets:', error.response || error);
             alert(
                 `Failed to load lakshane presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
-                );
+            );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(lakshaneStorageKey)) || [];
@@ -1442,7 +1582,7 @@ $previousChikitsa = $latestFollowUp
             console.error('Error loading lakshane preset list:', error.response || error);
             alert(
                 `Failed to load lakshane preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
-                );
+            );
         }
 
         const localPresets = JSON.parse(localStorage.getItem(lakshaneStorageKey)) || [];
@@ -1525,7 +1665,7 @@ $previousChikitsa = $latestFollowUp
             console.error('Error saving lakshane preset:', error.response || error);
             alert(
                 `Failed to save lakshane preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
-                );
+            );
         }
     }
 
@@ -1551,7 +1691,7 @@ $previousChikitsa = $latestFollowUp
                 console.error('Error deleting lakshane preset:', error.response || error);
                 alert(
                     `Failed to delete lakshane preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
-                    );
+                );
             }
         }
     }
