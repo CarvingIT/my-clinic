@@ -178,7 +178,7 @@ $previousChikitsa = $latestFollowUp
 
 
                                     <!-- Modal for Adding Custom Chikitsa Preset -->
-                                    <div id="chikitsaModal"
+                                    {{-- <div id="chikitsaModal"
                                         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
                                         <div
                                             class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
@@ -230,7 +230,7 @@ $previousChikitsa = $latestFollowUp
                                                     class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
                                             </div>
                                         </div>
-                                    </div>
+                                    </div> --}}
 
                                     <!-- Dravya Popup -->
                                     <div id="dravyaPopup"
