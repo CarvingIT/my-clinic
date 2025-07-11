@@ -1004,6 +1004,16 @@ $previousChikitsa = $latestFollowUp
     const chikitsaStorageKey = 'customChikitsaPresets';
     const previousChikitsa = {!! json_encode($previousChikitsa) !!};
 
+    function getCsrfToken() {
+        const token = document.querySelector('meta[name="csrf-token"]')?.content;
+        if (!token) {
+            console.error(
+                'CSRF token not found. Add <meta name="csrf-token" content="{{ csrf_token() }}"> to layout.');
+            alert('CSRF token not found. Please check your Blade layout.');
+        }
+        return token || '';
+    }
+
     async function loadChikitsaPresets() {
         const container = document.getElementById('chikitsaPresets');
         if (!container) {
@@ -1017,6 +1027,7 @@ $previousChikitsa = $latestFollowUp
             return;
         }
 
+        // Load database presets
         try {
             const response = await axios.get(`/presets?field_id=${chikitsaFieldId}`, {
                 headers: {
@@ -1037,9 +1048,10 @@ $previousChikitsa = $latestFollowUp
             );
         }
 
+        // Load local storage presets
         const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
         localPresets.forEach(preset => {
-            createChikitsaPresetButton(preset.button_text || preset, preset.preset_text || preset, null, false);
+            createChikitsaPresetButton(preset.title, preset.value, null, false);
         });
     }
 
@@ -1114,8 +1126,8 @@ $previousChikitsa = $latestFollowUp
         const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
         localPresets.forEach(preset => {
             createChikitsaPresetRow({
-                button_text: preset,
-                preset_text: preset,
+                button_text: preset.title,
+                preset_text: preset.value,
                 id: null
             }, false);
         });
@@ -1171,6 +1183,7 @@ $previousChikitsa = $latestFollowUp
         }
 
         try {
+            // Save to database
             await axios.post('/presets', {
                 field_id: chikitsaFieldId,
                 button_text: buttonText,
@@ -1183,6 +1196,18 @@ $previousChikitsa = $latestFollowUp
                 },
                 withCredentials: true
             });
+
+            // Save to local storage
+            const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
+            const newPreset = {
+                title: buttonText,
+                value: presetText || buttonText
+            };
+            if (!localPresets.some(p => p.title === buttonText)) {
+                localPresets.push(newPreset);
+                localStorage.setItem(chikitsaStorageKey, JSON.stringify(localPresets));
+            }
+
             loadChikitsaPresets();
             loadChikitsaPresetList();
             clearChikitsaForm();
@@ -1208,7 +1233,7 @@ $previousChikitsa = $latestFollowUp
                     });
                 } else {
                     const stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
-                    const updated = stored.filter(item => item !== buttonText);
+                    const updated = stored.filter(item => item.title !== buttonText);
                     localStorage.setItem(chikitsaStorageKey, JSON.stringify(updated));
                 }
                 loadChikitsaPresets();
