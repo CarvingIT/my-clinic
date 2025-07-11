@@ -1039,7 +1039,7 @@ $previousChikitsa = $latestFollowUp
 
         const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
         localPresets.forEach(preset => {
-            createChikitsaPresetButton(preset, preset, null, false);
+            createChikitsaPresetButton(preset.button_text || preset, preset.preset_text || preset, null, false);
         });
     }
 
