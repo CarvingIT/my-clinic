@@ -274,8 +274,7 @@
 
                             {{-- Reports Button --}}
                             <div x-data="{ openReportModal: false, selectedImageUrl: '' }">
-                                <button @click="openReportModal = true"
-                                    title="{{ __('messages.View Reports') }}"
+                                <button @click="openReportModal = true" title="{{ __('messages.View Reports') }}"
                                     class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 ml-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-15 h-10 flex items-center justify-center">
                                     <i class="fas fa-file-image text-white text-2xl"></i>
                                 </button>
@@ -316,7 +315,30 @@
                                                                 <div class="space-y-4">
                                                                     @foreach ($uploads->where('photo_type', 'patient_photo') as $upload)
                                                                         <div @click="selectedImageUrl = '{{ route('uploads.show', $upload->id) }}'"
-                                                                            class="flex items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition duration-200">
+                                                                            class="relative flex items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition duration-200">
+                                                                            <!-- Delete Button -->
+                                                                            <form method="POST"
+                                                                                action="{{ route('uploads.destroy', $upload->id) }}"
+                                                                                onsubmit="return confirm('Are you sure you want to delete this photo?');"
+                                                                                class="absolute top-2 right-2 z-10">
+                                                                                @csrf
+                                                                                @method('DELETE')
+                                                                                <button type="submit"
+                                                                                    class="text-red-600 hover:text-red-800 p-1 rounded-full bg-white/80 shadow-sm transition duration-200"
+                                                                                    @click.stop>
+                                                                                    <svg class="w-5 h-5"
+                                                                                        fill="none"
+                                                                                        stroke="currentColor"
+                                                                                        viewBox="0 0 24 24"
+                                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path stroke-linecap="round"
+                                                                                            stroke-linejoin="round"
+                                                                                            stroke-width="2"
+                                                                                            d="M6 18L18 6M6 6l12 12">
+                                                                                        </path>
+                                                                                    </svg>
+                                                                                </button>
+                                                                            </form>
                                                                             <!-- Thumbnail -->
                                                                             <div class="flex-shrink-0 w-20 h-20">
                                                                                 <img src="{{ route('uploads.show', $upload->id) }}"
@@ -353,7 +375,30 @@
                                                                 <div class="space-y-4">
                                                                     @foreach ($uploads->where('photo_type', 'lab_report') as $upload)
                                                                         <div @click="selectedImageUrl = '{{ route('uploads.show', $upload->id) }}'"
-                                                                            class="flex items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition duration-200">
+                                                                            class="relative flex items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg shadow-sm hover:shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition duration-200">
+                                                                            <!-- Delete Button -->
+                                                                            <form method="POST"
+                                                                                action="{{ route('uploads.destroy', $upload->id) }}"
+                                                                                onsubmit="return confirm('Are you sure you want to delete this photo?');"
+                                                                                class="absolute top-2 right-2 z-10">
+                                                                                @csrf
+                                                                                @method('DELETE')
+                                                                                <button type="submit"
+                                                                                    class="text-red-600 hover:text-red-800 p-1 rounded-full bg-white/80 shadow-sm transition duration-200"
+                                                                                    @click.stop>
+                                                                                    <svg class="w-5 h-5"
+                                                                                        fill="none"
+                                                                                        stroke="currentColor"
+                                                                                        viewBox="0 0 24 24"
+                                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                                        <path stroke-linecap="round"
+                                                                                            stroke-linejoin="round"
+                                                                                            stroke-width="2"
+                                                                                            d="M6 18L18 6M6 6l12 12">
+                                                                                        </path>
+                                                                                    </svg>
+                                                                                </button>
+                                                                            </form>
                                                                             <!-- Thumbnail -->
                                                                             <div class="flex-shrink-0 w-20 h-20">
                                                                                 <img src="{{ route('uploads.show', $upload->id) }}"
@@ -386,42 +431,6 @@
                                                         <p class="text-center text-gray-500 dark:text-gray-400 py-4">No
                                                             medical reports or photos available.</p>
                                                     @endif
-
-                                                    <!-- Upload Form -->
-                                                    {{-- <form method="POST" action="{{ route('uploads.store') }}"
-                            enctype="multipart/form-data" class="mt-6">
-                            @csrf
-                            <input type="hidden" name="patient_id" value="{{ $patient->id }}">
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <x-input-label for="photos" :value="__('messages.Upload Photos/Reports')"
-                                        class="mb-1" />
-                                    <input type="file" name="photos[]" id="photos"
-                                        class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 transition duration-200 hover:border-indigo-500"
-                                        multiple accept="image/*">
-                                    <x-input-error :messages="$errors Byrd('photos')" class="mt-2" />
-                                </div>
-
-                                <div>
-                                    <x-input-label for="photo_type" :value="__('Photo Type')"
-                                        class="mb-1" />
-                                    <select name="photo_type" id="photo_type"
-                                        class="block w-full mt-1 text-sm border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200">
-                                        <option value="patient_photo">{{ __('Patient Photo') }}</option>
-                                        <option value="lab_report">{{ __('Lab Report') }}</option>
-                                    </select>
-                                    <x-input-error :messages="$errors->get('photo_type')" class="mt-2" />
-                                </div>
-                            </div>
-
-                            <div class="flex justify-end mt-4">
-                                <x-primary-button
-                                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">
-                                    {{ __('messages.Upload') }}
-                                </x-primary-button>
-                            </div>
-                        </form> --}}
                                                 </div>
                                             </template>
 
@@ -460,8 +469,7 @@
                             {{-- Chikitsa Ahwal --}}
 
                             <div x-data="{ openReportModal: false }">
-                                <button @click="openReportModal = true"
-                                title="{{ __('Upload/View PDF') }}"
+                                <button @click="openReportModal = true" title="{{ __('Upload/View PDF') }}"
                                     class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-6 h-6">
                                         <!-- White document icon -->

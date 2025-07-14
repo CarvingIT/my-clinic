@@ -46,7 +46,8 @@ class UploadController extends Controller
         // Delete the record from DB
         $upload->delete();
 
-        return response()->json(['message' => 'File deleted successfully!'], 200);
+        // return response()->json(['message' => 'File deleted successfully!'], 200);
+        return back()->with('success', 'Photo deleted successfully.');
     }
 
     // Serve private files through a controller method
