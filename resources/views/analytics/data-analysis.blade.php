@@ -160,35 +160,35 @@
                 </div>
                 <!-- Table -->
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
+                    <table class="min-w-full divide-y divide-gray-200 table-fixed w-full">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    class="w-1/6 px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider break-words hyphens-auto">
                                     {{ __('messages.Patient Name') }}
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    class="w-1/12 px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider break-words hyphens-auto">
                                     {{ __('messages.reference') }}
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    class="w-1/5 px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider break-words hyphens-auto">
                                     {{ __('नाडी / लक्षणे') }}
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    class="w-1/5 px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider break-words hyphens-auto">
                                     {{ __('चिकित्सा') }}
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    class="w-1/5 px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider break-words hyphens-auto">
                                     {{ __('निदान ') }}
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    class="w-1/6 px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider break-words hyphens-auto">
                                     {{ __('messages.Vishesh') }}
                                 </th>
                                 <th
-                                    class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    class="w-1/12 px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider break-words hyphens-auto">
                                     {{ __('messages.Followup Timestamp') }}
                                 </th>
                             </tr>
@@ -196,7 +196,7 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach ($followUps as $followUp)
                                 <tr>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 break-words hyphens-auto">
                                         <a href="{{ route('patients.show', $followUp->patient->id) }}"
                                             class="text-indigo-600 hover:text-indigo-900 block">
                                             {{ optional($followUp->patient)->name ?? 'N/A' }}
@@ -206,8 +206,6 @@
                                                 [{{ intval($followUp->patient->age) }}y]
                                             @endif
                                         </a>
-
-
                                         @if ($followUp->patient && ($followUp->patient->height || $followUp->patient->weight))
                                             <div class="text-gray-500 text-sm">
                                                 {{ $followUp->patient->height ? $followUp->patient->height . 'cm' : 'N/A' }}
@@ -216,10 +214,10 @@
                                             </div>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 break-words hyphens-auto">
                                         {{ optional($followUp->patient)->reference ?? 'N/A' }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 break-words hyphens-auto">
                                         @php
                                             $checkUpInfo = json_decode($followUp->check_up_info, true) ?? [];
                                         @endphp
@@ -230,7 +228,7 @@
                                             <p>{!! $followUp->diagnosis !!}</p>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 break-words hyphens-auto">
                                         @if (!empty($checkUpInfo['chikitsa']))
                                             <p>{!! $checkUpInfo['chikitsa'] !!}</p>
                                         @endif
@@ -244,18 +242,18 @@
                                             <p>{{ __('Packets') }}: {{ $checkUpInfo['packets'] }}</p>
                                         @endif --}}
                                     </td>
-                                    <td class="px-6 py-4">
+
+                                    <td class="px-6 py-4 break-words hyphens-auto">
                                         @if (!empty($checkUpInfo['nidan']))
                                             <p>{!! $checkUpInfo['nidan'] !!}</p>
                                         @endif
-
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-6 py-4 break-words hyphens-auto">
                                         @if (!empty($followUp->patient->vishesh))
                                             <p>{!! optional($followUp->patient)->vishesh !!}</p>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-6 py-4 break-words hyphens-auto">
                                         {{ $followUp->created_at->format('d M Y, h:i A') }}
                                     </td>
                                 </tr>
