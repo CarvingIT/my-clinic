@@ -10,7 +10,9 @@ return new class extends Migration
     {
         Schema::create('presets', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('field_id')->constrained()->onDelete('cascade');
+            // $table->foreignId('field_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('field_id');
+            $table->foreign('field_id')->references('id')->on('fields');
             $table->string('button_text', 255);
             $table->text('preset_text')->nullable();
             $table->integer('display_order')->default(0);
