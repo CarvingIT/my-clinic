@@ -132,7 +132,9 @@ Route::middleware(['auth', StaffMiddleware::class])->group(function () {
 
 // Doctor Routes
 Route::middleware(['auth', DoctorMiddleware::class])->group(function () {
-    Route::get('followups/create', [FollowUpController::class, 'create'])->name('followups.create'); // Doctor can create follow-ups
+    // Route::get('followups/create', [FollowUpController::class, 'create'])->name('followups.create'); // Doctor can create follow-ups
+    Route::get('followups/create/{patient}', [FollowUpController::class, 'create'])->name('followups.create');
+
     Route::resource('followups', FollowUpController::class)->except(['index']); // Doctor can manage follow-ups except for listing them
     Route::resource('reports', ReportController::class)->only(['store', 'destroy']); // Doctor can store and delete reports
     Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store'); // Doctor can upload files
