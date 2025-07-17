@@ -1254,15 +1254,7 @@ $previousChikitsa = $latestFollowUp
             alert('Dravya field ID is invalid (0). Check database seeding for "dravya" in fields table.');
             return;
         }
-        if (typeof animateCSSGrid !== 'undefined') {
-            animateCSSGrid.wrapGrid(container, {
-                duration: 300,
-                easing: 'easeInOut',
-                stagger: 50
-            });
-        } else {
-            console.warn('animateCSSGrid not loaded; animations skipped.');
-        }
+
 
         try {
             const response = await axios.get(`/presets?field_id=${dravyaFieldId}`, {
@@ -1275,12 +1267,14 @@ $previousChikitsa = $latestFollowUp
             response.data.forEach(preset => {
                 createDravyaPresetButton(preset.button_text, preset.preset_text, preset.id);
             });
-            setupDragAndDrop(); // For Drag and Drop
-            // Wrap grid for animations (use global animateCSSGrid from CDN)
-            animateCSSGrid.wrapGrid(container, {
-                duration: 300, // Smooth 300ms animation
-                easing: 'easeInOut', // Natural in-out easing
-                stagger: 50 // Slight stagger for wave effect
+
+            // By using SortableJS for drag and drop
+            new Sortable(container, {
+                animation: 200,
+                ghostClass: 'dragging',
+                onEnd: function() {
+                    saveNewOrder();
+                }
             });
         } catch (error) {
             console.error('Error loading dravya presets:', error.response || error);

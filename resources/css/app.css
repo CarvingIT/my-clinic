@@ -198,3 +198,11 @@ li {
   cursor: grabbing;
   z-index: 10; /* Bring to front */
 }
+
+.dragging {
+    opacity: 0.7;
+    transform: scale(1.05);
+    background: #f8f9fa;
+    border: 2px dashed #3b82f6;
+    z-index: 999;
+}

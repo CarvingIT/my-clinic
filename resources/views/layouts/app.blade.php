@@ -45,10 +45,12 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     {{-- For Grid Animation --}}
-    {{-- <script src="https://unpkg.com/animate-css-grid@latest"></script> --}}
-    {{-- <script src="https://cdn.jsdelivr.net/npm/animate-css-grid@latest/dist/main.js"></script> --}}
-    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" /> --}}
     <script src="https://cdn.jsdelivr.net/npm/animate-css-grid@1.1.0/dist/main.js"></script>
+
+    {{-- For Drag and Drop --}}
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+
 
 </head>
 
