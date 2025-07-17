@@ -1,70 +1,78 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        {{-- <title>{{ config('app.name', 'Laravel') }}</title> --}}
-        <title>My Clinic</title>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <!-- Favicon -->
-        <link rel="icon" href="{{ asset('favicon.png') }}">
+    {{-- <title>{{ config('app.name', 'Laravel') }}</title> --}}
+    <title>My Clinic</title>
 
-
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-        <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
-
-        {{-- Icons --}}
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
-        {{-- alpine js --}}
-        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('favicon.png') }}">
 
 
-        <!-- Scripts -->
-        <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{-- Icons --}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-        {{-- Script to disable dark mode --}}
-        <script>
-            document.addEventListener('DOMContentLoaded', () => {
-                document.documentElement.classList.remove('dark');
-            });
-        </script>
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
+    {{-- alpine js --}}
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 
-        <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+    <!-- Scripts -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
-        </div>
+    {{-- Script to disable dark mode --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.documentElement.classList.remove('dark');
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
 
-        <script>
-            const marathiToEnglishMapping = {
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+
+    {{-- For Grid Animation --}}
+    {{-- <script src="https://unpkg.com/animate-css-grid@latest"></script> --}}
+    {{-- <script src="https://cdn.jsdelivr.net/npm/animate-css-grid@latest/dist/main.js"></script> --}}
+    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" /> --}}
+    <script src="https://cdn.jsdelivr.net/npm/animate-css-grid@1.1.0/dist/main.js"></script>
+
+</head>
+
+<body class="font-sans antialiased">
+    <div class="min-h-screen bg-gray-100">
+        @include('layouts.navigation')
+
+        <!-- Page Heading -->
+        @isset($header)
+            <header class="bg-white shadow">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                    {{ $header }}
+                </div>
+            </header>
+        @endisset
+
+        <!-- Page Content -->
+        <main>
+            {{ $slot }}
+        </main>
+    </div>
+
+    <script>
+        const marathiToEnglishMapping = {
             '०': '0',
             '१': '1',
             '२': '2',
@@ -89,25 +97,24 @@
                 this.value = convertMarathiToEnglish(this.value);
             });
         });
+    </script>
 
-        </script>
-
-        <script src="{{ asset('tinymce/tinymce.min.js') }}"></script>
+    <script src="{{ asset('tinymce/tinymce.min.js') }}"></script>
 
 
-        <script>
-            tinymce.init({
-                selector: '.tinymce-editor',
-                plugins: 'lists link table textcolor',
-                toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
-                menubar: false,
-                branding: false,
-                statusbar: true,
-                elementpath: false,
-                height: 200,
-                resize: true,
-                forced_root_block: false,
-                content_style: `
+    <script>
+        tinymce.init({
+            selector: '.tinymce-editor',
+            plugins: 'lists link table textcolor',
+            toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
+            menubar: false,
+            branding: false,
+            statusbar: true,
+            elementpath: false,
+            height: 200,
+            resize: true,
+            forced_root_block: false,
+            content_style: `
                                 body {
                                 line-height: 1.4 !important;
                                 margin: 0;
@@ -119,34 +126,35 @@
                                 }
                             `,
 
-            });
-        </script>
-        <script>
-            tinymce.init({
-                selector: '.tinymce-editor002',
-                plugins: 'lists link table textcolor',
-                toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
-                menubar: false,
-                branding: false,
-                statusbar: true,
-                elementpath: false,
-                height: 150,
+        });
+    </script>
+    <script>
+        tinymce.init({
+            selector: '.tinymce-editor002',
+            plugins: 'lists link table textcolor',
+            toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
+            menubar: false,
+            branding: false,
+            statusbar: true,
+            elementpath: false,
+            height: 150,
 
-            });
-        </script>
-        <script>
-            tinymce.init({
-                selector: '.tinymce-editor003',
-                plugins: 'lists link table textcolor',
-                toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
-                menubar: false,
-                branding: false,
-                statusbar: true,
-                elementpath: false,
-                height: 150,
+        });
+    </script>
+    <script>
+        tinymce.init({
+            selector: '.tinymce-editor003',
+            plugins: 'lists link table textcolor',
+            toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
+            menubar: false,
+            branding: false,
+            statusbar: true,
+            elementpath: false,
+            height: 150,
 
-            });
-        </script>
+        });
+    </script>
 
-    </body>
+</body>
+
 </html>

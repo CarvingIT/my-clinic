@@ -185,6 +185,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/presets', [PresetController::class, 'index']);
     Route::post('/presets', [PresetController::class, 'store']);
+    Route::post('/presets/update-order', [PresetController::class, 'updateOrder'])->name('presets.update-order');
     Route::put('/presets/{preset}', [PresetController::class, 'update']);
     Route::delete('/presets/{preset}', [PresetController::class, 'destroy']);
 });

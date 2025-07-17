@@ -171,3 +171,30 @@ li {
 .modal-container:not(.hidden) .modal-content {
     @apply scale-100;
 }
+
+.dragging {
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+.relative:hover {
+    cursor: grab;
+}
+#dravyaPresets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem; /* Adjust gap for better spacing */
+  transition: all 0.3s ease-in-out; /* for container resize */
+}
+
+.relative {
+  position: relative;
+  transition: transform 0.3s ease-in-out, opacity 0.2s ease; /* Smooth shifts and fade */
+  cursor: grab;
+}
+
+.relative.dragging {
+  opacity: 0.5; /* Fade original during drag */
+  transform: scale(1.05); /* Slight scale for "lifting" feel */
+  cursor: grabbing;
+  z-index: 10; /* Bring to front */
+}

@@ -176,62 +176,6 @@ $previousChikitsa = $latestFollowUp
                                             class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 mt-4"></div>
                                     </div>
 
-
-                                    <!-- Modal for Adding Custom Chikitsa Preset -->
-                                    {{-- <div id="chikitsaModal"
-                                        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-                                        <div
-                                            class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
-                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                                                चिकित्सा प्रीसेट व्यवस्थापन</h2>
-                                            <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
-                                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">
-                                                    नवीन चिकित्सा जोडा</h3>
-                                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    <div>
-                                                        <label
-                                                            class="block text-sm text-gray-700 dark:text-gray-300">बटण
-                                                            टेक्स्ट</label>
-                                                        <input type="text" id="chikitsaButtonText"
-                                                            placeholder="उदा. ज्वर"
-                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
-                                                    </div>
-                                                    <div>
-                                                        <label
-                                                            class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट
-                                                            टेक्स्ट</label>
-                                                        <textarea id="chikitsaPresetText" rows="2" placeholder="उदा. महासुदर्शन, वैदेही..."
-                                                            class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white"></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="mt-4 flex justify-end space-x-2">
-                                                    <button type="button" onclick="clearChikitsaForm()"
-                                                        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
-                                                    <button type="button" onclick="saveChikitsaPreset()"
-                                                        class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
-                                                </div>
-                                            </div>
-                                            <div class="max-h-96 overflow-y-auto">
-                                                <table
-                                                    class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
-                                                    <thead>
-                                                        <tr class="bg-gray-200 dark:bg-gray-700">
-                                                            <th class="p-2">बटण टेक्स्ट</th>
-                                                            <th class="p-2">प्रीसेट टेक्स्ट</th>
-                                                            <th class="p-2">स्रोत</th>
-                                                            <th class="p-2">कृती</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="chikitsaPresetList"></tbody>
-                                                </table>
-                                            </div>
-                                            <div class="mt-4 flex justify-end">
-                                                <button type="button" onclick="closeChikitsaModal()"
-                                                    class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
-                                            </div>
-                                        </div>
-                                    </div> --}}
-
                                     <!-- Dravya Popup -->
                                     <div id="dravyaPopup"
                                         class="fixed hidden bg-white dark:bg-gray-800 p-4 rounded shadow-md border border-gray-300 dark:border-gray-600 overflow-y-auto z-50"
@@ -1292,6 +1236,7 @@ $previousChikitsa = $latestFollowUp
         editor.focus();
     }
 </script>
+<script src="https://unpkg.com/animate-css-grid@latest"></script>
 {{-- Dravya dynamic script --}}
 <script>
     const dravyaFieldId = {{ \App\Models\Field::where('name', 'dravya')->first()->id ?? 0 }};
@@ -1309,6 +1254,15 @@ $previousChikitsa = $latestFollowUp
             alert('Dravya field ID is invalid (0). Check database seeding for "dravya" in fields table.');
             return;
         }
+        if (typeof animateCSSGrid !== 'undefined') {
+            animateCSSGrid.wrapGrid(container, {
+                duration: 300,
+                easing: 'easeInOut',
+                stagger: 50
+            });
+        } else {
+            console.warn('animateCSSGrid not loaded; animations skipped.');
+        }
 
         try {
             const response = await axios.get(`/presets?field_id=${dravyaFieldId}`, {
@@ -1321,6 +1275,13 @@ $previousChikitsa = $latestFollowUp
             response.data.forEach(preset => {
                 createDravyaPresetButton(preset.button_text, preset.preset_text, preset.id);
             });
+            setupDragAndDrop(); // For Drag and Drop
+            // Wrap grid for animations (use global animateCSSGrid from CDN)
+            animateCSSGrid.wrapGrid(container, {
+                duration: 300, // Smooth 300ms animation
+                easing: 'easeInOut', // Natural in-out easing
+                stagger: 50 // Slight stagger for wave effect
+            });
         } catch (error) {
             console.error('Error loading dravya presets:', error.response || error);
             alert(
@@ -1332,6 +1293,8 @@ $previousChikitsa = $latestFollowUp
     function createDravyaPresetButton(buttonText, presetText, id) {
         const presetDiv = document.createElement('div');
         presetDiv.className = 'relative';
+        presetDiv.dataset.id = id; // Store preset ID for ordering
+        presetDiv.draggable = true; // Make draggable
 
         const button = document.createElement('button');
         button.type = 'button';
@@ -1354,6 +1317,107 @@ $previousChikitsa = $latestFollowUp
         // Toggle delete button visibility based on edit mode
         if (isDravyaEditMode) {
             deleteBtn.classList.remove('hidden');
+        }
+    }
+    // Set up drag-and-drop events on the container
+    function setupDragAndDrop() {
+        const container = document.getElementById('dravyaPresets');
+        const draggables = container.querySelectorAll('div.relative');
+
+        draggables.forEach(draggable => {
+            draggable.addEventListener('dragstart', (e) => {
+                draggable.classList.add('dragging'); // For styling (e.g., opacity: 0.5 in CSS)
+                // N Create clone for drag image (feels like dragging whole button)
+                const clone = draggable.cloneNode(true);
+                document.body.appendChild(clone);
+                clone.style.position = 'absolute';
+                clone.style.top = '-9999px'; // Offscreen
+                e.dataTransfer.setDragImage(clone, e.offsetX, e.offsetY);
+                setTimeout(() => document.body.removeChild(clone), 0); // Clean up
+            });
+
+            draggable.addEventListener('dragend', () => {
+                draggable.classList.remove('dragging');
+                saveNewOrder(); // Persist order after drop
+            });
+        });
+
+        container.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Allow drop
+            const afterElement = getDragAfterElement(container, e.clientX, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            if (afterElement == null) {
+                container.appendChild(dragging);
+            } else {
+                container.insertBefore(dragging, afterElement);
+            }
+        });
+    }
+
+    // Calculate where to insert based on mouse position (works for grid)
+    function getDragAfterElement(container, x, y) {
+        const draggableElements = [...container.querySelectorAll('div.relative:not(.dragging)')];
+
+        // Find closest element by distance
+        let closest = draggableElements.reduce((closest, child) => {
+            const box = child.getBoundingClientRect();
+            const offsetX = x - (box.left + box.width / 2);
+            const offsetY = y - (box.top + box.height / 2);
+            const distance = Math.sqrt(offsetX ** 2 + offsetY ** 2);
+
+            if (distance < closest.distance) {
+                return {
+                    distance,
+                    element: child,
+                    offsetX
+                };
+            } else {
+                return closest;
+            }
+        }, {
+            distance: Number.POSITIVE_INFINITY,
+            element: null,
+            offsetX: 0
+        });
+
+        if (closest.element) {
+            // If mouse is right of center, insert after (before next sibling)
+            if (closest.offsetX > 0) {
+                return closest.element.nextSibling;
+            } else {
+                // Insert before
+                return closest.element;
+            }
+        }
+
+        return null; // Append to end
+    }
+
+    //  Save new order to backend
+    async function saveNewOrder() {
+        const container = document.getElementById('dravyaPresets');
+        const items = [...container.querySelectorAll('div.relative')];
+        const orders = items.map((item, index) => ({
+            id: item.dataset.id,
+            order: index
+        }));
+
+        try {
+            await axios.post('/presets/update-order', {
+                orders
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            });
+        } catch (error) {
+            console.error('Error saving order:', error.response || error);
+            alert(
+                `Failed to save order: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+            );
         }
     }
 

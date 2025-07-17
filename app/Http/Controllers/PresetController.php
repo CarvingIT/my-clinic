@@ -65,4 +65,19 @@ class PresetController extends Controller
         $preset->delete();
         return response()->json(['message' => 'Preset deleted']);
     }
+
+    public function updateOrder(Request $request)
+    {
+        $request->validate([
+            'orders' => 'required|array',
+            'orders.*.id' => 'required|exists:presets,id',
+            'orders.*.order' => 'required|integer|min:0',
+        ]);
+
+        foreach ($request->orders as $item) {
+            Preset::where('id', $item['id'])->update(['display_order' => $item['order']]);
+        }
+
+        return response()->json(['message' => 'Orders updated successfully']);
+    }
 }
