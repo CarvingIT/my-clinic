@@ -1270,7 +1270,7 @@ $previousChikitsa = $latestFollowUp
 
             // By using SortableJS for drag and drop
             new Sortable(container, {
-                animation: 200,
+                animation: 250,
                 ghostClass: 'dragging',
                 onEnd: function() {
                     saveNewOrder();

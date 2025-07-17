@@ -200,9 +200,11 @@ li {
 }
 
 .dragging {
-    opacity: 0.7;
-    transform: scale(1.05);
-    background: #f8f9fa;
-    border: 2px dashed #3b82f6;
-    z-index: 999;
+    animation: pulse 0.8s infinite;
 }
+@keyframes pulse {
+    0% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+    100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+}
+
