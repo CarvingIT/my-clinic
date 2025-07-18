@@ -92,7 +92,7 @@
 
                                     <!-- Presets Container -->
                                     <div id="nadiPresets"
-                                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mt-4">
+                                        class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-2 mt-4">
                                     </div>
 
                                     <x-input-error :messages="$errors->get('nadi')" class="mt-2" />
@@ -105,7 +105,7 @@
                                             {{ __('लक्षणे') }}
                                         </h2>
                                         <button type="button" onclick="openLakshaneModal()"
-                                            class="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600 transition">
+                                            class="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600 transition text-lg">
                                             +
                                         </button>
                                     </div>
@@ -114,19 +114,24 @@
                                         class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
                                     <x-input-error :messages="$errors->get('diagnosis')" class="mt-2" />
 
-                                    <!-- Preset and Arrow Buttons Below Textarea -->
-                                    <div class="mt-4 grid grid-cols-7 gap-2">
+                                    <!-- Presets Container with Arrows First -->
+                                    <div id="lakshanePresetsContainer"
+                                        class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-2 mt-4">
+                                        <!-- Arrow Buttons (same style as presets) -->
                                         <button type="button" onclick="insertArrow('↑')"
-                                            class="w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                            class="w-full h-10 bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
                                             ↑
                                         </button>
                                         <button type="button" onclick="insertArrow('↓')"
-                                            class="w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                                            class="w-full h-10 bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition">
                                             ↓
                                         </button>
-                                        <div id="lakshanePresets" class="col-span-5 grid grid-cols-5 gap-2"></div>
+
+                                        <!-- Dynamic Presets Will Append Here -->
+                                        <div id="lakshanePresets" class="contents w-full h-10"></div>
                                     </div>
                                 </div>
+
 
                                 {{-- Nidaan Input --}}
                                 <div class="mt-4 mb-4">
@@ -622,7 +627,7 @@ $previousChikitsa = $latestFollowUp
                                 <div class="flex items-center justify-between mt-4">
 
                                     <button type="button" id="openCameraModal"
-                                        class="px-5 py-2.5 ms-4 text-xs font-medium tracking-wider bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                        class="px-5 py-2.5 text-xs font-medium tracking-wider bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                                         CAPTURE PHOTOS
                                     </button>
 
@@ -765,7 +770,7 @@ $previousChikitsa = $latestFollowUp
         const button = document.createElement('button');
         button.type = 'button';
         button.className =
-            'nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition w-full text-left pr-6';
+            'nadi-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition w-full text-centre pr-6';
         button.innerText = buttonText;
         button.onclick = () => appendNadi(presetText);
 
@@ -1006,7 +1011,7 @@ $previousChikitsa = $latestFollowUp
         const button = document.createElement('button');
         button.type = 'button';
         button.className =
-            'border p-2 rounded cursor-pointer bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition w-full text-left pr-6';
+            'border p-2 rounded cursor-pointer bg-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition w-full text-centre pr-6';
         button.innerText = buttonText;
         button.onclick = () => insertChikitsaText(presetText);
 
@@ -1142,15 +1147,15 @@ $previousChikitsa = $latestFollowUp
             });
 
             // Save to local storage
-            const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
-            const newPreset = {
-                title: buttonText,
-                value: presetText || buttonText
-            };
-            if (!localPresets.some(p => p.title === buttonText)) {
-                localPresets.push(newPreset);
-                localStorage.setItem(chikitsaStorageKey, JSON.stringify(localPresets));
-            }
+            // const localPresets = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
+            // const newPreset = {
+            //     title: buttonText,
+            //     value: presetText || buttonText
+            // };
+            // if (!localPresets.some(p => p.title === buttonText)) {
+            //     localPresets.push(newPreset);
+            //     localStorage.setItem(chikitsaStorageKey, JSON.stringify(localPresets));
+            // }
 
             loadChikitsaPresets();
             loadChikitsaPresetList();
@@ -1167,7 +1172,7 @@ $previousChikitsa = $latestFollowUp
     async function deleteChikitsaPreset(id, buttonText, isDatabase) {
         if (confirm(`Are you sure you want to delete "${buttonText}"?`)) {
             try {
-                if (isDatabase && id) {
+                if (id) {
                     await axios.delete(`/presets/${id}`, {
                         headers: {
                             'X-CSRF-TOKEN': getCsrfToken(),
@@ -1175,12 +1180,13 @@ $previousChikitsa = $latestFollowUp
                         },
                         withCredentials: true
                     });
-                } else {
-                    const stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
-                    const updated = stored.filter(item => item.title !== buttonText);
-                    localStorage.setItem(chikitsaStorageKey, JSON.stringify(updated));
                 }
-                loadChikitsaPresets();
+                // else {
+                //     const stored = JSON.parse(localStorage.getItem(chikitsaStorageKey)) || [];
+                //     const updated = stored.filter(item => item.title !== buttonText);
+                //     localStorage.setItem(chikitsaStorageKey, JSON.stringify(updated));
+                // }
+                // loadChikitsaPresets();
                 loadChikitsaPresetList();
             } catch (error) {
                 console.error('Error deleting chikitsa preset:', error.response || error);
@@ -1585,7 +1591,7 @@ $previousChikitsa = $latestFollowUp
         const button = document.createElement('button');
         button.type = 'button';
         button.className =
-            'w-full px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition text-left pr-6';
+            'bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition w-full text-centre pr-6';
         button.innerText = buttonText;
         button.onclick = () => insertLakshaneText(presetText);
 
