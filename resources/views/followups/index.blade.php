@@ -27,7 +27,7 @@
                     <div class="flex flex-col">
                         <label for="branch_name" class="text-gray-800 dark:text-gray-300 font-semibold">Branch:</label>
                         <select id="branch_name" name="branch_name"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            class="border border-gray-300 dark:border-gray-700 rounded-md pr-8 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
                             <option value="all" {{ request('branch_name') == 'all' ? 'selected' : '' }}>All Branches
                             </option>
                             @foreach ($branches as $branch)
@@ -56,6 +56,21 @@
                             @endforeach
                         </select>
                     </div>
+                    {{-- Filter for Today, Last Week, Last Month --}}
+                    <div class="flex flex-col">
+                        <label for="time_period" class="text-gray-800 dark:text-gray-300 font-semibold">Time
+                            Period:</label>
+                        <select id="time_period" name="time_period"
+                            class="border border-gray-300 dark:border-gray-700 rounded-md pr-8 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            <option value="all" {{ request('time_period') == 'all' ? 'selected' : '' }}>All</option>
+                            <option value="today" {{ request('time_period') == 'today' ? 'selected' : '' }}>Today
+                            </option>
+                            <option value="last_week" {{ request('time_period') == 'last_week' ? 'selected' : '' }}>
+                                Last Week</option>
+                            <option value="last_month" {{ request('time_period') == 'last_month' ? 'selected' : '' }}>
+                                Last Month</option>
+                        </select>
+                    </div>
 
                     <button onclick="formSubmit();"
                         class="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
@@ -71,8 +86,75 @@
                     <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📊 {{ __('messages.Insights') }}
                     </h3>
 
+                    {{-- Filter Summary Section --}}
+                    <div class="bg-blue-50 dark:bg-gray-900 border-l-4 border-blue-500 p-4 mb-6 rounded-md">
+                        <h4 class="text-md font-semibold text-blue-800 dark:text-blue-300 mb-3">Filter Summary</h4>
+                        <ul class="text-sm list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                            @php
+                                $filterSummary = [];
+
+                                if (request('time_period') && request('time_period') != 'all') {
+                                    $filterSummary[] = [
+                                        'icon' => '⏳',
+                                        'label' => 'Time Period',
+                                        'value' => match (request('time_period')) {
+                                            'today' => 'Today',
+                                            'last_week' => 'Last Week',
+                                            'last_month' => 'Last Month',
+                                            default => 'Unknown',
+                                        },
+                                    ];
+                                } elseif (request('from_date') || request('to_date')) {
+                                    $from = request('from_date')
+                                        ? \Carbon\Carbon::parse(request('from_date'))->format('d M Y')
+                                        : 'Start';
+                                    $to = request('to_date')
+                                        ? \Carbon\Carbon::parse(request('to_date'))->format('d M Y')
+                                        : 'End';
+                                    $filterSummary[] = [
+                                        'icon' => '📅',
+                                        'label' => 'Date Range',
+                                        'value' => "$from → $to",
+                                    ];
+                                }
+
+                                if (request('branch_name') && request('branch_name') != 'all') {
+                                    $filterSummary[] = [
+                                        'icon' => '🏢',
+                                        'label' => 'Branch',
+                                        'value' => request('branch_name'),
+                                    ];
+                                }
+
+                                if (request('doctor') && request('doctor') != 'all') {
+                                    $doctor = \App\Models\User::find(request('doctor'));
+                                    $filterSummary[] = [
+                                        'icon' => '👨‍⚕️',
+                                        'label' => 'Doctor',
+                                        'value' => $doctor ? $doctor->name : 'Unknown',
+                                    ];
+                                }
+                            @endphp
+
+                            @if (empty($filterSummary))
+                                <li class="text-gray-500 dark:text-gray-400 italic">No filters applied</li>
+                            @else
+                                @foreach ($filterSummary as $filter)
+                                    <li>
+                                        <span class="mr-1">{{ $filter['icon'] }}</span>
+                                        {{ $filter['label'] }}: <span class="font-bold">{{ $filter['value'] }}</span>
+                                    </li>
+                                @endforeach
+                                {{-- Example for total results if available --}}
+                                {{-- @if (isset($totalPatients))
+                                        <li>📊 Total Results: <span class="font-bold">{{ $totalPatients }}</span></li>
+                                    @endif --}}
+                            @endif
+                        </ul>
+                    </div>
+
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-5">
-                        <div
+                        {{-- <div
                             class="p-4 rounded-lg bg-gradient-to-br from-yellow-200 to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow
                     transition-all duration-300 ease-in-out hover:bg-gradient-to-bl hover:from-gray-50 hover:to-yellow-200 hover:scale-105 hover:shadow-lg">
                             <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">🏢
@@ -80,9 +162,9 @@
                             <p class="text-lg font-semibold text-yellow-900 dark:text-gray-100">
                                 {{ request('branch_name') ? request('branch_name') : __('messages.All Branches') }}
                             </p>
-                        </div>
+                        </div> --}}
 
-                        <div
+                        {{-- <div
                             class="p-4 rounded-lg bg-gradient-to-br from-orange-200 to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow
                     transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-gray-50 hover:to-orange-200 hover:scale-105 hover:shadow-lg">
                             <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">📆
@@ -92,18 +174,9 @@
                                 →
                                 {{ request('to_date') ? \Carbon\Carbon::parse(request('to_date'))->format('d M Y') : 'All' }}
                             </p>
-                        </div>
+                        </div> --}}
 
-                        <a href="{{ route('patient-dues.index') }}">
-                            <div
-                                class="p-4 rounded-lg bg-gradient-to-br from-red-200 to-white dark:from-red-900 dark:to-gray-900 shadow
-                    transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-red-200 hover:scale-105 hover:shadow-lg">
-                                <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">⚠️
-                                    {{ __('messages.Total Outstanding Balance') }}</p>
-                                <p class="text-lg font-bold text-red-600 dark:text-red-300">
-                                    ₹{{ number_format($totalDueAll) }}</p>
-                            </div>
-                        </a>
+
 
                         <div
                             class="p-4 rounded-lg bg-gradient-to-br from-cyan-200 to-white dark:from-blue-900 dark:to-gray-900 shadow
@@ -130,6 +203,27 @@
                                 ₹{{ number_format($totalIncome) }}</p>
                         </div>
                     </div>
+                    <a href="{{ route('patient-dues.index') }}" title="View all patient dues"
+                        class=" flex justify-center">
+                        <div
+                            class="p-2 mt-3 w-full text-center rounded-lg bg-gradient-to-br from-red-200 to-white dark:from-red-900 dark:to-gray-900 shadow
+        transition-all duration-300 ease-in-out hover:from-red-300 hover:to-white hover:shadow-xl hover:scale-105 cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2">
+
+                            <p
+                                class="text-sm font-semibold text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
+                                ⚠️ {{ __('messages.Total Outstanding Balance') }}
+                                <span class="text-xs text-gray-500">➡️</span>
+                            </p>
+
+                            <p class="text-lg font-bold text-red-600 dark:text-red-300">
+                                ₹{{ number_format($totalDueAll) }}
+                            </p>
+
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Click to view details</p>
+                        </div>
+                    </a>
+
+
                 </div>
 
                 {{-- Charts Section --}}
@@ -222,10 +316,13 @@
                                             class="text-right px-4 py-3 font-semibold text-green-600 dark:text-green-300">
                                             ₹{{ number_format(@$followUp->amount_paid, 2) }}
                                         </td> --}}
-                                        <td class="text-right px-4 py-3 font-semibold
-                                            {{ $followUp->amount_paid < $followUp->amount_billed ? 'text-red-600 dark:text-red-400' :
-                                            ($followUp->amount_paid > $followUp->amount_billed ? 'text-green-600 dark:text-green-300' :
-                                            'text-blue-600 dark:text-blue-300') }}">
+                                        <td
+                                            class="text-right px-4 py-3 font-semibold
+                                            {{ $followUp->amount_paid < $followUp->amount_billed
+                                                ? 'text-red-600 dark:text-red-400'
+                                                : ($followUp->amount_paid > $followUp->amount_billed
+                                                    ? 'text-green-600 dark:text-green-300'
+                                                    : 'text-blue-600 dark:text-blue-300') }}">
                                             ₹{{ number_format(@$followUp->amount_paid, 2) }}
                                         </td>
 

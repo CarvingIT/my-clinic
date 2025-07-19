@@ -184,6 +184,9 @@ class FollowUpController extends Controller
         // Default to "all"
         $selectedBranch = $request->input('branch_name', 'all');
 
+        // Initialize query
+        $query = FollowUp::whereHas('patient');
+
         $query = FollowUp::whereHas('patient'); // Ensures only follow-ups with patients are fetched
 
         // Apply branch filter only if a specific branch is selected
@@ -194,11 +197,33 @@ class FollowUpController extends Controller
             $query->where('doctor_id', $request->input('doctor'));
         }
 
-        // Apply date filter if selected
-        if ($request->filled('from_date') && $request->filled('to_date')) {
-            $from = Carbon::parse($request->from_date)->startOfDay();
-            $to = Carbon::parse($request->to_date)->endOfDay();
-            $query->whereBetween('created_at', [$from, $to]);
+        // Apply time_period filter (overrides from_date and to_date)
+        if ($request->filled('time_period') && $request->time_period != 'all') {
+            switch ($request->time_period) {
+                case 'today':
+                    $query->whereDate('created_at', Carbon::today());
+                    break;
+                case 'last_week':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->subWeek()->startOfWeek(),
+                        Carbon::now()->subWeek()->endOfWeek(),
+                    ]);
+                    break;
+                case 'last_month':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->subMonth()->startOfMonth(),
+                        Carbon::now()->subMonth()->endOfMonth(),
+                    ]);
+                    break;
+            }
+        } else {
+            // Apply date filters if time_period is not set or is "all"
+            if ($request->filled('from_date')) {
+                $query->whereDate('created_at', '>=', Carbon::parse($request->from_date)->startOfDay());
+            }
+            if ($request->filled('to_date')) {
+                $query->whereDate('created_at', '<=', Carbon::parse($request->to_date)->endOfDay());
+            }
         }
 
         // Clone query for summary calculations (to keep totals constant across pagination)
@@ -420,6 +445,11 @@ class FollowUpController extends Controller
 
     public function exportFollowUps(Request $request)
     {
+        // Validate the time_period input
+        $request->validate([
+            'time_period' => 'nullable|in:all,today,last_week,last_month',
+        ]);
+
         return Excel::download(new FollowUpExport($request), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
