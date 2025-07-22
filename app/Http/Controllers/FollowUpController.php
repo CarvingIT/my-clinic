@@ -245,6 +245,31 @@ class FollowUpController extends Controller
         // Apply pagination AFTER summary calculation
         $followUps = $query->latest()->paginate(10);
 
+        // Payment Method Counts
+        $cashPayments = $queryClone->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')) = 'Cash'")->count();
+        // $onlinePayments = $queryClone->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')) = 'Online'")->count();
+        $onlinePayments = $queryClone->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method'))) = 'online'")->count();
+
+        // Debug logging with sample records
+        // $onlineSample = $queryClone->whereRaw("LOWER(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method'))) = 'online'")
+        //     ->take(5)
+        //     ->get(['id', 'created_at', 'check_up_info', 'doctor_id'])
+        //     ->map(function ($item) {
+        //         return [
+        //             'id' => $item->id,
+        //             'created_at' => $item->created_at->toDateTimeString(),
+        //             'payment_method' => json_decode($item->check_up_info)->payment_method ?? 'N/A',
+        //             'branch_name' => json_decode($item->check_up_info)->branch_name ?? 'N/A',
+        //             'doctor_id' => $item->doctor_id,
+        //         ];
+        //     })->toArray();
+        // Log::info('Payment Method Counts', [
+        //     'cash' => $cashPayments,
+        //     'online' => $onlinePayments,
+        //     'filters' => $request->only(['time_period', 'from_date', 'to_date', 'branch_name', 'doctor']),
+        //     'online_sample' => $onlineSample
+        // ]);
+
         // Chart 1: Follow-Up Frequency (Daily)
         $followUpFrequencyDaily = FollowUp::selectRaw('DATE(created_at) as raw_date, DATE_FORMAT(created_at, "%d-%m-%y") as date, COUNT(*) as count')
             ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
@@ -334,7 +359,23 @@ class FollowUpController extends Controller
             }, ['new' => 0, 'existing' => 0]);
 
 
-        return view('followups.index', compact('followUps', 'totalIncome', 'totalPatients', 'totalFollowUps', 'branches', 'selectedBranch', 'totalDueAll', 'followUpFrequencyDaily', 'followUpFrequencyMonthly', 'followUpFrequencyYearly', 'ageDistribution', 'paymentStatus', 'newVsExistingPatients'));
+        return view('followups.index', compact(
+            'followUps',
+            'totalIncome',
+            'totalPatients',
+            'totalFollowUps',
+            'branches',
+            'selectedBranch',
+            'totalDueAll',
+            'followUpFrequencyDaily',
+            'followUpFrequencyMonthly',
+            'followUpFrequencyYearly',
+            'ageDistribution',
+            'paymentStatus',
+            'newVsExistingPatients',
+            'cashPayments',
+            'onlinePayments'
+        ));
     }
 
 

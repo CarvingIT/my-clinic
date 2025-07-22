@@ -38,9 +38,9 @@ class PatientDuesController extends Controller
                 return $patient->total_due != 0;
             })
             // ->sortBy('name');
-            // ->sortByDesc(function ($patient) {
-            // return $patient->last_follow_up_date ? $patient->last_follow_up_date->timestamp : 0;});
-            ->sortByDesc('total_due');
+            ->sortByDesc(function ($patient) {
+            return $patient->last_follow_up_date ? $patient->last_follow_up_date->timestamp : 0;});
+            // ->sortByDesc('total_due');
 
         $perPage = 10;
         $currentPage = $request->input('page', 1);

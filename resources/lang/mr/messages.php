@@ -115,6 +115,8 @@ return [
     'Followup Data Analysis' => 'फॉलो-अप डेटा विश्लेषण',
 
     'View Reports' => 'अहवाल पहा',
+    'Cash Payments' => 'नगद पेमेंट्स',
+    'Online Payments' => 'ऑनलाइन पेमेंट्स',
 
 
 

@@ -116,6 +116,8 @@ return [
     'Followup Data Analysis' => 'Follow-up Data Analysis',
 
     'View Reports' => 'View Reports',
+    'Cash Payments' => 'Cash Payments',
+    'Online Payments' => 'Online Payments',
 
 
 

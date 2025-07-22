@@ -27,8 +27,8 @@
                     <div class="flex flex-col">
                         <label for="branch_name" class="text-gray-800 dark:text-gray-300 font-semibold">Branch:</label>
                         <select id="branch_name" name="branch_name"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md pr-8 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
-                            <option value="all" {{ request('branch_name') == 'all' ? 'selected' : '' }}>All Branches
+                            class="border border-gray-300 dark:border-gray-700 rounded-md pr-4 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            <option value="all" {{ request('branch_name') == 'all' ? 'selected' : '' }}>All
                             </option>
                             @foreach ($branches as $branch)
                                 <option value="{{ $branch }}"
@@ -42,7 +42,7 @@
                     <div class="flex flex-col">
                         <label for="doctor" class="text-gray-800 dark:text-gray-300 font-semibold">Doctor:</label>
                         <select id="doctor" name="doctor"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            class="border border-gray-300 dark:border-gray-700 rounded-md px-2 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
                             <option value="all" {{ request('doctor') == 'all' ? 'selected' : '' }}>All
                             </option>
                             @php
@@ -58,18 +58,26 @@
                     </div>
                     {{-- Filter for Today, Last Week, Last Month --}}
                     <div class="flex flex-col">
-                        <label for="time_period" class="text-gray-800 dark:text-gray-300 font-semibold">Time
-                            Period:</label>
-                        <select id="time_period" name="time_period"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md pr-8 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
-                            <option value="all" {{ request('time_period') == 'all' ? 'selected' : '' }}>All</option>
-                            <option value="today" {{ request('time_period') == 'today' ? 'selected' : '' }}>Today
-                            </option>
-                            <option value="last_week" {{ request('time_period') == 'last_week' ? 'selected' : '' }}>
-                                Last Week</option>
-                            <option value="last_month" {{ request('time_period') == 'last_month' ? 'selected' : '' }}>
-                                Last Month</option>
-                        </select>
+                        <label class="text-gray-800 dark:text-gray-300 font-semibold">Time Period:</label>
+                        <div class="flex gap-2">
+                            <input type="hidden" id="time_period" name="time_period" value="{{ request('time_period', 'all') }}">
+                            <button type="button" onclick="setTimePeriod('all')"
+                                class="px-3 py-2 {{ request('time_period', 'all') == 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                All
+                            </button>
+                            <button type="button" onclick="setTimePeriod('today')"
+                                class="px-3 py-2 {{ request('time_period') == 'today' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                Today
+                            </button>
+                            <button type="button" onclick="setTimePeriod('last_week')"
+                                class="px-3 py-2 {{ request('time_period') == 'last_week' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                Last Week
+                            </button>
+                            <button type="button" onclick="setTimePeriod('last_month')"
+                                class="px-3 py-2 {{ request('time_period') == 'last_month' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                Last Month
+                            </button>
+                        </div>
                     </div>
 
                     <button onclick="formSubmit();"
@@ -77,8 +85,7 @@
                         Filter
                     </button>
                     <button id="exportCSV" onclick="csvExport();"
-                        class="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">Export
-                        to CSV</button>
+                        class="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">CSV</button>
                 </form>
 
                 {{-- Insights Section --}}
@@ -202,8 +209,36 @@
                             <p class="text-lg font-bold text-green-600 dark:text-green-300">
                                 ₹{{ number_format($totalIncome) }}</p>
                         </div>
+                        <div
+                            class="p-4 rounded-lg bg-gradient-to-br from-teal-200 to-white dark:from-teal-900 dark:to-gray-900 shadow transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-teal-200 hover:scale-105 hover:shadow-lg">
+                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">💵
+                                {{ __('messages.Cash Payments') }}</p>
+                            <p class="text-lg font-bold text-teal-600 dark:text-teal-300">{{ $cashPayments }}</p>
+                        </div>
+                        <a href="{{ route('patient-dues.index') }}">
+                            <div
+                                class="p-4 rounded-lg bg-gradient-to-br from-red-200 to-white dark:from-red-900 dark:to-gray-900 shadow transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-red-200 hover:scale-105 hover:shadow-lg">
+                                <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 gap-1">
+                                    ⚠️ {{ __('messages.Total Outstanding Balance') }}
+                                    <span class="text-xs text-gray-500">➡️</span>
+                                </p>
+
+                                <p class="text-lg font-bold text-red-600 dark:text-red-300">
+                                    ₹{{ number_format($totalDueAll) }}
+                                </p>
+
+                                {{-- <p class="text-xs text-gray-500 dark:text-gray-400">Click to view details</p> --}}
+                            </div>
+                        </a>
+                        <div
+                            class="p-4 rounded-lg bg-gradient-to-br from-pink-200 to-white dark:from-pink-900 dark:to-gray-900 shadow transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-pink-200 hover:scale-105 hover:shadow-lg">
+                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">💳
+                                {{ __('messages.Online Payments') }}</p>
+                            <p class="text-lg font-bold text-pink-600 dark:text-pink-300">{{ $onlinePayments }}</p>
+                        </div>
+
                     </div>
-                    <a href="{{ route('patient-dues.index') }}" title="View all patient dues"
+                    {{-- <a href="{{ route('patient-dues.index') }}" title="View all patient dues"
                         class=" flex justify-center">
                         <div
                             class="p-2 mt-3 w-full text-center rounded-lg bg-gradient-to-br from-red-200 to-white dark:from-red-900 dark:to-gray-900 shadow
@@ -221,7 +256,7 @@
 
                             <p class="text-xs text-gray-500 dark:text-gray-400">Click to view details</p>
                         </div>
-                    </a>
+                    </a> --}}
 
 
                 </div>
@@ -357,15 +392,79 @@
 <script>
     // Form submission functions
     function formSubmit() {
-        document.getElementById('follow_ups').action = "/followups";
+        document.getElementById('follow_ups').action = "{{ route('followups.index') }}";
         document.getElementById('follow_ups').submit();
     }
 
     function csvExport() {
-        document.getElementById('follow_ups').action = "/export-followups";
+        document.getElementById('follow_ups').action = "{{ route('followups.export') }}";
         document.getElementById('follow_ups').submit();
     }
 
+    function setTimePeriod(period) {
+        const timePeriodInput = document.getElementById('time_period');
+        const fromDate = document.getElementById('from_date');
+        const toDate = document.getElementById('to_date');
+        timePeriodInput.value = period;
+
+        // Disable and clear date inputs if period is not 'all'
+        if (period !== 'all') {
+            fromDate.disabled = true;
+            toDate.disabled = true;
+            fromDate.value = '';
+            toDate.value = '';
+        } else {
+            fromDate.disabled = false;
+            toDate.disabled = false;
+        }
+
+        // Update button styles
+        document.querySelectorAll('.time-period-btn').forEach(btn => {
+            btn.classList.remove('bg-indigo-600', 'text-white');
+            btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+        });
+        const activeButton = document.querySelector(`button[onclick="setTimePeriod('${period}')"]`);
+        if (activeButton) {
+            activeButton.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+            activeButton.classList.add('bg-indigo-600', 'text-white');
+        }
+
+        // Submit form
+        formSubmit();
+    }
+
+    // Initialize button styles and input states on page load without submitting
+    function initializeTimePeriod() {
+        const timePeriodInput = document.getElementById('time_period');
+        const fromDate = document.getElementById('from_date');
+        const toDate = document.getElementById('to_date');
+        const period = timePeriodInput.value || 'all';
+
+        // Set input states
+        if (period !== 'all') {
+            fromDate.disabled = true;
+            toDate.disabled = true;
+            fromDate.value = '';
+            toDate.value = '';
+        } else {
+            fromDate.disabled = false;
+            toDate.disabled = false;
+        }
+
+        // Update button styles
+        document.querySelectorAll('.time-period-btn').forEach(btn => {
+            btn.classList.remove('bg-indigo-600', 'text-white');
+            btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+        });
+        const activeButton = document.querySelector(`button[onclick="setTimePeriod('${period}')"]`);
+        if (activeButton) {
+            activeButton.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
+            activeButton.classList.add('bg-indigo-600', 'text-white');
+        }
+    }
+
+    // Run initialization on page load
+    document.addEventListener('DOMContentLoaded', initializeTimePeriod);
     // Chart 1: Follow-Up Frequency (Daily)
     if (@json($followUpFrequencyDaily->count())) {
         const dailyCtx = document.getElementById('followUpFrequencyDailyChart').getContext('2d');
@@ -709,3 +808,6 @@
             '<p class="text-gray-600 dark:text-gray-400">No patient data available.</p>';
     }
 </script>
+
+
+
