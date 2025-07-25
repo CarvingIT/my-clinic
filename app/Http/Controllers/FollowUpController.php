@@ -246,8 +246,19 @@ class FollowUpController extends Controller
         $followUps = $query->latest()->paginate(10);
 
         // Payment Method Counts
-        $cashPayments = (clone $queryClone)->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')) = 'Cash'")->count();
-        $onlinePayments = (clone $queryClone)->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')) = 'Online'")->count();
+        // $cashPayments = (clone $queryClone)->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')) = 'Cash'")->count();
+        // $onlinePayments = (clone $queryClone)->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')) = 'Online'")->count();
+
+        $paymentCounts = (clone $queryClone)
+            ->selectRaw("TRIM(LOWER(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) as method, COUNT(*) as count")
+            ->groupBy('method')
+            ->pluck('count', 'method');
+
+        // Normalize keys when accessing
+        $cashPayments = $paymentCounts['cash'] ?? 0;
+        $onlinePayments = $paymentCounts['online'] ?? 0;
+
+
 
         // Chart 1: Follow-Up Frequency (Daily)
         $followUpFrequencyDaily = FollowUp::selectRaw('DATE(created_at) as raw_date, DATE_FORMAT(created_at, "%d-%m-%y") as date, COUNT(*) as count')
