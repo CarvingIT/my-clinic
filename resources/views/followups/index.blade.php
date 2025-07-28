@@ -81,11 +81,11 @@
                     </div>
 
                     <button onclick="formSubmit();"
-                        class="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
+                        class="px-5 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
                         Filter
                     </button>
                     <button id="exportCSV" onclick="csvExport();"
-                        class="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">CSV</button>
+                        class="px-3 py-2 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">CSV</button>
                 </form>
 
                 {{-- Insights Section --}}
@@ -338,7 +338,7 @@
                                             </a>
                                         </td>
 
-                                        <td class="text-center px-4 py-3">{{ $followUp->doctor->name }}</td>
+                                        <td class="text-center px-4 py-3">{{ $followUp->doctor->name ?? 'N/A' }}</td>
                                         <td
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
                                             ₹{{ number_format(@$followUp->amount_billed, 2) }}

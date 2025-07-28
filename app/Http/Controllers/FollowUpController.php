@@ -175,31 +175,33 @@ class FollowUpController extends Controller
 
     public function index(Request $request)
     {
-        $branches = FollowUp::selectRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) as branch_name")
-            ->whereNotNull(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name'))"))
-            ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name'))"), '!=', '')
-            ->distinct()
-            ->pluck('branch_name'); // Get unique branch names from JSON
+        // Fetching distinct branches from the master branches table.
 
-        // Default to "all"
+        $branches = Branch::pluck('name'); // actual branch column
+
+        // Get filter inputs with defaults
         $selectedBranch = $request->input('branch_name', 'all');
+        $selectedDoctor = $request->input('doctor', 'all');
+        $timePeriod = $request->input('time_period', 'all');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
 
-        // Initialize query
+        // Base query: only follow-ups with a related patient
         $query = FollowUp::whereHas('patient');
 
-        $query = FollowUp::whereHas('patient'); // Ensures only follow-ups with patients are fetched
-
-        // Apply branch filter only if a specific branch is selected
+        // Apply branch filter (branch_name stored in JSON field)
         if ($selectedBranch !== 'all' && !empty($selectedBranch)) {
             $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
         }
-        if ($request->input('doctor') != 'all') {
-            $query->where('doctor_id', $request->input('doctor'));
+
+        // Apply doctor filter
+        if ($selectedDoctor !== 'all') {
+            $query->where('doctor_id', $selectedDoctor);
         }
 
-        // Apply time_period filter (overrides from_date and to_date)
-        if ($request->filled('time_period') && $request->time_period != 'all') {
-            switch ($request->time_period) {
+        // Apply time filters
+        if ($timePeriod !== 'all') {
+            switch ($timePeriod) {
                 case 'today':
                     $query->whereDate('created_at', Carbon::today());
                     break;
@@ -217,104 +219,98 @@ class FollowUpController extends Controller
                     break;
             }
         } else {
-            // Apply date filters if time_period is not set or is "all"
-            if ($request->filled('from_date')) {
-                $query->whereDate('created_at', '>=', Carbon::parse($request->from_date)->startOfDay());
+            if ($fromDate) {
+                $query->whereDate('created_at', '>=', Carbon::parse($fromDate)->startOfDay());
             }
-            if ($request->filled('to_date')) {
-                $query->whereDate('created_at', '<=', Carbon::parse($request->to_date)->endOfDay());
+            if ($toDate) {
+                $query->whereDate('created_at', '<=', Carbon::parse($toDate)->endOfDay());
             }
         }
 
-        // Clone query for summary calculations (to keep totals constant across pagination)
-        $queryClone = clone $query;
+        // Clone for summary data before pagination
+        $summaryQuery = clone $query;
 
-        // Total Income Calculationyy
-        $totalIncome = $queryClone->sum('amount_paid');
+        // Calculate summary values
+        $totalIncome = $summaryQuery->sum('amount_paid');
 
-        $totalPatients = FollowUp::whereIn('id', $queryClone->pluck('id'))
+        // Use pluck ids to ensure consistency
+        $followUpIds = $summaryQuery->pluck('id');
+
+        $totalPatients = FollowUp::whereIn('id', $followUpIds)
             ->distinct('patient_id')
             ->count('patient_id');
-        $totalFollowUps = $queryClone->count();
 
-        // Balance Calculation.. Total Outstanding Due**
-        $totalBilled = $queryClone->sum('amount_billed');
-        $totalPaid = $queryClone->sum('amount_paid');
-        $totalDueAll = $totalBilled - $totalPaid; // Ensure negative balance
+        $totalFollowUps = $summaryQuery->count();
 
-        // Apply pagination AFTER summary calculation
-        $followUps = $query->latest()->paginate(10);
+        $totalBilled = $summaryQuery->sum('amount_billed');
+        $totalPaid = $summaryQuery->sum('amount_paid');
+        $totalDueAll = $totalBilled - $totalPaid;
 
-        // Payment Method Counts
-        // $cashPayments = (clone $queryClone)->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')) = 'Cash'")->count();
-        // $onlinePayments = (clone $queryClone)->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')) = 'Online'")->count();
-
-        $paymentCounts = (clone $queryClone)
-            ->selectRaw("TRIM(LOWER(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) as method, COUNT(*) as count")
+        // Payment methods count grouped by method
+        $paymentCounts = $summaryQuery
+            ->selectRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) as method, COUNT(*) as count")
             ->groupBy('method')
             ->pluck('count', 'method');
 
-        // Normalize keys when accessing
         $cashPayments = $paymentCounts['cash'] ?? 0;
         $onlinePayments = $paymentCounts['online'] ?? 0;
 
+        // Paginate main data for display
+        $followUps = $query->latest()->paginate(10);
 
+        // Prepare chart data (daily, monthly, yearly)
+        $commonFilters = function ($q) use ($request, $selectedBranch, $selectedDoctor) {
+            if ($request->filled('from_date')) {
+                $q->whereDate('created_at', '>=', $request->from_date);
+            }
+            if ($request->filled('to_date')) {
+                $q->whereDate('created_at', '<=', $request->to_date);
+            }
+            if ($selectedBranch !== 'all' && !empty($selectedBranch)) {
+                $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
+            }
+            if ($selectedDoctor !== 'all') {
+                $q->where('doctor_id', $selectedDoctor);
+            }
+        };
 
-        // Chart 1: Follow-Up Frequency (Daily)
         $followUpFrequencyDaily = FollowUp::selectRaw('DATE(created_at) as raw_date, DATE_FORMAT(created_at, "%d-%m-%y") as date, COUNT(*) as count')
-            ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
-            ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
-            ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
-            ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
+            ->whereHas('patient')
+            ->when(true, $commonFilters)
             ->groupBy('raw_date', 'date')
             ->orderBy('raw_date', 'asc')
             ->get();
 
-
-        // Chart 2: Follow-Up Frequency (Monthly)
         $followUpFrequencyMonthly = FollowUp::selectRaw('DATE_FORMAT(created_at, "%m-%Y") as month, COUNT(*) as count')
-            ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
-            ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
-            ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
-            ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
+            ->whereHas('patient')
+            ->when(true, $commonFilters)
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        // Chart 3: Follow-Up Frequency (Yearly)
         $followUpFrequencyYearly = FollowUp::selectRaw('YEAR(created_at) as year, COUNT(*) as count')
-            ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
-            ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
-            ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
-            ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
+            ->whereHas('patient')
+            ->when(true, $commonFilters)
             ->groupBy('year')
             ->orderBy('year')
             ->get();
 
-        // Chart 4: Age Distribution
-        // Chart 4: Age Distribution
-        $ageDistribution = Patient::whereHas('followUps', function ($query) use ($request) {
-            $query->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
-                ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
-                ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
-                ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor));
+        // Age Distribution Chart
+        $ageDistribution = Patient::whereHas('followUps', function ($q) use ($commonFilters) {
+            $commonFilters($q);
         })
             ->selectRaw('
-    CASE
-        WHEN birthdate IS NULL THEN "Unknown"
-        WHEN TIMESTAMPDIFF(YEAR, birthdate, follow_ups.created_at) <= 18 THEN "0-18"
-        WHEN TIMESTAMPDIFF(YEAR, birthdate, follow_ups.created_at) <= 45 THEN "19-45"
-        ELSE "46+"
-    END as age_group, COUNT(DISTINCT patients.id) as count')
-            // ->join('follow_ups', function ($join) {
-            //     $join->on('patients.id', '=', 'follow_ups.patient_id');
-            // })
-
-            //For the latest follow-up
+        CASE
+            WHEN birthdate IS NULL THEN "Unknown"
+            WHEN TIMESTAMPDIFF(YEAR, birthdate, follow_ups.created_at) <= 18 THEN "0-18"
+            WHEN TIMESTAMPDIFF(YEAR, birthdate, follow_ups.created_at) <= 45 THEN "19-45"
+            ELSE "46+"
+        END as age_group, COUNT(DISTINCT patients.id) as count
+    ')
             ->join('follow_ups', function ($join) {
                 $join->on('patients.id', '=', 'follow_ups.patient_id')
-                    ->where('follow_ups.created_at', function ($query) {
-                        $query->selectRaw('MAX(created_at)')
+                    ->where('follow_ups.created_at', function ($q) {
+                        $q->selectRaw('MAX(created_at)')
                             ->from('follow_ups')
                             ->whereColumn('patient_id', 'patients.id');
                     });
@@ -323,23 +319,17 @@ class FollowUpController extends Controller
             ->orderByRaw('FIELD(age_group, "0-18", "19-45", "46+", "Unknown")')
             ->get();
 
-        // Chart 5: Payment Status
+        // Payment Status Chart
         $paymentStatus = FollowUp::selectRaw('DATE(created_at) as raw_date, DATE_FORMAT(created_at, "%d-%m-%y") as date, SUM(amount_billed) as billed, SUM(amount_paid) as paid, SUM(amount_billed - amount_paid) as due')
-            ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
-            ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
-            ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
-            ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
+            ->whereHas('patient')
+            ->when(true, $commonFilters)
             ->groupBy('raw_date', 'date')
             ->orderBy('raw_date', 'asc')
             ->get();
 
-
-        // Chart 6: New vs. Existing Patients
+        // New vs Existing Patients
         $newVsExistingPatients = FollowUp::whereHas('patient')
-            ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
-            ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
-            ->when($request->input('branch_name') !== 'all' && !empty($request->input('branch_name')), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$request->branch_name]))
-            ->when($request->input('doctor') !== 'all', fn($q) => $q->where('doctor_id', $request->doctor))
+            ->when(true, $commonFilters)
             ->groupBy('patient_id')
             ->selectRaw('COUNT(*) as followup_count')
             ->get()
@@ -348,7 +338,7 @@ class FollowUpController extends Controller
                 return $carry;
             }, ['new' => 0, 'existing' => 0]);
 
-
+        // Return the view with all variables
         return view('followups.index', compact(
             'followUps',
             'totalIncome',
@@ -367,6 +357,7 @@ class FollowUpController extends Controller
             'onlinePayments'
         ));
     }
+
 
 
 
