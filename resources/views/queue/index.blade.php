@@ -11,7 +11,8 @@
                 <div class="p-6 text-gray-900">
                     <!-- Success Message -->
                     @if (session('success'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md shadow-sm mb-6">
+                        <div
+                            class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md shadow-sm mb-6">
                             {{ session('success') }}
                         </div>
                     @endif
@@ -43,10 +44,14 @@
                                 @forelse ($queue as $entry)
                                     <tr class="hover:bg-gray-50 transition duration-150">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            <a href="{{ route('patients.show', $entry->patient->id) }}"
-                                                class="text-blue-600 hover:text-blue-800">
-                                                {{ $entry->patient->name }}
-                                            </a>
+                                            @if ($entry->patient)
+                                                <a href="{{ route('patients.show', $entry->patient->id) }}"
+                                                    class="text-blue-600 hover:text-blue-800">
+                                                    {{ $entry->patient->name }}
+                                                </a>
+                                            @else
+                                                <span class="text-gray-400">Unknown/Deleted Patient</span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                             {{ $entry->in_queue_at->format('d-m-Y H:i') }}
@@ -60,7 +65,8 @@
                                                 onsubmit="return confirm('Are you sure you want to mark this patient as in?')">
                                                 @csrf
                                                 <button type="submit"
-                                                    class="text-green-600 hover:text-green-800 font-medium" title="Mark as In">
+                                                    class="text-green-600 hover:text-green-800 font-medium"
+                                                    title="Mark as In">
                                                     <i class="fas fa-user-check"></i>
                                                 </button>
                                             </form>
