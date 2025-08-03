@@ -15,20 +15,24 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@myclinic.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@myclinic.com'], // <- condition to find existing user
+            [ // <- fields to fill if user is not found
+                'name' => 'Admin User',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'remember_token' => Str::random(10),
+            ]
+        );
 
-        User::create([
-            'name' => 'Test User',
-            'email' => 'test@myclinic.com',
-            'email_verified_at' => now(),
-            'password' => Hash::make('password'),
-            'remember_token' => Str::random(10),
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test@myclinic.com'],
+            [
+                'name' => 'Test User',
+                'email_verified_at' => now(),
+                'password' => Hash::make('password'),
+                'remember_token' => Str::random(10),
+            ]
+        );
     }
 }
