@@ -9,25 +9,32 @@ use Carbon\Carbon;
 
 class ExportData extends Command
 {
-    protected $signature = 'MC:ExportData {--start-date=}';
-    protected $description = 'Export patients and follow-ups to JSON. Optional: --start-date=YYYY-MM-DD';
+    protected $signature = 'MC:ExportData {--start-date=} {--end-date=}';
+    protected $description = 'Export patients and follow-ups to JSON. Optional: --start-date=YYYY-MM-DD and --end-date=YYYY-MM-DD';
 
     public function handle()
     {
         $startDate = $this->option('start-date');
+        $endDate = $this->option('end-date');
         $this->info('Exporting patients...');
 
         $query = Patient::with('followUps');
 
-        if ($startDate) {
-            try {
-                $parsedDate = Carbon::parse($startDate)->startOfDay();
-                $query->where('created_at', '>=', $parsedDate);
-                $this->info("Filtered from date: $parsedDate");
-            } catch (\Exception $e) {
-                $this->error("Invalid date format. Use YYYY-MM-DD.");
-                return;
+        try {
+            if ($startDate) {
+                $parsedStartDate = Carbon::parse($startDate)->startOfDay();
+                $query->where('created_at', '>=', $parsedStartDate);
+                $this->info("Filtered from date: $parsedStartDate");
             }
+
+            if ($endDate) {
+                $parsedEndDate = Carbon::parse($endDate)->endOfDay();
+                $query->where('created_at', '<=', $parsedEndDate);
+                $this->info("Filtered until date: $parsedEndDate");
+            }
+        } catch (\Exception $e) {
+            $this->error("Invalid date format. Use YYYY-MM-DD.");
+            return;
         }
 
         $patients = $query->get();
