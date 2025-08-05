@@ -14,34 +14,50 @@ class ExportData extends Command
 
     public function handle()
     {
-        $startDate = $this->option('start-date');
-        $this->info('Exporting patients...');
+        $timezone = config('app.timezone', 'Asia/Kolkata');
+        $now = now()->setTimezone($timezone);
 
-        $query = Patient::with('followUps');
+        $startDate = $this->option('start-date');
+        $query = Patient::with(['followUps' => function ($q) use ($startDate) {
+            if ($startDate) {
+                $q->where('updated_at', '>=', $startDate);
+            }
+        }]);
 
         if ($startDate) {
-            try {
-                $parsedDate = Carbon::parse($startDate)->startOfDay();
-                $query->where('created_at', '>=', $parsedDate);
-                $this->info("Filtered from date: $parsedDate");
-            } catch (\Exception $e) {
-                $this->error("Invalid date format. Use YYYY-MM-DD.");
-                return;
-            }
+            $parsedDate = Carbon::parse($startDate)->startOfDay();
+            $query->where(function ($q) use ($parsedDate) {
+                $q->where('updated_at', '>=', $parsedDate);
+            });
         }
 
         $patients = $query->get();
 
         if ($patients->isEmpty()) {
             $this->warn('No patients found for given criteria.');
+            return;
         }
 
-        $jsonData = $patients->toJson(JSON_PRETTY_PRINT);
+        // Normalize follow-up timestamps
+        $exported = $patients->map(function ($patient) use ($timezone) {
+            $data = $patient->toArray();
+
+            $data['follow_ups'] = collect($data['follow_ups'])->map(function ($fup) use ($timezone) {
+                $fup['created_at'] = Carbon::parse($fup['created_at'])->setTimezone($timezone)->toDateTimeString();
+                $fup['updated_at'] = Carbon::parse($fup['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                return $fup;
+            });
+
+            return $data;
+        });
+
+        $jsonData = json_encode($exported, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         $fileName = 'backup-' . now()->format('Y-m-d_H-i-s') . '.json';
 
-        Storage::put('backup/' . $fileName, $jsonData);
+        Storage::put("backup/{$fileName}", $jsonData);
         // Storage::disk('public')->put($fileName, $jsonData); // Save to public disk
 
         $this->info("Data exported to: storage/app/private/backup/$fileName");
+        // $this->info("Data exported to: storage/app/backup/{$fileName}");
     }
 }

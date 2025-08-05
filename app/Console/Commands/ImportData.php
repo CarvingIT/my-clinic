@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Patient;
 use App\Models\FollowUp;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ImportData extends Command
 {
@@ -42,28 +43,79 @@ class ImportData extends Command
 
         $patients = json_decode($json, true);
 
-        DB::transaction(function () use ($patients) {
+        $timezone = config('app.timezone', 'Asia/Kolkata');
+
+        DB::transaction(function () use ($patients, $timezone) {
             foreach ($patients as $patientData) {
                 $followUps = $patientData['follow_ups'] ?? [];
                 unset($patientData['follow_ups']);
 
+                // Normalize patient timestamps before comparison
+                $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+
                 $existingPatient = Patient::withTrashed()->where('guid', $patientData['guid'])->first();
 
                 if ($existingPatient) {
-                    if ($existingPatient->trashed()) {
-                        $existingPatient->restore(); // restores the soft-deleted record
-                        $existingPatient->update($patientData); // updates with latest backup data
-                        $this->info("Restored and updated soft-deleted patient: {$patientData['name']} ({$patientData['guid']})");
-                    } else {
-                        $this->warn("Skipped existing patient: {$patientData['name']} ({$patientData['guid']})");
+                    $wasUpdated = false;
+
+                    // Normalize existing patient updated_at
+                    $existingPatientUpdatedAt = Carbon::parse($existingPatient->updated_at)->setTimezone($timezone);
+
+                    if ($existingPatientUpdatedAt->lessThan(Carbon::parse($patientData['updated_at']))) {
+                        $existingPatient->update($patientData);
+                        $wasUpdated = true;
                     }
-                    continue;
+
+                    if ($existingPatient->trashed()) {
+                        $existingPatient->restore();
+                        $this->info("Restored soft-deleted patient: {$patientData['name']}");
+                    }
+
+                    if ($wasUpdated) {
+                        $this->info("Updated patient: {$patientData['name']} ({$patientData['guid']})");
+                    } else {
+                        $this->info("Patient already up-to-date: {$patientData['name']} ({$patientData['guid']})");
+                    }
+
+                    // Process follow-ups
+                    foreach ($followUps as $followUpData) {
+                        // Normalize follow-up timestamps before comparison
+                        $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($timezone)->toDateTimeString();
+                        $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+
+                        $existingFollowUp = FollowUp::where('patient_id', $existingPatient->id)
+                            ->where('created_at', $followUpData['created_at'])
+                            ->first();
+
+                        if ($existingFollowUp) {
+                            $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($timezone);
+
+                            if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
+                                $existingFollowUp->update($followUpData);
+                                $this->info("Updated follow-up for patient: {$patientData['name']}");
+                            } else {
+                                $this->info("Follow-up already up-to-date for patient: {$patientData['name']}");
+                            }
+                        } else {
+                            $followUpData['patient_id'] = $existingPatient->id;
+                            FollowUp::create($followUpData);
+                            $this->info("Added new follow-up for existing patient: {$patientData['name']}");
+                        }
+                    }
+
+                    continue; // Next patient
                 }
 
-                // Create patient
+                // New patient: normalize timestamps before create
+                $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone($timezone)->toDateTimeString();
+                $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+
                 $patient = Patient::create($patientData);
 
                 foreach ($followUps as $followUpData) {
+                    $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($timezone)->toDateTimeString();
+                    $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+
                     $followUpData['patient_id'] = $patient->id;
                     FollowUp::create($followUpData);
                 }
