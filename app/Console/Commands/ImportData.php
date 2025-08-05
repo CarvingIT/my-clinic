@@ -15,16 +15,31 @@ class ImportData extends Command
 
     public function handle()
     {
-        $file = $this->option('file') ?? 'backup.json';
+        $filePath = $this->option('file') ?? 'backup.json';
 
-        if (!Storage::exists($file)) {
-            $this->error("File not found: storage/app/$file");
-            return;
+        // Check if absolute path or not
+        $isAbsolute = str_starts_with($filePath, '/') || preg_match('/^[A-Za-z]:\\\\/', $filePath); // Linux or Windows
+
+        if ($isAbsolute) {
+            // Absolute path: check if file exists
+            if (!file_exists($filePath)) {
+                $this->error("File not found: $filePath");
+                return;
+            }
+
+            $this->info("Importing data from: $filePath");
+            $json = file_get_contents($filePath);
+        } else {
+            // Relative path: assume it's inside Laravel storage (like 'backup/backup.json')
+            if (!Storage::exists($filePath)) {
+                $this->error("File not found in storage: $filePath");
+                return;
+            }
+
+            $this->info("Importing data from storage: $filePath");
+            $json = Storage::get($filePath);
         }
 
-        $this->info("Importing data from: $file");
-
-        $json = Storage::get($file);
         $patients = json_decode($json, true);
 
         DB::transaction(function () use ($patients) {
@@ -32,14 +47,7 @@ class ImportData extends Command
                 $followUps = $patientData['follow_ups'] ?? [];
                 unset($patientData['follow_ups']);
 
-                // Avoid inserting duplicate patient (based on guid)
-                // $existingPatient = Patient::where('guid', $patientData['guid'])->first();
                 $existingPatient = Patient::withTrashed()->where('guid', $patientData['guid'])->first();
-
-                // if ($existingPatient) {
-                //     $this->warn("Skipped existing patient: {$patientData['name']} ({$patientData['guid']})");
-                //     continue;
-                // }
 
                 if ($existingPatient) {
                     if ($existingPatient->trashed()) {
@@ -51,7 +59,6 @@ class ImportData extends Command
                     }
                     continue;
                 }
-
 
                 // Create patient
                 $patient = Patient::create($patientData);
