@@ -134,7 +134,7 @@ class ImportData extends Command
                             $existingPatient->restore();
                             $patientsRestored++;
                             $restoredPatientNames[] = $name;
-                            $this->info("Restored soft-deleted patient: {$name}");
+                            // $this->info("Restored soft-deleted patient: {$name}");
                         }
                     } catch (\Exception $e) {
                         $this->warn("Error updating/restoring patient {$name} (GUID: {$patientData['guid']}): " . $e->getMessage());
