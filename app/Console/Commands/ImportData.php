@@ -43,6 +43,17 @@ class ImportData extends Command
 
         $patients = json_decode($json, true);
 
+        // JSON validation
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $this->warn("Skipping file: $filePath (Invalid JSON: " . json_last_error_msg() . ")");
+            return;
+        }
+
+        if (!is_array($patients)) {
+            $this->warn("Skipping file: $filePath (Data is not an array of patients)");
+            return;
+        }
+
         $timezone = config('app.timezone', 'Asia/Kolkata');
 
         // Summary counters and name collectors
@@ -77,56 +88,112 @@ class ImportData extends Command
             &$restoredPatientNames
         ) {
             foreach ($patients as $patientData) {
+                // Patient-level validation
+                if (
+                    empty($patientData['guid']) ||
+                    empty($patientData['created_at']) ||
+                    empty($patientData['updated_at']) ||
+                    !isset($patientData['name'])
+                ) {
+                    $this->warn("Skipping patient: missing required fields - " . json_encode($patientData));
+                    $skippedPatientsCount++;
+                    $skippedPatientNames[] = $patientData['name'] ?? 'Unknown';
+                    continue;
+                }
+
+                try {
+                    $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone($timezone)->toDateTimeString();
+                    $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                } catch (\Exception $e) {
+                    $this->warn("Skipping patient: invalid date format for GUID {$patientData['guid']}");
+                    $skippedPatientsCount++;
+                    $skippedPatientNames[] = $patientData['name'] ?? 'Unknown';
+                    continue;
+                }
+
                 $followUps = $patientData['follow_ups'] ?? [];
                 unset($patientData['follow_ups']);
                 $name = $patientData['name'] ?? 'Unknown';
 
-                $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($timezone)->toDateTimeString();
                 $existingPatient = Patient::withTrashed()->where('guid', $patientData['guid'])->first();
 
                 if ($existingPatient) {
-                    $existingPatientUpdatedAt = Carbon::parse($existingPatient->updated_at)->setTimezone($timezone);
+                    try {
+                        $existingPatientUpdatedAt = Carbon::parse($existingPatient->updated_at)->setTimezone($timezone);
 
-                    if ($existingPatientUpdatedAt->lessThan(Carbon::parse($patientData['updated_at']))) {
-                        $existingPatient->update($patientData);
-                        $updatedPatientsCount++;
-                        $updatedPatientNames[] = $name;
-                    } else {
+                        if ($existingPatientUpdatedAt->lessThan(Carbon::parse($patientData['updated_at']))) {
+                            $existingPatient->update($patientData);
+                            $updatedPatientsCount++;
+                            $updatedPatientNames[] = $name;
+                        } else {
+                            $skippedPatientsCount++;
+                            $skippedPatientNames[] = $name;
+                        }
+
+                        if ($existingPatient->trashed()) {
+                            $existingPatient->restore();
+                            $patientsRestored++;
+                            $restoredPatientNames[] = $name;
+                            $this->info("Restored soft-deleted patient: {$name}");
+                        }
+                    } catch (\Exception $e) {
+                        $this->warn("Error updating/restoring patient {$name} (GUID: {$patientData['guid']}): " . $e->getMessage());
                         $skippedPatientsCount++;
                         $skippedPatientNames[] = $name;
+                        continue;
                     }
 
-                    if ($existingPatient->trashed()) {
-                        $existingPatient->restore();
-                        $patientsRestored++;
-                        $restoredPatientNames[] = $name;
-                        $this->info("Restored soft-deleted patient: {$name}");
-                    }
-
-
+                    // Process follow-ups for existing patient
                     foreach ($followUps as $followUpData) {
-                        $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($timezone)->toDateTimeString();
-                        $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                        // Follow-up validation
+                        if (empty($followUpData['created_at']) || empty($followUpData['updated_at'])) {
+                            $this->warn("Skipping follow-up for patient {$name}: missing date fields");
+                            $skippedFollowUpsCount++;
+                            $skippedFollowUpNames[] = $name;
+                            continue;
+                        }
+
+                        try {
+                            $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($timezone)->toDateTimeString();
+                            $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                        } catch (\Exception $e) {
+                            $this->warn("Skipping follow-up for patient {$name}: invalid date format");
+                            $skippedFollowUpsCount++;
+                            $skippedFollowUpNames[] = $name;
+                            continue;
+                        }
 
                         $existingFollowUp = FollowUp::where('patient_id', $existingPatient->id)
                             ->where('created_at', $followUpData['created_at'])
                             ->first();
 
                         if ($existingFollowUp) {
-                            $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($timezone);
-                            if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
-                                $existingFollowUp->update($followUpData);
-                                $updatedFollowUpsCount++;
-                                $updatedFollowUpNames[] = $name;
-                            } else {
+                            try {
+                                $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($timezone);
+                                if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
+                                    $existingFollowUp->update($followUpData);
+                                    $updatedFollowUpsCount++;
+                                    $updatedFollowUpNames[] = $name;
+                                } else {
+                                    $skippedFollowUpsCount++;
+                                    $skippedFollowUpNames[] = $name;
+                                }
+                            } catch (\Exception $e) {
+                                $this->warn("Error updating follow-up for patient {$name}: " . $e->getMessage());
                                 $skippedFollowUpsCount++;
                                 $skippedFollowUpNames[] = $name;
                             }
                         } else {
-                            $followUpData['patient_id'] = $existingPatient->id;
-                            FollowUp::create($followUpData);
-                            $newFollowUpsCount++;
-                            $addedFollowUpNames[] = $name;
+                            try {
+                                $followUpData['patient_id'] = $existingPatient->id;
+                                FollowUp::create($followUpData);
+                                $newFollowUpsCount++;
+                                $addedFollowUpNames[] = $name;
+                            } catch (\Exception $e) {
+                                $this->warn("Error creating follow-up for patient {$name}: " . $e->getMessage());
+                                $skippedFollowUpsCount++;
+                                $skippedFollowUpNames[] = $name;
+                            }
                         }
                     }
 
@@ -134,21 +201,47 @@ class ImportData extends Command
                 }
 
                 // New patient
-                $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone($timezone)->toDateTimeString();
-                $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                try {
+                    $patient = Patient::create($patientData);
+                    $importedPatientsCount++;
+                    $importedPatientNames[] = $name;
+                } catch (\Exception $e) {
+                    $this->warn("Error creating patient {$name}: " . $e->getMessage());
+                    $skippedPatientsCount++;
+                    $skippedPatientNames[] = $name;
+                    continue;
+                }
 
-                $patient = Patient::create($patientData);
-                $importedPatientsCount++;
-                $importedPatientNames[] = $name;
-
+                // Process follow-ups for new patient
                 foreach ($followUps as $followUpData) {
-                    $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($timezone)->toDateTimeString();
-                    $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                    // Follow-up validation
+                    if (empty($followUpData['created_at']) || empty($followUpData['updated_at'])) {
+                        $this->warn("Skipping follow-up for patient {$name}: missing date fields");
+                        $skippedFollowUpsCount++;
+                        $skippedFollowUpNames[] = $name;
+                        continue;
+                    }
 
-                    $followUpData['patient_id'] = $patient->id;
-                    FollowUp::create($followUpData);
-                    $newFollowUpsCount++;
-                    $addedFollowUpNames[] = $name;
+                    try {
+                        $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($timezone)->toDateTimeString();
+                        $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                    } catch (\Exception $e) {
+                        $this->warn("Skipping follow-up for patient {$name}: invalid date format");
+                        $skippedFollowUpsCount++;
+                        $skippedFollowUpNames[] = $name;
+                        continue;
+                    }
+
+                    try {
+                        $followUpData['patient_id'] = $patient->id;
+                        FollowUp::create($followUpData);
+                        $newFollowUpsCount++;
+                        $addedFollowUpNames[] = $name;
+                    } catch (\Exception $e) {
+                        $this->warn("Error creating follow-up for patient {$name}: " . $e->getMessage());
+                        $skippedFollowUpsCount++;
+                        $skippedFollowUpNames[] = $name;
+                    }
                 }
             }
         });
@@ -158,10 +251,10 @@ class ImportData extends Command
         $this->line(" <fg=yellow>Patients restored:</> {$patientsRestored} " . $this->formatNames($restoredPatientNames));
         $this->line(" <fg=green>Patients imported:</> $importedPatientsCount " . $this->formatNames($importedPatientNames));
         // $this->line(" <fg=yellow>Patients updated:</> $updatedPatientsCount " . $this->formatNames($updatedPatientNames));
-        $this->line(" <fg=gray>Patients skipped (up-to-date):</> $skippedPatientsCount ");
+        $this->line(" <fg=gray>Patients uchanged:</> $skippedPatientsCount ");
         $this->line(" <fg=green>Follow-ups added:</> $newFollowUpsCount " . $this->formatNames($addedFollowUpNames));
         // $this->line(" <fg=yellow>Follow-ups updated:</> $updatedFollowUpsCount " . $this->formatNames($updatedFollowUpNames));
-        $this->line(" <fg=gray>Follow-ups skipped (up-to-date):</> $skippedFollowUpsCount ");
+        $this->line(" <fg=gray>Follow-ups unchanged:</> $skippedFollowUpsCount ");
 
         $this->line("\n<fg=white;bg=blue> Import completed successfully </>");
 
