@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 class ExportData extends Command
 {
-    protected $signature = 'MC:ExportData {--start-date=}';
+    protected $signature = 'MC:ExportData {--start-date=} {--end-date=}';
     protected $description = 'Export patients and follow-ups to JSON. Optional: --start-date=YYYY-MM-DD';
 
     public function handle()
@@ -18,18 +18,28 @@ class ExportData extends Command
         $now = now()->setTimezone($timezone);
 
         $startDate = $this->option('start-date');
-        $query = Patient::with(['followUps' => function ($q) use ($startDate) {
+        $endDate = $this->option('end-date');
+
+        $query = Patient::with(['followUps' => function ($q) use ($startDate, $endDate) {
             if ($startDate) {
-                $q->where('updated_at', '>=', $startDate);
+                $q->where('updated_at', '>=', Carbon::parse($startDate)->startOfDay());
+            }
+            if ($endDate) {
+                $q->where('updated_at', '<=', Carbon::parse($endDate)->endOfDay());
             }
         }]);
 
-        if ($startDate) {
-            $parsedDate = Carbon::parse($startDate)->startOfDay();
-            $query->where(function ($q) use ($parsedDate) {
-                $q->where('updated_at', '>=', $parsedDate);
+        if ($startDate || $endDate) {
+            $query->where(function ($q) use ($startDate, $endDate) {
+                if ($startDate) {
+                    $q->where('updated_at', '>=', Carbon::parse($startDate)->startOfDay());
+                }
+                if ($endDate) {
+                    $q->where('updated_at', '<=', Carbon::parse($endDate)->endOfDay());
+                }
             });
         }
+
 
         $patients = $query->get();
 
