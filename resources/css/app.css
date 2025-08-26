@@ -10,22 +10,29 @@
 
 /* Custom dark mode styles */
 .dark .bg-white {
-    background-color: #1a202c; /* Dark background */
+    background-color: #1a202c;
+    /* Dark background */
 }
+
 .dark .text-gray-800 {
-    color: #e2e8f0; /* Light text color */
+    color: #e2e8f0;
+    /* Light text color */
 }
 
 /* Modal Container */
-#cameraModal > div {
-    max-width: 90vw; /* Responsive max width */
-    max-height: 90vh; /* Responsive max height */
+#cameraModal>div {
+    max-width: 90vw;
+    /* Responsive max width */
+    max-height: 90vh;
+    /* Responsive max height */
 }
 
 /* Video Container */
 #cameraModal .flex-1.overflow-hidden {
-    max-height: 100%; /* Prevents overflow */
-    background-color: #e5e7eb; /* Light gray fallback */
+    max-height: 100%;
+    /* Prevents overflow */
+    background-color: #e5e7eb;
+    /* Light gray fallback */
 }
 
 /* Live Video Preview */
@@ -37,26 +44,38 @@
 }
 
 /* Preview Sections */
-#patientPhotosPreview, #labReportsPreview {
-    min-height: 0; /* Allows flex-1 to shrink properly */
+#patientPhotosPreview,
+#labReportsPreview {
+    min-height: 0;
+    /* Allows flex-1 to shrink properly */
 }
 
 /* Preview Images Container */
-#patientPhotosImages, #labReportsImages {
+#patientPhotosImages,
+#labReportsImages {
     display: grid;
-    gap: 8px; /* Consistent spacing */
-    padding: 4px; /* Inner padding */
+    gap: 8px;
+    /* Consistent spacing */
+    padding: 4px;
+    /* Inner padding */
 }
 
 /* Dynamic Grid Adjustment */
-#patientPhotosImages:empty, #labReportsImages:empty {
+#patientPhotosImages:empty,
+#labReportsImages:empty {
     /* No special styling needed when empty */
 }
-#patientPhotosImages:has(> :only-child), #labReportsImages:has(> :only-child) {
-    grid-template-columns: 1fr; /* Single column for one image */
+
+#patientPhotosImages:has(> :only-child),
+#labReportsImages:has(> :only-child) {
+    grid-template-columns: 1fr;
+    /* Single column for one image */
 }
-#patientPhotosImages:not(:has(> :only-child)), #labReportsImages:not(:has(> :only-child)) {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Multiple images */
+
+#patientPhotosImages:not(:has(> :only-child)),
+#labReportsImages:not(:has(> :only-child)) {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    /* Multiple images */
 }
 
 /* Scrollbars */
@@ -64,14 +83,18 @@
 #labReportsImages::-webkit-scrollbar {
     width: 8px;
 }
+
 #patientPhotosImages::-webkit-scrollbar-thumb,
 #labReportsImages::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #3b82f6, #06b6d4); /* Blue to cyan */
+    background: linear-gradient(to bottom, #3b82f6, #06b6d4);
+    /* Blue to cyan */
     border-radius: 4px;
 }
+
 #patientPhotosImages::-webkit-scrollbar-track,
 #labReportsImages::-webkit-scrollbar-track {
-    background: #e5e7eb; /* Light gray */
+    background: #e5e7eb;
+    /* Light gray */
 }
 
 /* Preview Container */
@@ -80,6 +103,7 @@
     width: 100%;
     transition: transform 0.2s ease;
 }
+
 .preview-container:hover {
     /* transform: scale(1.05); */
 }
@@ -95,7 +119,8 @@
 /* Multiple Images Case */
 #patientPhotosImages:not(:has(> :only-child)) .preview-container,
 #labReportsImages:not(:has(> :only-child)) .preview-container {
-    height: 100px; /* Fixed height for grid */
+    height: 100px;
+    /* Fixed height for grid */
 }
 
 /* Preview Image */
@@ -104,7 +129,8 @@
     height: 100%;
     object-fit: cover;
     border-radius: 6px;
-    border: 1px solid #d1d5db; /* Light gray border */
+    border: 1px solid #d1d5db;
+    /* Light gray border */
 }
 
 /* Delete Button */
@@ -114,7 +140,8 @@
     right: 4px;
     width: 20px;
     height: 20px;
-    background: rgba(239, 68, 68, 0.8); /* Lighter red */
+    background: rgba(239, 68, 68, 0.8);
+    /* Lighter red */
     color: white;
     border-radius: 50%;
     display: flex;
@@ -125,6 +152,7 @@
     opacity: 0.7;
     transition: opacity 0.2s ease, transform 0.2s ease;
 }
+
 .delete-btn:hover {
     opacity: 1;
     transform: scale(1.1);
@@ -176,35 +204,254 @@ li {
     opacity: 0.5;
     transition: opacity 0.2s ease;
 }
+
 .relative:hover {
     cursor: grab;
 }
+
 #dravyaPresets {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem; /* Adjust gap for better spacing */
-  transition: all 0.3s ease-in-out; /* for container resize */
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    /* Adjust gap for better spacing */
+    transition: all 0.3s ease-in-out;
+    /* for container resize */
 }
 
 .relative {
-  position: relative;
-  transition: transform 0.3s ease-in-out, opacity 0.2s ease; /* Smooth shifts and fade */
-  cursor: grab;
+    position: relative;
+    transition: transform 0.3s ease-in-out, opacity 0.2s ease;
+    /* Smooth shifts and fade */
+    cursor: grab;
 }
 
 .relative.dragging {
-  opacity: 0.5; /* Fade original during drag */
-  transform: scale(1.05); /* Slight scale for "lifting" feel */
-  cursor: grabbing;
-  z-index: 10; /* Bring to front */
+    opacity: 0.5;
+    /* Fade original during drag */
+    transform: scale(1.05);
+    /* Slight scale for "lifting" feel */
+    cursor: grabbing;
+    z-index: 10;
+    /* Bring to front */
 }
 
 .dragging {
     animation: pulse 0.8s infinite;
 }
+
 @keyframes pulse {
-    0% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
-    50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
-    100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+    0% {
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+
+    100% {
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+    }
 }
 
+
+
+/* Dashboard UI/UX Enhancements */
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Loading animation keyframes */
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .7;
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(-25%);
+        animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+
+    50% {
+        transform: none;
+        animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+}
+
+/* Page animations */
+.dashboard-container {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+/* Card hover effects */
+.metric-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.metric-card:hover::before {
+    left: 100%;
+}
+
+/* Loading skeleton */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+}
+
+/* Enhanced focus styles for accessibility */
+.focus\:ring-enhanced:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+/* Mobile responsiveness improvements */
+@media (max-width: 640px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .metric-card {
+        padding: 1.5rem;
+    }
+}
+
+/* Dark mode support (future-ready) */
+@media (prefers-color-scheme: dark) {
+    .dark-mode-ready {
+        --bg-primary: #1f2937;
+        --bg-secondary: #374151;
+        --text-primary: #f9fafb;
+        --text-secondary: #d1d5db;
+        --accent: #3b82f6;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    .bg-gradient-to-r,
+    .bg-gradient-to-br {
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .bg-gradient-to-r {
+        background: #ffffff;
+        border: 2px solid #000000;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Custom utility classes */
+.glass-morphism {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.text-shadow {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.box-shadow-xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Performance optimizations */
+.will-change-transform {
+    will-change: transform;
+}
+
+.gpu-accelerated {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}

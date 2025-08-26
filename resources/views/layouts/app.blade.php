@@ -157,6 +157,9 @@
         });
     </script>
 
+    <!-- Dashboard Enhancements -->
+    <script src="{{ asset('resources/js/dashboard-enhancements.js') }}"></script>
+
 </body>
 
 </html>
