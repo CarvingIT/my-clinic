@@ -606,39 +606,44 @@
 
                         @if($recent_follow_ups->count() > 0)
                             <div class="overflow-x-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
+                                <table class="min-w-full rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
                                     <thead>
                                         <tr>
-                                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Date & Time') }}</th>
-                                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Patient') }}</th>
-                                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Doctor') }}</th>
-                                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Amount Billed') }}</th>
-                                            <th class="px-4 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Amount Paid') }}</th>
+                                            <th class="px-5 py-3 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tl-xl">{{ __('Date & Time') }}</th>
+                                            <th class="px-5 py-3 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{{ __('Patient') }}</th>
+                                            <th class="px-5 py-3 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{{ __('Doctor') }}</th>
+                                            <th class="px-5 py-3 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">{{ __('Nadi') }}</th>
+                                            <th class="px-5 py-3 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider rounded-tr-xl">{{ __('Chikitsa') }}</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200">
+                                    <tbody class="bg-white divide-y divide-gray-100">
                                         @foreach($recent_follow_ups as $followUp)
-                                            <tr class="hover:bg-gray-50">
-                                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+                                            @php
+                                                $info = is_array($followUp->check_up_info) ? $followUp->check_up_info : json_decode($followUp->check_up_info, true);
+                                                $nadi = $info['nadi'] ?? '';
+                                                $chikitsa = $info['chikitsa'] ?? '';
+                                            @endphp
+                                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                                <td class="px-5 py-3 whitespace-nowrap text-sm text-gray-700 font-medium">
                                                     {{ $followUp->created_at->format('d M, Y - h:i A') }}
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap">
+                                                <td class="px-5 py-3 whitespace-nowrap">
                                                     @if($followUp->patient)
-                                                        <a href="{{ route('patients.show', $followUp->patient->id) }}" class="text-blue-600 hover:text-blue-800 font-medium">
+                                                        <a href="{{ route('patients.show', $followUp->patient->id) }}" class="text-blue-700 hover:text-blue-900 font-semibold">
                                                             {{ $followUp->patient->name }}
                                                         </a>
                                                     @else
-                                                        <span class="text-gray-400">{{ __('Unknown Patient') }}</span>
+                                                        <span class="text-gray-400 font-medium">{{ __('Unknown Patient') }}</span>
                                                     @endif
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                                                <td class="px-5 py-3 whitespace-nowrap text-sm text-gray-700 font-medium">
                                                     {{ $followUp->doctor ? $followUp->doctor->name : 'N/A' }}
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    ₹{{ number_format($followUp->amount_billed) }}
+                                                <td class="px-5 py-3 text-sm font-medium align-middle" style="min-width:200px;max-width:350px;white-space:nowrap;">
+                                                    <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-800" style="white-space:nowrap;">{!! $nadi !!}</span>
                                                 </td>
-                                                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-green-700">
-                                                    ₹{{ number_format($followUp->amount_paid) }}
+                                                <td class="px-5 py-3 text-sm font-medium align-middle" style="min-width:200px;max-width:350px;white-space:nowrap;">
+                                                    <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-800" style="white-space:nowrap;">{!! $chikitsa !!}</span>
                                                 </td>
                                             </tr>
                                         @endforeach
