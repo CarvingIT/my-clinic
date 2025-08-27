@@ -10,7 +10,7 @@ use Carbon\Carbon;
 class ExportData extends Command
 {
     protected $signature = 'MC:ExportData {--start-date=} {--end-date=}';
-    protected $description = 'Export patients and follow-ups to JSON. Optional: --start-date=YYYY-MM-DD';
+    protected $description = 'Export patients and follow-ups to JSON. Optional: --start-date=YYYY-MM-DD and --end-date=YYYY-MM-DD';
 
     public function handle()
     {
@@ -19,25 +19,25 @@ class ExportData extends Command
 
         $startDate = $this->option('start-date');
         $endDate = $this->option('end-date');
+        $this->info('Exporting patients...');
 
-        $query = Patient::with(['followUps' => function ($q) use ($startDate, $endDate) {
+        $query = Patient::with('followUps');
+
+        try {
             if ($startDate) {
-                $q->where('updated_at', '>=', Carbon::parse($startDate)->startOfDay());
+                $parsedStartDate = Carbon::parse($startDate)->startOfDay();
+                $query->where('created_at', '>=', $parsedStartDate);
+                $this->info("Filtered from date: $parsedStartDate");
             }
-            if ($endDate) {
-                $q->where('updated_at', '<=', Carbon::parse($endDate)->endOfDay());
-            }
-        }]);
 
-        if ($startDate || $endDate) {
-            $query->where(function ($q) use ($startDate, $endDate) {
-                if ($startDate) {
-                    $q->where('updated_at', '>=', Carbon::parse($startDate)->startOfDay());
-                }
-                if ($endDate) {
-                    $q->where('updated_at', '<=', Carbon::parse($endDate)->endOfDay());
-                }
-            });
+            if ($endDate) {
+                $parsedEndDate = Carbon::parse($endDate)->endOfDay();
+                $query->where('created_at', '<=', $parsedEndDate);
+                $this->info("Filtered until date: $parsedEndDate");
+            }
+        } catch (\Exception $e) {
+            $this->error("Invalid date format. Use YYYY-MM-DD.");
+            return;
         }
 
 
