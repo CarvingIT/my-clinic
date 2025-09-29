@@ -4,8 +4,16 @@
             <h2 class="font-semibold text-2xl text-gray-800 leading-tight">
                 {{ __('Dashboard') }}
             </h2>
-            <div class="text-sm text-gray-600">
-                <span class="font-medium">{{ date('l, d F Y') }}</span>
+            <div class="flex items-center space-x-4">
+                <div class="text-sm text-gray-600">
+                    <span class="font-medium">{{ date('l, d F Y') }}</span>
+                </div>
+                @if(Auth::user()->hasRole('admin'))
+                    <a href="{{ route('admin.sync-data') }}"
+                       class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
+                        Sync Data
+                    </a>
+                @endif
             </div>
         </div>
     </x-slot>

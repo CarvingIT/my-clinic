@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -35,4 +34,8 @@ return [
         ],
     ],
 
+    'online_api' => [
+        'url' => env('ONLINE_API_URL', 'https://kothrud.vaidyajategaonkar.com/api'),
+        'token' => env('ONLINE_API_TOKEN'),
+    ],
 ];

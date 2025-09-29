@@ -10,6 +10,7 @@ use App\Http\Controllers\QueueController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\PatientDuesController;
 use App\Http\Controllers\DataAnalysisController;
+use App\Http\Controllers\SyncController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\StaffMiddleware;
 use App\Http\Middleware\DoctorMiddleware;
@@ -119,6 +120,8 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update'); // Update profile
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy'); // Delete profile
     Route::get('/patient-dues', [PatientDuesController::class, 'index'])->name('patient-dues.index'); // List patient dues
+    Route::get('/admin/sync-data', [SyncController::class, 'showSyncForm'])->name('admin.sync-data');
+    Route::post('/admin/sync-data', [SyncController::class, 'syncData'])->name('admin.sync-data.post');
 });
 
 // Staff Routes
