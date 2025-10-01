@@ -148,11 +148,22 @@
 
     <!-- Sync Details Modal -->
     <div id="syncDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
-        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-xl rounded-lg bg-white max-h-[90vh] overflow-y-auto">
             <div class="mt-3">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-gray-900">Sync Details</h3>
-                    <button onclick="closeSyncDetails()" class="text-gray-400 hover:text-gray-600">
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-gray-200">
+                    <div class="flex items-center space-x-3">
+                        <div class="flex-shrink-0">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Sync Results</h3>
+                            <p class="text-sm text-gray-600">Detailed breakdown of the synchronization process</p>
+                        </div>
+                    </div>
+                    <button onclick="closeSyncDetails()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -160,120 +171,253 @@
                 </div>
 
                 @if(session('sync_stats'))
-                    <div class="space-y-4">
-                        <!-- Patients Section -->
-                        <div class="border rounded-lg p-4">
-                            <h4 class="font-semibold text-gray-800 mb-3">Patients</h4>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-green-600">{{ session('sync_stats')['patients_restored'] ?? 0 }}</div>
-                                    <div class="text-sm text-gray-600">Restored</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-blue-600">{{ session('sync_stats')['patients_imported'] ?? 0 }}</div>
-                                    <div class="text-sm text-gray-600">Imported</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-yellow-600">{{ session('sync_stats')['patients_updated'] ?? 0 }}</div>
-                                    <div class="text-sm text-gray-600">Updated</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-gray-600">{{ session('sync_stats')['patients_skipped'] ?? 0 }}</div>
-                                    <div class="text-sm text-gray-600">Skipped</div>
+                    <div class="space-y-6">
+                        <!-- Overview Cards -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Total Patients Card -->
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 border border-blue-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Total Patients</h4>
+                                        <div class="text-3xl font-bold text-blue-600">
+                                            {{ (session('sync_stats')['patients_restored'] ?? 0) + (session('sync_stats')['patients_imported'] ?? 0) + (session('sync_stats')['patients_updated'] ?? 0) + (session('sync_stats')['patients_skipped'] ?? 0) }}
+                                        </div>
+                                        <p class="text-sm text-gray-600 mt-1">Records processed</p>
+                                    </div>
+                                    <div class="text-blue-500">
+                                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Patient Names Details -->
-                            @if(session('sync_stats')['patient_names'] ?? false)
-                                <div class="space-y-3">
-                                    @if(!empty(session('sync_stats')['patient_names']['restored'] ?? []))
-                                        <div>
-                                            <h5 class="text-sm font-medium text-green-700 mb-1">Restored Patients:</h5>
-                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
-                                                {{ implode(', ', session('sync_stats')['patient_names']['restored']) }}
-                                            </div>
+                            <!-- Total Follow-ups Card -->
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-gray-800 mb-2">Total Follow-ups</h4>
+                                        <div class="text-3xl font-bold text-green-600">
+                                            {{ (session('sync_stats')['follow_ups_added'] ?? 0) + (session('sync_stats')['follow_ups_updated'] ?? 0) + (session('sync_stats')['follow_ups_skipped'] ?? 0) }}
                                         </div>
-                                    @endif
-
-                                    @if(!empty(session('sync_stats')['patient_names']['imported'] ?? []))
-                                        <div>
-                                            <h5 class="text-sm font-medium text-blue-700 mb-1">Imported Patients:</h5>
-                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
-                                                {{ implode(', ', session('sync_stats')['patient_names']['imported']) }}
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if(!empty(session('sync_stats')['patient_names']['updated'] ?? []))
-                                        <div>
-                                            <h5 class="text-sm font-medium text-yellow-700 mb-1">Updated Patients:</h5>
-                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
-                                                {{ implode(', ', session('sync_stats')['patient_names']['updated']) }}
-                                            </div>
-                                        </div>
-                                    @endif
+                                        <p class="text-sm text-gray-600 mt-1">Records processed</p>
+                                    </div>
+                                    <div class="text-green-500">
+                                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </div>
                                 </div>
-                            @endif
+                            </div>
                         </div>
 
-                        <!-- Follow-ups Section -->
-                        <div class="border rounded-lg p-4">
-                            <h4 class="font-semibold text-gray-800 mb-3">Follow-ups</h4>
-                            <div class="grid grid-cols-3 gap-4 mb-4">
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-green-600">{{ session('sync_stats')['follow_ups_added'] ?? 0 }}</div>
-                                    <div class="text-sm text-gray-600">Added</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-yellow-600">{{ session('sync_stats')['follow_ups_updated'] ?? 0 }}</div>
-                                    <div class="text-sm text-gray-600">Updated</div>
-                                </div>
-                                <div class="text-center">
-                                    <div class="text-2xl font-bold text-gray-600">{{ session('sync_stats')['follow_ups_skipped'] ?? 0 }}</div>
-                                    <div class="text-sm text-gray-600">Skipped</div>
+                        <!-- Detailed Breakdown -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <!-- Patients Section -->
+                            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                                <div class="p-6">
+                                    <div class="flex items-center space-x-2 mb-4">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                        <h4 class="text-lg font-semibold text-gray-800">Patients</h4>
+                                    </div>
+
+                                    <!-- Patient Stats Grid -->
+                                    <div class="grid grid-cols-2 gap-4 mb-6">
+                                        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <div class="text-2xl font-bold text-green-600">{{ session('sync_stats')['patients_restored'] ?? 0 }}</div>
+                                                    <div class="text-xs text-green-700 font-medium">Restored</div>
+                                                </div>
+                                                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <div class="text-2xl font-bold text-blue-600">{{ session('sync_stats')['patients_imported'] ?? 0 }}</div>
+                                                    <div class="text-xs text-blue-700 font-medium">Imported</div>
+                                                </div>
+                                                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <div class="text-2xl font-bold text-yellow-600">{{ session('sync_stats')['patients_updated'] ?? 0 }}</div>
+                                                    <div class="text-xs text-yellow-700 font-medium">Updated</div>
+                                                </div>
+                                                <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+
+                                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <div class="text-2xl font-bold text-gray-600">{{ session('sync_stats')['patients_skipped'] ?? 0 }}</div>
+                                                    <div class="text-xs text-gray-700 font-medium">Skipped</div>
+                                                </div>
+                                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Patient Names Details -->
+                                    @if(session('sync_stats')['patient_names'] ?? false)
+                                        <div class="space-y-3">
+                                            @if(!empty(session('sync_stats')['patient_names']['restored'] ?? []))
+                                                <div class="bg-green-50 rounded-md p-3 border border-green-200">
+                                                    <h5 class="text-sm font-semibold text-green-800 mb-2 flex items-center">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                                        </svg>
+                                                        Restored Patients
+                                                    </h5>
+                                                    <div class="text-sm text-green-700 bg-white rounded p-2 max-h-24 overflow-y-auto border">
+                                                        {{ implode(', ', session('sync_stats')['patient_names']['restored']) }}
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if(!empty(session('sync_stats')['patient_names']['imported'] ?? []))
+                                                <div class="bg-blue-50 rounded-md p-3 border border-blue-200">
+                                                    <h5 class="text-sm font-semibold text-blue-800 mb-2 flex items-center">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                        </svg>
+                                                        Imported Patients
+                                                    </h5>
+                                                    <div class="text-sm text-blue-700 bg-white rounded p-2 max-h-24 overflow-y-auto border">
+                                                        {{ implode(', ', session('sync_stats')['patient_names']['imported']) }}
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if(!empty(session('sync_stats')['patient_names']['updated'] ?? []))
+                                                <div class="bg-yellow-50 rounded-md p-3 border border-yellow-200">
+                                                    <h5 class="text-sm font-semibold text-yellow-800 mb-2 flex items-center">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                        </svg>
+                                                        Updated Patients
+                                                    </h5>
+                                                    <div class="text-sm text-yellow-700 bg-white rounded p-2 max-h-24 overflow-y-auto border">
+                                                        {{ implode(', ', session('sync_stats')['patient_names']['updated']) }}
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
 
-                            <!-- Follow-up Patient Names Details -->
-                            @if(session('sync_stats')['follow_up_patient_names'] ?? false)
-                                <div class="space-y-3">
-                                    @if(!empty(session('sync_stats')['follow_up_patient_names']['added'] ?? []))
-                                        <div>
-                                            <h5 class="text-sm font-medium text-green-700 mb-1">Added Follow-ups (Patients):</h5>
-                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
-                                                {{ implode(', ', session('sync_stats')['follow_up_patient_names']['added']) }}
+                            <!-- Follow-ups Section -->
+                            <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+                                <div class="p-6">
+                                    <div class="flex items-center space-x-2 mb-4">
+                                        <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <h4 class="text-lg font-semibold text-gray-800">Follow-ups</h4>
+                                    </div>
+
+                                    <!-- Follow-up Stats Grid -->
+                                    <div class="grid grid-cols-2 gap-4 mb-6">
+                                        <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <div class="text-2xl font-bold text-green-600">{{ session('sync_stats')['follow_ups_added'] ?? 0 }}</div>
+                                                    <div class="text-xs text-green-700 font-medium">Added</div>
+                                                </div>
+                                                <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                </svg>
                                             </div>
                                         </div>
-                                    @endif
 
-                                    @if(!empty(session('sync_stats')['follow_up_patient_names']['updated'] ?? []))
-                                        <div>
-                                            <h5 class="text-sm font-medium text-yellow-700 mb-1">Updated Follow-ups (Patients):</h5>
-                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
-                                                {{ implode(', ', session('sync_stats')['follow_up_patient_names']['updated']) }}
+                                        <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <div class="text-2xl font-bold text-yellow-600">{{ session('sync_stats')['follow_ups_updated'] ?? 0 }}</div>
+                                                    <div class="text-xs text-yellow-700 font-medium">Updated</div>
+                                                </div>
+                                                <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
                                             </div>
+                                        </div>
+
+                                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200 col-span-2">
+                                            <div class="flex items-center justify-between">
+                                                <div>
+                                                    <div class="text-2xl font-bold text-gray-600">{{ session('sync_stats')['follow_ups_skipped'] ?? 0 }}</div>
+                                                    <div class="text-xs text-gray-700 font-medium">Skipped</div>
+                                                </div>
+                                                <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Follow-up Patient Names Details -->
+                                    @if(session('sync_stats')['follow_up_patient_names'] ?? false)
+                                        <div class="space-y-3">
+                                            @if(!empty(session('sync_stats')['follow_up_patient_names']['added'] ?? []))
+                                                <div class="bg-green-50 rounded-md p-3 border border-green-200">
+                                                    <h5 class="text-sm font-semibold text-green-800 mb-2 flex items-center">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                        </svg>
+                                                        Added Follow-ups (Patients)
+                                                    </h5>
+                                                    <div class="text-sm text-green-700 bg-white rounded p-2 max-h-24 overflow-y-auto border">
+                                                        {{ implode(', ', session('sync_stats')['follow_up_patient_names']['added']) }}
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            @if(!empty(session('sync_stats')['follow_up_patient_names']['updated'] ?? []))
+                                                <div class="bg-yellow-50 rounded-md p-3 border border-yellow-200">
+                                                    <h5 class="text-sm font-semibold text-yellow-800 mb-2 flex items-center">
+                                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                        </svg>
+                                                        Updated Follow-ups (Patients)
+                                                    </h5>
+                                                    <div class="text-sm text-yellow-700 bg-white rounded p-2 max-h-24 overflow-y-auto border">
+                                                        {{ implode(', ', session('sync_stats')['follow_up_patient_names']['updated']) }}
+                                                    </div>
+                                                </div>
+                                            @endif
                                         </div>
                                     @endif
                                 </div>
-                            @endif
+                            </div>
                         </div>
 
-                        <!-- Summary -->
-                        <div class="border rounded-lg p-4 bg-gray-50">
-                            <h4 class="font-semibold text-gray-800 mb-2">Summary</h4>
-                            <div class="text-sm text-gray-700">
-                                <p>Total patients processed: <strong>{{ (session('sync_stats')['patients_restored'] ?? 0) + (session('sync_stats')['patients_imported'] ?? 0) + (session('sync_stats')['patients_updated'] ?? 0) + (session('sync_stats')['patients_skipped'] ?? 0) }}</strong></p>
-                                <p>Total follow-ups processed: <strong>{{ (session('sync_stats')['follow_ups_added'] ?? 0) + (session('sync_stats')['follow_ups_updated'] ?? 0) + (session('sync_stats')['follow_ups_skipped'] ?? 0) }}</strong></p>
+                        <!-- Footer -->
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <div class="flex justify-end">
+                                <button onclick="closeSyncDetails()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
+                                    Close Details
+                                </button>
                             </div>
                         </div>
                     </div>
                 @endif
-
-                <div class="mt-4 flex justify-end">
-                    <button onclick="closeSyncDetails()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 focus:outline-none">
-                        Close
-                    </button>
-                </div>
             </div>
         </div>
     </div>
