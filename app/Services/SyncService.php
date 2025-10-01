@@ -228,6 +228,66 @@ class SyncService
      */
     public function syncFromApi($date, $username, $password)
     {
+        $useMockData = config('services.online_api.use_mock_data', false);
+
+        if ($useMockData) {
+            // Mock data for testing
+            $data = [
+                [
+                    'guid' => 'test-patient-1-' . $date,
+                    'name' => 'Test Patient 1',
+                    'email_id' => 'test1@example.com',
+                    'mobile_phone' => '1234567890',
+                    'address' => 'Test Address 1',
+                    'birthdate' => '1990-01-01',
+                    'gender' => 'male',
+                    'created_at' => now()->toDateTimeString(),
+                    'updated_at' => now()->toDateTimeString(),
+                    'follow_ups' => [
+                        [
+                            'check_up_info' => 'Test follow-up note 1',
+                            'diagnosis' => 'Test diagnosis 1',
+                            'treatment' => 'Test treatment 1',
+                            'amount_billed' => 100.00,
+                            'amount_paid' => 50.00,
+                            'created_at' => now()->toDateTimeString(),
+                            'updated_at' => now()->toDateTimeString(),
+                        ]
+                    ]
+                ],
+                [
+                    'guid' => 'test-patient-2-' . $date,
+                    'name' => 'Test Patient 2',
+                    'email_id' => 'test2@example.com',
+                    'mobile_phone' => '0987654321',
+                    'address' => 'Test Address 2',
+                    'birthdate' => '1985-05-15',
+                    'gender' => 'female',
+                    'created_at' => now()->toDateTimeString(),
+                    'updated_at' => now()->toDateTimeString(),
+                    'follow_ups' => [
+                        [
+                            'check_up_info' => 'Test follow-up note 2',
+                            'diagnosis' => 'Test diagnosis 2',
+                            'treatment' => 'Test treatment 2',
+                            'amount_billed' => 200.00,
+                            'amount_paid' => 150.00,
+                            'created_at' => now()->toDateTimeString(),
+                            'updated_at' => now()->toDateTimeString(),
+                        ]
+                    ]
+                ]
+            ];
+
+            $stats = $this->importData($data);
+
+            return [
+                'message' => 'Mock data synced successfully for testing.',
+                'stats' => $stats
+            ];
+        }
+
+        // Real API calls
         $apiUrl = config('services.online_api.url', 'https://kothrud.vaidyajategaonkar.com/api');
 
         // First, attempt login to get token

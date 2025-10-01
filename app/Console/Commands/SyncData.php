@@ -7,14 +7,19 @@ use App\Services\SyncService;
 
 class SyncData extends Command
 {
-    protected $signature = 'MC:SyncData {date : The date to sync data for (YYYY-MM-DD)} {--username= : API username} {--password= : API password}';
+    protected $signature = 'MC:SyncData {--date= : The date to sync data for (YYYY-MM-DD)} {--username= : API username} {--password= : API password}';
     protected $description = 'Sync patients and follow-ups from online API for a specific date';
 
     public function handle()
     {
-        $date = $this->argument('date');
+        $date = $this->option('date');
         $username = $this->option('username');
         $password = $this->option('password');
+
+        // Prompt for date if not provided
+        if (!$date) {
+            $date = $this->ask('Enter the date to sync data for (YYYY-MM-DD)');
+        }
 
         // Validate date format
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {

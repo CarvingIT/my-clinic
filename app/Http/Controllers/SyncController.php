@@ -36,7 +36,7 @@ class SyncController extends Controller
         try {
             // Run the sync command with credentials
             $exitCode = Artisan::call('MC:SyncData', [
-                'date' => $date,
+                '--date' => $date,
                 '--username' => $username,
                 '--password' => $password,
             ]);
@@ -67,7 +67,7 @@ class SyncController extends Controller
 
         try {
             $exitCode = Artisan::call('MC:SyncData', [
-                'date' => $date
+                '--date' => $date
             ]);
 
             if ($exitCode === 0) {
