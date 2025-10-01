@@ -110,7 +110,7 @@ class SyncService
                 unset($patientData['follow_ups']);
                 $name = $patientData['name'] ?? 'Unknown';
 
-                $existingPatient = Patient::withTrashed()->where('guid', $patientData['guid'])->first();
+                $existingPatient = Patient::withTrashed()->where('patient_id', $patientData['patient_id'])->first();
 
                 if ($existingPatient) {
                     try {
@@ -231,58 +231,82 @@ class SyncService
         $useMockData = config('services.online_api.use_mock_data', false);
 
         if ($useMockData) {
-            // Mock data for testing
+            // Realistic mock data matching real clinic backup structure
             $data = [
                 [
-                    'guid' => 'test-patient-1-' . $date,
-                    'name' => 'Test Patient 1',
-                    'email_id' => 'test1@example.com',
-                    'mobile_phone' => '1234567890',
-                    'address' => 'Test Address 1',
-                    'birthdate' => '1990-01-01',
-                    'gender' => 'male',
-                    'created_at' => now()->toDateTimeString(),
+                    'guid' => 'patient-arjun-sharma',
+                    'name' => 'Arjun Sharma',
+                    'email_id' => 'arjun.sharma@example.com',
+                    'mobile_phone' => '9876543210',
+                    'address' => '456 MG Road, Pune, Maharashtra',
+                    'birthdate' => '1995-05-15',
+                    'gender' => 'Male',
+                    'patient_id' => 'A-1505959876543210',
+                    'vishesh' => 'samanya',
+                    'height' => '175.00',
+                    'weight' => '70.00',
+                    'occupation' => 'Engineer',
+                    'reference' => 'by friend',
+                    'created_at' => $date . ' 09:00:00',
                     'updated_at' => now()->toDateTimeString(),
                     'follow_ups' => [
                         [
-                            'check_up_info' => 'Test follow-up note 1',
-                            'diagnosis' => 'Test diagnosis 1',
-                            'treatment' => 'Test treatment 1',
-                            'amount_billed' => 100.00,
-                            'amount_paid' => 50.00,
-                            'created_at' => now()->toDateTimeString(),
-                            'updated_at' => now()->toDateTimeString(),
-                        ]
-                    ]
+                            'check_up_info' => '{"nadi":"वात","chikitsa":"महासुदर्शन, वैदेही, बिभितक, यष्टी, तालीसादी","days":null,"packets":null,"payment_method":"cash","amount":"1000","balance":null,"user_id":7,"user_name":"Dhananjay","branch_id":"1","branch_name":"Paud Road"}',
+                            'diagnosis' => 'Viral infection',
+                            'treatment' => 'Prescribed antibiotics and rest.',
+                            'amount_billed' => 1000.00,
+                            'amount_paid' => 1000.00,
+                            'doctor_id' => 7,
+                            'created_at' => $date . ' 10:00:00',
+                            'updated_at' => $date . ' 10:00:00',
+                        ],
+                        [
+                            'check_up_info' => '{"nadi":"वात, सूक्ष्म","chikitsa":"वरा, गुग्गुल, विश्व, अश्वकपी, वत्स, गोक्षुर, गोदंती","days":null,"packets":null,"payment_method":"cash","amount":"1000","balance":null,"user_id":7,"user_name":"Dhananjay","branch_id":"1","branch_name":"Paud Road"}',
+                            'diagnosis' => 'Improved condition',
+                            'treatment' => 'Continue medication.',
+                            'amount_billed' => 500.00,
+                            'amount_paid' => 500.00,
+                            'doctor_id' => 7,
+                            'created_at' => $date . ' 14:00:00',
+                            'updated_at' => $date . ' 14:00:00',
+                        ],
+                    ],
                 ],
                 [
-                    'guid' => 'test-patient-2-' . $date,
-                    'name' => 'Test Patient 2',
-                    'email_id' => 'test2@example.com',
-                    'mobile_phone' => '0987654321',
-                    'address' => 'Test Address 2',
-                    'birthdate' => '1985-05-15',
-                    'gender' => 'female',
-                    'created_at' => now()->toDateTimeString(),
+                    'guid' => 'patient-meera-patel',
+                    'name' => 'Meera Patel',
+                    'email_id' => 'meera.patel@example.com',
+                    'mobile_phone' => '8765432109',
+                    'address' => '789 Shivaji Nagar, Pune, Maharashtra',
+                    'birthdate' => '1990-08-22',
+                    'gender' => 'Female',
+                    'patient_id' => 'M-2208908765432109',
+                    'vishesh' => '<p>santulan vishesh</p>',
+                    'height' => '165.00',
+                    'weight' => '55.00',
+                    'occupation' => 'Teacher',
+                    'reference' => 'by relative',
+                    'created_at' => $date . ' 11:00:00',
                     'updated_at' => now()->toDateTimeString(),
                     'follow_ups' => [
                         [
-                            'check_up_info' => 'Test follow-up note 2',
-                            'diagnosis' => 'Test diagnosis 2',
-                            'treatment' => 'Test treatment 2',
-                            'amount_billed' => 200.00,
-                            'amount_paid' => 150.00,
-                            'created_at' => now()->toDateTimeString(),
-                            'updated_at' => now()->toDateTimeString(),
-                        ]
-                    ]
-                ]
+                            'check_up_info' => '{"photo_types":"[]","nadi":"वात, पित्त","nidan":"Diagnosis","chikitsa":"महासुदर्शन, वैदेही, बिभितक, यष्टी, तालीसादी","vishesh":"santulan","days":"10","packets":"5","total_due":"500.00","payment_method":"cash","all_dues":"0","photos":[{}],"user_id":7,"user_name":"Dhananjay","branch_id":"3","branch_name":"Kothrud"}',
+                            'diagnosis' => 'निद्रा - ↓',
+                            'treatment' => 'Prescribed medication.',
+                            'amount_billed' => 1000.00,
+                            'amount_paid' => 500.00,
+                            'doctor_id' => 7,
+                            'created_at' => $date . ' 12:00:00',
+                            'updated_at' => $date . ' 12:00:00',
+                        ],
+                    ],
+                ],
             ];
 
             $stats = $this->importData($data);
 
             return [
-                'message' => 'Mock data synced successfully for testing.',
+                'message' => 'Mock data synced successfully (realistic clinic data).',
                 'stats' => $stats
             ];
         }
