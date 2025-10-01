@@ -15,7 +15,14 @@
             <!-- Success/Error Messages -->
             @if(session('success'))
                 <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
-                    <span class="block sm:inline">{{ session('success') }}</span>
+                    <div class="flex justify-between items-start">
+                        <span class="block sm:inline">{{ session('success') }}</span>
+                        @if(session('sync_stats'))
+                            <button onclick="showSyncDetails()" class="ml-4 bg-blue-500 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded focus:outline-none">
+                                View Details
+                            </button>
+                        @endif
+                    </div>
                 </div>
             @endif
 
@@ -118,7 +125,154 @@
                             buttonText.textContent = 'Syncing...';
                             spinner.classList.remove('hidden');
                         });
+
+                        function showSyncDetails() {
+                            document.getElementById('syncDetailsModal').classList.remove('hidden');
+                        }
+
+                        function closeSyncDetails() {
+                            document.getElementById('syncDetailsModal').classList.add('hidden');
+                        }
+
+                        // Close modal when clicking outside
+                        document.getElementById('syncDetailsModal').addEventListener('click', function(e) {
+                            if (e.target === this) {
+                                closeSyncDetails();
+                            }
+                        });
                     </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync Details Modal -->
+    <div id="syncDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-medium text-gray-900">Sync Details</h3>
+                    <button onclick="closeSyncDetails()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                @if(session('sync_stats'))
+                    <div class="space-y-4">
+                        <!-- Patients Section -->
+                        <div class="border rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Patients</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600">{{ session('sync_stats')['patients_restored'] ?? 0 }}</div>
+                                    <div class="text-sm text-gray-600">Restored</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-blue-600">{{ session('sync_stats')['patients_imported'] ?? 0 }}</div>
+                                    <div class="text-sm text-gray-600">Imported</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-yellow-600">{{ session('sync_stats')['patients_updated'] ?? 0 }}</div>
+                                    <div class="text-sm text-gray-600">Updated</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-600">{{ session('sync_stats')['patients_skipped'] ?? 0 }}</div>
+                                    <div class="text-sm text-gray-600">Skipped</div>
+                                </div>
+                            </div>
+
+                            <!-- Patient Names Details -->
+                            @if(session('sync_stats')['patient_names'] ?? false)
+                                <div class="space-y-3">
+                                    @if(!empty(session('sync_stats')['patient_names']['restored'] ?? []))
+                                        <div>
+                                            <h5 class="text-sm font-medium text-green-700 mb-1">Restored Patients:</h5>
+                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
+                                                {{ implode(', ', session('sync_stats')['patient_names']['restored']) }}
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if(!empty(session('sync_stats')['patient_names']['imported'] ?? []))
+                                        <div>
+                                            <h5 class="text-sm font-medium text-blue-700 mb-1">Imported Patients:</h5>
+                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
+                                                {{ implode(', ', session('sync_stats')['patient_names']['imported']) }}
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if(!empty(session('sync_stats')['patient_names']['updated'] ?? []))
+                                        <div>
+                                            <h5 class="text-sm font-medium text-yellow-700 mb-1">Updated Patients:</h5>
+                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
+                                                {{ implode(', ', session('sync_stats')['patient_names']['updated']) }}
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Follow-ups Section -->
+                        <div class="border rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-800 mb-3">Follow-ups</h4>
+                            <div class="grid grid-cols-3 gap-4 mb-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-green-600">{{ session('sync_stats')['follow_ups_added'] ?? 0 }}</div>
+                                    <div class="text-sm text-gray-600">Added</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-yellow-600">{{ session('sync_stats')['follow_ups_updated'] ?? 0 }}</div>
+                                    <div class="text-sm text-gray-600">Updated</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-600">{{ session('sync_stats')['follow_ups_skipped'] ?? 0 }}</div>
+                                    <div class="text-sm text-gray-600">Skipped</div>
+                                </div>
+                            </div>
+
+                            <!-- Follow-up Patient Names Details -->
+                            @if(session('sync_stats')['follow_up_patient_names'] ?? false)
+                                <div class="space-y-3">
+                                    @if(!empty(session('sync_stats')['follow_up_patient_names']['added'] ?? []))
+                                        <div>
+                                            <h5 class="text-sm font-medium text-green-700 mb-1">Added Follow-ups (Patients):</h5>
+                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
+                                                {{ implode(', ', session('sync_stats')['follow_up_patient_names']['added']) }}
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if(!empty(session('sync_stats')['follow_up_patient_names']['updated'] ?? []))
+                                        <div>
+                                            <h5 class="text-sm font-medium text-yellow-700 mb-1">Updated Follow-ups (Patients):</h5>
+                                            <div class="text-xs text-gray-600 max-h-20 overflow-y-auto">
+                                                {{ implode(', ', session('sync_stats')['follow_up_patient_names']['updated']) }}
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Summary -->
+                        <div class="border rounded-lg p-4 bg-gray-50">
+                            <h4 class="font-semibold text-gray-800 mb-2">Summary</h4>
+                            <div class="text-sm text-gray-700">
+                                <p>Total patients processed: <strong>{{ (session('sync_stats')['patients_restored'] ?? 0) + (session('sync_stats')['patients_imported'] ?? 0) + (session('sync_stats')['patients_updated'] ?? 0) + (session('sync_stats')['patients_skipped'] ?? 0) }}</strong></p>
+                                <p>Total follow-ups processed: <strong>{{ (session('sync_stats')['follow_ups_added'] ?? 0) + (session('sync_stats')['follow_ups_updated'] ?? 0) + (session('sync_stats')['follow_ups_skipped'] ?? 0) }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <div class="mt-4 flex justify-end">
+                    <button onclick="closeSyncDetails()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 focus:outline-none">
+                        Close
+                    </button>
                 </div>
             </div>
         </div>

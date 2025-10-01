@@ -15,7 +15,7 @@ class SyncService
 
     public function __construct()
     {
-        $this->timezone = config('app.timezone', 'Asia/Kolkata');
+        $this->timezone = env('APP_TIMEZONE', 'Asia/Kolkata');
     }
 
     /**
@@ -78,6 +78,10 @@ class SyncService
         $newFollowUpsCount = $updatedFollowUpsCount = $skippedFollowUpsCount = 0;
         $patientsRestored = 0;
 
+        // Track patient names for detailed reporting
+        $restoredPatientNames = $importedPatientNames = $updatedPatientNames = $skippedPatientNames = [];
+        $addedFollowUpPatientNames = $updatedFollowUpPatientNames = [];
+
         DB::transaction(function () use (
             $patientsData,
             &$importedPatientsCount,
@@ -86,7 +90,13 @@ class SyncService
             &$newFollowUpsCount,
             &$updatedFollowUpsCount,
             &$skippedFollowUpsCount,
-            &$patientsRestored
+            &$patientsRestored,
+            &$restoredPatientNames,
+            &$importedPatientNames,
+            &$updatedPatientNames,
+            &$skippedPatientNames,
+            &$addedFollowUpPatientNames,
+            &$updatedFollowUpPatientNames
         ) {
             foreach ($patientsData as $patientData) {
                 // Patient-level validation
@@ -116,16 +126,23 @@ class SyncService
                     try {
                         $existingPatientUpdatedAt = Carbon::parse($existingPatient->updated_at)->setTimezone($this->timezone);
 
+                        $wasUpdated = false;
                         if ($existingPatientUpdatedAt->lessThan(Carbon::parse($patientData['updated_at']))) {
+                            $patientData['updated_at'] = now()->setTimezone($this->timezone)->toDateTimeString();
                             $existingPatient->update($patientData);
-                            $updatedPatientsCount++;
-                        } else {
-                            $skippedPatientsCount++;
+                            $wasUpdated = true;
                         }
 
                         if ($existingPatient->trashed()) {
                             $existingPatient->restore();
                             $patientsRestored++;
+                            $restoredPatientNames[] = $name;
+                        } elseif ($wasUpdated) {
+                            $updatedPatientsCount++;
+                            $updatedPatientNames[] = $name;
+                        } else {
+                            $skippedPatientsCount++;
+                            $skippedPatientNames[] = $name;
                         }
                     } catch (\Exception $e) {
                         throw new \Exception("Error updating/restoring patient {$name} (GUID: {$patientData['guid']}): " . $e->getMessage());
@@ -147,16 +164,27 @@ class SyncService
                             continue;
                         }
 
+                        // Try to find existing follow-up by unique content first
                         $existingFollowUp = FollowUp::where('patient_id', $existingPatient->id)
-                            ->where('created_at', $followUpData['created_at'])
+                            ->where('check_up_info', $followUpData['check_up_info'])
                             ->first();
+
+                        // Fallback to timestamp-based matching if content doesn't match
+                        if (!$existingFollowUp) {
+                            $existingFollowUp = FollowUp::where('patient_id', $existingPatient->id)
+                                ->where('doctor_id', $followUpData['doctor_id'])
+                                ->whereRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') = DATE_FORMAT(?, '%Y-%m-%d %H:%i')", [$followUpData['created_at']])
+                                ->first();
+                        }
 
                         if ($existingFollowUp) {
                             try {
                                 $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($this->timezone);
                                 if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
+                                    $followUpData['updated_at'] = now()->setTimezone($this->timezone)->toDateTimeString();
                                     $existingFollowUp->update($followUpData);
                                     $updatedFollowUpsCount++;
+                                    $updatedFollowUpPatientNames[] = $name;
                                 } else {
                                     $skippedFollowUpsCount++;
                                 }
@@ -168,6 +196,7 @@ class SyncService
                                 $followUpData['patient_id'] = $existingPatient->id;
                                 FollowUp::create($followUpData);
                                 $newFollowUpsCount++;
+                                $addedFollowUpPatientNames[] = $name;
                             } catch (\Exception $e) {
                                 $skippedFollowUpsCount++;
                             }
@@ -181,6 +210,7 @@ class SyncService
                 try {
                     $patient = Patient::create($patientData);
                     $importedPatientsCount++;
+                    $importedPatientNames[] = $name;
                 } catch (\Exception $e) {
                     throw new \Exception("Error creating patient {$name}: " . $e->getMessage());
                 }
@@ -201,12 +231,41 @@ class SyncService
                         continue;
                     }
 
-                    try {
-                        $followUpData['patient_id'] = $patient->id;
-                        FollowUp::create($followUpData);
-                        $newFollowUpsCount++;
-                    } catch (\Exception $e) {
-                        $skippedFollowUpsCount++;
+                    // Check if follow-up already exists for new patient (in case of partial syncs)
+                    $existingFollowUp = FollowUp::where('patient_id', $patient->id)
+                        ->where('check_up_info', $followUpData['check_up_info'])
+                        ->first();
+
+                    if (!$existingFollowUp) {
+                        // Fallback check
+                        $existingFollowUp = FollowUp::where('patient_id', $patient->id)
+                            ->where('doctor_id', $followUpData['doctor_id'])
+                            ->whereRaw("DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') = DATE_FORMAT(?, '%Y-%m-%d %H:%i')", [$followUpData['created_at']])
+                            ->first();
+                    }
+
+                    if (!$existingFollowUp) {
+                        try {
+                            $followUpData['patient_id'] = $patient->id;
+                            FollowUp::create($followUpData);
+                            $newFollowUpsCount++;
+                            $addedFollowUpPatientNames[] = $name;
+                        } catch (\Exception $e) {
+                            $skippedFollowUpsCount++;
+                        }
+                    } else {
+                        // Update if newer
+                        try {
+                            $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($this->timezone);
+                            if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
+                                $existingFollowUp->update($followUpData);
+                                $updatedFollowUpsCount++;
+                            } else {
+                                $skippedFollowUpsCount++;
+                            }
+                        } catch (\Exception $e) {
+                            $skippedFollowUpsCount++;
+                        }
                     }
                 }
             }
@@ -220,6 +279,16 @@ class SyncService
             'follow_ups_added' => $newFollowUpsCount,
             'follow_ups_updated' => $updatedFollowUpsCount,
             'follow_ups_skipped' => $skippedFollowUpsCount,
+            'patient_names' => [
+                'restored' => $restoredPatientNames,
+                'imported' => $importedPatientNames,
+                'updated' => $updatedPatientNames,
+                'skipped' => $skippedPatientNames,
+            ],
+            'follow_up_patient_names' => [
+                'added' => $addedFollowUpPatientNames,
+                'updated' => $updatedFollowUpPatientNames,
+            ],
         ];
     }
 
@@ -248,7 +317,7 @@ class SyncService
                     'occupation' => 'Engineer',
                     'reference' => 'by friend',
                     'created_at' => $date . ' 09:00:00',
-                    'updated_at' => now()->toDateTimeString(),
+                    'updated_at' => $date . ' 09:00:00', // Fixed date for consistent testing
                     'follow_ups' => [
                         [
                             'check_up_info' => '{"nadi":"वात","chikitsa":"महासुदर्शन, वैदेही, बिभितक, यष्टी, तालीसादी","days":null,"packets":null,"payment_method":"cash","amount":"1000","balance":null,"user_id":7,"user_name":"Dhananjay","branch_id":"1","branch_name":"Paud Road"}',
@@ -287,7 +356,7 @@ class SyncService
                     'occupation' => 'Teacher',
                     'reference' => 'by relative',
                     'created_at' => $date . ' 11:00:00',
-                    'updated_at' => now()->toDateTimeString(),
+                    'updated_at' => $date . ' 11:00:00', // Fixed date for consistent testing
                     'follow_ups' => [
                         [
                             'check_up_info' => '{"photo_types":"[]","nadi":"वात, पित्त","nidan":"Diagnosis","chikitsa":"महासुदर्शन, वैदेही, बिभितक, यष्टी, तालीसादी","vishesh":"santulan","days":"10","packets":"5","total_due":"500.00","payment_method":"cash","all_dues":"0","photos":[{}],"user_id":7,"user_name":"Dhananjay","branch_id":"3","branch_name":"Kothrud"}',
@@ -390,21 +459,30 @@ class SyncService
     }
 
     /**
-     * Import data from file
+     * Clean up duplicate follow-ups, keeping only the most recent one for each unique combination
      */
-    public function importFromFile($filePath)
+    public function cleanupDuplicateFollowUps()
     {
-        if (!Storage::exists($filePath)) {
-            throw new \Exception("File not found in storage: $filePath");
+        $duplicatesRemoved = 0;
+
+        // Find follow-ups with duplicate patient_id + check_up_info combinations
+        $duplicates = DB::select("
+            SELECT patient_id, check_up_info, COUNT(*) as count, MAX(updated_at) as latest_update
+            FROM follow_ups
+            GROUP BY patient_id, check_up_info
+            HAVING COUNT(*) > 1
+        ");
+
+        foreach ($duplicates as $duplicate) {
+            // Keep the most recently updated follow-up, delete the others
+            $followUpsToDelete = FollowUp::where('patient_id', $duplicate->patient_id)
+                ->where('check_up_info', $duplicate->check_up_info)
+                ->where('updated_at', '<', $duplicate->latest_update)
+                ->delete();
+
+            $duplicatesRemoved += $followUpsToDelete;
         }
 
-        $json = Storage::get($filePath);
-        $patients = json_decode($json, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception("Invalid JSON: " . json_last_error_msg());
-        }
-
-        return $this->importData($patients);
+        return $duplicatesRemoved;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PresetController;
+use App\Http\Controllers\ApiController;
 
 Route::middleware('auth')->group(function () {
     Route::get('/presets', [PresetController::class, 'index']);
@@ -24,3 +25,9 @@ Route::middleware('auth')->group(function () {
         ]);
     });
 });
+
+// Sync API endpoints (for data synchronization)
+
+
+Route::post('/login', [ApiController::class, 'login']);
+Route::middleware('auth:sanctum')->get('/export', [ApiController::class, 'export']);
