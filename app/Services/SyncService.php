@@ -226,19 +226,32 @@ class SyncService
     /**
      * Sync data from online API
      */
-    public function syncFromApi($date)
+    public function syncFromApi($date, $username, $password)
     {
-        $apiUrl = config('services.online_api.url') . '/export?date=' . $date;
-        $token = config('services.online_api.token');
+        $apiUrl = config('services.online_api.url', 'https://kothrud.vaidyajategaonkar.com/api');
 
-        if (!$token) {
-            throw new \Exception('ONLINE_API_TOKEN not configured');
+        // First, attempt login to get token
+        $loginResponse = Http::post($apiUrl . '/login', [
+            'username' => $username,
+            'password' => $password,
+        ]);
+
+        if (!$loginResponse->successful()) {
+            throw new \Exception('Login failed: ' . $loginResponse->status() . ' - ' . $loginResponse->body());
         }
 
-        $response = Http::withToken($token)->get($apiUrl);
+        $loginData = $loginResponse->json();
+        if (!isset($loginData['token'])) {
+            throw new \Exception('Login successful but no token received.');
+        }
+
+        $token = $loginData['token'];
+
+        // Now fetch the data
+        $response = Http::withToken($token)->get($apiUrl . '/export?date=' . $date);
 
         if (!$response->successful()) {
-            throw new \Exception('Failed to fetch data from online API: ' . $response->status());
+            throw new \Exception('Failed to fetch data from online API: ' . $response->status() . ' - ' . $response->body());
         }
 
         $data = $response->json();

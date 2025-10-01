@@ -25,14 +25,20 @@ class SyncController extends Controller
     {
         $request->validate([
             'sync_date' => 'required|date|before_or_equal:today',
+            'api_username' => 'required|string|max:255',
+            'api_password' => 'required|string|max:255',
         ]);
 
         $date = $request->input('sync_date');
+        $username = $request->input('api_username');
+        $password = $request->input('api_password');
 
         try {
-            // Run the sync command
+            // Run the sync command with credentials
             $exitCode = Artisan::call('MC:SyncData', [
-                'date' => $date
+                'date' => $date,
+                '--username' => $username,
+                '--password' => $password,
             ]);
 
             if ($exitCode === 0) {
