@@ -67,7 +67,7 @@ class SyncData extends Command
             $this->line("\n<fg=white;bg=blue> Sync completed successfully </>");
 
         } catch (\Exception $e) {
-            $this->error('Sync failed: ' . $e->getMessage());
+            $this->error($e->getMessage());
             return 1;
         }
 

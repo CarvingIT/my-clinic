@@ -321,7 +321,14 @@ class SyncService
         ]);
 
         if (!$loginResponse->successful()) {
-            throw new \Exception('Login failed: ' . $loginResponse->status() . ' - ' . $loginResponse->body());
+            $status = $loginResponse->status();
+            $message = match($status) {
+                401 => 'Invalid username or password.',
+                404 => 'API endpoint not found. Please check if the API is available.',
+                500 => 'Server error. Please try again later.',
+                default => 'Login failed with status ' . $status . '.',
+            };
+            throw new \Exception('Login failed: ' . $message);
         }
 
         $loginData = $loginResponse->json();
@@ -335,7 +342,15 @@ class SyncService
         $response = Http::withToken($token)->get($apiUrl . '/export?date=' . $date);
 
         if (!$response->successful()) {
-            throw new \Exception('Failed to fetch data from online API: ' . $response->status() . ' - ' . $response->body());
+            $status = $response->status();
+            $message = match($status) {
+                401 => 'Authentication failed. Token may be invalid.',
+                403 => 'Access forbidden. Check permissions.',
+                404 => 'Data endpoint not found.',
+                500 => 'Server error while fetching data.',
+                default => 'Failed to fetch data with status ' . $status . '.',
+            };
+            throw new \Exception('Failed to fetch data from online API: ' . $message);
         }
 
         $data = $response->json();
