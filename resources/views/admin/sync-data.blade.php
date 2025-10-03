@@ -44,7 +44,10 @@
                                 </div>
                                 <div class="ml-3">
                                     <p class="text-sm text-blue-700">
-                                        <strong>Sync Information:</strong> This will import patient and follow-up data from the online server. Only data updated on or after the selected date will be synced. Existing data will be updated if newer.
+                                        <strong>Sync Information:</strong> This will import patient and follow-up data from the online server. 
+                                        <br>• <strong>Date-filtered sync:</strong> Only imports data updated on the selected date (recommended for daily syncs)
+                                        <br>• <strong>Full sync:</strong> Imports ALL data from the online system (use when setting up or catching up)
+                                        <br>Existing data will be updated if newer versions are found.
                                     </p>
                                 </div>
                             </div>
@@ -64,10 +67,23 @@
                                    value="{{ old('sync_date', date('Y-m-d')) }}"
                                    max="{{ date('Y-m-d') }}"
                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   required>
+                                   {{ old('sync_all') ? '' : 'required' }}>
                             @error('sync_date')
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="flex items-center">
+                                <input type="checkbox"
+                                       id="sync_all"
+                                       name="sync_all"
+                                       value="1"
+                                       {{ old('sync_all') ? 'checked' : '' }}
+                                       class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <span class="ml-2 text-sm text-gray-700">Sync ALL data (ignore date filter)</span>
+                            </label>
+                            <p class="mt-1 text-sm text-gray-500">Check this to import all patients from the online system, not just those updated on the selected date.</p>
                         </div>
 
                         <div class="mb-4">
@@ -116,13 +132,41 @@
                     </form>
 
                     <script>
+                        // Toggle date field requirement based on sync_all checkbox
+                        document.getElementById('sync_all').addEventListener('change', function() {
+                            const dateField = document.getElementById('sync_date');
+                            const buttonText = document.getElementById('button-text');
+                            if (this.checked) {
+                                dateField.removeAttribute('required');
+                                dateField.classList.add('opacity-50');
+                                buttonText.textContent = 'Start Full Sync';
+                            } else {
+                                dateField.setAttribute('required', 'required');
+                                dateField.classList.remove('opacity-50');
+                                buttonText.textContent = 'Start Sync';
+                            }
+                        });
+
+                        // Initialize on page load
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const checkbox = document.getElementById('sync_all');
+                            const dateField = document.getElementById('sync_date');
+                            const buttonText = document.getElementById('button-text');
+                            if (checkbox.checked) {
+                                dateField.removeAttribute('required');
+                                dateField.classList.add('opacity-50');
+                                buttonText.textContent = 'Start Full Sync';
+                            }
+                        });
+
                         document.getElementById('sync-form').addEventListener('submit', function() {
                             const button = document.getElementById('sync-button');
                             const buttonText = document.getElementById('button-text');
                             const spinner = document.getElementById('loading-spinner');
+                            const isFullSync = document.getElementById('sync_all').checked;
 
                             button.disabled = true;
-                            buttonText.textContent = 'Syncing...';
+                            buttonText.textContent = isFullSync ? 'Full Syncing...' : 'Syncing...';
                             spinner.classList.remove('hidden');
                         });
 
@@ -218,7 +262,7 @@
                                 <div class="p-6">
                                     <div class="flex items-center space-x-2 mb-4">
                                         <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                         </svg>
                                         <h4 class="text-lg font-semibold text-gray-800">Patients</h4>
                                     </div>
@@ -407,6 +451,101 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Errors and Issues Section -->
+                        @if((session('sync_stats')['errors'] ?? false) && (!empty(session('sync_stats')['errors']['patients']) || !empty(session('sync_stats')['errors']['follow_ups'])))
+                            <div class="bg-red-50 rounded-lg border border-red-200 shadow-sm">
+                                <div class="p-6">
+                                    <div class="flex items-center space-x-2 mb-4">
+                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                        </svg>
+                                        <h4 class="text-lg font-semibold text-red-800">Errors & Issues</h4>
+                                    </div>
+
+                                    @if(!empty(session('sync_stats')['errors']['patients']))
+                                        <div class="mb-4">
+                                            <h5 class="text-sm font-semibold text-red-700 mb-2">Patient Errors</h5>
+                                            <div class="bg-white rounded p-3 border max-h-32 overflow-y-auto">
+                                                <ul class="text-sm text-red-600 space-y-1">
+                                                    @foreach(session('sync_stats')['errors']['patients'] as $error)
+                                                        <li class="flex items-start">
+                                                            <span class="text-red-500 mr-2">•</span>
+                                                            {{ $error }}
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if(!empty(session('sync_stats')['errors']['follow_ups']))
+                                        <div class="mb-4">
+                                            <h5 class="text-sm font-semibold text-red-700 mb-2">Follow-up Errors</h5>
+                                            <div class="bg-white rounded p-3 border max-h-32 overflow-y-auto">
+                                                <ul class="text-sm text-red-600 space-y-1">
+                                                    @foreach(session('sync_stats')['errors']['follow_ups'] as $error)
+                                                        <li class="flex items-start">
+                                                            <span class="text-red-500 mr-2">•</span>
+                                                            {{ $error }}
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Background Operations Section -->
+                        @if(session('sync_stats')['background_operations'] ?? false)
+                            <div class="bg-purple-50 rounded-lg border border-purple-200 shadow-sm">
+                                <div class="p-6">
+                                    <div class="flex items-center space-x-2 mb-4">
+                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        <h4 class="text-lg font-semibold text-purple-800">Background Operations</h4>
+                                    </div>
+                                    <div class="bg-white rounded p-3 border max-h-40 overflow-y-auto">
+                                        <ul class="text-sm text-purple-700 space-y-1">
+                                            @foreach(session('sync_stats')['background_operations'] as $operation)
+                                                <li class="flex items-start">
+                                                    <span class="text-purple-500 mr-2">✓</span>
+                                                    {{ $operation }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        <!-- Sync Logs Section -->
+                        @if(session('sync_stats')['sync_logs'] ?? false)
+                            <div class="bg-gray-50 rounded-lg border border-gray-200 shadow-sm">
+                                <div class="p-6">
+                                    <div class="flex items-center space-x-2 mb-4">
+                                        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        <h4 class="text-lg font-semibold text-gray-800">Sync Activity Log</h4>
+                                    </div>
+                                    <div class="bg-white rounded p-3 border max-h-60 overflow-y-auto">
+                                        <div class="text-sm text-gray-700 space-y-1 font-mono">
+                                            @foreach(session('sync_stats')['sync_logs'] as $log)
+                                                <div class="flex items-start {{ strpos($log, 'ERROR:') === 0 ? 'text-red-600' : (strpos($log, 'WARNING:') === 0 ? 'text-yellow-600' : 'text-gray-600') }}">
+                                                    <span class="mr-2 text-xs opacity-75">{{ date('H:i:s') }}</span>
+                                                    <span>{{ $log }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
 
                         <!-- Footer -->
                         <div class="mt-8 pt-6 border-t border-gray-200">

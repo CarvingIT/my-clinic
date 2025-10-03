@@ -18,12 +18,32 @@ class AnalyticsController extends Controller
 
     public function index(Request $request)
     {
-        // Fetch unique branches from follow-ups
-        $branches = FollowUp::selectRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) as branch_name")
-            ->whereNotNull(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name'))"))
-            ->where(DB::raw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name'))"), '!=', '')
-            ->distinct()
-            ->pluck('branch_name');
+        // Fetch unique branches from follow-ups with error handling for invalid JSON
+        try {
+            $branchesQuery = FollowUp::selectRaw("DISTINCT JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) as branch_name")
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) IS NOT NULL")
+                ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) != ''")
+                ->whereRaw("JSON_VALID(check_up_info) = 1"); // Only include valid JSON
+
+            $branches = $branchesQuery->pluck('branch_name')->filter()->values();
+        } catch (\Exception $e) {
+            // Fallback: get branches from all follow-ups, parsing JSON in PHP
+            $branches = collect();
+            FollowUp::chunk(100, function ($followUps) use (&$branches) {
+                foreach ($followUps as $followUp) {
+                    try {
+                        $info = json_decode($followUp->check_up_info, true);
+                        if ($info && isset($info['branch_name']) && !empty($info['branch_name'])) {
+                            $branches->push($info['branch_name']);
+                        }
+                    } catch (\Exception $e) {
+                        // Skip invalid JSON records
+                        continue;
+                    }
+                }
+            });
+            $branches = $branches->unique()->values();
+        }
 
         // Default to "all"
         $selectedBranch = $request->input('branch_name', 'all');
@@ -42,7 +62,10 @@ class AnalyticsController extends Controller
 
         // Apply branch filter if a specific branch is selected
         if ($selectedBranch !== 'all' && !empty($selectedBranch)) {
-            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
+            $query->where(function ($q) use ($selectedBranch) {
+                // Try JSON_EXTRACT for valid JSON first
+                $q->whereRaw("JSON_VALID(check_up_info) = 1 AND JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
+            });
         }
 
         // Apply doctor filter if a specific doctor is selected

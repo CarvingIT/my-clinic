@@ -24,23 +24,26 @@ class SyncController extends Controller
     public function syncData(Request $request): RedirectResponse
     {
         $request->validate([
-            'sync_date' => 'required|date|before_or_equal:today',
+            'sync_date' => 'nullable|date|before_or_equal:today',
             'api_username' => 'required|string|max:255',
             'api_password' => 'required|string|max:255',
+            'sync_all' => 'nullable|boolean',
         ]);
 
         $date = $request->input('sync_date');
         $username = $request->input('api_username');
         $password = $request->input('api_password');
+        $syncAll = $request->boolean('sync_all', false);
+        $syncAll = $request->boolean('sync_all', false);
 
         try {
             // Call sync service directly to get detailed stats
             $syncService = app(\App\Services\SyncService::class);
-            $result = $syncService->syncFromApi($date, $username, $password);
+            $result = $syncService->syncFromApi($date, $username, $password, $syncAll);
 
             if (isset($result['stats'])) {
                 $stats = $result['stats'];
-                $message = 'Data synced successfully from online server.';
+                $message = $result['message'] ?? 'Data synced successfully from online server.';
 
                 return redirect()->back()->with('success', $message)->with('sync_stats', $stats);
             } else {

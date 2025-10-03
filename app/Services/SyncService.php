@@ -82,6 +82,11 @@ class SyncService
         $restoredPatientNames = $importedPatientNames = $updatedPatientNames = $skippedPatientNames = [];
         $addedFollowUpPatientNames = $updatedFollowUpPatientNames = [];
 
+        // Track errors and failed operations
+        $patientErrors = $followUpErrors = [];
+        $backgroundOperations = [];
+        $syncLogs = [];
+
         DB::transaction(function () use (
             $patientsData,
             &$importedPatientsCount,
@@ -96,9 +101,16 @@ class SyncService
             &$updatedPatientNames,
             &$skippedPatientNames,
             &$addedFollowUpPatientNames,
-            &$updatedFollowUpPatientNames
+            &$updatedFollowUpPatientNames,
+            &$patientErrors,
+            &$followUpErrors,
+            &$backgroundOperations,
+            &$syncLogs
         ) {
             foreach ($patientsData as $patientData) {
+                $syncLogs[] = "Processing patient: " . (isset($patientData['name']) ? $patientData['name'] : 'Unknown') . " (GUID: " . (isset($patientData['guid']) ? $patientData['guid'] : 'N/A') . ")";
+                $backgroundOperations[] = "Validating patient data structure";
+
                 // Patient-level validation
                 if (
                     empty($patientData['guid']) ||
@@ -106,64 +118,99 @@ class SyncService
                     empty($patientData['updated_at']) ||
                     !isset($patientData['name'])
                 ) {
-                    throw new \Exception("Skipping patient: missing required fields - " . json_encode($patientData));
+                    $error = "Skipping patient: missing required fields - " . json_encode($patientData);
+                    $patientErrors[] = $error;
+                    $syncLogs[] = "ERROR: " . $error;
+                    $skippedPatientsCount++;
+                    $skippedPatientNames[] = $patientData['name'] ?? 'Unknown';
+                    continue;
                 }
 
+                $backgroundOperations[] = "Parsing timestamps for patient {$patientData['name']}";
                 try {
                     $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone($this->timezone)->toDateTimeString();
                     $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($this->timezone)->toDateTimeString();
                 } catch (\Exception $e) {
-                    throw new \Exception("Skipping patient: invalid date format for GUID {$patientData['guid']}");
+                    $error = "Skipping patient: invalid date format for GUID {$patientData['guid']}: " . $e->getMessage();
+                    $patientErrors[] = $error;
+                    $syncLogs[] = "ERROR: " . $error;
+                    $skippedPatientsCount++;
+                    $skippedPatientNames[] = $patientData['name'] ?? 'Unknown';
+                    continue;
                 }
 
                 $followUps = $patientData['follow_ups'] ?? [];
                 unset($patientData['follow_ups']);
                 $name = $patientData['name'] ?? 'Unknown';
 
+                $backgroundOperations[] = "Checking for existing patient with patient_id: {$patientData['patient_id']}";
                 $existingPatient = Patient::withTrashed()->where('patient_id', $patientData['patient_id'])->first();
 
                 if ($existingPatient) {
+                    $backgroundOperations[] = "Found existing patient, checking update requirements";
                     try {
                         $existingPatientUpdatedAt = Carbon::parse($existingPatient->updated_at)->setTimezone($this->timezone);
 
                         $wasUpdated = false;
                         if ($existingPatientUpdatedAt->lessThan(Carbon::parse($patientData['updated_at']))) {
+                            $backgroundOperations[] = "Patient data is newer, updating patient record";
                             $patientData['updated_at'] = now()->setTimezone($this->timezone)->toDateTimeString();
                             $existingPatient->update($patientData);
                             $wasUpdated = true;
+                            $syncLogs[] = "Updated patient: {$name}";
                         }
 
                         if ($existingPatient->trashed()) {
+                            $backgroundOperations[] = "Restoring soft-deleted patient";
                             $existingPatient->restore();
                             $patientsRestored++;
                             $restoredPatientNames[] = $name;
+                            $syncLogs[] = "Restored patient: {$name}";
                         } elseif ($wasUpdated) {
                             $updatedPatientsCount++;
                             $updatedPatientNames[] = $name;
                         } else {
+                            $backgroundOperations[] = "Patient data is up to date, skipping update";
                             $skippedPatientsCount++;
                             $skippedPatientNames[] = $name;
+                            $syncLogs[] = "Skipped patient (up to date): {$name}";
                         }
                     } catch (\Exception $e) {
-                        throw new \Exception("Error updating/restoring patient {$name} (GUID: {$patientData['guid']}): " . $e->getMessage());
+                        $error = "Error updating/restoring patient {$name} (GUID: {$patientData['guid']}): " . $e->getMessage();
+                        $patientErrors[] = $error;
+                        $syncLogs[] = "ERROR: " . $error;
+                        $skippedPatientsCount++;
+                        $skippedPatientNames[] = $name;
+                        continue;
                     }
 
                     // Process follow-ups for existing patient
+                    $backgroundOperations[] = "Processing " . count($followUps) . " follow-ups for patient {$name}";
                     foreach ($followUps as $followUpData) {
+                        $backgroundOperations[] = "Validating follow-up data for patient {$name}";
+
                         // Follow-up validation
                         if (empty($followUpData['created_at']) || empty($followUpData['updated_at'])) {
+                            $error = "Skipping follow-up for patient {$name}: missing required timestamp fields";
+                            $followUpErrors[] = $error;
+                            $syncLogs[] = "ERROR: " . $error;
                             $skippedFollowUpsCount++;
                             continue;
                         }
 
+                        $backgroundOperations[] = "Parsing follow-up timestamps for patient {$name}";
                         try {
                             $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($this->timezone)->toDateTimeString();
                             $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($this->timezone)->toDateTimeString();
                         } catch (\Exception $e) {
+                            $error = "Skipping follow-up for patient {$name}: invalid date format";
+                            $followUpErrors[] = $error;
+                            $syncLogs[] = "ERROR: " . $error;
                             $skippedFollowUpsCount++;
                             continue;
                         }
 
+                        $backgroundOperations[] = "Checking for existing follow-up records for patient {$name}";
                         // Try to find existing follow-up by unique content first
                         $existingFollowUp = FollowUp::where('patient_id', $existingPatient->id)
                             ->where('check_up_info', $followUpData['check_up_info'])
@@ -178,26 +225,39 @@ class SyncService
                         }
 
                         if ($existingFollowUp) {
+                            $backgroundOperations[] = "Found existing follow-up, checking if update needed for patient {$name}";
                             try {
                                 $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($this->timezone);
                                 if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
+                                    $backgroundOperations[] = "Updating existing follow-up for patient {$name}";
                                     $followUpData['updated_at'] = now()->setTimezone($this->timezone)->toDateTimeString();
                                     $existingFollowUp->update($followUpData);
                                     $updatedFollowUpsCount++;
                                     $updatedFollowUpPatientNames[] = $name;
+                                    $syncLogs[] = "Updated follow-up for patient: {$name}";
                                 } else {
+                                    $backgroundOperations[] = "Follow-up is up to date for patient {$name}";
                                     $skippedFollowUpsCount++;
+                                    $syncLogs[] = "Skipped follow-up (up to date) for patient: {$name}";
                                 }
                             } catch (\Exception $e) {
+                                $error = "Error updating follow-up for patient {$name}: " . $e->getMessage();
+                                $followUpErrors[] = $error;
+                                $syncLogs[] = "ERROR: " . $error;
                                 $skippedFollowUpsCount++;
                             }
                         } else {
+                            $backgroundOperations[] = "Creating new follow-up for patient {$name}";
                             try {
                                 $followUpData['patient_id'] = $existingPatient->id;
                                 FollowUp::create($followUpData);
                                 $newFollowUpsCount++;
                                 $addedFollowUpPatientNames[] = $name;
+                                $syncLogs[] = "Added new follow-up for patient: {$name}";
                             } catch (\Exception $e) {
+                                $error = "Error creating follow-up for patient {$name}: " . $e->getMessage();
+                                $followUpErrors[] = $error;
+                                $syncLogs[] = "ERROR: " . $error;
                                 $skippedFollowUpsCount++;
                             }
                         }
@@ -207,26 +267,43 @@ class SyncService
                 }
 
                 // New patient
+                $backgroundOperations[] = "Creating new patient record";
                 try {
                     $patient = Patient::create($patientData);
                     $importedPatientsCount++;
                     $importedPatientNames[] = $name;
+                    $syncLogs[] = "Created new patient: {$name}";
                 } catch (\Exception $e) {
-                    throw new \Exception("Error creating patient {$name}: " . $e->getMessage());
+                    $error = "Error creating patient {$name}: " . $e->getMessage();
+                    $patientErrors[] = $error;
+                    $syncLogs[] = "ERROR: " . $error;
+                    $skippedPatientsCount++;
+                    $skippedPatientNames[] = $name;
+                    continue;
                 }
 
                 // Process follow-ups for new patient
+                $backgroundOperations[] = "Processing " . count($followUps) . " follow-ups for new patient {$name}";
                 foreach ($followUps as $followUpData) {
+                    $backgroundOperations[] = "Validating follow-up data for new patient {$name}";
+
                     // Follow-up validation
                     if (empty($followUpData['created_at']) || empty($followUpData['updated_at'])) {
+                        $error = "Skipping follow-up for new patient {$name}: missing required timestamp fields";
+                        $followUpErrors[] = $error;
+                        $syncLogs[] = "ERROR: " . $error;
                         $skippedFollowUpsCount++;
                         continue;
                     }
 
+                    $backgroundOperations[] = "Parsing follow-up timestamps for new patient {$name}";
                     try {
                         $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($this->timezone)->toDateTimeString();
                         $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($this->timezone)->toDateTimeString();
                     } catch (\Exception $e) {
+                        $error = "Skipping follow-up for new patient {$name}: invalid date format";
+                        $followUpErrors[] = $error;
+                        $syncLogs[] = "ERROR: " . $error;
                         $skippedFollowUpsCount++;
                         continue;
                     }
@@ -245,25 +322,36 @@ class SyncService
                     }
 
                     if (!$existingFollowUp) {
+                        $backgroundOperations[] = "Creating follow-up for new patient {$name}";
                         try {
                             $followUpData['patient_id'] = $patient->id;
                             FollowUp::create($followUpData);
                             $newFollowUpsCount++;
                             $addedFollowUpPatientNames[] = $name;
+                            $syncLogs[] = "Added follow-up for new patient: {$name}";
                         } catch (\Exception $e) {
+                            $error = "Error creating follow-up for new patient {$name}: " . $e->getMessage();
+                            $followUpErrors[] = $error;
+                            $syncLogs[] = "ERROR: " . $error;
                             $skippedFollowUpsCount++;
                         }
                     } else {
+                        $backgroundOperations[] = "Follow-up already exists for new patient {$name}, checking for updates";
                         // Update if newer
                         try {
                             $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($this->timezone);
                             if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
                                 $existingFollowUp->update($followUpData);
                                 $updatedFollowUpsCount++;
+                                $syncLogs[] = "Updated existing follow-up for new patient: {$name}";
                             } else {
                                 $skippedFollowUpsCount++;
+                                $syncLogs[] = "Skipped follow-up (up to date) for new patient: {$name}";
                             }
                         } catch (\Exception $e) {
+                            $error = "Error updating follow-up for new patient {$name}: " . $e->getMessage();
+                            $followUpErrors[] = $error;
+                            $syncLogs[] = "ERROR: " . $error;
                             $skippedFollowUpsCount++;
                         }
                     }
@@ -289,15 +377,25 @@ class SyncService
                 'added' => $addedFollowUpPatientNames,
                 'updated' => $updatedFollowUpPatientNames,
             ],
+            'errors' => [
+                'patients' => $patientErrors,
+                'follow_ups' => $followUpErrors,
+            ],
+            'background_operations' => array_unique($backgroundOperations),
+            'sync_logs' => $syncLogs,
         ];
     }
 
     /**
      * Sync data from online API
      */
-    public function syncFromApi($date, $username, $password)
+    public function syncFromApi($date, $username, $password, $syncAll = false)
     {
         $useMockData = config('services.online_api.use_mock_data', false);
+
+        // Initialize logging arrays
+        $backgroundOperations = [];
+        $syncLogs = [];
 
         if ($useMockData) {
             // Realistic mock data matching real clinic backup structure
@@ -374,6 +472,10 @@ class SyncService
 
             $stats = $this->importData($data);
 
+            // Merge the background operations and sync logs from importData
+            $stats['background_operations'] = array_merge($backgroundOperations, $stats['background_operations'] ?? []);
+            $stats['sync_logs'] = array_merge($syncLogs, $stats['sync_logs'] ?? []);
+
             return [
                 'message' => 'Mock data synced successfully (realistic clinic data).',
                 'stats' => $stats
@@ -384,6 +486,7 @@ class SyncService
         $apiUrl = config('services.online_api.url', 'http://dev.vaidyajategaonkar.com/api');
 
         // First, attempt login to get token
+        $backgroundOperations[] = "Attempting login to API server";
         $loginResponse = Http::post($apiUrl . '/login', [
             'username' => $username,
             'password' => $password,
@@ -397,18 +500,32 @@ class SyncService
                 500 => 'Server error. Please try again later.',
                 default => 'Login failed with status ' . $status . '.',
             };
-            throw new \Exception('Login failed: ' . $message);
+            $error = 'Login failed: ' . $message;
+            $syncLogs[] = "ERROR: " . $error;
+            throw new \Exception($error);
         }
 
+        $backgroundOperations[] = "Login successful, extracting token";
         $loginData = $loginResponse->json();
         if (!isset($loginData['token'])) {
-            throw new \Exception('Login successful but no token received.');
+            $error = 'Login successful but no token received.';
+            $syncLogs[] = "ERROR: " . $error;
+            throw new \Exception($error);
         }
 
         $token = $loginData['token'];
+        $backgroundOperations[] = "Token received, fetching data from API";
 
         // Now fetch the data
-        $response = Http::withToken($token)->get($apiUrl . '/export?date=' . $date);
+        $apiEndpoint = $apiUrl . '/export';
+        if (!$syncAll) {
+            $apiEndpoint .= '?date=' . $date;
+            $syncLogs[] = "Fetching data for date: {$date}";
+        } else {
+            $syncLogs[] = "Fetching ALL data (no date filter)";
+        }
+
+        $response = Http::withToken($token)->get($apiEndpoint);
 
         if (!$response->successful()) {
             $status = $response->status();
@@ -419,22 +536,46 @@ class SyncService
                 500 => 'Server error while fetching data.',
                 default => 'Failed to fetch data with status ' . $status . '.',
             };
-            throw new \Exception('Failed to fetch data from online API: ' . $message);
+            $error = 'Failed to fetch data from online API: ' . $message;
+            $syncLogs[] = "ERROR: " . $error;
+            throw new \Exception($error);
         }
 
+        $backgroundOperations[] = "Data received from API, parsing JSON response";
         $data = $response->json();
 
+        $syncLogs[] = "API Response Status: " . $response->status();
+        $syncLogs[] = "API Response Body Length: " . strlen($response->body());
+        $syncLogs[] = "Parsed Data Count: " . (is_array($data) ? count($data) : 'Not an array');
+
         if (empty($data)) {
+            $syncLogs[] = "WARNING: No data available for the selected date.";
+            $syncLogs[] = "API Response Body: " . $response->body();
             return [
                 'message' => 'No data available for the selected date.',
                 'stats' => []
             ];
         }
 
+        $syncLogs[] = "Successfully received " . count($data) . " patient records from API";
+        $backgroundOperations[] = "Starting data import process";
+
+        // Log sample of received data for debugging
+        if (!empty($data)) {
+            $samplePatient = $data[0];
+            $syncLogs[] = "Sample patient data: GUID=" . ($samplePatient['guid'] ?? 'N/A') .
+                         ", Name=" . ($samplePatient['name'] ?? 'N/A') .
+                         ", Updated=" . ($samplePatient['updated_at'] ?? 'N/A');
+        }
         $stats = $this->importData($data);
 
+        // Merge the background operations and sync logs from importData
+        $stats['background_operations'] = array_merge($backgroundOperations, $stats['background_operations'] ?? []);
+        $stats['sync_logs'] = array_merge($syncLogs, $stats['sync_logs'] ?? []);
+
+        $syncType = $syncAll ? 'ALL data' : "data for date {$date}";
         return [
-            'message' => 'Data synced successfully from online server.',
+            'message' => 'Data synced successfully from online server (' . $syncType . ').',
             'stats' => $stats
         ];
     }
