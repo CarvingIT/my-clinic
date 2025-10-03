@@ -11,7 +11,7 @@
                 @if(Auth::user()->hasRole('admin'))
                     <a href="{{ route('admin.sync-data') }}"
                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
-                        Sync Data
+                        Import Data
                     </a>
                 @endif
             </div>
