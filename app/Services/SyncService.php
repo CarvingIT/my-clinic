@@ -143,6 +143,8 @@ class SyncService
                 unset($patientData['follow_ups']);
                 $name = $patientData['name'] ?? 'Unknown';
 
+                $syncLogs[] = "Patient {$name} has " . count($followUps) . " follow-ups in API data";
+
                 $backgroundOperations[] = "Checking for existing patient with patient_id: {$patientData['patient_id']}";
                 $existingPatient = Patient::withTrashed()->where('patient_id', $patientData['patient_id'])->first();
 
@@ -518,12 +520,16 @@ class SyncService
 
         // Now fetch the data
         $apiEndpoint = $apiUrl . '/export';
-        if (!$syncAll) {
+        if ($syncAll) {
+            // For full sync, send a very old date to get all historical data
+            $apiEndpoint .= '?date=1900-01-01';
+            $syncLogs[] = "Fetching ALL data (using very old date to get all records)";
+        } else {
             $apiEndpoint .= '?date=' . $date;
             $syncLogs[] = "Fetching data for date: {$date}";
-        } else {
-            $syncLogs[] = "Fetching ALL data (no date filter)";
         }
+
+        $syncLogs[] = "API Endpoint: {$apiEndpoint}";
 
         $response = Http::withToken($token)->get($apiEndpoint);
 
@@ -544,6 +550,14 @@ class SyncService
         $backgroundOperations[] = "Data received from API, parsing JSON response";
         $data = $response->json();
 
+        // Check if response is actually JSON
+        $contentType = $response->header('Content-Type');
+        if (!$contentType || !str_contains($contentType, 'application/json')) {
+            $error = 'API returned non-JSON response. Expected JSON data but got: ' . ($contentType ?? 'unknown content type') . '. Response body: ' . substr($response->body(), 0, 500) . '...';
+            $syncLogs[] = "ERROR: " . $error;
+            throw new \Exception($error);
+        }
+
         $syncLogs[] = "API Response Status: " . $response->status();
         $syncLogs[] = "API Response Body Length: " . strlen($response->body());
         $syncLogs[] = "Parsed Data Count: " . (is_array($data) ? count($data) : 'Not an array');
@@ -551,14 +565,25 @@ class SyncService
         if (empty($data)) {
             $syncLogs[] = "WARNING: No data available for the selected date.";
             $syncLogs[] = "API Response Body: " . $response->body();
+            $message = $syncAll ? 'No data available from the online server.' : 'No data available for the selected date.';
             return [
-                'message' => 'No data available for the selected date.',
-                'stats' => []
+                'message' => $message,
+                'stats' => [
+                    'sync_logs' => $syncLogs,
+                    'background_operations' => $backgroundOperations
+                ]
             ];
         }
 
         $syncLogs[] = "Successfully received " . count($data) . " patient records from API";
-        $backgroundOperations[] = "Starting data import process";
+
+        // Count total follow-ups in API data
+        $totalApiFollowUps = 0;
+        foreach ($data as $patient) {
+            $followUps = $patient['follow_ups'] ?? [];
+            $totalApiFollowUps += count($followUps);
+        }
+        $syncLogs[] = "Total follow-ups in API data: {$totalApiFollowUps}";
 
         // Log sample of received data for debugging
         if (!empty($data)) {
