@@ -11,7 +11,7 @@
 
                 {{-- Filters Section --}}
                 <form method="GET" action="{{ route('followups.index') }}" id="follow_ups"
-                    class="flex flex-wrap gap-4 mb-6 items-end">
+                    class="flex gap-4 mb-6 items-end">
                     <div class="flex flex-col font-weight-semibold">
                         <label for="from_date" class="text-gray-800 dark:text-gray-300 font-semibold">From:</label>
                         <input type="date" id="from_date" name="from_date" value="{{ request('from_date') }}"
@@ -46,12 +46,23 @@
                             <option value="all" {{ request('doctor') == 'all' ? 'selected' : '' }}>All
                             </option>
                             @php
-                                $doctors = \App\Models\User::all();
+                                // Get unique user_names from follow_ups check_up_info JSON
+                                $doctorNames = \DB::table('follow_ups')
+                                    ->select('check_up_info')
+                                    ->get()
+                                    ->map(function($fu) {
+                                        $data = json_decode($fu->check_up_info, true);
+                                        return $data['user_name'] ?? null;
+                                    })
+                                    ->filter()
+                                    ->unique()
+                                    ->sort()
+                                    ->values();
                             @endphp
-                            @foreach ($doctors as $doctor)
-                                <option value="{{ $doctor->id }}"
-                                    {{ request('doctor') == $doctor->id ? 'selected' : '' }}>
-                                    {{ $doctor->name }}
+                            @foreach ($doctorNames as $doctorName)
+                                <option value="{{ $doctorName }}"
+                                    {{ request('doctor') == $doctorName ? 'selected' : '' }}>
+                                    {{ $doctorName }}
                                 </option>
                             @endforeach
                         </select>
@@ -59,22 +70,22 @@
                     {{-- Filter for Today, Last Week, Last Month --}}
                     <div class="flex flex-col">
                         <label class="text-gray-800 dark:text-gray-300 font-semibold">Time Period:</label>
-                        <div class="flex gap-2">
+                        <div class="flex gap-1">
                             <input type="hidden" id="time_period" name="time_period" value="{{ request('time_period', 'all') }}">
                             <button type="button" onclick="setTimePeriod('all')"
-                                class="px-3 py-2 {{ request('time_period', 'all') == 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                class="px-2 py-1 text-xs {{ request('time_period', 'all') == 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
                                 All
                             </button>
                             <button type="button" onclick="setTimePeriod('today')"
-                                class="px-3 py-2 {{ request('time_period') == 'today' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                class="px-2 py-1 text-xs {{ request('time_period') == 'today' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
                                 Today
                             </button>
                             <button type="button" onclick="setTimePeriod('last_week')"
-                                class="px-3 py-2 {{ request('time_period') == 'last_week' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                class="px-2 py-1 text-xs {{ request('time_period') == 'last_week' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
                                 Last Week
                             </button>
                             <button type="button" onclick="setTimePeriod('last_month')"
-                                class="px-3 py-2 {{ request('time_period') == 'last_month' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                class="px-2 py-1 text-xs {{ request('time_period') == 'last_month' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
                                 Last Month
                             </button>
                         </div>
@@ -134,11 +145,10 @@
                                 }
 
                                 if (request('doctor') && request('doctor') != 'all') {
-                                    $doctor = \App\Models\User::find(request('doctor'));
                                     $filterSummary[] = [
                                         'icon' => '👨‍⚕️',
                                         'label' => 'Doctor',
-                                        'value' => $doctor ? $doctor->name : 'Unknown',
+                                        'value' => request('doctor'),
                                     ];
                                 }
                             @endphp

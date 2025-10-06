@@ -59,7 +59,8 @@ class FollowUpExport implements FromCollection, WithHeadings, WithMapping, WithC
             $follow_ups = $follow_ups->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
         }
         if ($this->req->input('doctor') != 'all') {
-            $follow_ups = $follow_ups->where('doctor_id', $this->req->input('doctor'));
+            $selectedDoctor = $this->req->input('doctor');
+            $follow_ups = $follow_ups->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.user_name')) = ?", [$selectedDoctor]);
         }
 
         return $follow_ups->with('patient')->get(); // Eager load the patient relationship
@@ -83,7 +84,7 @@ class FollowUpExport implements FromCollection, WithHeadings, WithMapping, WithC
             optional($followUp->created_at)->format('d M Y, h:i A'),
             optional($followUp->patient)->name ?? 'N/A',
             $patientId,
-            optional($followUp->doctor)->name ?? 'N/A',
+            $checkUpInfo['user_name'] ?? 'N/A',
             number_format($followUp->amount_billed, 2),
             $checkUpInfo['payment_method'] ?? 'N/A',
             number_format($followUp->amount_paid, 2),

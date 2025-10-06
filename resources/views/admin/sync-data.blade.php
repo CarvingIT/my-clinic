@@ -71,6 +71,10 @@
                                     class="px-3 py-2 {{ old('time_period') == 'today' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
                                     Today
                                 </button>
+                                <button type="button" onclick="setTimePeriod('last_3_days')"
+                                    class="px-3 py-2 {{ old('time_period') == 'last_3_days' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                    Last 3 Days
+                                </button>
                                 <button type="button" onclick="setTimePeriod('last_week')"
                                     class="px-3 py-2 {{ old('time_period') == 'last_week' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
                                     Last Week
@@ -181,6 +185,9 @@
 
                                 if (period === 'today') {
                                     targetDate = today;
+                                } else if (period === 'last_3_days') {
+                                    targetDate = new Date(today);
+                                    targetDate.setDate(today.getDate() - 3);
                                 } else if (period === 'last_week') {
                                     targetDate = new Date(today);
                                     targetDate.setDate(today.getDate() - 7);

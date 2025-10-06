@@ -196,7 +196,7 @@ class FollowUpController extends Controller
 
         // Apply doctor filter
         if ($selectedDoctor !== 'all') {
-            $query->where('doctor_id', $selectedDoctor);
+            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.user_name')) = ?", [$selectedDoctor]);
         }
 
         // Apply time filters
@@ -270,7 +270,7 @@ class FollowUpController extends Controller
                 $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
             }
             if ($selectedDoctor !== 'all') {
-                $q->where('doctor_id', $selectedDoctor);
+                $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.user_name')) = ?", [$selectedDoctor]);
             }
         };
 
