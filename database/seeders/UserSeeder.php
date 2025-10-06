@@ -25,6 +25,12 @@ class UserSeeder extends Seeder
             ]
         );
 
+        // Assign admin role to the admin user
+        $adminUser = User::where('email', 'admin@myclinic.com')->first();
+        if ($adminUser) {
+            $adminUser->assignRoles(['admin']);
+        }
+
         User::firstOrCreate(
             ['email' => 'test@myclinic.com'],
             [

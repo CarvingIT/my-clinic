@@ -44,7 +44,7 @@
                                 </div>
                                 <div class="ml-3">
                                     <p class="text-sm text-blue-700">
-                                        <strong>Sync Information:</strong> This will import patient and follow-up data from the online server. 
+                                        <strong>Sync Information:</strong> This will import patient and follow-up data from the online server.
                                         <br>• <strong>Date-filtered sync:</strong> Only imports data updated on the selected date (recommended for daily syncs)
                                         <br>• <strong>Full sync:</strong> Imports ALL data from the online system (use when setting up or catching up)
                                         <br>Existing data will be updated if newer versions are found.
@@ -159,7 +159,7 @@
                             }
                         });
 
-                        document.getElementById('sync-form').addEventListener('submit', function() {
+                        document.getElementById('sync-form').addEventListener('submit', function(e) {
                             const button = document.getElementById('sync-button');
                             const buttonText = document.getElementById('button-text');
                             const spinner = document.getElementById('loading-spinner');
@@ -168,7 +168,102 @@
                             button.disabled = true;
                             buttonText.textContent = isFullSync ? 'Full Syncing...' : 'Syncing...';
                             spinner.classList.remove('hidden');
+
+                            // Show progress modal immediately
+                            showSyncProgress();
+
+                            // Start progress simulation
+                            simulateSyncProgress();
                         });
+
+                        function showSyncProgress() {
+                            document.getElementById('syncProgressModal').classList.remove('hidden');
+                        }
+
+                        function hideSyncProgress() {
+                            document.getElementById('syncProgressModal').classList.add('hidden');
+                        }
+
+                        function simulateSyncProgress() {
+                            const steps = [
+                                { text: 'Connecting to online server...', duration: 1000 },
+                                { text: 'Authenticating with API...', duration: 1500 },
+                                { text: 'Fetching patient data...', duration: 2000 },
+                                { text: 'Processing patient records...', duration: 3000 },
+                                { text: 'Fetching follow-up data...', duration: 2000 },
+                                { text: 'Processing follow-up records...', duration: 2500 },
+                                { text: 'Finalizing sync operation...', duration: 1500 },
+                                { text: 'Sync completed! Refreshing page...', duration: 1000 }
+                            ];
+
+                            const progressBar = document.getElementById('progress-bar');
+                            const progressText = document.getElementById('progress-text');
+                            const stepIndicator = document.getElementById('step-indicator');
+                            const stepDots = document.querySelectorAll('#syncProgressModal .flex.items-center.space-x-3 .w-2');
+                            const stepTexts = document.querySelectorAll('#syncProgressModal .flex.items-center.space-x-3 span:last-child');
+
+                            let currentStep = 0;
+                            let totalDuration = steps.reduce((sum, step) => sum + step.duration, 0);
+                            let elapsedTime = 0;
+
+                            function updateProgress() {
+                                if (currentStep < steps.length) {
+                                    const step = steps[currentStep];
+                                    progressText.textContent = step.text;
+                                    stepIndicator.textContent = `${currentStep + 1}/${steps.length}`;
+
+                                    // Update step indicators
+                                    stepDots.forEach((dot, index) => {
+                                        if (index < currentStep) {
+                                            dot.className = 'w-2 h-2 bg-green-600 rounded-full';
+                                        } else if (index === currentStep) {
+                                            dot.className = 'w-2 h-2 bg-blue-600 rounded-full animate-pulse';
+                                        } else {
+                                            dot.className = 'w-2 h-2 bg-gray-300 rounded-full';
+                                        }
+                                    });
+
+                                    stepTexts.forEach((text, index) => {
+                                        if (index < currentStep) {
+                                            text.className = 'text-green-600';
+                                        } else if (index === currentStep) {
+                                            text.className = 'text-blue-700 font-medium';
+                                        } else {
+                                            text.className = 'text-gray-400';
+                                        }
+                                    });
+
+                                    // Calculate progress percentage
+                                    const stepProgress = (elapsedTime / totalDuration) * 100;
+                                    const baseProgress = (currentStep / steps.length) * 100;
+                                    const currentProgress = baseProgress + (stepProgress * (1 / steps.length));
+                                    progressBar.style.width = Math.min(currentProgress, 100) + '%';
+
+                                    elapsedTime += 100; // Update every 100ms
+
+                                    // Move to next step when duration is reached
+                                    if (elapsedTime >= steps.reduce((sum, s, i) => i <= currentStep ? sum + s.duration : sum, 0)) {
+                                        currentStep++;
+                                        if (currentStep < steps.length) {
+                                            setTimeout(updateProgress, 100);
+                                        } else {
+                                            // All steps completed, the page will refresh with results
+                                            setTimeout(() => {
+                                                progressText.textContent = 'Sync completed successfully!';
+                                                progressBar.style.width = '100%';
+                                                // Mark final step as completed
+                                                stepDots[steps.length - 1].className = 'w-2 h-2 bg-green-600 rounded-full';
+                                                stepTexts[steps.length - 1].className = 'text-green-600';
+                                            }, 500);
+                                        }
+                                    } else {
+                                        setTimeout(updateProgress, 100);
+                                    }
+                                }
+                            }
+
+                            updateProgress();
+                        }
 
                         function showSyncDetails() {
                             document.getElementById('syncDetailsModal').classList.remove('hidden');
@@ -557,6 +652,85 @@
                         </div>
                     </div>
                 @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync Progress Modal -->
+    <div id="syncProgressModal" class="fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-xl rounded-lg bg-white">
+            <div class="mt-3 text-center">
+                <!-- Header -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="flex-shrink-0">
+                            <svg class="w-12 h-12 text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">Syncing Data</h3>
+                    <p class="text-sm text-gray-600">Please wait while we synchronize your data from the online server</p>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mb-6">
+                    <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
+                        <div id="progress-bar" class="bg-blue-600 h-3 rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span id="progress-text" class="text-gray-700 font-medium">Initializing sync...</span>
+                        <span id="step-indicator" class="text-gray-500">0/8</span>
+                    </div>
+                </div>
+
+                <!-- Progress Steps -->
+                <div class="text-left space-y-2 mb-6">
+                    <div class="flex items-center space-x-3 text-sm">
+                        <div class="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                        <span class="text-gray-600">Connecting to online server</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-sm">
+                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                        <span class="text-gray-400">Authenticating with API</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-sm">
+                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                        <span class="text-gray-400">Fetching patient data</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-sm">
+                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                        <span class="text-gray-400">Processing patient records</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-sm">
+                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                        <span class="text-gray-400">Fetching follow-up data</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-sm">
+                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                        <span class="text-gray-400">Processing follow-up records</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-sm">
+                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                        <span class="text-gray-400">Finalizing sync operation</span>
+                    </div>
+                    <div class="flex items-center space-x-3 text-sm">
+                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                        <span class="text-gray-400">Completing sync</span>
+                    </div>
+                </div>
+
+                <!-- Loading Animation -->
+                <div class="flex justify-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                </div>
+
+                <!-- Note -->
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-xs text-blue-700">
+                        <strong>Note:</strong> This process may take a few minutes depending on the amount of data being synchronized.
+                    </p>
+                </div>
             </div>
         </div>
     </div>
