@@ -46,11 +46,14 @@ class ApiController extends Controller
 
         $date = $request->date;
 
-        // Get patients updated on or after the date
-        $patients = Patient::with(['followUps' => function ($query) use ($date) {
-            $query->where('updated_at', '>=', $date . ' 00:00:00');
-        }])
-        ->where('updated_at', '>=', $date . ' 00:00:00')
+        // Get patients that have been updated recently OR have follow-ups updated recently
+        $patients = Patient::with('followUps')  // Include ALL follow-ups for these patients
+        ->where(function ($query) use ($date) {
+            $query->where('updated_at', '>=', $date . ' 00:00:00')
+                  ->orWhereHas('followUps', function ($subQuery) use ($date) {
+                      $subQuery->where('updated_at', '>=', $date . ' 00:00:00');
+                  });
+        })
         ->get()
         ->map(function ($patient) {
             return [

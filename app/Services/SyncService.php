@@ -23,22 +23,28 @@ class SyncService
      */
     public function exportData($startDate = null, $endDate = null)
     {
-        $query = Patient::with(['followUps' => function ($q) use ($startDate, $endDate) {
-            if ($startDate) {
-                $q->where('updated_at', '>=', Carbon::parse($startDate)->startOfDay());
-            }
-            if ($endDate) {
-                $q->where('updated_at', '<=', Carbon::parse($endDate)->endOfDay());
-            }
-        }]);
+        $query = Patient::with('followUps');  // Include ALL follow-ups for matching patients
 
         if ($startDate || $endDate) {
             $query->where(function ($q) use ($startDate, $endDate) {
+                // Include patients updated within the date range
                 if ($startDate) {
                     $q->where('updated_at', '>=', Carbon::parse($startDate)->startOfDay());
                 }
                 if ($endDate) {
                     $q->where('updated_at', '<=', Carbon::parse($endDate)->endOfDay());
+                }
+
+                // OR include patients that have follow-ups updated within the date range
+                if ($startDate || $endDate) {
+                    $q->orWhereHas('followUps', function ($followUpQuery) use ($startDate, $endDate) {
+                        if ($startDate) {
+                            $followUpQuery->where('updated_at', '>=', Carbon::parse($startDate)->startOfDay());
+                        }
+                        if ($endDate) {
+                            $followUpQuery->where('updated_at', '<=', Carbon::parse($endDate)->endOfDay());
+                        }
+                    });
                 }
             });
         }
