@@ -1,25 +1,41 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Sync Data from Online Server') }}
-            </h2>
-            <a href="{{ route('dashboard') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
-                Back to Dashboard
+        <div class="flex justify-between items-center bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 rounded-lg shadow-lg">
+            <div class="flex items-center space-x-3">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                <h2 class="font-bold text-2xl leading-tight">
+                    {{ __('Sync Data from Online Server') }}
+                </h2>
+            </div>
+            <a href="{{ route('dashboard') }}" class="bg-white text-indigo-600 hover:bg-gray-100 font-semibold py-2 px-4 rounded-lg shadow-md transition duration-200 flex items-center space-x-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                <span>Back to Dashboard</span>
             </a>
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-6">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <!-- Success/Error Messages -->
             @if(session('success'))
-                <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                <div class="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-r-lg shadow-md" role="alert">
                     <div class="flex justify-between items-start">
-                        <span class="block sm:inline">{{ session('success') }}</span>
+                        <div class="flex items-start space-x-3">
+                            <svg class="w-6 h-6 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="font-medium">{{ session('success') }}</span>
+                        </div>
                         @if(session('sync_stats'))
-                            <button onclick="showSyncDetails()" class="ml-4 bg-blue-500 hover:bg-blue-700 text-white text-sm px-3 py-1 rounded focus:outline-none">
-                                View Details
+                            <button onclick="showSyncDetails()" class="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-lg shadow-md transition duration-200 flex items-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                <span>View Details</span>
                             </button>
                         @endif
                     </div>
@@ -27,27 +43,32 @@
             @endif
 
             @if(session('error'))
-                <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                    <span class="block sm:inline">{{ session('error') }}</span>
+                <div class="mb-6 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-r-lg shadow-md" role="alert">
+                    <div class="flex items-start space-x-3">
+                        <svg class="w-6 h-6 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <span class="font-medium">{{ session('error') }}</span>
+                    </div>
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="p-6 bg-white border-b border-gray-200">
-                    <div class="mb-4">
-                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+            <div class="bg-white overflow-hidden shadow-2xl sm:rounded-xl border border-gray-100">
+                <div class="p-6 bg-gradient-to-br from-gray-50 to-white border-b border-gray-200">
+                    <div class="mb-6">
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-indigo-500 p-4 rounded-r-lg shadow-sm">
                             <div class="flex">
                                 <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                    <svg class="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                 </div>
                                 <div class="ml-3">
-                                    <p class="text-sm text-blue-700">
-                                        <strong>Sync Information:</strong> This will import patient and follow-up data from the online server.
-                                        <br>• <strong>All Data:</strong> Imports ALL data from the online system (complete sync)
-                                        <br>• <strong>Time-filtered sync:</strong> Imports data updated within the selected time period (Today, Last Week, Last Month)
-                                        <br>Existing data will be updated if newer versions are found.
+                                    <h3 class="text-base font-semibold text-gray-900 mb-1">Sync Information</h3>
+                                    <p class="text-xs text-gray-700 leading-relaxed">
+                                        <strong class="text-indigo-700">All Data:</strong> Imports ALL data from the online system (complete sync)<br>
+                                        <strong class="text-indigo-700">Time-filtered sync:</strong> Imports data updated within the selected time period (Today, Last Week, Last Month)<br>
+                                        <span class="text-gray-600">Existing data will be updated if newer versions are found.</span>
                                     </p>
                                 </div>
                             </div>
@@ -57,77 +78,126 @@
                     <form method="POST" action="{{ route('admin.sync-data.post') }}" id="sync-form">
                         @csrf
 
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-gray-800 mb-3">
                                 Select Time Period
                             </label>
-                            <div class="flex gap-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                                 <input type="hidden" id="time_period" name="time_period" value="{{ old('time_period', 'all') }}">
                                 <button type="button" onclick="setTimePeriod('all')"
-                                    class="px-3 py-2 {{ old('time_period', 'all') == 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                    All Data
+                                    class="flex flex-col items-center justify-center h-full px-4 py-3 rounded-lg font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ old('time_period', 'all') == 'all' ? 'bg-indigo-600 text-white border-2 border-indigo-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                                    <svg class="w-5 h-5 mb-1 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    <span class="text-xs pointer-events-none">All Data</span>
                                 </button>
                                 <button type="button" onclick="setTimePeriod('today')"
-                                    class="px-3 py-2 {{ old('time_period') == 'today' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                    Today
+                                    class="flex flex-col items-center justify-center h-full px-4 py-3 rounded-lg font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ old('time_period') == 'today' ? 'bg-indigo-600 text-white border-2 border-indigo-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                                    <svg class="w-5 h-5 mb-1 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                    <span class="text-xs pointer-events-none">Today</span>
                                 </button>
                                 <button type="button" onclick="setTimePeriod('last_3_days')"
-                                    class="px-3 py-2 {{ old('time_period') == 'last_3_days' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                    Last 3 Days
+                                    class="flex flex-col items-center justify-center h-full px-4 py-3 rounded-lg font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ old('time_period') == 'last_3_days' ? 'bg-indigo-600 text-white border-2 border-indigo-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                                    <svg class="w-5 h-5 mb-1 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="text-xs pointer-events-none">Last 3 Days</span>
                                 </button>
                                 <button type="button" onclick="setTimePeriod('last_week')"
-                                    class="px-3 py-2 {{ old('time_period') == 'last_week' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                    Last Week
+                                    class="flex flex-col items-center justify-center h-full px-4 py-3 rounded-lg font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ old('time_period') == 'last_week' ? 'bg-indigo-600 text-white border-2 border-indigo-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                                    <svg class="w-5 h-5 mb-1 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                    </svg>
+                                    <span class="text-xs pointer-events-none">Last Week</span>
                                 </button>
                                 <button type="button" onclick="setTimePeriod('last_month')"
-                                    class="px-3 py-2 {{ old('time_period') == 'last_month' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800' }} rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                    Last Month
+                                    class="flex flex-col items-center justify-center h-full px-4 py-3 rounded-lg font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 {{ old('time_period') == 'last_month' ? 'bg-indigo-600 text-white border-2 border-indigo-700' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                                    <svg class="w-5 h-5 mb-1 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="text-xs pointer-events-none">Last Month</span>
                                 </button>
                             </div>
                             <input type="hidden" id="sync_date" name="sync_date" value="{{ old('sync_date') }}">
                             <input type="checkbox" id="sync_all" name="sync_all" value="1" style="display: none;" {{ old('sync_all') ? 'checked' : '' }}>
                             @error('sync_date')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-600 flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                    </svg>
+                                    <span>{{ $message }}</span>
+                                </p>
                             @enderror
                         </div>
 
-                        <div class="mb-4">
-                            <label for="api_username" class="block text-sm font-medium text-gray-700 mb-2">
+                        <div class="mb-6">
+                            <label for="api_username" class="block text-sm font-semibold text-gray-800 mb-3">
                                 API Username
                             </label>
-                            <input type="text"
-                                   id="api_username"
-                                   name="api_username"
-                                   value="{{ old('api_username') }}"
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   required>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </div>
+                                <input type="text"
+                                       id="api_username"
+                                       name="api_username"
+                                       value="{{ old('api_username') }}"
+                                       class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 bg-white"
+                                       placeholder="Enter your API username"
+                                       required>
+                            </div>
                             @error('api_username')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-600 flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                    </svg>
+                                    <span>{{ $message }}</span>
+                                </p>
                             @enderror
                         </div>
 
-                        <div class="mb-4">
-                            <label for="api_password" class="block text-sm font-medium text-gray-700 mb-2">
+                        <div class="mb-6">
+                            <label for="api_password" class="block text-sm font-semibold text-gray-800 mb-3">
                                 API Password
                             </label>
-                            <input type="password"
-                                   id="api_password"
-                                   name="api_password"
-                                   value="{{ old('api_password') }}"
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                                   required>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                    </svg>
+                                </div>
+                                <input type="password"
+                                       id="api_password"
+                                       name="api_password"
+                                       value="{{ old('api_password') }}"
+                                       class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 bg-white"
+                                       placeholder="Enter your API password"
+                                       required>
+                            </div>
                             @error('api_password')
-                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-2 text-sm text-red-600 flex items-center space-x-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                    </svg>
+                                    <span>{{ $message }}</span>
+                                </p>
                             @enderror
                         </div>
 
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-center">
                             <button type="submit"
                                     id="sync-button"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                                    class="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 focus:outline-none focus:ring-4 focus:ring-indigo-300 transform hover:scale-105 flex items-center space-x-3">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
                                 <span id="button-text">Start Sync</span>
                                 <span id="loading-spinner" class="hidden ml-2">
-                                    <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
@@ -135,6 +205,19 @@
                             </button>
                         </div>
                     </form>
+
+                    <!-- Selection Description -->
+                    {{-- <div id="selection-description" class="mt-4 p-3 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-200 shadow-sm">
+                        <div class="flex items-start space-x-3">
+                            <svg class="w-4 h-4 text-indigo-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="min-w-0 flex-1">
+                                <h4 class="text-xs font-semibold text-indigo-800 mb-1">What will happen:</h4>
+                                <p id="description-text" class="text-xs text-indigo-700 leading-relaxed">Please select a time period above to see what will be synchronized.</p>
+                            </div>
+                        </div>
+                    </div> --}}
 
                     <script>
                         // Toggle date field requirement based on sync_all checkbox
@@ -164,40 +247,48 @@
                             // Update button styles
                             const buttons = document.querySelectorAll('#sync-form button[type="button"]');
                             buttons.forEach(btn => {
-                                btn.className = 'px-3 py-2 bg-gray-200 text-gray-800 rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300';
+                                btn.className = 'px-4 py-3 bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 rounded-lg font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex flex-col items-center space-y-1';
                             });
 
                             // Highlight selected button
-                            event.target.className = 'px-3 py-2 bg-indigo-600 text-white rounded-md font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300';
+                            event.target.className = 'px-4 py-3 bg-indigo-600 text-white shadow-lg rounded-lg font-semibold transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 flex flex-col items-center space-y-1';
 
                             const syncDateInput = document.getElementById('sync_date');
                             const syncAllCheckbox = document.getElementById('sync_all');
                             const buttonText = document.getElementById('button-text');
+                            const descriptionText = document.getElementById('description-text');
 
                             if (period === 'all') {
                                 syncAllCheckbox.checked = true;
                                 syncDateInput.value = '';
                                 buttonText.textContent = 'Start Full Sync';
+                                descriptionText.textContent = 'This will perform a complete synchronization of ALL patient and follow-up data from the online server. This may take longer and will update existing records if newer versions are available.';
                             } else {
                                 syncAllCheckbox.checked = false;
                                 const today = new Date();
                                 let targetDate;
+                                let description = '';
 
                                 if (period === 'today') {
                                     targetDate = today;
+                                    description = 'This will synchronize data that has been updated today only. Only recent changes from the current day will be imported.';
                                 } else if (period === 'last_3_days') {
                                     targetDate = new Date(today);
                                     targetDate.setDate(today.getDate() - 3);
+                                    description = 'This will synchronize data updated in the last 3 days. Useful for catching up on recent changes without a full sync.';
                                 } else if (period === 'last_week') {
                                     targetDate = new Date(today);
                                     targetDate.setDate(today.getDate() - 7);
+                                    description = 'This will synchronize data updated in the last 7 days. A good balance between completeness and sync time.';
                                 } else if (period === 'last_month') {
                                     targetDate = new Date(today);
                                     targetDate.setDate(today.getDate() - 30);
+                                    description = 'This will synchronize data updated in the last 30 days. Includes more historical data but may take longer.';
                                 }
 
                                 syncDateInput.value = targetDate.toISOString().split('T')[0];
                                 buttonText.textContent = 'Start Sync';
+                                descriptionText.textContent = description;
                             }
 
                             if (updateForm) {
@@ -707,16 +798,16 @@
         <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-xl rounded-lg bg-white">
             <div class="mt-3 text-center">
                 <!-- Header -->
-                <div class="mb-6">
+                <div class="mb-6 text-center">
                     <div class="flex items-center justify-center mb-4">
                         <div class="flex-shrink-0">
-                            <svg class="w-12 h-12 text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-12 h-12 text-indigo-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                             </svg>
                         </div>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-2">Syncing Data</h3>
-                    <p class="text-sm text-gray-600">Please wait while we synchronize your data from the online server</p>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Syncing Data</h3>
+                    <p class="text-gray-600">Please wait while we synchronize your data from the online server</p>
                 </div>
 
                 <!-- Progress Bar -->
