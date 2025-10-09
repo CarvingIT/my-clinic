@@ -15,7 +15,6 @@ class Kernel extends HttpKernel
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\SetLocale::class, // Set locale middleware
-            \App\Http\Middleware\VerifyCsrfToken::class,
         ],
         'api' => [
             // API middleware
