@@ -495,7 +495,7 @@ class SyncService
 
         // First, attempt login to get token
         $backgroundOperations[] = "Attempting login to API server";
-        $loginResponse = Http::post($apiUrl . '/login', [
+        $loginResponse = Http::post($apiUrl . '/api/login', [
             'username' => $username,
             'password' => $password,
         ]);
