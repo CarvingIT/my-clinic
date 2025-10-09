@@ -35,7 +35,7 @@ return [
     ],
 
     'online_api' => [
-        'url' => env('ONLINE_API_URL', 'http://dev.vaidyajategaonkar.com/api'),
+        'url' => env('UPSTREAM_URL', 'https://kothrud.vaidyajategaonkar.com'),
         'use_mock_data' => env('SYNC_USE_MOCK_DATA', false),
     ],
 

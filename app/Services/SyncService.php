@@ -491,7 +491,7 @@ class SyncService
         }
 
         // Real API calls
-        $apiUrl = config('services.online_api.url', 'http://dev.vaidyajategaonkar.com/api');
+        $apiUrl = config('services.online_api.url', 'https://kothrud.vaidyajategaonkar.com');
 
         // First, attempt login to get token
         $backgroundOperations[] = "Attempting login to API server";
