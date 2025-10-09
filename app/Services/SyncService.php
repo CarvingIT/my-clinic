@@ -525,7 +525,7 @@ class SyncService
         $backgroundOperations[] = "Token received, fetching data from API";
 
         // Now fetch the data
-        $apiEndpoint = $apiUrl . '/export';
+        $apiEndpoint = $apiUrl . '/api/export';
         if ($syncAll) {
             // For full sync, send a very old date to get all historical data
             $apiEndpoint .= '?date=1900-01-01';

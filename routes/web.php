@@ -23,6 +23,7 @@ use Illuminate\Support\Facades\App;
 use App\Http\Controllers\UploadController;
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ApiController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -197,3 +198,5 @@ Route::middleware('auth')->group(function () {
 
 
 require __DIR__ . '/auth.php';
+
+
