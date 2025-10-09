@@ -134,7 +134,7 @@
 
                         <div class="mb-6">
                             <label for="api_username" class="block text-sm font-semibold text-gray-800 mb-3">
-                                API Username
+                                Username
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -147,7 +147,7 @@
                                        name="api_username"
                                        value="{{ old('api_username') }}"
                                        class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 bg-white"
-                                       placeholder="Enter your API username"
+                                       placeholder="Enter your username"
                                        required>
                             </div>
                             @error('api_username')
@@ -162,7 +162,7 @@
 
                         <div class="mb-6">
                             <label for="api_password" class="block text-sm font-semibold text-gray-800 mb-3">
-                                API Password
+                                Password
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -175,7 +175,7 @@
                                        name="api_password"
                                        value="{{ old('api_password') }}"
                                        class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200 bg-white"
-                                       placeholder="Enter your API password"
+                                       placeholder="Enter your password"
                                        required>
                             </div>
                             @error('api_password')

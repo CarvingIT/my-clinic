@@ -348,7 +348,12 @@
                                             </a>
                                         </td>
 
-                                        <td class="text-center px-4 py-3">{{ $followUp->doctor->name ?? 'N/A' }}</td>
+                                        <td class="text-center px-4 py-3">
+                                            @php
+                                                $checkUpInfo = json_decode($followUp->check_up_info, true);
+                                            @endphp
+                                            {{ $checkUpInfo['user_name'] ?? 'N/A' }}
+                                        </td>
                                         <td
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
                                             ₹{{ number_format(@$followUp->amount_billed, 2) }}
