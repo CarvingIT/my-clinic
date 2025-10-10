@@ -830,7 +830,7 @@
                     </div>
                     <div class="flex items-center space-x-3 text-sm">
                         <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
-                        <span class="text-gray-400">Fetching patients data</span>
+                        <span class="text-gray-400">Fetching patient data</span>
                     </div>
                     <div class="flex items-center space-x-3 text-sm">
                         <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
