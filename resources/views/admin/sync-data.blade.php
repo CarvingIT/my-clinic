@@ -323,14 +323,11 @@
 
                         function simulateSyncProgress() {
                             const steps = [
-                                { text: 'Connecting to online server...', duration: 1000 },
-                                { text: 'Authenticating with API...', duration: 1500 },
-                                { text: 'Fetching patient data...', duration: 2000 },
-                                { text: 'Processing patient records...', duration: 3000 },
-                                { text: 'Fetching follow-up data...', duration: 2000 },
-                                { text: 'Processing follow-up records...', duration: 2500 },
-                                { text: 'Finalizing sync operation...', duration: 1500 },
-                                { text: 'Sync completed! Refreshing page...', duration: 1000 }
+                                { text: 'Connecting to online server...', duration: 2000 },
+                                { text: 'Authenticating with API...', duration: 3500 },
+                                { text: 'Fetching patients data...', duration: 500 },
+                                { text: 'Finalizing sync operation...', duration: 500 },
+                                { text: 'Completing sync...', duration: 1000 }
                             ];
 
                             const progressBar = document.getElementById('progress-bar');
@@ -833,19 +830,7 @@
                     </div>
                     <div class="flex items-center space-x-3 text-sm">
                         <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
-                        <span class="text-gray-400">Fetching patient data</span>
-                    </div>
-                    <div class="flex items-center space-x-3 text-sm">
-                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
-                        <span class="text-gray-400">Processing patient records</span>
-                    </div>
-                    <div class="flex items-center space-x-3 text-sm">
-                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
-                        <span class="text-gray-400">Fetching follow-up data</span>
-                    </div>
-                    <div class="flex items-center space-x-3 text-sm">
-                        <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
-                        <span class="text-gray-400">Processing follow-up records</span>
+                        <span class="text-gray-400">Fetching patient's data</span>
                     </div>
                     <div class="flex items-center space-x-3 text-sm">
                         <div class="w-2 h-2 bg-gray-300 rounded-full"></div>
