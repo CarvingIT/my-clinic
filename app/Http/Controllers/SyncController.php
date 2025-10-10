@@ -50,7 +50,11 @@ class SyncController extends Controller
                 return redirect()->back()->with('error', 'Sync failed: ' . ($result['message'] ?? 'Unknown error'));
             }
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Sync failed: ' . $e->getMessage());
+            $message = $e->getMessage();
+            if (str_contains($message, 'Upstream authentication failure')) {
+                return redirect()->back()->with('error', $message);
+            }
+            return redirect()->back()->with('error', 'Sync failed: ' . $message);
         }
     }
 

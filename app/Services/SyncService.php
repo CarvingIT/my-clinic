@@ -503,14 +503,14 @@ class SyncService
         if (!$loginResponse->successful()) {
             $status = $loginResponse->status();
             $message = match($status) {
-                401 => 'Invalid username or password.',
+                401 => 'Upstream authentication failure. Synchronization is not possible.',
                 404 => 'API endpoint not found. Please check if the API is available.',
                 500 => 'Server error. Please try again later.',
                 default => 'Login failed with status ' . $status . '.',
             };
-            $error = 'Login failed: ' . $message;
+            $error = ($status === 401) ? $message : 'Login failed: ' . $message;
             $syncLogs[] = "ERROR: " . $error;
-            throw new \Exception($error);
+            throw new \Exception(($status === 401) ? $message : $error);
         }
 
         $backgroundOperations[] = "Login successful, extracting token";
