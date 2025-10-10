@@ -325,7 +325,7 @@
                             const steps = [
                                 { text: 'Connecting to online server...', duration: 2000 },
                                 { text: 'Authenticating with API...', duration: 3500 },
-                                { text: 'Fetching patients data...', duration: 500 },
+                                { text: 'Fetching patient data...', duration: 500 },
                                 { text: 'Finalizing sync operation...', duration: 500 },
                                 { text: 'Completing sync...', duration: 1000 }
                             ];
