@@ -502,22 +502,55 @@ class SyncService
 
         if (!$loginResponse->successful()) {
             $status = $loginResponse->status();
+            $responseBody = $loginResponse->body();
+            $contentType = $loginResponse->header('Content-Type');
+
+            // Try to get meaningful error message from response
+            $detailedError = '';
+            if (str_contains($contentType, 'application/json')) {
+                try {
+                    $jsonResponse = $loginResponse->json();
+                    if (is_array($jsonResponse) && isset($jsonResponse['error'])) {
+                        $detailedError = ': ' . $jsonResponse['error'];
+                    } elseif (is_array($jsonResponse) && isset($jsonResponse['message'])) {
+                        $detailedError = ': ' . $jsonResponse['message'];
+                    }
+                } catch (\Exception $e) {
+                    $detailedError = ': Unable to parse JSON response';
+                }
+            } elseif (str_contains($contentType, 'text/html')) {
+                // Check if it's a redirect to login page
+                if ($status === 302 && str_contains($responseBody, 'login')) {
+                    $detailedError = ': API endpoint redirected to login page (server not configured for API access)';
+                } else {
+                    $detailedError = ': Server returned HTML instead of JSON (not an API endpoint)';
+                }
+            }
+
             $message = match($status) {
-                401 => 'Upstream authentication failure. Synchronization is not possible.',
-                404 => 'API endpoint not found. Please check if the API is available.',
-                500 => 'Server error. Please try again later.',
-                default => 'Login failed with status ' . $status . '.',
+                401 => 'Upstream authentication failure. Synchronization is not possible.' . $detailedError,
+                404 => 'API endpoint not found. Please check if the API is available.' . $detailedError,
+                500 => 'Server error. Please try again later.' . $detailedError,
+                default => 'Login failed with status ' . $status . $detailedError . '.',
             };
+
+            // Add response details to logs for debugging
+            $syncLogs[] = "ERROR: " . $message;
+            $syncLogs[] = "Response Status: {$status}";
+            $syncLogs[] = "Response Content-Type: {$contentType}";
+            $syncLogs[] = "Response Body: " . substr($responseBody, 0, 200) . (strlen($responseBody) > 200 ? '...' : '');
+
             $error = ($status === 401) ? $message : 'Login failed: ' . $message;
-            $syncLogs[] = "ERROR: " . $error;
             throw new \Exception(($status === 401) ? $message : $error);
         }
 
         $backgroundOperations[] = "Login successful, extracting token";
         $loginData = $loginResponse->json();
         if (!isset($loginData['token'])) {
-            $error = 'Login successful but no token received.';
+            $responseBody = $loginResponse->body();
+            $error = 'Login successful but no token received. Response: ' . substr($responseBody, 0, 200) . (strlen($responseBody) > 200 ? '...' : '');
             $syncLogs[] = "ERROR: " . $error;
+            $syncLogs[] = "Full Response: " . $responseBody;
             throw new \Exception($error);
         }
 
@@ -541,15 +574,46 @@ class SyncService
 
         if (!$response->successful()) {
             $status = $response->status();
+            $responseBody = $response->body();
+            $contentType = $response->header('Content-Type');
+
+            // Try to get meaningful error message from response
+            $detailedError = '';
+            if (str_contains($contentType, 'application/json')) {
+                try {
+                    $jsonResponse = $response->json();
+                    if (is_array($jsonResponse) && isset($jsonResponse['error'])) {
+                        $detailedError = ': ' . $jsonResponse['error'];
+                    } elseif (is_array($jsonResponse) && isset($jsonResponse['message'])) {
+                        $detailedError = ': ' . $jsonResponse['message'];
+                    }
+                } catch (\Exception $e) {
+                    $detailedError = ': Unable to parse JSON response';
+                }
+            } elseif (str_contains($contentType, 'text/html')) {
+                // Check if it's a redirect to login page
+                if ($status === 302 && str_contains($responseBody, 'login')) {
+                    $detailedError = ': API endpoint redirected to login page (server not configured for API access)';
+                } else {
+                    $detailedError = ': Server returned HTML instead of JSON (not an API endpoint)';
+                }
+            }
+
             $message = match($status) {
-                401 => 'Authentication failed. Token may be invalid.',
-                403 => 'Access forbidden. Check permissions.',
-                404 => 'Data endpoint not found.',
-                500 => 'Server error while fetching data.',
-                default => 'Failed to fetch data with status ' . $status . '.',
+                401 => 'Authentication failed. Token may be invalid.' . $detailedError,
+                403 => 'Access forbidden. Check permissions.' . $detailedError,
+                404 => 'Data endpoint not found.' . $detailedError,
+                500 => 'Server error while fetching data.' . $detailedError,
+                default => 'Failed to fetch data with status ' . $status . $detailedError . '.',
             };
+
+            // Add response details to logs for debugging
+            $syncLogs[] = "ERROR: " . $message;
+            $syncLogs[] = "Response Status: {$status}";
+            $syncLogs[] = "Response Content-Type: {$contentType}";
+            $syncLogs[] = "Response Body: " . substr($responseBody, 0, 200) . (strlen($responseBody) > 200 ? '...' : '');
+
             $error = 'Failed to fetch data from online API: ' . $message;
-            $syncLogs[] = "ERROR: " . $error;
             throw new \Exception($error);
         }
 
