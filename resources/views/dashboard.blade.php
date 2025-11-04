@@ -8,7 +8,7 @@
                 <div class="text-sm text-gray-600">
                     <span class="font-medium">{{ date('l, d F Y') }}</span>
                 </div>
-                @if(Auth::user()->hasRole('admin'))
+                @if(Auth::user()->hasRole('admin') && env('UPSTREAM_URL'))
                     <a href="{{ route('admin.sync-data') }}"
                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
                         Import Data
