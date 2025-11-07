@@ -118,6 +118,7 @@ return [
     'View Reports' => 'View Reports',
     'Cash Payments' => 'Cash Payments',
     'Online Payments' => 'Online Payments',
+    'Import/Export' => 'Import/Export',
 
 
 

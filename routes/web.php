@@ -24,6 +24,7 @@ use App\Http\Controllers\UploadController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\ImportExportController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -123,6 +124,12 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/patient-dues', [PatientDuesController::class, 'index'])->name('patient-dues.index'); // List patient dues
     Route::get('/admin/sync-data', [SyncController::class, 'showSyncForm'])->name('admin.sync-data');
     Route::post('/admin/sync-data', [SyncController::class, 'syncData'])->name('admin.sync-data.post');
+    Route::get('/admin/import-export', [ImportExportController::class, 'index'])->name('admin.import-export');
+    Route::post('/admin/export-data', [ImportExportController::class, 'export'])->name('admin.export-data');
+    Route::post('/admin/import-data', [ImportExportController::class, 'import'])->name('admin.import-data');
+    Route::get('/admin/download-export/{file}', [ImportExportController::class, 'download'])->name('admin.download-export');
+    Route::get('/admin/export-files', [ImportExportController::class, 'listExportFiles'])->name('admin.export-files');
+    Route::delete('/admin/export-files/{file}', [ImportExportController::class, 'deleteExportFile'])->name('admin.export-files.delete');
 });
 
 // Staff Routes

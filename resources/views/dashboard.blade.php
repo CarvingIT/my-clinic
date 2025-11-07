@@ -11,7 +11,7 @@
                 @if(Auth::user()->hasRole('admin') && env('UPSTREAM_URL'))
                     <a href="{{ route('admin.sync-data') }}"
                        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
-                        Import Data
+                        Import Data from Upstream
                     </a>
                 @endif
             </div>
@@ -582,6 +582,25 @@
                                     </svg>
                                 </div>
                             </a>
+
+                            @if(auth()->user()->hasRole('admin'))
+                            <a href="{{ route('admin.import-export') }}" class="group flex items-center p-4 bg-gradient-to-r from-orange-50 to-red-50 hover:from-orange-100 hover:to-red-100 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border border-orange-100">
+                                <div class="flex-shrink-0 p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl mr-4 group-hover:scale-110 transition-transform duration-300 shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-orange-800 text-lg group-hover:text-orange-900 transition-colors">{{ __('Import/Export Data') }}</h4>
+                                    <p class="text-orange-600 text-sm">Import or Export patient data</p>
+                                </div>
+                                <div class="flex-shrink-0 text-orange-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all duration-300">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            </a>
+                            @endif
                         </div>
 
                         <!-- Additional Quick Stats -->

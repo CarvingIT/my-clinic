@@ -108,6 +108,12 @@
                         </x-nav-link>
                     @endif
 
+                    @if (Auth::user()->hasRole('admin'))
+                        <x-nav-link :href="route('admin.import-export')" :active="request()->routeIs('admin.import-export') || request()->routeIs('admin.export-files')">
+                            {{ __('messages.Import/Export') }}
+                        </x-nav-link>
+                    @endif
+
                     <x-nav-link :href="route('queue.index')" :active="request()->routeIs('queue.index')">
                         {{ __('messages.Queue') }}
                     </x-nav-link>
