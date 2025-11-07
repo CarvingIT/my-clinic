@@ -34,10 +34,21 @@ class PatientController extends Controller
         $query = Patient::query()->orderByLatestFollowUp();
 
         if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where('patients.name', 'like', "%{$searchTerm}%")
-                ->orWhere('patients.mobile_phone', 'like', "%{$searchTerm}%")
-                ->orWhere('patients.patient_id', 'like', "%{$searchTerm}%");
+            $searchTerm = trim($request->search);
+            $searchTerms = array_filter(explode(' ', $searchTerm));
+            if (!empty($searchTerms)) {
+                $query->where(function ($q) use ($searchTerms, $searchTerm) {
+                    // For name, require all search terms to be present
+                    $q->where(function ($nameQ) use ($searchTerms) {
+                        foreach ($searchTerms as $term) {
+                            $nameQ->where('patients.name', 'like', "%{$term}%");
+                        }
+                    });
+                    // For mobile and patient_id, match the full search term
+                    $q->orWhere('patients.mobile_phone', 'like', "%{$searchTerm}%")
+                      ->orWhere('patients.patient_id', 'like', "%{$searchTerm}%");
+                });
+            }
         }
         $patients = $query->with('followUps')->paginate(10);
         return view('patients.index', compact('patients'));
