@@ -30,30 +30,74 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <!-- Success/Error Messages -->
     @if(session('success') && str_contains(session('success'), 'Export completed'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6" role="alert">
+        <div id="export-success-alert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 relative" role="alert">
             <div class="flex items-center justify-between">
                 <span class="block sm:inline">{{ session('success') }}</span>
-                <button onclick="showExportDetails()" class="ml-4 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                    View Details
-                </button>
+                <div class="flex items-center space-x-2">
+                    <button onclick="showExportDetails()" class="ml-4 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        View Details
+                    </button>
+                    <button onclick="dismissAlert('export-success-alert')" class="ml-2 text-green-700 hover:text-green-900 focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
-    @endif            @if(session('success') && str_contains(session('success'), 'Import completed'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6" role="alert">
+    @endif
+    @if(session('success') && str_contains(session('success'), 'Import completed'))
+        <div id="import-success-alert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 relative" role="alert">
             <div class="flex items-center justify-between">
                 <span class="block sm:inline">{{ session('success') }}</span>
-                <button onclick="showImportDetails()" class="ml-4 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                    View Details
-                </button>
+                <div class="flex items-center space-x-2">
+                    <button onclick="showImportDetails()" class="ml-4 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                        View Details
+                    </button>
+                    <button onclick="dismissAlert('import-success-alert')" class="ml-2 text-green-700 hover:text-green-900 focus:outline-none">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
-    @endif            @if(session('error'))
-                <div class="mb-6 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-r-lg shadow-md" role="alert">
+    @endif
+    @if(session('error'))
+                <div id="error-alert" class="mb-6 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-r-lg shadow-md relative" role="alert">
                     <div class="flex items-start space-x-3">
                         <svg class="w-6 h-6 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                         </svg>
-                        <span class="font-medium">{{ session('error') }}</span>
+                        <span class="font-medium flex-1">{{ session('error') }}</span>
+                        <button onclick="dismissAlert('error-alert')" class="text-red-600 hover:text-red-800 focus:outline-none ml-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+            @if(session('import_errors'))
+                <div id="import-errors-alert" class="mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 text-yellow-800 px-6 py-4 rounded-r-lg shadow-md relative" role="alert">
+                    <div class="flex items-start space-x-3">
+                        <svg class="w-6 h-6 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <h4 class="font-semibold mb-2">Import Errors:</h4>
+                            <ul class="text-sm space-y-1 max-h-40 overflow-y-auto">
+                                @foreach(session('import_errors') as $error)
+                                    <li>• {{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                        <button onclick="dismissAlert('import-errors-alert')" class="text-yellow-600 hover:text-yellow-800 focus:outline-none ml-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
                     </div>
                 </div>
             @endif
@@ -351,7 +395,7 @@
                                     <div>
                                         <h4 class="text-lg font-semibold text-gray-800 mb-2">Total Patients Processed</h4>
                                         <div class="text-3xl font-bold text-blue-600">
-                                            {{ session('import_stats')['patients_restored'] + session('import_stats')['patients_imported'] + session('import_stats')['patients_updated'] + session('import_stats')['patients_unchanged'] }}
+                                            {{ session('import_stats')['patients_restored'] + session('import_stats')['patients_imported'] + session('import_stats')['patients_updated'] + session('import_stats')['patients_unchanged'] + (session('import_skipped') ? count(session('import_skipped')) : 0) }}
                                         </div>
                                         <p class="text-sm text-gray-600 mt-1">Records processed</p>
                                     </div>
@@ -412,8 +456,8 @@
                                         </div>
 
                                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                                            <div class="text-2xl font-bold text-gray-600">{{ session('import_stats')['patients_unchanged'] }}</div>
-                                            <div class="text-sm text-gray-600">Unchanged</div>
+                                            <div class="text-2xl font-bold text-gray-600">{{ session('import_stats')['patients_unchanged'] + (session('import_skipped') ? count(session('import_skipped')) : 0) }}</div>
+                                            <div class="text-sm text-gray-600">Skipped</div>
                                         </div>
                                     </div>
 
@@ -438,6 +482,29 @@
                                                     <p class="text-sm text-gray-600">{{ collect(session('import_stats')['patient_names']['updated'])->take(5)->join(', ') }}{{ count(session('import_stats')['patient_names']['updated']) > 5 ? ', +' . (count(session('import_stats')['patient_names']['updated']) - 5) . ' more' : '' }}</p>
                                                 </div>
                                             @endif
+                                        </div>
+                                    @endif
+
+                                    <!-- Skipped Patients (Duplicates) -->
+                                    @if(session('import_skipped'))
+                                        <div class="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                            <h5 class="font-medium text-blue-700 mb-2 flex items-center">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                </svg>
+                                                Already Existing Patients (Skipped)
+                                            </h5>
+                                            <div class="text-sm text-blue-600 max-h-32 overflow-y-auto">
+                                                <p class="mb-2">The following patients already exist in the system and were skipped during import:</p>
+                                                <ul class="space-y-1">
+                                                    @foreach(session('import_skipped') as $skipped)
+                                                        <li class="flex items-start">
+                                                            <span class="text-blue-500 mr-2">•</span>
+                                                            <span>{{ $skipped }}</span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
                                         </div>
                                     @endif
                                 </div>
@@ -530,6 +597,17 @@
     </div>
 
     <script>
+        function dismissAlert(alertId) {
+            const alert = document.getElementById(alertId);
+            if (alert) {
+                alert.style.transition = 'opacity 0.3s ease-out';
+                alert.style.opacity = '0';
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 300);
+            }
+        }
+
         function showExportDetails() {
             document.getElementById('exportDetailsModal').classList.remove('hidden');
         }

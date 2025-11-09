@@ -141,141 +141,253 @@ class ImportExportController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
-            'import_source' => 'required|in:upload,storage',
-        ]);
-
-        $importSource = $request->input('import_source');
-
-        if ($importSource === 'upload') {
+        try {
             $request->validate([
-                'file' => 'required|file|mimes:json|max:20480', // 20MB max
+                'import_source' => 'required|in:upload,storage',
             ]);
-            $file = $request->file('file');
-            $path = $file->storeAs('temp', 'import-' . time() . '.json'); // Store temporarily
-            $originalName = $file->getClientOriginalName();
-        } else {
-            $request->validate([
-                'storage_file' => 'required|string',
-            ]);
-            // Import from storage
-            $storageFile = $request->input('storage_file');
-            if (!Storage::exists("exports/{$storageFile}")) {
-                return back()->with('error', 'Selected export file not found in storage.');
-            }
-            $path = "exports/{$storageFile}";
-            $originalName = $storageFile;
-        }
 
-        $json = Storage::get($path);
-        $patients = json_decode($json, true);
+            $importSource = $request->input('import_source');
 
-        // JSON validation
-        if (json_last_error() !== JSON_ERROR_NONE) {
             if ($importSource === 'upload') {
-                Storage::delete($path);
-            }
-            return back()->with('error', 'Invalid JSON file: ' . json_last_error_msg());
-        }
+                $request->validate([
+                    'file' => 'required|file|max:40960', // 40MB max, removed mimes:json as it's unreliable
+                ]);
 
-        if (!is_array($patients)) {
-            if ($importSource === 'upload') {
-                Storage::delete($path);
-            }
-            return back()->with('error', 'Data is not an array of patients');
-        }
-
-        $timezone = config('app.timezone', 'Asia/Kolkata');
-
-        // Summary counters and name collectors
-        $importedPatientsCount = $updatedPatientsCount = $skippedPatientsCount = 0;
-        $newFollowUpsCount = $updatedFollowUpsCount = $skippedFollowUpsCount = 0;
-        $patientsRestored = 0;
-
-        $importedPatientNames = [];
-        $updatedPatientNames = [];
-        $skippedPatientNames = [];
-        $addedFollowUpNames = [];
-        $updatedFollowUpNames = [];
-        $skippedFollowUpNames = [];
-        $restoredPatientNames = [];
-
-        DB::transaction(function () use (
-            $patients,
-            $timezone,
-            &$importedPatientsCount,
-            &$updatedPatientsCount,
-            &$skippedPatientsCount,
-            &$newFollowUpsCount,
-            &$updatedFollowUpsCount,
-            &$skippedFollowUpsCount,
-            &$importedPatientNames,
-            &$updatedPatientNames,
-            &$skippedPatientNames,
-            &$addedFollowUpNames,
-            &$updatedFollowUpNames,
-            &$skippedFollowUpNames,
-            &$patientsRestored,
-            &$restoredPatientNames
-        ) {
-            foreach ($patients as $patientData) {
-                // Patient-level validation
-                if (
-                    empty($patientData['guid']) ||
-                    empty($patientData['created_at']) ||
-                    empty($patientData['updated_at']) ||
-                    !isset($patientData['name'])
-                ) {
-                    $skippedPatientsCount++;
-                    $skippedPatientNames[] = $patientData['name'] ?? 'Unknown';
-                    continue;
+                $uploadedFile = $request->file('file');
+                if (!$uploadedFile->isValid()) {
+                    return back()->with('error', 'File upload failed: ' . $uploadedFile->getErrorMessage());
                 }
 
-                try {
-                    $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone($timezone)->toDateTimeString();
-                    $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($timezone)->toDateTimeString();
-                } catch (\Exception $e) {
-                    $skippedPatientsCount++;
-                    $skippedPatientNames[] = $patientData['name'] ?? 'Unknown';
-                    continue;
+                // Check file extension
+                $extension = strtolower($uploadedFile->getClientOriginalExtension());
+                if ($extension !== 'json') {
+                    return back()->with('error', 'Only JSON files are allowed for import.');
                 }
 
-                $followUps = $patientData['follow_ups'] ?? [];
-                unset($patientData['follow_ups']);
-                $name = $patientData['name'] ?? 'Unknown';
+                $file = $request->file('file');
+                $path = $file->storeAs('temp', 'import-' . time() . '.json'); // Store temporarily
+                $originalName = $file->getClientOriginalName();
+            } else {
+                $request->validate([
+                    'storage_file' => 'required|string',
+                ]);
+                // Import from storage
+                $storageFile = $request->input('storage_file');
+                if (!Storage::exists("exports/{$storageFile}")) {
+                    return back()->with('error', 'Selected export file not found in storage.');
+                }
+                $path = "exports/{$storageFile}";
+                $originalName = $storageFile;
+            }
 
-                $existingPatient = \App\Models\Patient::withTrashed()->where('guid', $patientData['guid'])->first();
+            $json = Storage::get($path);
+            $patients = json_decode($json, true);
 
-                if ($existingPatient) {
-                    try {
-                        $existingPatientUpdatedAt = Carbon::parse($existingPatient->updated_at)->setTimezone($timezone);
+            // JSON validation
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                if ($importSource === 'upload') {
+                    Storage::delete($path);
+                }
+                return back()->with('error', 'Invalid JSON file: ' . json_last_error_msg());
+            }
 
-                        if ($existingPatientUpdatedAt->lessThan(Carbon::parse($patientData['updated_at']))) {
-                            $existingPatient->update($patientData);
-                            $updatedPatientsCount++;
-                            $updatedPatientNames[] = $name;
-                        } else {
-                            $skippedPatientsCount++;
-                            $skippedPatientNames[] = $name;
-                        }
+            if (!is_array($patients)) {
+                if ($importSource === 'upload') {
+                    Storage::delete($path);
+                }
+                return back()->with('error', 'Data is not an array of patients');
+            }
 
-                        if ($existingPatient->trashed()) {
-                            $existingPatient->restore();
-                            $patientsRestored++;
-                            $restoredPatientNames[] = $name;
-                        }
-                    } catch (\Exception $e) {
+            // Validate first patient structure
+            if (!empty($patients) && is_array($patients[0])) {
+                $firstPatient = $patients[0];
+                if (empty($firstPatient['guid']) || empty($firstPatient['name']) || empty($firstPatient['address']) || empty($firstPatient['mobile_phone'])) {
+                    if ($importSource === 'upload') {
+                        Storage::delete($path);
+                    }
+                    return back()->with('error', 'Invalid patient data structure. Required fields: guid, name, address, mobile_phone');
+                }
+            }
+
+            $timezone = config('app.timezone', 'Asia/Kolkata');
+
+            // Summary counters and name collectors
+            $importedPatientsCount = $updatedPatientsCount = $skippedPatientsCount = 0;
+            $newFollowUpsCount = $updatedFollowUpsCount = $skippedFollowUpsCount = 0;
+            $patientsRestored = 0;
+
+            $importedPatientNames = [];
+            $updatedPatientNames = [];
+            $skippedPatientNames = [];
+            $addedFollowUpNames = [];
+            $updatedFollowUpNames = [];
+            $skippedFollowUpNames = [];
+            $restoredPatientNames = [];
+
+            $errors = [];
+            $skippedDuplicates = [];
+
+            DB::transaction(function () use (
+                $patients,
+                $timezone,
+                &$importedPatientsCount,
+                &$updatedPatientsCount,
+                &$skippedPatientsCount,
+                &$newFollowUpsCount,
+                &$updatedFollowUpsCount,
+                &$skippedFollowUpsCount,
+                &$importedPatientNames,
+                &$updatedPatientNames,
+                &$skippedPatientNames,
+                &$addedFollowUpNames,
+                &$updatedFollowUpNames,
+                &$skippedFollowUpNames,
+                &$patientsRestored,
+                &$restoredPatientNames,
+                &$errors
+            ) {
+                foreach ($patients as $index => $patientData) {
+                    // Patient-level validation
+                    if (
+                        empty($patientData['guid']) ||
+                        empty($patientData['created_at']) ||
+                        empty($patientData['updated_at']) ||
+                        empty($patientData['name']) ||
+                        empty($patientData['address']) ||
+                        empty($patientData['mobile_phone'])
+                    ) {
                         $skippedPatientsCount++;
-                        $skippedPatientNames[] = $name;
+                        $skippedPatientNames[] = $patientData['name'] ?? 'Unknown (missing required fields)';
+                        $errors[] = "Patient #{$index}: Missing required fields (guid, name, address, mobile_phone)";
                         continue;
                     }
 
-                    // Process follow-ups for existing patient
-                    foreach ($followUps as $followUpData) {
+                    try {
+                        $patientData['created_at'] = Carbon::parse($patientData['created_at'])->setTimezone($timezone)->toDateTimeString();
+                        $patientData['updated_at'] = Carbon::parse($patientData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                    } catch (\Exception $e) {
+                        $skippedPatientsCount++;
+                        $skippedPatientNames[] = $patientData['name'] ?? 'Unknown';
+                        $errors[] = "Patient #{$index} ({$patientData['name']}): Invalid date format - " . $e->getMessage();
+                        continue;
+                    }
+
+                    $followUps = $patientData['follow_ups'] ?? [];
+                    unset($patientData['follow_ups']);
+                    $name = $patientData['name'] ?? 'Unknown';
+
+                    $existingPatient = \App\Models\Patient::withTrashed()->where('guid', $patientData['guid'])->first();
+
+                    if ($existingPatient) {
+                        try {
+                            $existingPatientUpdatedAt = Carbon::parse($existingPatient->updated_at)->setTimezone($timezone);
+
+                            if ($existingPatientUpdatedAt->lessThan(Carbon::parse($patientData['updated_at']))) {
+                                $existingPatient->update($patientData);
+                                $updatedPatientsCount++;
+                                $updatedPatientNames[] = $name;
+                            } else {
+                                $skippedPatientsCount++;
+                                $skippedPatientNames[] = $name;
+                            }
+
+                            if ($existingPatient->trashed()) {
+                                $existingPatient->restore();
+                                $patientsRestored++;
+                                $restoredPatientNames[] = $name;
+                            }
+                        } catch (\Exception $e) {
+                            $skippedPatientsCount++;
+                            $skippedPatientNames[] = $name;
+                            $errors[] = "Patient #{$index} ({$name}): Update failed - " . $e->getMessage();
+                            continue;
+                        }
+
+                        // Process follow-ups for existing patient
+                        foreach ($followUps as $followUpIndex => $followUpData) {
+                            // Follow-up validation
+                            if (empty($followUpData['created_at']) || empty($followUpData['updated_at']) || empty($followUpData['check_up_info'])) {
+                                $skippedFollowUpsCount++;
+                                $skippedFollowUpNames[] = $name;
+                                $errors[] = "Follow-up #{$followUpIndex} for patient {$name}: Missing required fields (created_at, updated_at, check_up_info)";
+                                continue;
+                            }
+
+                            try {
+                                $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($timezone)->toDateTimeString();
+                                $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                            } catch (\Exception $e) {
+                                $skippedFollowUpsCount++;
+                                $skippedFollowUpNames[] = $name;
+                                $errors[] = "Follow-up #{$followUpIndex} for patient {$name}: Invalid date format - " . $e->getMessage();
+                                continue;
+                            }
+
+                            $existingFollowUp = \App\Models\FollowUp::where('patient_id', $existingPatient->id)
+                                ->where('created_at', $followUpData['created_at'])
+                                ->first();
+
+                            if ($existingFollowUp) {
+                                try {
+                                    $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($timezone);
+                                    if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
+                                        $existingFollowUp->update($followUpData);
+                                        $updatedFollowUpsCount++;
+                                        $updatedFollowUpNames[] = $name;
+                                    } else {
+                                        $skippedFollowUpsCount++;
+                                        $skippedFollowUpNames[] = $name;
+                                    }
+                                } catch (\Exception $e) {
+                                    $skippedFollowUpsCount++;
+                                    $skippedFollowUpNames[] = $name;
+                                    $errors[] = "Follow-up #{$followUpIndex} for patient {$name}: Update failed - " . $e->getMessage();
+                                }
+                            } else {
+                                try {
+                                    $followUpData['patient_id'] = $existingPatient->id;
+                                    \App\Models\FollowUp::create($followUpData);
+                                    $newFollowUpsCount++;
+                                    $addedFollowUpNames[] = $name;
+                                } catch (\Exception $e) {
+                                    $skippedFollowUpsCount++;
+                                    $skippedFollowUpNames[] = $name;
+                                    $errors[] = "Follow-up #{$followUpIndex} for patient {$name}: Create failed - " . $e->getMessage();
+                                }
+                            }
+                        }
+
+                        continue;
+                    }
+
+                    // New patient
+                    try {
+                        // Check if patient with same patient_id already exists
+                        $existingByPatientId = \App\Models\Patient::withTrashed()->where('patient_id', $patientData['patient_id'])->first();
+                        if ($existingByPatientId) {
+                            $skippedPatientsCount++;
+                            $skippedPatientNames[] = $name;
+                            $skippedDuplicates[] = "Patient '{$name}' (ID: {$patientData['patient_id']}) already exists - skipped";
+                            continue;
+                        }
+
+                        $patient = \App\Models\Patient::create($patientData);
+                        $importedPatientsCount++;
+                        $importedPatientNames[] = $name;
+                    } catch (\Exception $e) {
+                        $skippedPatientsCount++;
+                        $skippedPatientNames[] = $name;
+                        $errors[] = "Patient #{$index} ({$name}): Create failed - " . $e->getMessage();
+                        continue;
+                    }
+
+                    // Process follow-ups for new patient
+                    foreach ($followUps as $followUpIndex => $followUpData) {
                         // Follow-up validation
-                        if (empty($followUpData['created_at']) || empty($followUpData['updated_at'])) {
+                        if (empty($followUpData['created_at']) || empty($followUpData['updated_at']) || empty($followUpData['check_up_info'])) {
                             $skippedFollowUpsCount++;
                             $skippedFollowUpNames[] = $name;
+                            $errors[] = "Follow-up #{$followUpIndex} for patient {$name}: Missing required fields (created_at, updated_at, check_up_info)";
                             continue;
                         }
 
@@ -285,118 +397,74 @@ class ImportExportController extends Controller
                         } catch (\Exception $e) {
                             $skippedFollowUpsCount++;
                             $skippedFollowUpNames[] = $name;
+                            $errors[] = "Follow-up #{$followUpIndex} for patient {$name}: Invalid date format - " . $e->getMessage();
                             continue;
                         }
 
-                        $existingFollowUp = \App\Models\FollowUp::where('patient_id', $existingPatient->id)
-                            ->where('created_at', $followUpData['created_at'])
-                            ->first();
-
-                        if ($existingFollowUp) {
-                            try {
-                                $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($timezone);
-                                if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
-                                    $existingFollowUp->update($followUpData);
-                                    $updatedFollowUpsCount++;
-                                    $updatedFollowUpNames[] = $name;
-                                } else {
-                                    $skippedFollowUpsCount++;
-                                    $skippedFollowUpNames[] = $name;
-                                }
-                            } catch (\Exception $e) {
-                                $skippedFollowUpsCount++;
-                                $skippedFollowUpNames[] = $name;
-                            }
-                        } else {
-                            try {
-                                $followUpData['patient_id'] = $existingPatient->id;
-                                \App\Models\FollowUp::create($followUpData);
-                                $newFollowUpsCount++;
-                                $addedFollowUpNames[] = $name;
-                            } catch (\Exception $e) {
-                                $skippedFollowUpsCount++;
-                                $skippedFollowUpNames[] = $name;
-                            }
+                        try {
+                            $followUpData['patient_id'] = $patient->id;
+                            \App\Models\FollowUp::create($followUpData);
+                            $newFollowUpsCount++;
+                            $addedFollowUpNames[] = $name;
+                        } catch (\Exception $e) {
+                            $skippedFollowUpsCount++;
+                            $skippedFollowUpNames[] = $name;
+                            $errors[] = "Follow-up #{$followUpIndex} for patient {$name}: Create failed - " . $e->getMessage();
                         }
                     }
-
-                    continue;
                 }
+            });
 
-                // New patient
-                try {
-                    $patient = \App\Models\Patient::create($patientData);
-                    $importedPatientsCount++;
-                    $importedPatientNames[] = $name;
-                } catch (\Exception $e) {
-                    $skippedPatientsCount++;
-                    $skippedPatientNames[] = $name;
-                    continue;
-                }
-
-                // Process follow-ups for new patient
-                foreach ($followUps as $followUpData) {
-                    // Follow-up validation
-                    if (empty($followUpData['created_at']) || empty($followUpData['updated_at'])) {
-                        $skippedFollowUpsCount++;
-                        $skippedFollowUpNames[] = $name;
-                        continue;
-                    }
-
-                    try {
-                        $followUpData['created_at'] = Carbon::parse($followUpData['created_at'])->setTimezone($timezone)->toDateTimeString();
-                        $followUpData['updated_at'] = Carbon::parse($followUpData['updated_at'])->setTimezone($timezone)->toDateTimeString();
-                    } catch (\Exception $e) {
-                        $skippedFollowUpsCount++;
-                        $skippedFollowUpNames[] = $name;
-                        continue;
-                    }
-
-                    try {
-                        $followUpData['patient_id'] = $patient->id;
-                        \App\Models\FollowUp::create($followUpData);
-                        $newFollowUpsCount++;
-                        $addedFollowUpNames[] = $name;
-                    } catch (\Exception $e) {
-                        $skippedFollowUpsCount++;
-                        $skippedFollowUpNames[] = $name;
-                    }
-                }
+            // Clean up temp file only if uploaded
+            if ($importSource === 'upload') {
+                Storage::delete($path);
             }
-        });
 
-        // Clean up temp file only if uploaded
-        if ($importSource === 'upload') {
-            Storage::delete($path);
+            // Prepare stats
+            $stats = [
+                'import_date' => now()->toDateTimeString(),
+                'file_name' => $originalName,
+                'patients_restored' => $patientsRestored,
+                'patients_imported' => $importedPatientsCount,
+                'patients_updated' => $updatedPatientsCount,
+                'patients_unchanged' => $skippedPatientsCount,
+                'follow_ups_added' => $newFollowUpsCount,
+                'follow_ups_updated' => $updatedFollowUpsCount,
+                'follow_ups_unchanged' => $skippedFollowUpsCount,
+                'patient_names' => [
+                    'restored' => $restoredPatientNames,
+                    'imported' => $importedPatientNames,
+                    'updated' => $updatedPatientNames,
+                    'unchanged' => $skippedPatientNames,
+                ],
+                'follow_up_patient_names' => [
+                    'added' => $addedFollowUpNames,
+                    'updated' => $updatedFollowUpNames,
+                    'unchanged' => $skippedFollowUpNames,
+                ],
+            ];
+
+            session(['import_stats' => $stats]);
+
+            // Store skipped duplicates as informational messages
+            if (!empty($skippedDuplicates)) {
+                session(['import_skipped' => $skippedDuplicates]);
+            }
+
+            // If there were actual errors (not duplicates), show them
+            if (!empty($errors)) {
+                session(['import_errors' => array_slice($errors, 0, 10)]); // Show first 10 errors
+            }
+
+            return back()->with('success', 'Import completed successfully.')->with('show_import_details', true);
+
+        } catch (\Exception $e) {
+            // Clean up temp file if it exists
+            if (isset($path) && isset($importSource) && $importSource === 'upload') {
+                Storage::delete($path);
+            }
+            return back()->with('error', 'Import failed: ' . $e->getMessage());
         }
-
-        // Prepare stats
-        $stats = [
-            'import_date' => now()->toDateTimeString(),
-            'file_name' => $originalName,
-            'patients_restored' => $patientsRestored,
-            'patients_imported' => $importedPatientsCount,
-            'patients_updated' => $updatedPatientsCount,
-            'patients_unchanged' => $skippedPatientsCount,
-            'follow_ups_added' => $newFollowUpsCount,
-            'follow_ups_updated' => $updatedFollowUpsCount,
-            'follow_ups_unchanged' => $skippedFollowUpsCount,
-            'patient_names' => [
-                'restored' => $restoredPatientNames,
-                'imported' => $importedPatientNames,
-                'updated' => $updatedPatientNames,
-                'unchanged' => $skippedPatientNames,
-            ],
-            'follow_up_patient_names' => [
-                'added' => $addedFollowUpNames,
-                'updated' => $updatedFollowUpNames,
-                'unchanged' => $skippedFollowUpNames,
-            ],
-        ];
-
-        session(['import_stats' => $stats]);
-
-        return back()->with('success', 'Import completed successfully.')->with('show_import_details', true);
     }
 
     public function listExportFiles()

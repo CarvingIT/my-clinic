@@ -44,7 +44,10 @@ class Patient extends Model
         parent::boot();
 
         static::creating(function ($model) {
-            $model->guid = Str::uuid();
+            // Only generate GUID if not already set (for imports)
+            if (empty($model->guid)) {
+                $model->guid = Str::uuid();
+            }
             //  $model->patient_id = Str::uuid();
 
 
