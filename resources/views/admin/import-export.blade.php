@@ -1,4 +1,10 @@
 <x-app-layout>
+    <style>
+        .progress-bar {
+            width: 100%;
+            transition: width 8s linear;
+        }
+    </style>
     <x-slot name="header">
         <div class="flex justify-between items-center bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 rounded-lg shadow-lg">
             <div class="flex items-center space-x-3">
@@ -30,7 +36,7 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <!-- Success/Error Messages -->
     @if(session('success') && str_contains(session('success'), 'Export completed'))
-        <div id="export-success-alert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 relative" role="alert">
+        <div id="export-success-alert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 relative overflow-hidden" role="alert">
             <div class="flex items-center justify-between">
                 <span class="block sm:inline">{{ session('success') }}</span>
                 <div class="flex items-center space-x-2">
@@ -44,10 +50,11 @@
                     </button>
                 </div>
             </div>
+            <div id="export-success-progress" class="progress-bar bg-green-200 h-1 mt-3 rounded-full"></div>
         </div>
     @endif
     @if(session('success') && str_contains(session('success'), 'Import completed'))
-        <div id="import-success-alert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 relative" role="alert">
+        <div id="import-success-alert" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 relative overflow-hidden" role="alert">
             <div class="flex items-center justify-between">
                 <span class="block sm:inline">{{ session('success') }}</span>
                 <div class="flex items-center space-x-2">
@@ -61,10 +68,11 @@
                     </button>
                 </div>
             </div>
+            <div id="import-success-progress" class="progress-bar bg-green-200 h-1 mt-3 rounded-full"></div>
         </div>
     @endif
     @if(session('error'))
-                <div id="error-alert" class="mb-6 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-r-lg shadow-md relative" role="alert">
+                <div id="error-alert" class="mb-6 bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-r-lg shadow-md relative overflow-hidden" role="alert">
                     <div class="flex items-start space-x-3">
                         <svg class="w-6 h-6 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
@@ -76,29 +84,7 @@
                             </svg>
                         </button>
                     </div>
-                </div>
-            @endif
-
-            @if(session('import_errors'))
-                <div id="import-errors-alert" class="mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-500 text-yellow-800 px-6 py-4 rounded-r-lg shadow-md relative" role="alert">
-                    <div class="flex items-start space-x-3">
-                        <svg class="w-6 h-6 text-yellow-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                        <div class="flex-1">
-                            <h4 class="font-semibold mb-2">Import Errors:</h4>
-                            <ul class="text-sm space-y-1 max-h-40 overflow-y-auto">
-                                @foreach(session('import_errors') as $error)
-                                    <li>• {{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                        <button onclick="dismissAlert('import-errors-alert')" class="text-yellow-600 hover:text-yellow-800 focus:outline-none ml-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
-                        </button>
-                    </div>
+                    <div id="error-progress" class="progress-bar bg-red-200 h-1 mt-3 rounded-full"></div>
                 </div>
             @endif
 
@@ -582,6 +568,46 @@
                             </div>
                         </div>
 
+                        <!-- Import Process -->
+                        {{-- @if(session('import_errors'))
+                            <div class="bg-white rounded-lg border border-blue-200 shadow-sm">
+                                <div class="p-6">
+                                    <div class="flex items-center space-x-2 mb-4">
+                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                        </svg>
+                                        <h4 class="text-lg font-semibold text-gray-800">Import Process Details</h4>
+                                    </div>
+                                    <div class="text-sm text-gray-600 mb-3">
+                                        <p>The following details show what happened during the import process:</p>
+                                    </div>
+                                    <div class="space-y-2">
+                                        @foreach(session('import_errors') as $error)
+                                            @php
+                                                $friendlyMessage = $error;
+                                                // Parse duplicate patient error
+                                                if (preg_match('/Patient #\d+ \(([^)]+)\): Create failed - SQLSTATE\[23000\]: Integrity constraint violation: 1062 Duplicate entry \'([^\']+)\' for key \'patients\.patients_patient_id_unique\'/', $error, $matches)) {
+                                                    $patientName = $matches[1];
+                                                    $patientId = $matches[2];
+                                                    $friendlyMessage = "Patient '{$patientName}' was skipped because a patient with ID '{$patientId}' already exists in the system.";
+                                                }
+                                                // Parse duplicate follow-up error if needed
+                                                elseif (preg_match('/Follow-up #\d+ for patient ([^:]+): Create failed - (.+)/', $error, $matches)) {
+                                                    $patientInfo = $matches[1];
+                                                    $reason = $matches[2];
+                                                    $friendlyMessage = "Follow-up for patient {$patientInfo} was skipped: {$reason}";
+                                                }
+                                            @endphp
+                                            <div class="flex items-start p-2 bg-gray-50 rounded-lg">
+                                                <span class="text-blue-500 mr-2 mt-0.5">•</span>
+                                                <span class="text-sm text-gray-700">{{ $friendlyMessage }}</span>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </div>
+                        @endif --}}
+
                         <!-- Footer -->
                         <div class="mt-8 pt-6 border-t border-gray-200">
                             <div class="flex justify-end">
@@ -600,12 +626,46 @@
         function dismissAlert(alertId) {
             const alert = document.getElementById(alertId);
             if (alert) {
-                alert.style.transition = 'opacity 0.3s ease-out';
+                alert.style.transition = 'all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1)';
                 alert.style.opacity = '0';
+                alert.style.transform = 'translateX(100%)';
+                alert.style.maxHeight = '0';
+                alert.style.marginBottom = '0';
+                alert.style.paddingTop = '0';
+                alert.style.paddingBottom = '0';
                 setTimeout(() => {
                     alert.style.display = 'none';
-                }, 300);
+                }, 400);
             }
+        }
+
+        function autoDismissAlerts() {
+            const alerts = [
+                { id: 'export-success-alert', progressId: 'export-success-progress' },
+                { id: 'import-success-alert', progressId: 'import-success-progress' },
+                { id: 'error-alert', progressId: 'error-progress' }
+            ];
+
+            alerts.forEach(({ id: alertId, progressId }) => {
+                const alert = document.getElementById(alertId);
+                const progressBar = document.getElementById(progressId);
+
+                if (alert && !alert.classList.contains('hidden')) {
+                    // Start progress bar animation
+                    if (progressBar) {
+                        progressBar.style.width = '100%';
+                        progressBar.style.transition = 'width 8s linear';
+                        // Force reflow to ensure animation starts
+                        progressBar.offsetHeight;
+                        progressBar.style.width = '0%';
+                    }
+
+                    // Dismiss alert after 8 seconds
+                    setTimeout(() => {
+                        dismissAlert(alertId);
+                    }, 8000);
+                }
+            });
         }
 
         function showExportDetails() {
@@ -662,6 +722,7 @@
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             toggleImportSource();
+            autoDismissAlerts();
         });
     </script>
 </x-app-layout>
