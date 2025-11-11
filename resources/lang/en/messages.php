@@ -119,7 +119,7 @@ return [
     'Cash Payments' => 'Cash Payments',
     'Online Payments' => 'Online Payments',
     'Import/Export' => 'Import/Export',
-
+    'Age/Gender' => 'Age/Gender',
 
 
 

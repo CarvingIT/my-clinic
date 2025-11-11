@@ -118,6 +118,7 @@ return [
     'Cash Payments' => 'नगद पेमेंट्स',
     'Online Payments' => 'ऑनलाइन पेमेंट्स',
     'Import/Export' => 'आयात/निर्यात',
+    'Age/Gender' => 'वय/लिंग',
 
 
 
