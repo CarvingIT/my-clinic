@@ -117,6 +117,9 @@ class FollowUpController extends Controller
             $checkUpInfo[$key] = $value;
         }
 
+        // Explicitly handle reports field
+        $checkUpInfo['reports'] = json_decode($request->input('reports', '[]'), true) ?? [];
+
         // Adding user and branch info to $checkUpInfo
         $checkUpInfo['user_id'] = Auth::id();
         $checkUpInfo['user_name'] = Auth::user()->name;
@@ -430,6 +433,9 @@ class FollowUpController extends Controller
         foreach ($request->except(['_token', 'patient_id', 'diagnosis', 'treatment', 'chikitsa_combo', 'amount_billed', 'amount_paid']) as $key => $value) {
             $newCheckUpInfo[$key] = $value;
         }
+
+        // Explicitly handle reports field
+        $newCheckUpInfo['reports'] = json_decode($request->input('reports', '[]'), true) ?? [];
 
         // Preserve existing username and branch unless updated
         if (!isset($newCheckUpInfo['user_name']) && isset($existingCheckUpInfo['user_name'])) {

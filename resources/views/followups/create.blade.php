@@ -178,15 +178,12 @@
                                     <!-- Current session reports will be added here dynamically -->
                                 </div>
 
-                                <!-- Hidden input to store reports data -->
-                                <input type="hidden" name="reports" id="reportsInput" value="[]">
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="bg-white shadow-lg rounded-lg overflow-hidden">
                 <div class="p-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <!-- Follow-up Creation Form (Left Column) -->
@@ -198,6 +195,7 @@
                                 <input type="file" name="photos[]" id="photoFileInput" style="display:none;"
                                     accept="image/*">
                                 <input type="hidden" name="photo_types" id="photoTypesInput">
+                                <input type="hidden" name="reports" id="reportsInput" value="[]">
 
                                 <!-- Naadi Textarea -->
                                 <div class="mb-6">
@@ -2236,6 +2234,14 @@ $previousChikitsa = $latestFollowUp
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 filterReports(this.value.trim().toLowerCase());
+            });
+        }
+
+        // Ensure reports input is updated before form submission
+        const form = document.getElementById('followUpForm');
+        if (form) {
+            form.addEventListener('submit', function() {
+                updateReportsInput();
             });
         }
     });
