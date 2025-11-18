@@ -9,9 +9,9 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-6">
                 <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">
+                    {{-- <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">
                         Patient Information
-                    </h3>
+                    </h3> --}}
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Patient Details (Left Side - 2/3 width) -->
                         <div class="lg:col-span-2">
@@ -19,7 +19,7 @@
                                 {{ $patient->name }} ({{ $patient->patient_id }})
                             </h2>
                             <!-- Complete Patient Information Grid -->
-                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3 text-sm">
                                 @if ($patient->birthdate || $patient->gender)
                                     <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
                                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Age/Gender') }}:</span>
