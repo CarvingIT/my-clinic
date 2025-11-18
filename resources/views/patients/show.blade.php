@@ -33,13 +33,6 @@
                                     </div>
                                 @endif
 
-                                @if ($patient->vishesh)
-                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Vishesh') }}:</span>
-                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ Str::limit(strip_tags($patient->vishesh), 50) }}</span>
-                                    </div>
-                                @endif
-
                                 @if ($patient->height)
                                     <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
                                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Height') }}:</span>
@@ -110,6 +103,22 @@
                                     <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
                                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Birthdate') }}:</span>
                                         <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate->format('d M Y') }}</span>
+                                    </div>
+                                @endif
+
+                                @if ($patient->vishesh)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded lg:col-span-2" x-data="{ expanded: false }">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Vishesh') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">
+                                            <span x-show="!expanded">{{ Str::limit(html_entity_decode(strip_tags($patient->vishesh)), 90) }}</span>
+                                            <span x-show="expanded">{{ html_entity_decode(strip_tags($patient->vishesh)) }}</span>
+                                            @if (strlen(strip_tags($patient->vishesh)) > 90)
+                                                <button @click="expanded = !expanded" class="text-blue-600 hover:text-blue-800 ml-1 text-sm font-medium">
+                                                    <span x-show="!expanded">{{ __('Read More') }}</span>
+                                                    <span x-show="expanded">{{ __('Read Less') }}</span>
+                                                </button>
+                                            @endif
+                                        </span>
                                     </div>
                                 @endif
                             </div>
@@ -635,10 +644,6 @@
                                             {{ __('नाडी') }}/{{ __('लक्षणे') }}
                                         </th>
                                         <th scope="col"
-                                            class="px-6 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
-                                            {{ __('निदान') }}
-                                        </th>
-                                        <th scope="col"
                                             class="px-2 py-3 text-left text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                                             {{ __('चिकित्सा') }}
                                         </th>
@@ -731,22 +736,26 @@
                                                             </p>
                                                         @endif
 
-                                                        @if (isset($followUp->diagnosis) && $followUp->diagnosis !== null && $followUp->diagnosis !== '')
-                                                            {{-- Note the change here --}}
-                                                            <p>
-                                                                {{-- <span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}:</span> --}}
-                                                                {!! $followUp->diagnosis !!}
-                                                            </p>
-                                                        @endif
-                                                        {{-- <p><span
-                                                                class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span>
-                                                            @if (isset($checkUpInfo['chikitsa']))
-                                                                {{ $checkUpInfo['chikitsa'] }}
-                                                            @endif
-                                                        </p> --}}
-
-                                                        {{-- @if ($followUp->patient_photos)
+@if (isset($followUp->diagnosis) && $followUp->diagnosis !== null && $followUp->diagnosis !== '')
+    {{-- Note the change here --}}
+    <p>
+        {{-- <span
+            class="font-bold text-gray-800 dark:text-gray-200">{{ __('लक्षणे') }}:</span> --}}
+        {!! $followUp->diagnosis !!}
+    </p>
+@endif
+@if (isset($checkUpInfo['nidan']) && $checkUpInfo['nidan'] !== null && $checkUpInfo['nidan'] !== '')
+    <p>
+        <span class="font-bold text-gray-800 dark:text-gray-200">{{ __('निदान') }}:</span>
+        {!! str_replace(['<p>', '</p>'], ['', ''], trim($checkUpInfo['nidan'])) !!}
+    </p>
+@endif
+{{-- <p><span
+        class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span>
+    @if (isset($checkUpInfo['chikitsa']))
+        {{ $checkUpInfo['chikitsa'] }}
+    @endif
+</p> --}}                                                        {{-- @if ($followUp->patient_photos)
                                                             <img src="{{ route('followup.image', ['filename' => basename($followUp->patient_photos)]) }}"
                                                                 alt="Patient Photo">
                                                         @else
@@ -756,13 +765,6 @@
 
                                                     </div>
                                                 @endif
-                                            </td>
-                                            <td class="px-6 py-4 align-top text-gray-600 dark:text-gray-300 max-w-xs break-words whitespace-normal"
-                                                style="word-break: break-word; overflow-wrap: break-word;">
-                                                @php
-                                                    $checkUpInfo = json_decode($followUp->check_up_info, true);
-                                                @endphp
-                                                {!! $checkUpInfo['nidan'] ?? '' !!}
                                             </td>
                                             <td class="px-2 py-4 align-top text-gray-600 dark:text-gray-300 max-w-xs break-words whitespace-normal"
                                                 style=" word-break: break-word; overflow-wrap: break-word;">

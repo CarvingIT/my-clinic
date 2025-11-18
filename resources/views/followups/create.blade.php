@@ -27,13 +27,6 @@
                                     </div>
                                 @endif
 
-                                @if ($patient->vishesh)
-                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Vishesh') }}:</span>
-                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ Str::limit(strip_tags($patient->vishesh), 50) }}</span>
-                                    </div>
-                                @endif
-
                                 @if ($patient->height)
                                     <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
                                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Height') }}:</span>
@@ -104,6 +97,22 @@
                                     <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
                                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Birthdate') }}:</span>
                                         <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate->format('d M Y') }}</span>
+                                    </div>
+                                @endif
+
+                                @if ($patient->vishesh)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded lg:col-span-2" x-data="{ expanded: false }">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Vishesh') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">
+                                            <span x-show="!expanded">{{ Str::limit(html_entity_decode(strip_tags($patient->vishesh)), 90) }}</span>
+                                            <span x-show="expanded">{{ html_entity_decode(strip_tags($patient->vishesh)) }}</span>
+                                            @if (strlen(strip_tags($patient->vishesh)) > 90)
+                                                <button @click="expanded = !expanded" class="text-blue-600 hover:text-blue-800 ml-1 text-sm font-medium">
+                                                    <span x-show="!expanded">{{ __('Read More') }}</span>
+                                                    <span x-show="expanded">{{ __('Read Less') }}</span>
+                                                </button>
+                                            @endif
+                                        </span>
                                     </div>
                                 @endif
                             </div>
