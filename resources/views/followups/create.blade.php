@@ -1,69 +1,116 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight px-5">
-            {{ __('messages.Add Follow Up') }} - {{ $patient->name }}
-
-            <span class="text-gray-600 text-sm">
-                @if ($patient->birthdate || $patient->gender)
-                    {{-- | {{ __('messages.Age') }}/{{ __('messages.Gender') }}: --}}
-                    {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
-                @endif
-
-
-                @if ($patient->height)
-                    | {{ __('messages.Height') }}: {{ $patient->height }} cm
-                @endif
-                @if ($patient->weight)
-                    | {{ __('messages.Weight') }}: {{ $patient->weight }} kg
-                @endif
-                @if ($patient->height && $patient->weight)
-                    @php
-                        $heightInMeters = $patient->height / 100;
-                        $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
-                        $bmiCategory = match (true) {
-                            $bmi < 18.5 => 'Underweight',
-                            $bmi >= 18.5 && $bmi < 25 => 'Healthy Weight',
-                            $bmi >= 25 && $bmi < 30 => 'Overweight',
-                            default => 'Obese',
-                        };
-                    @endphp
-                    | {{ __('BMI') }}: {{ number_format($bmi, 2) }}
-                @endif
-                @if (isset($totalDueAll))
-                    | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($totalDueAll, 2) }}
-                @endif
-                @if ($patient->occupation)
-                    <div>
-                        <span class="font-semibold">| {{ __('messages.occupation') }}:</span>
-                        <span>{{ $patient->occupation }}</span>
-                    </div>
-                @endif
-
-                @if ($patient->reference)
-                    <div>
-                        <span class="font-semibold">| {{ __('messages.reference') }}:</span>
-                        <span>{{ $patient->reference }}</span>
-                    </div>
-                @endif
-                <div class="my-1"></div>
-                <div class="flex flex-wrap items-start gap-x-2 gap-y-2 text-sm">
-                    @if ($patient->vishesh)
-                        <div>
-                            <span class="font-semibold">| {{ __('messages.Vishesh') }}:</span>
-                            <span class="font-medium">{!! $patient->vishesh !!}</span>
-                        </div>
-                    @endif
-                </div>
-
-
-            </span>
+            {{ __('messages.Add Follow Up') }}
         </h2>
     </x-slot>
 
-    <div class="py-12 px-4 sm:px-8">
+    <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900 dark:text-gray-100">
+            <div class="mb-6">
+                <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">
+                        Patient Information
+                    </h3>
+                    <div>
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
+                            {{ $patient->name }} ({{ $patient->patient_id }})
+                        </h2>
+                        <!-- Complete Patient Information Grid -->
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+                            @if ($patient->birthdate || $patient->gender)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Age/Gender') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->vishesh)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Vishesh') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ Str::limit(strip_tags($patient->vishesh), 50) }}</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->height)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Height') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->height }} cm</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->weight)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Weight') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->weight }} kg</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->height && $patient->weight)
+                                @php
+                                    $heightInMeters = $patient->height / 100;
+                                    $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
+                                    $bmiCategory = match (true) {
+                                        $bmi < 18.5 => 'Underweight',
+                                        $bmi >= 18.5 && $bmi < 25 => 'Normal',
+                                        $bmi >= 25 && $bmi < 30 => 'Overweight',
+                                        default => 'Obese',
+                                    };
+                                @endphp
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('BMI') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ number_format($bmi, 1) }} ({{ $bmiCategory }})</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->mobile_phone)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.mobile_phone') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->mobile_phone }}</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->email_id)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Email ID') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->email_id }}</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->address)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.address') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->address }}</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->occupation)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.occupation') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->occupation }}</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->reference)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.reference') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->reference }}</span>
+                                </div>
+                            @endif
+
+                            @if ($patient->birthdate)
+                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Birthdate') }}:</span>
+                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate->format('d M Y') }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+                <div class="p-6">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         <!-- Follow-up Creation Form (Left Column) -->
                         <div class="lg:col-span-2">
