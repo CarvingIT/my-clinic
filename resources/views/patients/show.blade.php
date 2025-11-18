@@ -25,7 +25,17 @@
                                 {{ $patient->name }} ({{ $patient->patient_id }})
                             </h2>
                             <!-- Complete Patient Information Grid -->
-                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm" x-data="{ showMore: false }">
+                                <!-- Vishesh Field - Always visible and spans 3 columns -->
+                                @if ($patient->vishesh)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded lg:col-span-3 mt-4">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300 text-lg">{{ __('messages.Vishesh') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1 text-base leading-relaxed">
+                                            {!! nl2br(html_entity_decode(strip_tags($patient->vishesh))) !!}
+                                        </span>
+                                    </div>
+                                @endif
+
                                 @if ($patient->birthdate || $patient->gender)
                                     <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
                                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Age/Gender') }}:</span>
@@ -71,27 +81,6 @@
                                     </div>
                                 @endif
 
-                                @if ($patient->email_id)
-                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Email ID') }}:</span>
-                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->email_id }}</span>
-                                    </div>
-                                @endif
-
-                                @if ($patient->address)
-                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.address') }}:</span>
-                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->address }}</span>
-                                    </div>
-                                @endif
-
-                                @if ($patient->occupation)
-                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.occupation') }}:</span>
-                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->occupation }}</span>
-                                    </div>
-                                @endif
-
                                 @if ($patient->reference)
                                     <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
                                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.reference') }}:</span>
@@ -99,28 +88,44 @@
                                     </div>
                                 @endif
 
+                                @if ($patient->address)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded" x-show="showMore" x-transition>
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.address') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->address }}</span>
+                                    </div>
+                                @endif
+
+                                @if ($patient->occupation)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded" x-show="showMore" x-transition>
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.occupation') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->occupation }}</span>
+                                    </div>
+                                @endif
+
+                                @if ($patient->email_id)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded" x-show="showMore" x-transition>
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Email ID') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->email_id }}</span>
+                                    </div>
+                                @endif
+
                                 @if ($patient->birthdate)
-                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded" x-show="showMore" x-transition>
                                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Birthdate') }}:</span>
                                         <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate->format('d M Y') }}</span>
                                     </div>
                                 @endif
 
-                                @if ($patient->vishesh)
-                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded lg:col-span-2" x-data="{ expanded: false }">
-                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Vishesh') }}:</span>
-                                        <span class="text-gray-600 dark:text-gray-400 ml-1">
-                                            <span x-show="!expanded">{{ Str::limit(html_entity_decode(strip_tags($patient->vishesh)), 90) }}</span>
-                                            <span x-show="expanded">{{ html_entity_decode(strip_tags($patient->vishesh)) }}</span>
-                                            @if (strlen(strip_tags($patient->vishesh)) > 90)
-                                                <button @click="expanded = !expanded" class="text-blue-600 hover:text-blue-800 ml-1 text-sm font-medium">
-                                                    <span x-show="!expanded">{{ __('Read More') }}</span>
-                                                    <span x-show="expanded">{{ __('Read Less') }}</span>
-                                                </button>
-                                            @endif
-                                        </span>
-                                    </div>
-                                @endif
+                                <!-- Read More Button -->
+                                                                <!-- Read More Button -->
+                                <div class="lg:col-span-3 flex justify-center mt-2">
+                                                                        <button @click="showMore = !showMore"
+                                            class="bg-white hover:bg-indigo-50 text-indigo-600 hover:text-indigo-700 text-xs font-medium py-1 px-2 rounded-lg border border-indigo-200 hover:border-indigo-300 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
+                                        <span x-show="!showMore">{{ __('Read More') }}</span>
+                                        <span x-show="showMore">{{ __('Read Less') }}</span>
+                                    </button>
+                                </div>
+
                             </div>
 
 
