@@ -181,7 +181,8 @@
                                             <div class="report-item bg-white dark:bg-gray-600 p-3 rounded-md shadow-sm border border-gray-200 dark:border-gray-500"
                                                  data-text="{{ strtolower($report['text']) }}"
                                                  data-timestamp="{{ $report['timestamp'] }}"
-                                                 data-followup-date="{{ $report['followup_date'] }}">
+                                                 data-followup-date="{{ $report['followup_date'] }}"
+                                                 data-original-text="{{ $report['text'] }}">
                                                 <div class="flex justify-between items-start">
                                                     <div class="flex-1">
                                                         <div class="text-sm text-gray-800 dark:text-gray-200 font-medium">
@@ -2287,4 +2288,50 @@ $previousChikitsa = $latestFollowUp
             report.style.display = matchesSearch ? 'block' : 'none';
         });
     }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('reportSearch');
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        const reportItems = document.querySelectorAll('.report-item');
+        reportItems.forEach(item => {
+            const textDiv = item.querySelector('.text-sm.font-medium');
+            const dateDiv = item.querySelector('.text-xs.text-gray-500, .text-xs.text-gray-400');
+            
+            // Reset both text and date content
+            textDiv.innerHTML = item.dataset.originalText;
+            if (dateDiv) {
+                dateDiv.innerHTML = item.dataset.timestamp + ' • Follow-up: ' + item.dataset.followupDate;
+            }
+            
+            const text = item.dataset.text || '';
+            const timestamp = item.dataset.timestamp || '';
+            const followupDate = item.dataset.followupDate || '';
+            
+            const matchesSearch = !searchTerm ||
+                text.includes(searchTerm) ||
+                followupDate.toLowerCase().includes(searchTerm);
+            
+            if (searchTerm === '') {
+                item.style.display = 'block';
+            } else if (matchesSearch) {
+                item.style.display = 'block';
+                
+                // Highlight in report text
+                const regex = new RegExp(`(${this.value.trim()})`, 'gi');
+                textDiv.innerHTML = item.dataset.originalText.replace(regex, '<mark>$1</mark>');
+                
+                // Highlight in date section if date matches
+                if (followupDate.toLowerCase().includes(searchTerm) && dateDiv) {
+                    const originalDateText = item.dataset.timestamp + ' • Follow-up: ' + item.dataset.followupDate;
+                    dateDiv.innerHTML = originalDateText.replace(regex, '<mark>$1</mark>');
+                }
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+});
 </script>
