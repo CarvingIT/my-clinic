@@ -111,44 +111,61 @@
 
                         <!-- Reports Section (Right Side - 1/3 width) -->
                         <div class="lg:col-span-1">
-                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 h-full">
-                                <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-300 dark:border-gray-600 pb-2">
-                                    Reports
-                                </h4>
+                            @php
+                                $allReports = [];
+                                foreach ($followUps as $followUp) {
+                                    $checkUpInfo = json_decode($followUp->check_up_info, true) ?? [];
+                                    if (!empty($checkUpInfo['reports']) && is_array($checkUpInfo['reports'])) {
+                                        foreach ($checkUpInfo['reports'] as $report) {
+                                            $allReports[] = [
+                                                'text' => $report['text'] ?? '',
+                                                'timestamp' => $report['timestamp'] ?? '',
+                                                'followup_date' => $followUp->created_at->format('d M Y'),
+                                                'followup_id' => $followUp->id
+                                            ];
+                                        }
+                                    }
+                                }
+                                // Sort by timestamp descending (newest first)
+                                usort($allReports, function($a, $b) {
+                                    return strtotime($b['timestamp']) <=> strtotime($a['timestamp']);
+                                });
+                            @endphp
+                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-5 h-full shadow-lg border border-gray-200 dark:border-gray-600">
+                                <!-- Header -->
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-bold text-gray-800 dark:text-white flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        Reports
+                                    </h4>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-full">
+                                        {{ count($allReports) }}
+                                    </span>
+                                </div>
 
                                 <!-- Search Bar and Add Button -->
-                                <div class="flex gap-2 mb-4">
-                                    <input type="text" id="reportSearch" placeholder="Search reports..."
-                                        class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <div class="flex gap-3 mb-4">
+                                    <div class="relative flex-1">
+                                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                        <input type="text" id="reportSearch" placeholder="Search reports..."
+                                            class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm">
+                                    </div>
                                     <button type="button" onclick="openReportModal()"
-                                        class="px-3 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition duration-200">
-                                        +
+                                        class="px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-indigo-800 transform hover:scale-105 transition-all duration-200 shadow-md flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        Add
                                     </button>
                                 </div>
 
                                 <!-- Reports List -->
-                                <div id="reportsList" class="space-y-2 max-h-96 overflow-y-auto">
+                                <div id="reportsList" class="space-y-3 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-300 dark:scrollbar-thumb-indigo-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
                                     <!-- Previous reports will be loaded here -->
-                                    @php
-                                        $allReports = [];
-                                        foreach ($followUps as $followUp) {
-                                            $checkUpInfo = json_decode($followUp->check_up_info, true) ?? [];
-                                            if (!empty($checkUpInfo['reports']) && is_array($checkUpInfo['reports'])) {
-                                                foreach ($checkUpInfo['reports'] as $report) {
-                                                    $allReports[] = [
-                                                        'text' => $report['text'] ?? '',
-                                                        'timestamp' => $report['timestamp'] ?? '',
-                                                        'followup_date' => $followUp->created_at->format('d M Y'),
-                                                        'followup_id' => $followUp->id
-                                                    ];
-                                                }
-                                            }
-                                        }
-                                        // Sort by timestamp descending (newest first)
-                                        usort($allReports, function($a, $b) {
-                                            return strtotime($b['timestamp']) <=> strtotime($a['timestamp']);
-                                        });
-                                    @endphp
 
                                     @if(count($allReports) > 0)
                                         @foreach($allReports as $report)
