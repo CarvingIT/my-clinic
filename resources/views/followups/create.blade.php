@@ -12,98 +12,175 @@
                     <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-600 pb-2">
                         Patient Information
                     </h3>
-                    <div>
-                        <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
-                            {{ $patient->name }} ({{ $patient->patient_id }})
-                        </h2>
-                        <!-- Complete Patient Information Grid -->
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
-                            @if ($patient->birthdate || $patient->gender)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Age/Gender') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}</span>
-                                </div>
-                            @endif
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Patient Details (Left Side - 2/3 width) -->
+                        <div class="lg:col-span-2">
+                            <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
+                                {{ $patient->name }} ({{ $patient->patient_id }})
+                            </h2>
+                            <!-- Complete Patient Information Grid -->
+                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+                                @if ($patient->birthdate || $patient->gender)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Age/Gender') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->vishesh)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Vishesh') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ Str::limit(strip_tags($patient->vishesh), 50) }}</span>
-                                </div>
-                            @endif
+                                @if ($patient->vishesh)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Vishesh') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ Str::limit(strip_tags($patient->vishesh), 50) }}</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->height)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Height') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->height }} cm</span>
-                                </div>
-                            @endif
+                                @if ($patient->height)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Height') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->height }} cm</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->weight)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Weight') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->weight }} kg</span>
-                                </div>
-                            @endif
+                                @if ($patient->weight)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Weight') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->weight }} kg</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->height && $patient->weight)
-                                @php
-                                    $heightInMeters = $patient->height / 100;
-                                    $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
-                                    $bmiCategory = match (true) {
-                                        $bmi < 18.5 => 'Underweight',
-                                        $bmi >= 18.5 && $bmi < 25 => 'Normal',
-                                        $bmi >= 25 && $bmi < 30 => 'Overweight',
-                                        default => 'Obese',
-                                    };
-                                @endphp
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('BMI') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ number_format($bmi, 1) }} ({{ $bmiCategory }})</span>
-                                </div>
-                            @endif
+                                @if ($patient->height && $patient->weight)
+                                    @php
+                                        $heightInMeters = $patient->height / 100;
+                                        $bmi = $patient->weight / ($heightInMeters * $heightInMeters);
+                                        $bmiCategory = match (true) {
+                                            $bmi < 18.5 => 'Underweight',
+                                            $bmi >= 18.5 && $bmi < 25 => 'Normal',
+                                            $bmi >= 25 && $bmi < 30 => 'Overweight',
+                                            default => 'Obese',
+                                        };
+                                    @endphp
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('BMI') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ number_format($bmi, 1) }} ({{ $bmiCategory }})</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->mobile_phone)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.mobile_phone') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->mobile_phone }}</span>
-                                </div>
-                            @endif
+                                @if ($patient->mobile_phone)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.mobile_phone') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->mobile_phone }}</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->email_id)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Email ID') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->email_id }}</span>
-                                </div>
-                            @endif
+                                @if ($patient->email_id)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Email ID') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->email_id }}</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->address)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.address') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->address }}</span>
-                                </div>
-                            @endif
+                                @if ($patient->address)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.address') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->address }}</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->occupation)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.occupation') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->occupation }}</span>
-                                </div>
-                            @endif
+                                @if ($patient->occupation)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.occupation') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->occupation }}</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->reference)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.reference') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->reference }}</span>
-                                </div>
-                            @endif
+                                @if ($patient->reference)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.reference') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->reference }}</span>
+                                    </div>
+                                @endif
 
-                            @if ($patient->birthdate)
-                                <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
-                                    <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Birthdate') }}:</span>
-                                    <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate->format('d M Y') }}</span>
+                                @if ($patient->birthdate)
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Birthdate') }}:</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate->format('d M Y') }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
+                        <!-- Reports Section (Right Side - 1/3 width) -->
+                        <div class="lg:col-span-1">
+                            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 h-full">
+                                <h4 class="text-lg font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-300 dark:border-gray-600 pb-2">
+                                    Reports
+                                </h4>
+
+                                <!-- Search Bar and Add Button -->
+                                <div class="flex gap-2 mb-4">
+                                    <input type="text" id="reportSearch" placeholder="Search reports..."
+                                        class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    <button type="button" onclick="openReportModal()"
+                                        class="px-3 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition duration-200">
+                                        +
+                                    </button>
                                 </div>
-                            @endif
+
+                                <!-- Reports List -->
+                                <div id="reportsList" class="space-y-2 max-h-96 overflow-y-auto">
+                                    <!-- Previous reports will be loaded here -->
+                                    @php
+                                        $allReports = [];
+                                        foreach ($followUps as $followUp) {
+                                            $checkUpInfo = json_decode($followUp->check_up_info, true) ?? [];
+                                            if (!empty($checkUpInfo['reports']) && is_array($checkUpInfo['reports'])) {
+                                                foreach ($checkUpInfo['reports'] as $report) {
+                                                    $allReports[] = [
+                                                        'text' => $report['text'] ?? '',
+                                                        'timestamp' => $report['timestamp'] ?? '',
+                                                        'followup_date' => $followUp->created_at->format('d M Y'),
+                                                        'followup_id' => $followUp->id
+                                                    ];
+                                                }
+                                            }
+                                        }
+                                        // Sort by timestamp descending (newest first)
+                                        usort($allReports, function($a, $b) {
+                                            return strtotime($b['timestamp']) <=> strtotime($a['timestamp']);
+                                        });
+                                    @endphp
+
+                                    @if(count($allReports) > 0)
+                                        @foreach($allReports as $report)
+                                            <div class="report-item bg-white dark:bg-gray-600 p-3 rounded-md shadow-sm border border-gray-200 dark:border-gray-500"
+                                                 data-text="{{ strtolower($report['text']) }}"
+                                                 data-timestamp="{{ $report['timestamp'] }}"
+                                                 data-followup-date="{{ $report['followup_date'] }}">
+                                                <div class="flex justify-between items-start">
+                                                    <div class="flex-1">
+                                                        <div class="text-sm text-gray-800 dark:text-gray-200 font-medium">
+                                                            {{ $report['text'] }}
+                                                        </div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                            {{ $report['timestamp'] }} • Follow-up: {{ $report['followup_date'] }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                                            <div class="text-sm">No previous reports found</div>
+                                            <div class="text-xs mt-1">Add your first report using the + button</div>
+                                        </div>
+                                    @endif
+
+                                    <!-- Current session reports will be added here dynamically -->
+                                </div>
+
+                                <!-- Hidden input to store reports data -->
+                                <input type="hidden" name="reports" id="reportsInput" value="[]">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -758,7 +835,26 @@ $previousChikitsa = $latestFollowUp
 </x-app-layout>
 
 
-{{-- Script for nadi presets --}}
+                                <!-- Report Modal -->
+                                <div id="reportModal"
+                                    class="fixed inset-0 bg-black bg-opacity-50 items-center justify-center hidden z-50">
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Add New Report</h2>
+                                        <div class="mb-4">
+                                            <label class="block text-sm text-gray-700 dark:text-gray-300 mb-2">Report Text</label>
+                                            <textarea id="reportText" rows="4" placeholder="Enter your report here..."
+                                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md dark:bg-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                        </div>
+                                        <div class="flex justify-end space-x-2">
+                                            <button type="button" onclick="closeReportModal()"
+                                                class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Cancel</button>
+                                            <button type="button" onclick="addReport()"
+                                                class="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded">Add Report</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Script for nadi presets --}}
 <script>
     const nadiFieldId = {{ \App\Models\Field::where('name', 'nadi')->first()->id ?? 0 }};
     const nadiStorageKey = 'customNadiPresets';
@@ -2003,5 +2099,160 @@ $previousChikitsa = $latestFollowUp
 
         photoFileInput.files = dataTransfer.files;
         photoTypesInput.value = JSON.stringify(types); // Store types as JSON string
+    }
+
+    // Reports functionality
+    let reports = [];
+
+    function openReportModal() {
+        const modal = document.getElementById('reportModal');
+        if (!modal) {
+            console.error('reportModal not found in DOM.');
+            return;
+        }
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('reportText').focus();
+
+        // Add click outside to close
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeReportModal();
+            }
+        });
+
+        // Add keyboard support
+        const handleKeydown = function(e) {
+            if (e.key === 'Escape') {
+                closeReportModal();
+            } else if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                addReport();
+            }
+        };
+
+        document.addEventListener('keydown', handleKeydown);
+
+        // Store the handler to remove it later
+        modal._keydownHandler = handleKeydown;
+    }
+
+    function closeReportModal() {
+        const modal = document.getElementById('reportModal');
+        if (!modal) {
+            console.error('reportModal not found in DOM.');
+            return;
+        }
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.getElementById('reportText').value = '';
+
+        // Remove keyboard event listener
+        if (modal._keydownHandler) {
+            document.removeEventListener('keydown', modal._keydownHandler);
+            modal._keydownHandler = null;
+        }
+    }
+
+    function addReport() {
+        const reportText = document.getElementById('reportText').value.trim();
+        if (!reportText) {
+            alert('Please enter a report.');
+            return;
+        }
+
+        const now = new Date();
+        const timestamp = now.getDate().toString().padStart(2, '0') + '/' +
+                         (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
+                         now.getFullYear() + ' ' +
+                         now.getHours().toString().padStart(2, '0') + ':' +
+                         now.getMinutes().toString().padStart(2, '0') + ':' +
+                         now.getSeconds().toString().padStart(2, '0');
+
+        const report = {
+            text: reportText,
+            timestamp: timestamp
+        };
+
+        reports.push(report);
+        updateReportsDisplay();
+        updateReportsInput();
+        closeReportModal();
+    }
+
+    function updateReportsDisplay() {
+        const container = document.getElementById('reportsList');
+        container.innerHTML = '';
+
+        reports.forEach((report, index) => {
+            const reportDiv = document.createElement('div');
+            reportDiv.className = 'flex justify-between items-start p-2 bg-gray-50 dark:bg-gray-800 rounded mb-2';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'flex-1';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'text-sm';
+            textDiv.textContent = report.text;
+
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'text-xs text-gray-500 dark:text-gray-400 mt-1';
+            timestampDiv.textContent = report.timestamp;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'text-red-500 hover:text-red-700 ml-2';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.onclick = () => removeReport(index);
+
+            contentDiv.appendChild(textDiv);
+            contentDiv.appendChild(timestampDiv);
+            reportDiv.appendChild(contentDiv);
+            reportDiv.appendChild(deleteBtn);
+            container.appendChild(reportDiv);
+        });
+    }
+
+    function removeReport(index) {
+        if (confirm('Are you sure you want to delete this report?')) {
+            reports.splice(index, 1);
+            updateReportsDisplay();
+            updateReportsInput();
+        }
+    }
+
+    function updateReportsInput() {
+        const input = document.getElementById('reportsInput');
+        input.value = JSON.stringify(reports);
+    }
+
+    // Initialize reports if editing existing follow-up
+    document.addEventListener('DOMContentLoaded', function() {
+        // For create view, reports start empty
+        updateReportsInput();
+
+        // Add search functionality
+        const searchInput = document.getElementById('reportSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                filterReports(this.value.trim().toLowerCase());
+            });
+        }
+    });
+
+    function filterReports(searchTerm) {
+        const allReports = document.querySelectorAll('.report-item');
+        allReports.forEach(report => {
+            const text = report.dataset.text || '';
+            const timestamp = report.dataset.timestamp || '';
+            const followupDate = report.dataset.followupDate || '';
+
+            const matchesSearch = !searchTerm ||
+                text.includes(searchTerm) ||
+                timestamp.includes(searchTerm) ||
+                followupDate.toLowerCase().includes(searchTerm);
+
+            report.style.display = matchesSearch ? 'block' : 'none';
+        });
     }
 </script>
