@@ -88,16 +88,58 @@
         };
 
         function convertMarathiToEnglish(input) {
-            // Remove spaces first, then replace Marathi digits with English digits
-            return input.replace(/\s+/g, '').replace(/[०-९]/g, (match) => marathiToEnglishMapping[match]);
+            // First convert all Marathi digits to English digits
+            let result = input.replace(/[०-९]/g, (match) => marathiToEnglishMapping[match]);
+
+            // Then remove spaces between English digits to create proper numbers
+            result = result.replace(/(\d)\s+(\d)/g, '$1$2');
+
+            return result;
         }
 
-        // Apply only to fields with the 'reverse-transliteration' class
-        document.querySelectorAll('.reverse-transliteration').forEach(inputField => {
-            inputField.addEventListener('input', function() {
-                // Convert Marathi digits and remove spaces
-                this.value = convertMarathiToEnglish(this.value);
+        // Apply Marathi to English conversion to all text and number input fields
+        document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input[type="email"]').forEach(inputField => {
+            // Skip fields that explicitly don't want this conversion
+            if (inputField.classList.contains('no-transliteration')) {
+                return;
+            }
+
+            let timeoutId;
+            let lastValue = inputField.value;
+
+            // Function to apply conversion
+            const applyConversion = () => {
+                const currentValue = inputField.value;
+                if (currentValue !== lastValue) {
+                    const converted = convertMarathiToEnglish(currentValue);
+                    if (converted !== currentValue) {
+                        inputField.value = converted;
+                        lastValue = converted;
+                        // Dispatch custom event to notify other scripts of the conversion
+                        inputField.dispatchEvent(new CustomEvent('marathiConverted', { detail: { original: currentValue, converted: converted } }));
+                    } else {
+                        lastValue = currentValue;
+                    }
+                }
+            };
+
+            // Listen to multiple events
+            ['input', 'change', 'blur', 'focus', 'keyup', 'keydown'].forEach(eventType => {
+                inputField.addEventListener(eventType, () => {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(applyConversion, 50);
+                });
             });
+
+            // Also listen for composition end (for IME like Google Input Tools)
+            inputField.addEventListener('compositionend', () => {
+                setTimeout(applyConversion, 10);
+            });
+
+            // Periodic check for changes (fallback)
+            setInterval(() => {
+                applyConversion();
+            }, 500);
         });
     </script>
 

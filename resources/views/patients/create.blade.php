@@ -214,13 +214,19 @@
 
     function calculateBirthdateFromAge() {
         let age = document.getElementById('age').value;
-        if (age) {
+        if (age && !isNaN(age)) {
             let currentYear = new Date().getFullYear();
-            let birthYear = currentYear - age;
+            let birthYear = currentYear - parseInt(age);
             let birthdate = `${birthYear}-01-01`; // Default to Jan 1st
             document.getElementById('birthdate').value = birthdate;
         }
     }
+
+    // Add event listeners after page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Listen for Marathi conversion events on age field
+        document.getElementById('age').addEventListener('marathiConverted', calculateBirthdateFromAge);
+    });
 </script>
 
 

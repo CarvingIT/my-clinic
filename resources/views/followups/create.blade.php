@@ -606,6 +606,10 @@ $previousChikitsa = $latestFollowUp
 
                                         document.getElementById('amount_billed').addEventListener('input', calculateTotalDue);
                                         document.getElementById('amount_paid').addEventListener('input', calculateTotalDue);
+
+                                        // Listen for Marathi conversion events on amount fields
+                                        document.getElementById('amount_billed').addEventListener('marathiConverted', calculateTotalDue);
+                                        document.getElementById('amount_paid').addEventListener('marathiConverted', calculateTotalDue);
                                     };
                                 </script>
 
