@@ -2155,9 +2155,6 @@ $previousChikitsa = $latestFollowUp
         const handleKeydown = function(e) {
             if (e.key === 'Escape') {
                 closeReportModal();
-            } else if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                addReport();
             }
         };
 
@@ -2223,7 +2220,7 @@ $previousChikitsa = $latestFollowUp
 
             const textDiv = document.createElement('div');
             textDiv.className = 'text-sm';
-            textDiv.textContent = report.text;
+            textDiv.innerHTML = report.text.replace(/\n/g, '<br>');
 
             const timestampDiv = document.createElement('div');
             timestampDiv.className = 'text-xs text-gray-500 dark:text-gray-400 mt-1';
