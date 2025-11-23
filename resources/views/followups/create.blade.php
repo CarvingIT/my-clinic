@@ -126,12 +126,17 @@
                                 foreach ($followUps as $followUp) {
                                     $checkUpInfo = json_decode($followUp->check_up_info, true) ?? [];
                                     if (!empty($checkUpInfo['reports']) && is_array($checkUpInfo['reports'])) {
-                                        foreach ($checkUpInfo['reports'] as $report) {
+                                        foreach ($checkUpInfo['reports'] as $index => $report) {
+                                            // Skip soft deleted reports
+                                            if (isset($report['deleted_at'])) {
+                                                continue;
+                                            }
                                             $allReports[] = [
                                                 'text' => $report['text'] ?? '',
                                                 'timestamp' => $report['timestamp'] ?? '',
                                                 'followup_date' => $followUp->created_at->format('d M Y'),
-                                                'followup_id' => $followUp->id
+                                                'followup_id' => $followUp->id,
+                                                'report_index' => $index
                                             ];
                                         }
                                     }
@@ -183,15 +188,33 @@
                                                  data-text="{{ strtolower($report['text']) }}"
                                                  data-timestamp="{{ $report['timestamp'] }}"
                                                  data-followup-date="{{ $report['followup_date'] }}"
-                                                 data-original-text="{{ $report['text'] }}">
+                                                 data-original-text="{{ $report['text'] }}"
+                                                 data-followup-id="{{ $report['followup_id'] }}"
+                                                 data-report-index="{{ $report['report_index'] }}">
                                                 <div class="flex justify-between items-start">
                                                     <div class="flex-1">
                                                         <div class="text-sm text-gray-800 dark:text-gray-200 font-medium">
-                                                            {{ $report['text'] }}
+                                                            {!! nl2br(e($report['text'])) !!}
                                                         </div>
                                                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                             {{ $report['timestamp'] }} • Follow-up: {{ $report['followup_date'] }}
                                                         </div>
+                                                    </div>
+                                                    <div class="flex flex-col space-y-1 ml-2">
+                                                        <button type="button" onclick="editReport(this)"
+                                                            class="w-6 h-6 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center justify-center"
+                                                            title="Edit">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button type="button" onclick="deleteReport(this)"
+                                                            class="w-6 h-6 bg-red-500 text-white rounded hover:bg-red-600 transition flex items-center justify-center"
+                                                            title="Delete">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -223,7 +246,7 @@
                                 <input type="file" name="photos[]" id="photoFileInput" style="display:none;"
                                     accept="image/*">
                                 <input type="hidden" name="photo_types" id="photoTypesInput">
-                                <input type="hidden" name="reports" id="reportsInput" value="[]">
+                                <input type="hidden" name="reports" id="reportsInput" value="{{ old('reports', '[]') }}">
 
                                 <!-- Naadi Textarea -->
                                 <div class="mb-6">
@@ -2133,6 +2156,11 @@ $previousChikitsa = $latestFollowUp
 
     // Reports functionality
     let reports = [];
+    let editMode = false;
+    let editIndex = -1;
+    let editStaticMode = false;
+    let editStaticFollowupId = null;
+    let editStaticReportIndex = null;
 
     function openReportModal() {
         const modal = document.getElementById('reportModal');
@@ -2143,6 +2171,21 @@ $previousChikitsa = $latestFollowUp
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.getElementById('reportText').focus();
+
+        // Update modal title and button based on mode
+        const modalTitle = document.querySelector('#reportModal h2');
+        const addButton = document.querySelector('#reportModal button:last-child');
+
+        if (editMode) {
+            modalTitle.textContent = 'Edit Report';
+            addButton.textContent = 'Update';
+        } else if (editStaticMode) {
+            modalTitle.textContent = 'Edit Report';
+            addButton.textContent = 'Update';
+        } else {
+            modalTitle.textContent = 'Add New Report';
+            addButton.textContent = 'Add';
+        }
 
         // Add click outside to close
         modal.addEventListener('click', function(e) {
@@ -2174,6 +2217,13 @@ $previousChikitsa = $latestFollowUp
         modal.classList.remove('flex');
         document.getElementById('reportText').value = '';
 
+        // Reset edit mode
+        editMode = false;
+        editIndex = -1;
+        editStaticMode = false;
+        editStaticFollowupId = null;
+        editStaticReportIndex = null;
+
         // Remove keyboard event listener
         if (modal._keydownHandler) {
             document.removeEventListener('keydown', modal._keydownHandler);
@@ -2188,20 +2238,111 @@ $previousChikitsa = $latestFollowUp
             return;
         }
 
-        const now = new Date();
-        const timestamp = now.getDate().toString().padStart(2, '0') + '/' +
-                         (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
-                         now.getFullYear() + ' ' +
-                         now.getHours().toString().padStart(2, '0') + ':' +
-                         now.getMinutes().toString().padStart(2, '0') + ':' +
-                         now.getSeconds().toString().padStart(2, '0');
+        if (editStaticMode && editStaticFollowupId !== null && editStaticReportIndex !== null) {
+            // Update static report via AJAX
+            fetch(`/followups/${editStaticFollowupId}/reports/${editStaticReportIndex}`, {
+                method: 'PUT',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: reportText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+            // Update the DOM with the new report data
+            // Find the report item more robustly by looping through all items
+            let reportItem = null;
+            const allReportItems = document.querySelectorAll('.report-item');
 
-        const report = {
-            text: reportText,
-            timestamp: timestamp
-        };
+            for (const item of allReportItems) {
+                if (item.dataset.followupId == editStaticFollowupId && item.dataset.reportIndex == editStaticReportIndex) {
+                    reportItem = item;
+                    break;
+                }
+            }
 
-        reports.push(report);
+            console.log('Looking for report item with followupId:', editStaticFollowupId, '(type:', typeof editStaticFollowupId, ') reportIndex:', editStaticReportIndex, '(type:', typeof editStaticReportIndex, ')');
+            console.log('Found report item:', reportItem);                    if (reportItem) {
+                        // Find the text div more robustly
+                        const textDiv = reportItem.querySelector('div.text-sm.font-medium') ||
+                                       reportItem.querySelector('div.text-sm') ||
+                                       reportItem.querySelector('[class*="text-sm"]');
+                        console.log('Found text div:', textDiv);
+                        console.log('Report item HTML structure:', reportItem.outerHTML);
+
+                        if (textDiv) {
+                            console.log('Current innerHTML:', textDiv.innerHTML);
+                            const newHtml = reportText.replace(/\n/g, '<br>');
+                            textDiv.innerHTML = newHtml;
+                            console.log('Updated report text in DOM to:', newHtml);
+                            console.log('New innerHTML:', textDiv.innerHTML);
+
+                            // Visual feedback
+                            textDiv.style.backgroundColor = '#e0f7e0'; // Light green
+                            setTimeout(() => {
+                                textDiv.style.backgroundColor = '';
+                            }, 1000);
+                        } else {
+                            console.error('Could not find text div in report item. Available elements:');
+                            const allDivs = reportItem.querySelectorAll('div');
+                            allDivs.forEach((div, index) => {
+                                console.log(`Div ${index}:`, div.className, div.innerHTML.substring(0, 50));
+                            });
+                        }
+                        // Update data attributes - CRITICAL: search functionality relies on these
+                        reportItem.dataset.originalText = reportText;
+                        reportItem.dataset.text = reportText.toLowerCase();
+                        console.log('Updated data attributes for report');
+
+                        // Force reapply search highlighting if search is active
+                        const searchInput = document.getElementById('reportSearch');
+                        if (searchInput && searchInput.value.trim()) {
+                            // Re-trigger search to update highlighting with new text
+                            const event = new Event('input', { bubbles: true });
+                            searchInput.dispatchEvent(event);
+                        }
+                    } else {
+                        console.error('Could not find report item with followupId:', editStaticFollowupId, 'reportIndex:', editStaticReportIndex);
+                        // Log all report items for debugging
+                        const allReports = document.querySelectorAll('.report-item');
+                        console.log('All report items:', allReports);
+                        allReports.forEach((item, index) => {
+                            console.log(`Report ${index}:`, item.dataset.followupId, item.dataset.reportIndex);
+                        });
+                    }
+                    closeReportModal();
+                } else {
+                    alert('Error updating report: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating report. Please try again.');
+            });
+        } else if (editMode && editIndex >= 0) {
+            // Update existing report
+            reports[editIndex].text = reportText;
+        } else {
+            // Add new report
+            const now = new Date();
+            const timestamp = now.getDate().toString().padStart(2, '0') + '/' +
+                             (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
+                             now.getFullYear() + ' ' +
+                             now.getHours().toString().padStart(2, '0') + ':' +
+                             now.getMinutes().toString().padStart(2, '0') + ':' +
+                             now.getSeconds().toString().padStart(2, '0');
+
+            const report = {
+                text: reportText,
+                timestamp: timestamp
+            };
+
+            reports.push(report);
+        }
+
         updateReportsDisplay();
         updateReportsInput();
         closeReportModal();
@@ -2209,11 +2350,19 @@ $previousChikitsa = $latestFollowUp
 
     function updateReportsDisplay() {
         const container = document.getElementById('reportsList');
-        container.innerHTML = '';
 
+        // Remove existing dynamic reports
+        const existingDynamic = container.querySelectorAll('.dynamic-report');
+        existingDynamic.forEach(el => el.remove());
+
+        // Find the first static report to insert before
+        const firstStaticReport = container.querySelector('.report-item:not(.dynamic-report)');
+        const insertBeforeElement = firstStaticReport || null;
+
+        // Add new dynamic reports at the top
         reports.forEach((report, index) => {
             const reportDiv = document.createElement('div');
-            reportDiv.className = 'flex justify-between items-start p-2 bg-gray-50 dark:bg-gray-800 rounded mb-2';
+            reportDiv.className = 'dynamic-report flex justify-between items-start p-2 bg-gray-50 dark:bg-gray-800 rounded mb-2';
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'flex-1';
@@ -2226,17 +2375,45 @@ $previousChikitsa = $latestFollowUp
             timestampDiv.className = 'text-xs text-gray-500 dark:text-gray-400 mt-1';
             timestampDiv.textContent = report.timestamp;
 
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'flex flex-col space-y-1 ml-2';
+
+            const editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'text-blue-500 hover:text-blue-700 p-1 rounded';
+            editBtn.title = 'Edit';
+            editBtn.innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+            `;
+            editBtn.onclick = () => editDynamicReport(index);
+
             const deleteBtn = document.createElement('button');
             deleteBtn.type = 'button';
-            deleteBtn.className = 'text-red-500 hover:text-red-700 ml-2';
-            deleteBtn.innerHTML = '×';
+            deleteBtn.className = 'text-red-500 hover:text-red-700 p-1 rounded';
+            deleteBtn.title = 'Delete';
+            deleteBtn.innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            `;
             deleteBtn.onclick = () => removeReport(index);
+
+            buttonsDiv.appendChild(editBtn);
+            buttonsDiv.appendChild(deleteBtn);
 
             contentDiv.appendChild(textDiv);
             contentDiv.appendChild(timestampDiv);
             reportDiv.appendChild(contentDiv);
-            reportDiv.appendChild(deleteBtn);
-            container.appendChild(reportDiv);
+            reportDiv.appendChild(buttonsDiv);
+
+            // Insert at the top, before the first static report
+            if (insertBeforeElement) {
+                container.insertBefore(reportDiv, insertBeforeElement);
+            } else {
+                container.appendChild(reportDiv);
+            }
         });
     }
 
@@ -2255,7 +2432,21 @@ $previousChikitsa = $latestFollowUp
 
     // Initialize reports if editing existing follow-up
     document.addEventListener('DOMContentLoaded', function() {
-        // For create view, reports start empty
+        // Load reports from hidden input (for validation errors)
+        const reportsInput = document.getElementById('reportsInput');
+        if (reportsInput && reportsInput.value) {
+            try {
+                const savedReports = JSON.parse(reportsInput.value);
+                if (Array.isArray(savedReports)) {
+                    reports = savedReports;
+                }
+            } catch (e) {
+                console.error('Error parsing saved reports:', e);
+            }
+        }
+
+        // Update display and input
+        updateReportsDisplay();
         updateReportsInput();
 
         // Add search functionality
@@ -2290,6 +2481,71 @@ $previousChikitsa = $latestFollowUp
             report.style.display = matchesSearch ? 'block' : 'none';
         });
     }
+
+    // Edit report function
+    function editReport(button) {
+        const reportItem = button.closest('.report-item');
+        const reportText = reportItem.dataset.originalText;
+        const followupId = reportItem.dataset.followupId;
+        const reportIndex = reportItem.dataset.reportIndex;
+
+        // Set static report editing mode
+        editStaticMode = true;
+        editStaticFollowupId = followupId;
+        editStaticReportIndex = reportIndex;
+        editMode = false;
+        editIndex = -1;
+
+        // Open the report modal and pre-fill with the text
+        openReportModal();
+        document.getElementById('reportText').value = reportText;
+    }
+
+    // Edit dynamic report function
+    function editDynamicReport(index) {
+        const report = reports[index];
+        if (!report) return;
+
+        editMode = true;
+        editIndex = index;
+
+        // Open the report modal and pre-fill with the text
+        openReportModal();
+        document.getElementById('reportText').value = report.text;
+    }
+
+    // Delete report function
+    function deleteReport(button) {
+        if (confirm('Are you sure you want to delete this report?')) {
+            const reportItem = button.closest('.report-item');
+            const followupId = reportItem.dataset.followupId;
+            const reportIndex = reportItem.dataset.reportIndex;
+
+            // Make AJAX call to soft delete the report
+            fetch(`/followups/${followupId}/reports/${reportIndex}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the report from DOM
+                    reportItem.remove();
+                    console.log('Successfully deleted report from DOM');
+                } else {
+                    alert('Error deleting report: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting report. Please try again.');
+            });
+        }
+    }
 </script>
 
 <script>
@@ -2299,11 +2555,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const searchTerm = this.value.toLowerCase().trim();
         const reportItems = document.querySelectorAll('.report-item');
         reportItems.forEach(item => {
-            const textDiv = item.querySelector('.text-sm.font-medium');
-            const dateDiv = item.querySelector('.text-xs.text-gray-500, .text-xs.text-gray-400');
+            const textDiv = item.querySelector('div.text-sm.font-medium') ||
+                           item.querySelector('div.text-sm') ||
+                           item.querySelector('[class*="text-sm"]');
+            const dateDiv = item.querySelector('.text-xs.text-gray-500, .text-xs.text-gray-400') ||
+                           item.querySelector('.text-xs');
 
             // Reset both text and date content
-            textDiv.innerHTML = item.dataset.originalText;
+            if (textDiv) {
+                textDiv.innerHTML = item.dataset.originalText.replace(/\n/g, '<br>');
+            } else {
+                console.warn('Could not find text div for report item in search');
+            }
             if (dateDiv) {
                 dateDiv.innerHTML = item.dataset.timestamp + ' • Follow-up: ' + item.dataset.followupDate;
             }
@@ -2323,7 +2586,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Highlight in report text
                 const regex = new RegExp(`(${this.value.trim()})`, 'gi');
-                textDiv.innerHTML = item.dataset.originalText.replace(regex, '<mark>$1</mark>');
+                textDiv.innerHTML = item.dataset.originalText.replace(/\n/g, '<br>').replace(regex, '<mark>$1</mark>');
 
                 // Highlight in date section if date matches
                 if (followupDate.toLowerCase().includes(searchTerm) && dateDiv) {

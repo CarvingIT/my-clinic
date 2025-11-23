@@ -471,6 +471,66 @@ class FollowUpController extends Controller
         return redirect()->route('patients.show', $patientId)->with('success', 'Follow Up Deleted Successfully');
     }
 
+    public function deleteReport(Request $request, FollowUp $followup, $reportIndex)
+    {
+        // Get the current check_up_info
+        $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
+
+        // Check if reports exist
+        if (!isset($checkUpInfo['reports']) || !is_array($checkUpInfo['reports'])) {
+            return response()->json(['success' => false, 'message' => 'No reports found'], 404);
+        }
+
+        // Check if the report index exists
+        if (!isset($checkUpInfo['reports'][$reportIndex])) {
+            return response()->json(['success' => false, 'message' => 'Report not found'], 404);
+        }
+
+        // Soft delete the report by adding deleted_at timestamp
+        $checkUpInfo['reports'][$reportIndex]['deleted_at'] = now()->toISOString();
+
+        // Save the updated check_up_info
+        $followup->update([
+            'check_up_info' => json_encode($checkUpInfo)
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Report deleted successfully']);
+    }
+
+    public function updateReport(Request $request, FollowUp $followup, $reportIndex)
+    {
+        $request->validate([
+            'text' => 'required|string'
+        ]);
+
+        // Get the current check_up_info
+        $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
+
+        // Check if reports exist
+        if (!isset($checkUpInfo['reports']) || !is_array($checkUpInfo['reports'])) {
+            return response()->json(['success' => false, 'message' => 'No reports found'], 404);
+        }
+
+        // Check if the report index exists
+        if (!isset($checkUpInfo['reports'][$reportIndex])) {
+            return response()->json(['success' => false, 'message' => 'Report not found'], 404);
+        }
+
+        // Update the report text
+        $checkUpInfo['reports'][$reportIndex]['text'] = $request->text;
+
+        // Save the updated check_up_info
+        $followup->update([
+            'check_up_info' => json_encode($checkUpInfo)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Report updated successfully',
+            'report' => $checkUpInfo['reports'][$reportIndex]
+        ]);
+    }
+
     public function exportFollowUps(Request $request)
     {
         // Validate the time_period input
