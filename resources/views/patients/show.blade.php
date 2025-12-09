@@ -745,9 +745,9 @@
                                                                 @endphp
                                                                 <div class="mt-2 flex gap-2">
                                                                     @foreach($nadiDots as $box)
-                                                                        <div class="grid grid-cols-3 gap-0 bg-gray-300 dark:bg-gray-600 px-2 py-1 rounded">
+                                                                        <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-1 rounded">
                                                                             @for($i = 0; $i < 9; $i++)
-                                                                                <div class="w-5 h-5 flex items-center justify-center bg-gray-100 dark:bg-gray-800 {{ $i % 3 != 2 ? 'border-r-2 border-gray-600 dark:border-gray-400' : '' }} {{ $i < 6 ? 'border-b-2 border-gray-600 dark:border-gray-400' : '' }} {{ ($box[$i] ?? false) ? 'text-red-500 text-xl' : '' }}">
+                                                                                <div class="w-5 h-5 flex items-center justify-center bg-white dark:bg-gray-800 {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-500' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-500' : '' }} {{ ($box[$i] ?? false) ? 'text-red-500 text-xl' : '' }}">
                                                                                     {{ ($box[$i] ?? false) ? '•' : '' }}
                                                                                 </div>
                                                                             @endfor
