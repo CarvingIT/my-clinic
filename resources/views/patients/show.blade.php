@@ -743,7 +743,7 @@
                                                                 @php
                                                                     $nadiDots = $checkUpInfo['nadi_dots'] ?? [[], [], []];
                                                                 @endphp
-                                                                <div class="mt-2 flex gap-2">
+                                                                <div class="mt-2 flex gap-2 justify-end">
                                                                     @foreach($nadiDots as $box)
                                                                         <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-1 rounded">
                                                                             @for($i = 0; $i < 9; $i++)
