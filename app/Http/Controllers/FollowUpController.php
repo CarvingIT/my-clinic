@@ -120,6 +120,9 @@ class FollowUpController extends Controller
         // Explicitly handle reports field
         $checkUpInfo['reports'] = json_decode($request->input('reports', '[]'), true) ?? [];
 
+        // Explicitly handle nadi_dots field
+        $checkUpInfo['nadi_dots'] = json_decode($request->input('nadi_dots', '[[], [], []]'), true) ?? [[], [], []];
+
         // Adding user and branch info to $checkUpInfo
         $checkUpInfo['user_id'] = Auth::id();
         $checkUpInfo['user_name'] = Auth::user()->name;
@@ -436,6 +439,9 @@ class FollowUpController extends Controller
 
         // Explicitly handle reports field
         $newCheckUpInfo['reports'] = json_decode($request->input('reports', '[]'), true) ?? [];
+
+        // Explicitly handle nadi_dots field
+        $newCheckUpInfo['nadi_dots'] = json_decode($request->input('nadi_dots', '[[], [], []]'), true) ?? [[], [], []];
 
         // Preserve existing username and branch unless updated
         if (!isset($newCheckUpInfo['user_name']) && isset($existingCheckUpInfo['user_name'])) {

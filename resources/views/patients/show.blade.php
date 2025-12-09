@@ -739,6 +739,22 @@
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('नाडी') }}:</span> --}}
                                                                 {!! $checkUpInfo['nadi'] !!}
                                                             </p>
+                                                            @if (isset($checkUpInfo['nadi_dots']))
+                                                                @php
+                                                                    $nadiDots = $checkUpInfo['nadi_dots'] ?? [[], [], []];
+                                                                @endphp
+                                                                <div class="mt-2 flex gap-2">
+                                                                    @foreach($nadiDots as $box)
+                                                                        <div class="grid grid-cols-3 gap-0 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-500 px-1 py-1 rounded shadow-sm">
+                                                                            @for($i = 0; $i < 9; $i++)
+                                                                                <div class="w-4 h-4 flex items-center justify-center bg-white dark:bg-gray-800 {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-600' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-600' : '' }} {{ ($box[$i] ?? false) ? 'text-red-500 text-lg' : '' }}">
+                                                                                    {{ ($box[$i] ?? false) ? '•' : '' }}
+                                                                                </div>
+                                                                            @endfor
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            @endif
                                                         @endif
 
 @if (isset($followUp->diagnosis) && $followUp->diagnosis !== null && $followUp->diagnosis !== '')
