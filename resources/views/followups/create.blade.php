@@ -264,7 +264,8 @@
                                         class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
 
                                     <!-- Nadi Dots Grid -->
-                                    <div id="nadiGrid" class="mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded shadow-lg flex gap-2 justify-end">
+                                    <div id="nadiGrid" class="mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded shadow-lg flex gap-2 justify-center items-center">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400 mr-4">Nadi Points:</span>
                                         <!-- Box 1 -->
                                         <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-1 rounded">
                                             @for($i = 0; $i < 9; $i++)
