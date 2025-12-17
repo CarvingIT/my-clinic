@@ -94,6 +94,9 @@
             // Then remove spaces between English digits to create proper numbers
             result = result.replace(/(\d)\s+(\d)/g, '$1$2');
 
+            // Remove spaces before decimal points
+            result = result.replace(/\s+\./g, '.');
+
             return result;
         }
 

@@ -47,10 +47,9 @@
                         <div class="mt-2">
                             <x-input-label for="age" :value="__('Age')" />
                             <x-text-input id="age"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="number" name="age" placeholder="Enter Age (If no birthdate)"
-                                value="{{ old('age', isset($patient->birthdate) ? \Carbon\Carbon::parse($patient->birthdate)->age : '') }}"
-                                oninput="calculateBirthdateFromAge()" />
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
+                                type="text" name="age" placeholder="Enter Age (If no birthdate)"
+                                value="{{ old('age', isset($patient->birthdate) ? \Carbon\Carbon::parse($patient->birthdate)->age : '') }}" />
                         </div>
 
                         <!-- Mobile Phone -->
@@ -126,8 +125,8 @@
                         <div>
                             <x-input-label for="height" :value="__('messages.Height')" />
                             <x-text-input id="height"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="number" name="height" value="{{ old('height', $patient->height) }}" />
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
+                                type="text" step="0.01" name="height" value="{{ old('height', $patient->height) }}" />
                             <x-input-error :messages="$errors->get('height')" class="mt-1" />
                         </div>
 
@@ -135,8 +134,8 @@
                         <div>
                             <x-input-label for="weight" :value="__('messages.Weight')" />
                             <x-text-input id="weight"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="number" name="weight" value="{{ old('weight', $patient->weight) }}" />
+                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
+                                type="text" step="0.01" name="weight" value="{{ old('weight', $patient->weight) }}" />
                             <x-input-error :messages="$errors->get('weight')" class="mt-1" />
                         </div>
 
@@ -232,5 +231,8 @@
     // Run this when the page loads to ensure proper values are set
     document.addEventListener('DOMContentLoaded', function() {
         calculateAgeFromBirthdate();
+
+        // Calculate birthdate from age after Marathi conversion
+        document.getElementById('age').addEventListener('marathiConverted', calculateBirthdateFromAge);
     });
 </script>
