@@ -143,7 +143,7 @@
                             </a>
 
                             <a href="{{ route('patients.export-pdf', $patient) }}" target="_blank"
-                                class="bg-sky-400		 hover:bg-sky-500		 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
+                                class="bg-sky-400 hover:bg-sky-500 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                 {{ __('messages.Export to PDF') }}
                             </a>
 
@@ -1028,10 +1028,11 @@
             popup.classList.add('hidden');
         });
 
-        popup.addEventListener('click', function(e) {
-            if (e.target === popup) {
-                popup.classList.add('hidden');
-            }
-        });
     });
 </script>
+
+<style>
+    @media print, (max-width: 0) {
+        .pdf-content {
+            box-shadow: none !important;
+            margin: 0 !important;
