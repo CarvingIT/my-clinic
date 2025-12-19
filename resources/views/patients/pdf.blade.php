@@ -7,7 +7,7 @@
     <title>Patient Details - {{ $patient->name }}</title>
     <style>
         body {
-            font-family: 'Mangal', sans-serif;
+            font-family: 'Noto Sans Devanagari', 'DejaVu Sans', sans-serif;
             color: #333;
             line-height: 1.6;
             margin: 20px;
