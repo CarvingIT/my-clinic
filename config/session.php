@@ -32,9 +32,9 @@ return [
     |
     */
 
-    'lifetime' => env('SESSION_LIFETIME', 120),
+    'lifetime' => env('SESSION_LIFETIME', 120), // Back to 2 hours for normal sessions
 
-    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
+    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -114,7 +114,7 @@ return [
     |
     */
 
-    'lottery' => [2, 100],
+    'lottery' => [2, 100], // Back to normal cleanup chance
 
     /*
     |--------------------------------------------------------------------------

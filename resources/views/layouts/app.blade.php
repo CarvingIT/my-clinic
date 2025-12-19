@@ -205,6 +205,83 @@
     <!-- Dashboard Enhancements -->
     <script src="{{ asset('resources/js/dashboard-enhancements.js') }}"></script>
 
+    <!-- Session Expiry Warning Modal -->
+    <div id="session-expiry-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                    <svg class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                </div>
+                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Session Expiring Soon</h3>
+                <div class="mt-2 px-7 py-3">
+                    <p class="text-sm text-gray-500">
+                        Your session will expire in <span id="countdown">10</span> minutes. Would you like to extend it?
+                    </p>
+                </div>
+                <div class="flex items-center px-4 py-3">
+                    <button id="extend-session-btn" class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                        Extend Session
+                    </button>
+                    <button id="logout-btn" class="ml-3 px-4 py-2 bg-gray-300 text-gray-900 text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Logout Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+        @csrf
+    </form>
+
+    <script>
+        // Session expiry warning script
+        let sessionExpiryModal = document.getElementById('session-expiry-modal');
+        let countdownElement = document.getElementById('countdown');
+        let extendBtn = document.getElementById('extend-session-btn');
+        let logoutBtn = document.getElementById('logout-btn');
+        let countdownInterval;
+        let timeLeft = 10 * 60; // 10 minutes in seconds
+
+        function showSessionExpiryModal() {
+            sessionExpiryModal.classList.remove('hidden');
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                countdownElement.textContent = Math.ceil(timeLeft / 60);
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    window.location.href = '/logout';
+                }
+            }, 1000);
+        }
+
+        extendBtn.addEventListener('click', function() {
+            axios.post('/extend-session', {
+                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            }).then(response => {
+                if (response.data.status === 'extended') {
+                    sessionExpiryModal.classList.add('hidden');
+                    clearInterval(countdownInterval);
+                    // Reset for next warning
+                    timeLeft = 10 * 60;
+                    // Reset the timeout for next warning
+                    setTimeout(showSessionExpiryModal, (100 * 60 * 1000)); // Warn again in 100 minutes
+                }
+            }).catch(error => {
+                console.error('Error extending session:', error);
+            });
+        });
+
+        logoutBtn.addEventListener('click', function() {
+            document.getElementById('logout-form').submit();
+        });
+
+        // Show modal 10 minutes before session expires (session lifetime is 120 minutes)
+        setTimeout(showSessionExpiryModal, (110 * 60 * 1000));
+    </script>
+
 </body>
 
 </html>

@@ -39,6 +39,12 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Session extension route
+Route::post('/extend-session', function (Illuminate\Http\Request $request) {
+    $request->session()->regenerate();
+    return response()->json(['status' => 'extended']);
+})->middleware('auth')->name('extend.session');
+
 // locale
 
 Route::get('/set-locale/{locale}', function ($locale) {

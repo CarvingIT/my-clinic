@@ -39,6 +39,8 @@ return [
         'web' => [
             'driver' => 'session',
             'provider' => 'users',
+            'remember' => true,
+            'expire' => 525600, // 1 year in minutes (60*24*365)
         ],
     ],
 
