@@ -790,12 +790,12 @@
                                             <td class="px-2 py-4 align-top text-gray-600 dark:text-gray-300 max-w-xs break-words whitespace-normal"
                                                 style=" word-break: break-word; overflow-wrap: break-word;">
 
-                                                <p>
+                                                <div>
                                                     {{-- <span class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span> --}}
                                                     @if (isset($checkUpInfo['chikitsa']))
                                                         {!! $checkUpInfo['chikitsa'] !!}
                                                     @endif
-                                                </p>
+                                                </div>
 
                                                 <p>
                                                     @if (isset($checkUpInfo['days']) && $checkUpInfo['days'] !== null && $checkUpInfo['days'] !== '')

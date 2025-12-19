@@ -1361,7 +1361,7 @@ $previousChikitsa = $latestFollowUp
 
         let insertText = '';
         if (needsSpaceBefore) insertText += ' ';
-        insertText += text.replace(/,/g, '');
+        insertText += text.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().replace(/,/g, '').replace(/\s+/g, ' ').trim();
         if (needsSpaceAfter) insertText += ' ';
 
         editor.selection.setContent(insertText);
