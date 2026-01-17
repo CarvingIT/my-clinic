@@ -54,6 +54,17 @@ class PresetSeeder extends Seeder
                     'validation' => 'string'
                 ])
             ],
+
+            [
+                'name' => 'vishesh',
+                'category' => 'checkup-info',
+                'display_order' => 3,
+                'extra_attributes' => json_encode([
+                    'type' => 'textarea',
+                    'required' => false,
+                    'validation' => 'string'
+                ])
+            ],
         ];
 
         foreach ($fields as $field) {
@@ -74,6 +85,7 @@ class PresetSeeder extends Seeder
         $lakshaneField = Field::where('name', 'lakshane')->first();
         $chikitsaField = Field::where('name', 'chikitsa')->first();
         $dravyaField = Field::where('name', 'dravya')->first();
+        $visheshField = Field::where('name', 'vishesh')->first();
 
         // Nadi Presets
         $nadiPresets = [

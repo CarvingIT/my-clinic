@@ -37,7 +37,9 @@ return [
         'enabled' => true,
         'binary'  => env('WKHTML_PDF_BINARY', '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf"'),
         'timeout' => false,
-        'options' => [],
+        'options' => [
+            'encoding' => 'UTF-8',
+        ],
         'env'     => [],
     ],
 

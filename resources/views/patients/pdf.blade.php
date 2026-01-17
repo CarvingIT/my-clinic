@@ -7,7 +7,7 @@
     <title>Patient Details - {{ $patient->name }}</title>
     <style>
         body {
-            font-family: 'Mangal', sans-serif;
+            font-family: 'Noto Sans Devanagari', 'DejaVu Sans', sans-serif;
             color: #333;
             line-height: 1.6;
             margin: 20px;
@@ -197,9 +197,32 @@
                                     @endif
                                 @endforeach
 
-                                @if (isset($checkUpInfo['nadi']))
+                                {{-- @if (isset($checkUpInfo['nadi']))
                                     <p><strong>{{ __('नाडी') }}:</strong> {!! $checkUpInfo['nadi'] !!}</p>
-                                @endif
+                                    @if (isset($checkUpInfo['nadi_dots']))
+                                        @php
+                                            $nadiDots = $checkUpInfo['nadi_dots'] ?? [[], [], []];
+                                        @endphp
+                                        <div style="margin-top: 8px; display: flex; gap: 1px;">
+                                            @foreach($nadiDots as $box)
+                                                <table style="border-collapse: collapse; background-color: #f3f4f6; border: 1px solid #f3f4f6; border-radius: 4px;">
+                                                    <tbody>
+                                                        @for($row = 0; $row < 3; $row++)
+                                                            <tr>
+                                                                @for($col = 0; $col < 3; $col++)
+                                                                    @php $index = $row * 3 + $col; @endphp
+                                                                    <td style="width: 3px; height: 3px; background-color: #ffffff; border-right: {{ $col < 2 ? '1px solid #d1d5db' : 'none' }}; border-bottom: {{ $row < 2 ? '1px solid #d1d5db' : 'none' }}; text-align: center; vertical-align: middle; {{ ($box[$index] ?? false) ? 'color: #ef4444; font-size: 6px;' : '' }}">
+                                                                        {{ ($box[$index] ?? false) ? '■' : '' }}
+                                                                    </td>
+                                                                @endfor
+                                                            </tr>
+                                                        @endfor
+                                                    </tbody>
+                                                </table>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                @endif --}}
 
                                 @if (isset($followUp->diagnosis))
                                     <p><strong>{{ __('लक्षणे') }}:</strong> {!! $followUp->diagnosis !!}</p>

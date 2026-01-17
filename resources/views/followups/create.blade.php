@@ -126,12 +126,17 @@
                                 foreach ($followUps as $followUp) {
                                     $checkUpInfo = json_decode($followUp->check_up_info, true) ?? [];
                                     if (!empty($checkUpInfo['reports']) && is_array($checkUpInfo['reports'])) {
-                                        foreach ($checkUpInfo['reports'] as $report) {
+                                        foreach ($checkUpInfo['reports'] as $index => $report) {
+                                            // Skip soft deleted reports
+                                            if (isset($report['deleted_at'])) {
+                                                continue;
+                                            }
                                             $allReports[] = [
                                                 'text' => $report['text'] ?? '',
                                                 'timestamp' => $report['timestamp'] ?? '',
                                                 'followup_date' => $followUp->created_at->format('d M Y'),
-                                                'followup_id' => $followUp->id
+                                                'followup_id' => $followUp->id,
+                                                'report_index' => $index
                                             ];
                                         }
                                     }
@@ -183,15 +188,33 @@
                                                  data-text="{{ strtolower($report['text']) }}"
                                                  data-timestamp="{{ $report['timestamp'] }}"
                                                  data-followup-date="{{ $report['followup_date'] }}"
-                                                 data-original-text="{{ $report['text'] }}">
+                                                 data-original-text="{{ $report['text'] }}"
+                                                 data-followup-id="{{ $report['followup_id'] }}"
+                                                 data-report-index="{{ $report['report_index'] }}">
                                                 <div class="flex justify-between items-start">
                                                     <div class="flex-1">
                                                         <div class="text-sm text-gray-800 dark:text-gray-200 font-medium">
-                                                            {{ $report['text'] }}
+                                                            {!! nl2br(e($report['text'])) !!}
                                                         </div>
                                                         <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                                             {{ $report['timestamp'] }} • Follow-up: {{ $report['followup_date'] }}
                                                         </div>
+                                                    </div>
+                                                    <div class="flex flex-col space-y-1 ml-2">
+                                                        <button type="button" onclick="editReport(this)"
+                                                            class="w-6 h-6 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center justify-center"
+                                                            title="Edit">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button type="button" onclick="deleteReport(this)"
+                                                            class="w-6 h-6 bg-red-500 text-white rounded hover:bg-red-600 transition flex items-center justify-center"
+                                                            title="Delete">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -223,7 +246,7 @@
                                 <input type="file" name="photos[]" id="photoFileInput" style="display:none;"
                                     accept="image/*">
                                 <input type="hidden" name="photo_types" id="photoTypesInput">
-                                <input type="hidden" name="reports" id="reportsInput" value="[]">
+                                <input type="hidden" name="reports" id="reportsInput" value="{{ old('reports', '[]') }}">
 
                                 <!-- Naadi Textarea -->
                                 <div class="mb-6">
@@ -240,12 +263,39 @@
                                     <textarea id="nadiInput" name="nadi" rows="4"
                                         class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400"></textarea>
 
+                                    <!-- Nadi Dots Grid -->
+                                    <div id="nadiGrid" class="mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded shadow-lg flex gap-1 justify-center items-center">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400 mr-4">Nadi Points:</span>
+                                        <!-- Box 1 -->
+                                        <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-0.5 rounded">
+                                            @for($i = 0; $i < 9; $i++)
+                                                <div class="w-4 h-4 cursor-pointer flex items-center justify-center bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-500' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-500' : '' }}" onclick="toggleDot(this, 0, {{ $i }})"></div>
+                                            @endfor
+                                        </div>
+                                        <!-- Box 2 -->
+                                        <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-0.5 rounded">
+                                            @for($i = 0; $i < 9; $i++)
+                                                <div class="w-4 h-4 cursor-pointer flex items-center justify-center bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-500' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-500' : '' }}" onclick="toggleDot(this, 1, {{ $i }})"></div>
+                                            @endfor
+                                        </div>
+                                        <!-- Box 3 -->
+                                        <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-0.5 rounded">
+                                            @for($i = 0; $i < 9; $i++)
+                                                <div class="w-4 h-4 cursor-pointer flex items-center justify-center bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-500' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-500' : '' }}" onclick="toggleDot(this, 2, {{ $i }})"></div>
+                                            @endfor
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden input for dots data -->
+                                    <input type="hidden" name="nadi_dots" id="nadiDotsInput" value="{{ old('nadi_dots', json_encode([[], [], []])) }}">
+
                                     <!-- Presets Container -->
                                     <div id="nadiPresets"
                                         class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-2 mt-4">
                                     </div>
 
                                     <x-input-error :messages="$errors->get('nadi')" class="mt-2" />
+                                    <x-input-error :messages="$errors->get('nadi_dots')" class="mt-2" />
                                 </div>
 
                                 <!-- Lakshane Textarea -->
@@ -398,12 +448,21 @@ $previousChikitsa = $latestFollowUp
                                     <!-- Vishesh Textarea -->
                                     <div class="mt-4 mb-4">
                                         <div class="flex items-center justify-between space-x-2">
-                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-1">
+                                            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">
                                                 {{ __('messages.Vishesh') }}
                                             </h2>
+                                            <button type="button" onclick="openVisheshModal()"
+                                                class="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600 transition text-lg">
+                                                +
+                                            </button>
                                         </div>
-                                        <textarea name="vishesh"
+                                        <textarea id="vishesh" name="vishesh"
                                             class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ $patient->vishesh }}</textarea>
+
+                                        <!-- Presets Container -->
+                                        <div id="visheshPresets"
+                                            class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-2 mt-4">
+                                        </div>
                                     </div>
 
                                     {{-- Capture button --}}
@@ -606,6 +665,10 @@ $previousChikitsa = $latestFollowUp
 
                                         document.getElementById('amount_billed').addEventListener('input', calculateTotalDue);
                                         document.getElementById('amount_paid').addEventListener('input', calculateTotalDue);
+
+                                        // Listen for Marathi conversion events on amount fields
+                                        document.getElementById('amount_billed').addEventListener('marathiConverted', calculateTotalDue);
+                                        document.getElementById('amount_paid').addEventListener('marathiConverted', calculateTotalDue);
                                     };
                                 </script>
 
@@ -764,6 +827,59 @@ $previousChikitsa = $latestFollowUp
                                         </div>
                                         <div class="mt-4 flex justify-end">
                                             <button type="button" onclick="closeChikitsaModal()"
+                                                class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Vishesh Modal -->
+                                <div id="visheshModal"
+                                    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+                                    <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
+                                        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">विशेष
+                                            प्रीसेट व्यवस्थापन</h2>
+                                        <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
+                                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">नवीन
+                                                विशेष जोडा</h3>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-sm text-gray-700 dark:text-gray-300">बटण
+                                                        टेक्स्ट</label>
+                                                    <input type="text" id="visheshButtonText"
+                                                        placeholder="उदा. रक्तदाब"
+                                                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
+                                                </div>
+                                                <div>
+                                                    <label
+                                                        class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट
+                                                        टेक्स्ट</label>
+                                                    <input type="text" id="visheshPresetText"
+                                                        placeholder="उदा. रक्तदाब - "
+                                                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
+                                                </div>
+                                            </div>
+                                            <div class="mt-4 flex justify-end space-x-2">
+                                                <button type="button" onclick="clearVisheshForm()"
+                                                    class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
+                                                <button type="button" onclick="saveVisheshPreset()"
+                                                    class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
+                                            </div>
+                                        </div>
+                                        <div class="max-h-96 overflow-y-auto">
+                                            <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+                                                <thead>
+                                                    <tr class="bg-gray-200 dark:bg-gray-700">
+                                                        <th class="p-2">बटण टेक्स्ट</th>
+                                                        <th class="p-2">प्रीसेट टेक्स्ट</th>
+                                                        <th class="p-2">स्रोत</th>
+                                                        <th class="p-2">कृती</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="visheshPresetList"></tbody>
+                                            </table>
+                                        </div>
+                                        <div class="mt-4 flex justify-end">
+                                            <button type="button" onclick="closeVisheshModal()"
                                                 class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
                                         </div>
                                     </div>
@@ -1112,6 +1228,43 @@ $previousChikitsa = $latestFollowUp
     }
 
     document.addEventListener('DOMContentLoaded', loadNadiPresets);
+
+    // Nadi Dots Grid Functionality
+    let nadiDots = [[], [], []];
+
+    function toggleDot(element, boxIndex, subIndex) {
+        // Ensure arrays are initialized
+        if (!nadiDots[boxIndex]) nadiDots[boxIndex] = [];
+        nadiDots[boxIndex][subIndex] = !nadiDots[boxIndex][subIndex];
+
+        // Toggle visual dot
+        element.innerHTML = nadiDots[boxIndex][subIndex] ? '•' : '';
+        element.classList.toggle('text-red-500', nadiDots[boxIndex][subIndex]);
+        element.classList.toggle('text-xl', nadiDots[boxIndex][subIndex]);
+
+        // Update hidden input
+        document.getElementById('nadiDotsInput').value = JSON.stringify(nadiDots);
+    }
+
+    // Initialize dots on page load (for editing existing data)
+    document.addEventListener('DOMContentLoaded', function() {
+        const dotsInput = document.getElementById('nadiDotsInput');
+        if (dotsInput && dotsInput.value) {
+            nadiDots = JSON.parse(dotsInput.value);
+            // Populate grid visually
+            const boxes = document.querySelectorAll('#nadiGrid > div');
+            boxes.forEach((box, boxIdx) => {
+                const subs = box.querySelectorAll('div');
+                subs.forEach((sub, subIdx) => {
+                    if (nadiDots[boxIdx] && nadiDots[boxIdx][subIdx]) {
+                        sub.innerHTML = '•';
+                        sub.classList.add('text-red-500');
+                        sub.classList.add('text-xl');
+                    }
+                });
+            });
+        }
+    });
 </script>
 
 
@@ -1208,7 +1361,7 @@ $previousChikitsa = $latestFollowUp
 
         let insertText = '';
         if (needsSpaceBefore) insertText += ' ';
-        insertText += text.replace(/,/g, '');
+        insertText += text.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().replace(/,/g, '').replace(/\s+/g, ' ').trim();
         if (needsSpaceAfter) insertText += ' ';
 
         editor.selection.setContent(insertText);
@@ -1965,6 +2118,240 @@ $previousChikitsa = $latestFollowUp
 
 
 <script>
+    const visheshFieldId = {{ \App\Models\Field::where('name', 'vishesh')->first()->id ?? 0 }};
+    const visheshStorageKey = 'customVisheshPresets';
+
+    async function loadVisheshPresets() {
+        const container = document.getElementById('visheshPresets');
+        if (!container) {
+            console.error('visheshPresets container not found in DOM.');
+            return;
+        }
+        container.innerHTML = '';
+
+        if (!visheshFieldId) {
+            alert('Vishesh field ID is invalid (0). Check database seeding for "vishesh" in fields table.');
+            return;
+        }
+
+        try {
+            const response = await axios.get(`/presets?field_id=${visheshFieldId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createVisheshPresetButton(preset.button_text, preset.preset_text, preset.id, true);
+            });
+        } catch (error) {
+            console.error('Error loading vishesh presets:', error.response || error);
+            alert(
+                `Failed to load vishesh presets: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+            );
+        }
+
+        const localPresets = JSON.parse(localStorage.getItem(visheshStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createVisheshPresetButton(preset, preset, null, false);
+        });
+    }
+
+    function createVisheshPresetButton(buttonText, presetText, id, isDatabase) {
+        const presetDiv = document.createElement('div');
+        presetDiv.className = 'relative';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className =
+            'vishesh-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition w-full text-centre pr-6';
+        button.innerText = buttonText;
+        button.onclick = () => appendVishesh(presetText);
+
+        presetDiv.appendChild(button);
+        document.getElementById('visheshPresets').appendChild(presetDiv);
+    }
+
+    async function loadVisheshPresetList() {
+        const list = document.getElementById('visheshPresetList');
+        if (!list) {
+            console.error('visheshPresetList container not found in DOM.');
+            return;
+        }
+        list.innerHTML = '';
+
+        try {
+            const response = await axios.get(`/presets?field_id=${visheshFieldId}`, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createVisheshPresetRow(preset, true);
+            });
+        } catch (error) {
+            console.error('Error loading vishesh preset list:', error.response || error);
+            alert(
+                `Failed to load vishesh preset list: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+            );
+        }
+
+        const localPresets = JSON.parse(localStorage.getItem(visheshStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createVisheshPresetRow({
+                button_text: preset,
+                preset_text: preset,
+                id: null
+            }, false);
+        });
+    }
+
+    function createVisheshPresetRow(preset, isDatabase) {
+        const row = document.createElement('tr');
+        row.className = 'border-b dark:border-gray-600';
+
+        row.innerHTML = `
+        <td class="p-2">${preset.button_text}</td>
+        <td class="p-2">${preset.preset_text || preset.button_text}</td>
+        <td class="p-2">${isDatabase ? 'Database' : 'LocalStorage'}</td>
+        <td class="p-2">
+            <button type="button" class="text-red-500 hover:text-red-700" onclick="deleteVisheshPreset('${preset.id || ''}', '${preset.button_text}', ${isDatabase})">Delete</button>
+        </td>
+    `;
+
+        document.getElementById('visheshPresetList').appendChild(row);
+    }
+
+    function openVisheshModal() {
+        const modal = document.getElementById('visheshModal');
+        if (!modal) {
+            console.error('visheshModal not found in DOM.');
+            return;
+        }
+        modal.classList.remove('hidden');
+        loadVisheshPresetList();
+        clearVisheshForm();
+    }
+
+    function closeVisheshModal() {
+        document.getElementById('visheshModal').classList.add('hidden');
+    }
+
+    function clearVisheshForm() {
+        const buttonText = document.getElementById('visheshButtonText');
+        const presetText = document.getElementById('visheshPresetText');
+        if (buttonText && presetText) {
+            buttonText.value = '';
+            presetText.value = '';
+        }
+    }
+
+    async function saveVisheshPreset() {
+        const buttonText = document.getElementById('visheshButtonText').value.trim();
+        const presetText = document.getElementById('visheshPresetText').value.trim();
+
+        if (!buttonText) {
+            alert('Button text is required.');
+            return;
+        }
+
+        try {
+            await axios.post('/presets', {
+                field_id: visheshFieldId,
+                button_text: buttonText,
+                preset_text: presetText || buttonText,
+                display_order: 0
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': getCsrfToken(),
+                    'Accept': 'application/json'
+                },
+                withCredentials: true
+            });
+            loadVisheshPresets();
+            loadVisheshPresetList();
+            clearVisheshForm();
+            closeVisheshModal();
+        } catch (error) {
+            console.error('Error saving vishesh preset:', error.response || error);
+            alert(
+                `Failed to save vishesh preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+            );
+        }
+    }
+
+    async function deleteVisheshPreset(id, buttonText, isDatabase) {
+        if (confirm(`Are you sure you want to delete "${buttonText}"?`)) {
+            try {
+                if (isDatabase && id) {
+                    await axios.delete(`/presets/${id}`, {
+                        headers: {
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                            'Accept': 'application/json'
+                        },
+                        withCredentials: true
+                    });
+                } else {
+                    const stored = JSON.parse(localStorage.getItem(visheshStorageKey)) || [];
+                    const updated = stored.filter(item => item !== buttonText);
+                    localStorage.setItem(visheshStorageKey, JSON.stringify(updated));
+                }
+                loadVisheshPresets();
+                loadVisheshPresetList();
+            } catch (error) {
+                console.error('Error deleting vishesh preset:', error.response || error);
+                alert(
+                    `Failed to delete vishesh preset: ${error.response?.status || 'Unknown'} - ${error.response?.data?.message || error.message}`
+                );
+            }
+        }
+    }
+
+    function appendVishesh(text) {
+        const editor = tinymce.get('vishesh');
+        if (!editor) {
+            console.error('TinyMCE editor for vishesh not found.');
+            return;
+        }
+
+        editor.focus();
+        const rng = editor.selection.getRng();
+        const container = rng.startContainer;
+        const cursorPos = rng.startOffset;
+        const nodeText = container.textContent || '';
+        const beforeText = nodeText.substring(0, cursorPos);
+        const afterText = nodeText.substring(cursorPos);
+
+        const needsSpaceBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
+        const needsSpaceAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
+
+        let insertText = '';
+        if (needsSpaceBefore) insertText += ' ';
+        insertText += text;
+        if (needsSpaceAfter) insertText += ' ';
+
+        editor.selection.setContent(insertText);
+        editor.selection.collapse(false);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for TinyMCE to initialize all editors
+        const checkTinyMCE = () => {
+            if (typeof tinymce !== 'undefined' && tinymce.get('vishesh')) {
+                loadVisheshPresets();
+            } else {
+                setTimeout(checkTinyMCE, 200);
+            }
+        };
+        checkTinyMCE();
+    });
+</script>
+
+
+<script>
     let cameraStream = null;
     let capturedFiles = []; // Array to store captured files and their types
 
@@ -2129,6 +2516,11 @@ $previousChikitsa = $latestFollowUp
 
     // Reports functionality
     let reports = [];
+    let editMode = false;
+    let editIndex = -1;
+    let editStaticMode = false;
+    let editStaticFollowupId = null;
+    let editStaticReportIndex = null;
 
     function openReportModal() {
         const modal = document.getElementById('reportModal');
@@ -2139,6 +2531,21 @@ $previousChikitsa = $latestFollowUp
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.getElementById('reportText').focus();
+
+        // Update modal title and button based on mode
+        const modalTitle = document.querySelector('#reportModal h2');
+        const addButton = document.querySelector('#reportModal button:last-child');
+
+        if (editMode) {
+            modalTitle.textContent = 'Edit Report';
+            addButton.textContent = 'Update';
+        } else if (editStaticMode) {
+            modalTitle.textContent = 'Edit Report';
+            addButton.textContent = 'Update';
+        } else {
+            modalTitle.textContent = 'Add New Report';
+            addButton.textContent = 'Add';
+        }
 
         // Add click outside to close
         modal.addEventListener('click', function(e) {
@@ -2151,9 +2558,6 @@ $previousChikitsa = $latestFollowUp
         const handleKeydown = function(e) {
             if (e.key === 'Escape') {
                 closeReportModal();
-            } else if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                addReport();
             }
         };
 
@@ -2173,6 +2577,13 @@ $previousChikitsa = $latestFollowUp
         modal.classList.remove('flex');
         document.getElementById('reportText').value = '';
 
+        // Reset edit mode
+        editMode = false;
+        editIndex = -1;
+        editStaticMode = false;
+        editStaticFollowupId = null;
+        editStaticReportIndex = null;
+
         // Remove keyboard event listener
         if (modal._keydownHandler) {
             document.removeEventListener('keydown', modal._keydownHandler);
@@ -2187,20 +2598,111 @@ $previousChikitsa = $latestFollowUp
             return;
         }
 
-        const now = new Date();
-        const timestamp = now.getDate().toString().padStart(2, '0') + '/' +
-                         (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
-                         now.getFullYear() + ' ' +
-                         now.getHours().toString().padStart(2, '0') + ':' +
-                         now.getMinutes().toString().padStart(2, '0') + ':' +
-                         now.getSeconds().toString().padStart(2, '0');
+        if (editStaticMode && editStaticFollowupId !== null && editStaticReportIndex !== null) {
+            // Update static report via AJAX
+            fetch(`/followups/${editStaticFollowupId}/reports/${editStaticReportIndex}`, {
+                method: 'PUT',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: reportText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+            // Update the DOM with the new report data
+            // Find the report item more robustly by looping through all items
+            let reportItem = null;
+            const allReportItems = document.querySelectorAll('.report-item');
 
-        const report = {
-            text: reportText,
-            timestamp: timestamp
-        };
+            for (const item of allReportItems) {
+                if (item.dataset.followupId == editStaticFollowupId && item.dataset.reportIndex == editStaticReportIndex) {
+                    reportItem = item;
+                    break;
+                }
+            }
 
-        reports.push(report);
+            console.log('Looking for report item with followupId:', editStaticFollowupId, '(type:', typeof editStaticFollowupId, ') reportIndex:', editStaticReportIndex, '(type:', typeof editStaticReportIndex, ')');
+            console.log('Found report item:', reportItem);                    if (reportItem) {
+                        // Find the text div more robustly
+                        const textDiv = reportItem.querySelector('div.text-sm.font-medium') ||
+                                       reportItem.querySelector('div.text-sm') ||
+                                       reportItem.querySelector('[class*="text-sm"]');
+                        console.log('Found text div:', textDiv);
+                        console.log('Report item HTML structure:', reportItem.outerHTML);
+
+                        if (textDiv) {
+                            console.log('Current innerHTML:', textDiv.innerHTML);
+                            const newHtml = reportText.replace(/\n/g, '<br>');
+                            textDiv.innerHTML = newHtml;
+                            console.log('Updated report text in DOM to:', newHtml);
+                            console.log('New innerHTML:', textDiv.innerHTML);
+
+                            // Visual feedback
+                            textDiv.style.backgroundColor = '#e0f7e0'; // Light green
+                            setTimeout(() => {
+                                textDiv.style.backgroundColor = '';
+                            }, 1000);
+                        } else {
+                            console.error('Could not find text div in report item. Available elements:');
+                            const allDivs = reportItem.querySelectorAll('div');
+                            allDivs.forEach((div, index) => {
+                                console.log(`Div ${index}:`, div.className, div.innerHTML.substring(0, 50));
+                            });
+                        }
+                        // Update data attributes - CRITICAL: search functionality relies on these
+                        reportItem.dataset.originalText = reportText;
+                        reportItem.dataset.text = reportText.toLowerCase();
+                        console.log('Updated data attributes for report');
+
+                        // Force reapply search highlighting if search is active
+                        const searchInput = document.getElementById('reportSearch');
+                        if (searchInput && searchInput.value.trim()) {
+                            // Re-trigger search to update highlighting with new text
+                            const event = new Event('input', { bubbles: true });
+                            searchInput.dispatchEvent(event);
+                        }
+                    } else {
+                        console.error('Could not find report item with followupId:', editStaticFollowupId, 'reportIndex:', editStaticReportIndex);
+                        // Log all report items for debugging
+                        const allReports = document.querySelectorAll('.report-item');
+                        console.log('All report items:', allReports);
+                        allReports.forEach((item, index) => {
+                            console.log(`Report ${index}:`, item.dataset.followupId, item.dataset.reportIndex);
+                        });
+                    }
+                    closeReportModal();
+                } else {
+                    alert('Error updating report: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error updating report. Please try again.');
+            });
+        } else if (editMode && editIndex >= 0) {
+            // Update existing report
+            reports[editIndex].text = reportText;
+        } else {
+            // Add new report
+            const now = new Date();
+            const timestamp = now.getDate().toString().padStart(2, '0') + '/' +
+                             (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
+                             now.getFullYear() + ' ' +
+                             now.getHours().toString().padStart(2, '0') + ':' +
+                             now.getMinutes().toString().padStart(2, '0') + ':' +
+                             now.getSeconds().toString().padStart(2, '0');
+
+            const report = {
+                text: reportText,
+                timestamp: timestamp
+            };
+
+            reports.push(report);
+        }
+
         updateReportsDisplay();
         updateReportsInput();
         closeReportModal();
@@ -2208,34 +2710,70 @@ $previousChikitsa = $latestFollowUp
 
     function updateReportsDisplay() {
         const container = document.getElementById('reportsList');
-        container.innerHTML = '';
 
+        // Remove existing dynamic reports
+        const existingDynamic = container.querySelectorAll('.dynamic-report');
+        existingDynamic.forEach(el => el.remove());
+
+        // Find the first static report to insert before
+        const firstStaticReport = container.querySelector('.report-item:not(.dynamic-report)');
+        const insertBeforeElement = firstStaticReport || null;
+
+        // Add new dynamic reports at the top
         reports.forEach((report, index) => {
             const reportDiv = document.createElement('div');
-            reportDiv.className = 'flex justify-between items-start p-2 bg-gray-50 dark:bg-gray-800 rounded mb-2';
+            reportDiv.className = 'dynamic-report flex justify-between items-start p-2 bg-gray-50 dark:bg-gray-800 rounded mb-2';
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'flex-1';
 
             const textDiv = document.createElement('div');
             textDiv.className = 'text-sm';
-            textDiv.textContent = report.text;
+            textDiv.innerHTML = report.text.replace(/\n/g, '<br>');
 
             const timestampDiv = document.createElement('div');
             timestampDiv.className = 'text-xs text-gray-500 dark:text-gray-400 mt-1';
             timestampDiv.textContent = report.timestamp;
 
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'flex flex-col space-y-1 ml-2';
+
+            const editBtn = document.createElement('button');
+            editBtn.type = 'button';
+            editBtn.className = 'text-blue-500 hover:text-blue-700 p-1 rounded';
+            editBtn.title = 'Edit';
+            editBtn.innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+            `;
+            editBtn.onclick = () => editDynamicReport(index);
+
             const deleteBtn = document.createElement('button');
             deleteBtn.type = 'button';
-            deleteBtn.className = 'text-red-500 hover:text-red-700 ml-2';
-            deleteBtn.innerHTML = '×';
+            deleteBtn.className = 'text-red-500 hover:text-red-700 p-1 rounded';
+            deleteBtn.title = 'Delete';
+            deleteBtn.innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+            `;
             deleteBtn.onclick = () => removeReport(index);
+
+            buttonsDiv.appendChild(editBtn);
+            buttonsDiv.appendChild(deleteBtn);
 
             contentDiv.appendChild(textDiv);
             contentDiv.appendChild(timestampDiv);
             reportDiv.appendChild(contentDiv);
-            reportDiv.appendChild(deleteBtn);
-            container.appendChild(reportDiv);
+            reportDiv.appendChild(buttonsDiv);
+
+            // Insert at the top, before the first static report
+            if (insertBeforeElement) {
+                container.insertBefore(reportDiv, insertBeforeElement);
+            } else {
+                container.appendChild(reportDiv);
+            }
         });
     }
 
@@ -2254,7 +2792,21 @@ $previousChikitsa = $latestFollowUp
 
     // Initialize reports if editing existing follow-up
     document.addEventListener('DOMContentLoaded', function() {
-        // For create view, reports start empty
+        // Load reports from hidden input (for validation errors)
+        const reportsInput = document.getElementById('reportsInput');
+        if (reportsInput && reportsInput.value) {
+            try {
+                const savedReports = JSON.parse(reportsInput.value);
+                if (Array.isArray(savedReports)) {
+                    reports = savedReports;
+                }
+            } catch (e) {
+                console.error('Error parsing saved reports:', e);
+            }
+        }
+
+        // Update display and input
+        updateReportsDisplay();
         updateReportsInput();
 
         // Add search functionality
@@ -2289,6 +2841,71 @@ $previousChikitsa = $latestFollowUp
             report.style.display = matchesSearch ? 'block' : 'none';
         });
     }
+
+    // Edit report function
+    function editReport(button) {
+        const reportItem = button.closest('.report-item');
+        const reportText = reportItem.dataset.originalText;
+        const followupId = reportItem.dataset.followupId;
+        const reportIndex = reportItem.dataset.reportIndex;
+
+        // Set static report editing mode
+        editStaticMode = true;
+        editStaticFollowupId = followupId;
+        editStaticReportIndex = reportIndex;
+        editMode = false;
+        editIndex = -1;
+
+        // Open the report modal and pre-fill with the text
+        openReportModal();
+        document.getElementById('reportText').value = reportText;
+    }
+
+    // Edit dynamic report function
+    function editDynamicReport(index) {
+        const report = reports[index];
+        if (!report) return;
+
+        editMode = true;
+        editIndex = index;
+
+        // Open the report modal and pre-fill with the text
+        openReportModal();
+        document.getElementById('reportText').value = report.text;
+    }
+
+    // Delete report function
+    function deleteReport(button) {
+        if (confirm('Are you sure you want to delete this report?')) {
+            const reportItem = button.closest('.report-item');
+            const followupId = reportItem.dataset.followupId;
+            const reportIndex = reportItem.dataset.reportIndex;
+
+            // Make AJAX call to soft delete the report
+            fetch(`/followups/${followupId}/reports/${reportIndex}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the report from DOM
+                    reportItem.remove();
+                    console.log('Successfully deleted report from DOM');
+                } else {
+                    alert('Error deleting report: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deleting report. Please try again.');
+            });
+        }
+    }
 </script>
 
 <script>
@@ -2298,11 +2915,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const searchTerm = this.value.toLowerCase().trim();
         const reportItems = document.querySelectorAll('.report-item');
         reportItems.forEach(item => {
-            const textDiv = item.querySelector('.text-sm.font-medium');
-            const dateDiv = item.querySelector('.text-xs.text-gray-500, .text-xs.text-gray-400');
+            const textDiv = item.querySelector('div.text-sm.font-medium') ||
+                           item.querySelector('div.text-sm') ||
+                           item.querySelector('[class*="text-sm"]');
+            const dateDiv = item.querySelector('.text-xs.text-gray-500, .text-xs.text-gray-400') ||
+                           item.querySelector('.text-xs');
 
             // Reset both text and date content
-            textDiv.innerHTML = item.dataset.originalText;
+            if (textDiv) {
+                textDiv.innerHTML = item.dataset.originalText.replace(/\n/g, '<br>');
+            } else {
+                console.warn('Could not find text div for report item in search');
+            }
             if (dateDiv) {
                 dateDiv.innerHTML = item.dataset.timestamp + ' • Follow-up: ' + item.dataset.followupDate;
             }
@@ -2322,7 +2946,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Highlight in report text
                 const regex = new RegExp(`(${this.value.trim()})`, 'gi');
-                textDiv.innerHTML = item.dataset.originalText.replace(regex, '<mark>$1</mark>');
+                textDiv.innerHTML = item.dataset.originalText.replace(/\n/g, '<br>').replace(regex, '<mark>$1</mark>');
 
                 // Highlight in date section if date matches
                 if (followupDate.toLowerCase().includes(searchTerm) && dateDiv) {

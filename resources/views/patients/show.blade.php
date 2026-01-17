@@ -20,10 +20,58 @@
 
                     <div class="mb-4">
                         <div>
-                            <h2
-                                class="text-2xl font-bold text-indigo-700 mb-4 flex items-center cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
-                                {{ $patient->name }} ({{ $patient->patient_id }})
-                            </h2>
+                            <!-- Patient Header with Profile Picture -->
+                            <div class="flex items-center gap-4 mb-4">
+                                @php
+                                    $profilePhoto = $uploads->where('photo_type', 'patient_photo')->sortByDesc('created_at')->first();
+                                @endphp
+
+                                <!-- Profile Picture -->
+                                <div class="relative">
+                                    @if($profilePhoto)
+                                        <div class="relative group cursor-pointer" onclick="openProfilePictureModal('{{ route('uploads.show', $profilePhoto->id) }}')">
+                                            <img src="{{ route('uploads.show', $profilePhoto->id) }}"
+                                                 alt="Patient Profile Picture"
+                                                 class="w-16 h-16 rounded-full object-cover border-2 border-indigo-200 shadow-md hover:shadow-lg transition-all duration-300">
+
+                                            <!-- Hover overlay -->
+                                            <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-full transition-all duration-300 flex items-center justify-center">
+                                                <svg class="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center border-2 border-indigo-200 shadow-md">
+                                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                        </div>
+                                    @endif
+
+                                    <!-- Edit Photo Button -->
+                                    {{-- @if (Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')))
+                                        <button onclick="openEditProfilePictureModal()"
+                                                class="absolute -bottom-1 -right-1 bg-indigo-600 hover:bg-indigo-700 text-white p-1.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                                                title="Update Profile Picture">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                            </svg>
+                                        </button>
+                                    @endif --}}
+                                </div>
+
+                                <!-- Patient Name and ID -->
+                                <div class="flex-1">
+                                    <h2 class="text-2xl font-bold text-indigo-700 cursor-pointer hover:text-indigo-700 dark:hover:text-indigo-300 transition duration-400">
+                                        {{ $patient->name }}
+                                    </h2>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                                        Patient ID: {{ $patient->patient_id }}
+                                    </p>
+                                </div>
+                            </div>
+
                             <!-- Complete Patient Information Grid -->
                             <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm" x-data="{ showMore: false }">
                                 <!-- Vishesh Field - Always visible and spans 3 columns -->
@@ -143,7 +191,7 @@
                             </a>
 
                             <a href="{{ route('patients.export-pdf', $patient) }}" target="_blank"
-                                class="bg-sky-400		 hover:bg-sky-500		 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
+                                class="bg-sky-400 hover:bg-sky-500 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
                                 {{ __('messages.Export to PDF') }}
                             </a>
 
@@ -739,6 +787,22 @@
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('नाडी') }}:</span> --}}
                                                                 {!! $checkUpInfo['nadi'] !!}
                                                             </p>
+                                                            @if (isset($checkUpInfo['nadi_dots']))
+                                                                @php
+                                                                    $nadiDots = $checkUpInfo['nadi_dots'] ?? [[], [], []];
+                                                                @endphp
+                                                                <div class="mt-2 flex gap-0.5">
+                                                                    @foreach($nadiDots as $box)
+                                                                        <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-0.25 rounded border border-gray-100 dark:border-gray-600">
+                                                                            @for($i = 0; $i < 9; $i++)
+                                                                                <div class="w-3 h-3 flex items-center justify-center bg-white dark:bg-gray-800 {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-500' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-500' : '' }} {{ ($box[$i] ?? false) ? 'text-red-500 text-sm' : '' }}">
+                                                                                    {{ ($box[$i] ?? false) ? '•' : '' }}
+                                                                                </div>
+                                                                            @endfor
+                                                                        </div>
+                                                                    @endforeach
+                                                                </div>
+                                                            @endif
                                                         @endif
 
 @if (isset($followUp->diagnosis) && $followUp->diagnosis !== null && $followUp->diagnosis !== '')
@@ -774,12 +838,12 @@
                                             <td class="px-2 py-4 align-top text-gray-600 dark:text-gray-300 max-w-xs break-words whitespace-normal"
                                                 style=" word-break: break-word; overflow-wrap: break-word;">
 
-                                                <p>
+                                                <div>
                                                     {{-- <span class="font-bold text-gray-800 dark:text-gray-200">{{ __('चिकित्सा') }}:</span> --}}
                                                     @if (isset($checkUpInfo['chikitsa']))
                                                         {!! $checkUpInfo['chikitsa'] !!}
                                                     @endif
-                                                </p>
+                                                </div>
 
                                                 <p>
                                                     @if (isset($checkUpInfo['days']) && $checkUpInfo['days'] !== null && $checkUpInfo['days'] !== '')
@@ -946,6 +1010,102 @@
             </div>
         </div>
     </div>
+
+    <!-- Profile Picture Modal -->
+    <div id="profilePictureModal"
+         class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-2xl w-full relative">
+            <button id="closeProfilePictureModal"
+                    class="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 text-2xl">✖</button>
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Patient Profile Picture</h3>
+            <div class="flex justify-center">
+                <img id="profilePictureImage" src="" alt="Profile Picture"
+                     class="max-w-full max-h-[70vh] object-contain rounded-lg">
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Picture Modal -->
+    <div id="editProfilePictureModal"
+         class="fixed inset-0 bg-gray-900 bg-opacity-75 hidden flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full relative">
+            <button id="closeEditProfilePictureModal"
+                    class="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100 text-2xl">✖</button>
+            <h3 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Update Profile Picture</h3>
+
+            <form method="POST" action="{{ route('patients.update', $patient->id) }}" enctype="multipart/form-data" class="space-y-4">
+                @csrf
+                @method('PUT')
+
+                <!-- File Upload -->
+                <div>
+                    <label for="photo_file" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Choose New Photo
+                    </label>
+                    <input type="file" id="photo_file" name="photo_file" accept="image/*"
+                           class="w-full rounded-lg border-2 border-gray-300 dark:border-gray-600 p-2 text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Accepted formats: JPEG, PNG, JPG. Max size: 2MB</p>
+                </div>
+
+                <!-- Camera Capture Option -->
+                <div class="border-t pt-4">
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Or capture with camera:</p>
+                    <button type="button" id="openCameraModal"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                        📷 Capture Photo with Camera
+                    </button>
+                </div>
+
+                <!-- Hidden inputs for camera capture -->
+                <input type="file" id="photoFileInput" name="photos[]" multiple style="display: none;">
+                <input type="hidden" id="photoTypesInput" name="photo_types">
+
+                <!-- Camera Modal -->
+                <div id="cameraModal"
+                     class="fixed inset-0 bg-gray-200 bg-opacity-75 hidden flex justify-center items-center transition-opacity duration-300 z-60">
+                    <div class="bg-white p-6 rounded-xl shadow-lg w-[600px] h-[500px] flex flex-col gap-4 border border-gray-300">
+                        <!-- Camera Section -->
+                        <h4 class="text-xl font-bold tracking-wider text-indigo-600">Capture Profile Photo</h4>
+
+                        <label class="block text-sm text-gray-700">Camera Source:</label>
+                        <select id="cameraSelect"
+                                class="w-full p-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"></select>
+
+                        <div class="flex-1 overflow-hidden rounded-lg border border-gray-300 shadow-inner bg-gray-200">
+                            <video id="cameraPreview" class="w-full h-full object-contain" autoplay></video>
+                        </div>
+
+                        <div class="flex justify-between">
+                            <button id="captureBtn" type="button"
+                                    class="px-5 py-2 bg-gradient-to-r from-indigo-500 to-cyan-500 text-white rounded-lg hover:from-indigo-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-200 shadow-md">📸
+                                Capture</button>
+                            <button id="closeCameraModal" type="button"
+                                    class="px-5 py-2 bg-gradient-to-r from-red-400 to-pink-400 text-white rounded-lg hover:from-red-500 hover:to-pink-500 transform hover:scale-105 transition-all duration-200 shadow-md">Close</button>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div class="flex-1 flex flex-col bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <h5 class="text-lg font-semibold text-gray-700 mb-2">Captured Photo</h5>
+                            <div id="patientPhotosImages" class="flex-1 overflow-y-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-3 pt-4 border-t">
+                    <button type="button" onclick="closeEditProfilePictureModal()"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                        Update Photo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </x-app-layout>
 
 <script>
@@ -1012,10 +1172,195 @@
             popup.classList.add('hidden');
         });
 
-        popup.addEventListener('click', function(e) {
-            if (e.target === popup) {
-                popup.classList.add('hidden');
+        // Profile Picture Modal Functions
+        window.openProfilePictureModal = function(imageUrl) {
+            if (!imageUrl) {
+                // No image to show, just return
+                return;
             }
+            const modal = document.getElementById('profilePictureModal');
+            const image = document.getElementById('profilePictureImage');
+            image.src = imageUrl;
+            modal.classList.remove('hidden');
+        };
+
+        document.getElementById('closeProfilePictureModal').addEventListener('click', function() {
+            document.getElementById('profilePictureModal').classList.add('hidden');
         });
+
+        // Edit Profile Picture Modal Functions
+        window.openEditProfilePictureModal = function() {
+            document.getElementById('editProfilePictureModal').classList.remove('hidden');
+        };
+
+        window.closeEditProfilePictureModal = function() {
+            document.getElementById('editProfilePictureModal').classList.add('hidden');
+            // Reset camera if open
+            const cameraModal = document.getElementById('cameraModal');
+            if (cameraModal && !cameraModal.classList.contains('hidden')) {
+                cameraModal.classList.add('hidden');
+                stopCamera();
+            }
+        };
+
+        document.getElementById('closeEditProfilePictureModal').addEventListener('click', function() {
+            closeEditProfilePictureModal();
+        });
+
+        // Add form submit handler to ensure captured files are included
+        const editProfileForm = document.querySelector('#editProfilePictureModal form');
+        if (editProfileForm) {
+            editProfileForm.addEventListener('submit', function(e) {
+                // Ensure captured camera files are added to the form before submission
+                updateFileInput();
+            });
+        }
+
+        // Camera functionality for profile picture
+        let cameraStream = null;
+        let capturedFiles = [];
+
+        const cameraModal = document.getElementById("cameraModal");
+        const openCameraModal = document.getElementById("openCameraModal");
+        const closeCameraModalBtn = document.getElementById("closeCameraModal");
+        const captureBtn = document.getElementById("captureBtn");
+        const patientPhotosImages = document.getElementById("patientPhotosImages");
+        const video = document.getElementById("cameraPreview");
+        const cameraSelect = document.getElementById("cameraSelect");
+        const photoFileInput = document.getElementById("photoFileInput");
+        const photoTypesInput = document.getElementById("photoTypesInput");
+
+        if (openCameraModal) {
+            openCameraModal.addEventListener("click", async (e) => {
+                e.preventDefault();
+                cameraModal.classList.remove("hidden");
+                await loadCameras();
+            });
+        }
+
+        if (closeCameraModalBtn) {
+            closeCameraModalBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                updateFileInput();
+                cameraModal.classList.add("hidden");
+                stopCamera();
+            });
+        }
+
+        if (captureBtn) {
+            captureBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                const canvas = document.createElement("canvas");
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                canvas.toBlob((blob) => {
+                    const file = new File([blob], `profile_photo_${Date.now()}.png`, { type: "image/png" });
+
+                    // Add to capturedFiles array
+                    capturedFiles.push({ file, type: "patient_photo" });
+
+                    // Create preview container
+                    const previewContainer = document.createElement("div");
+                    previewContainer.classList.add("preview-container", "relative", "inline-block", "m-1");
+
+                    // Create image preview
+                    const img = document.createElement("img");
+                    img.src = URL.createObjectURL(blob);
+                    img.classList.add("w-24", "h-24", "object-cover", "rounded", "border", "border-gray-300");
+
+                    // Create delete button
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.innerHTML = "✖";
+                    deleteBtn.classList.add("absolute", "top-0", "right-0", "bg-red-500", "text-white", "rounded-full", "w-5", "h-5", "text-xs", "flex", "items-center", "justify-center");
+                    deleteBtn.addEventListener("click", () => {
+                        const index = capturedFiles.findIndex(f => f.file === file);
+                        if (index !== -1) capturedFiles.splice(index, 1);
+                        previewContainer.remove();
+                    });
+
+                    // Append elements
+                    previewContainer.appendChild(img);
+                    previewContainer.appendChild(deleteBtn);
+                    patientPhotosImages.appendChild(previewContainer);
+                }, "image/png");
+            });
+        }
+
+        async function loadCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === "videoinput");
+                if (videoDevices.length === 0) {
+                    alert("No cameras found.");
+                    return;
+                }
+                cameraSelect.innerHTML = "";
+                videoDevices.forEach((device, index) => {
+                    const option = document.createElement("option");
+                    option.value = device.deviceId;
+                    option.text = device.label || `Camera ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+                await startCamera(videoDevices[0]?.deviceId);
+            } catch (error) {
+                console.error("Error loading cameras:", error);
+                alert("Failed to access camera. Please allow permissions.");
+            }
+        }
+
+        async function startCamera(deviceId) {
+            stopCamera();
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        deviceId: deviceId ? { exact: deviceId } : undefined
+                    }
+                });
+                video.srcObject = cameraStream;
+                video.play();
+            } catch (error) {
+                console.error("Error starting camera:", error);
+                alert("Camera access denied or unavailable.");
+            }
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+        }
+
+        if (cameraSelect) {
+            cameraSelect.addEventListener("change", () => {
+                startCamera(cameraSelect.value);
+            });
+        }
+
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            const types = [];
+
+            capturedFiles.forEach(({ file, type }) => {
+                dataTransfer.items.add(file);
+                types.push(type);
+            });
+
+            if (photoFileInput) {
+                photoFileInput.files = dataTransfer.files;
+            }
+            if (photoTypesInput) {
+                photoTypesInput.value = JSON.stringify(types);
+            }
+        }
+
     });
 </script>
+
+<style>
+    @media print, (max-width: 0) {
+        .pdf-content {
+            box-shadow: none !important;
+            margin: 0 !important;

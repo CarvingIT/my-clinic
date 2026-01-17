@@ -86,6 +86,32 @@
                                     <textarea id="nadiInput" name="nadi" rows="4"
                                         class="tinymce-editor px-2 py-1 block mt-1 w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm transition-all duration-300 hover:border-indigo-400">{{ old('nadi', isset($checkUpInfo['nadi']) ? trim($checkUpInfo['nadi']) : '') }}</textarea>
 
+                                    <!-- Nadi Dots Grid -->
+                                    <div id="nadiGrid" class="mt-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 p-2 rounded shadow-lg flex gap-2 justify-center items-center">
+                                        <span class="text-sm text-gray-600 dark:text-gray-400 mr-4">Nadi Points:</span>
+                                        <!-- Box 1 -->
+                                        <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-1 rounded">
+                                            @for($i = 0; $i < 9; $i++)
+                                                <div class="w-5 h-5 cursor-pointer flex items-center justify-center bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-500' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-500' : '' }}" onclick="toggleDot(this, 0, {{ $i }})"></div>
+                                            @endfor
+                                        </div>
+                                        <!-- Box 2 -->
+                                        <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-1 rounded">
+                                            @for($i = 0; $i < 9; $i++)
+                                                <div class="w-5 h-5 cursor-pointer flex items-center justify-center bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-500' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-500' : '' }}" onclick="toggleDot(this, 1, {{ $i }})"></div>
+                                            @endfor
+                                        </div>
+                                        <!-- Box 3 -->
+                                        <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-1 rounded">
+                                            @for($i = 0; $i < 9; $i++)
+                                                <div class="w-5 h-5 cursor-pointer flex items-center justify-center bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-500' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-500' : '' }}" onclick="toggleDot(this, 2, {{ $i }})"></div>
+                                            @endfor
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden input for dots data -->
+                                    <input type="hidden" name="nadi_dots" id="nadiDotsInput" value="{{ old('nadi_dots', json_encode($checkUpInfo['nadi_dots'] ?? [[], [], []])) }}">
+
                                     <div id="nadiPresets" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mt-4">
                                         @foreach (['वात', 'पित्त', 'कफ', 'सूक्ष्म', 'कठीण', 'साम', 'वेग', 'प्राण', 'व्यान', 'स्थूल', 'अल्प स्थूल', 'अनियमित', 'तीक्ष्ण', 'वेगवती'] as $nadi)
                                             <div class="relative">
@@ -96,6 +122,7 @@
                                         @endforeach
                                     </div>
                                     <x-input-error :messages="$errors->get('nadi')" class="mt-2" />
+                                    <x-input-error :messages="$errors->get('nadi_dots')" class="mt-2" />
                                 </div>
 
                                 <!-- Lakshane Textarea -->
@@ -532,6 +559,43 @@
         }
 
         document.addEventListener('DOMContentLoaded', loadCustomPresets);
+
+        // Nadi Dots Grid Functionality
+        let nadiDots = [[], [], []];
+
+        function toggleDot(element, boxIndex, subIndex) {
+            // Ensure arrays are initialized
+            if (!nadiDots[boxIndex]) nadiDots[boxIndex] = [];
+            nadiDots[boxIndex][subIndex] = !nadiDots[boxIndex][subIndex];
+
+            // Toggle visual dot
+            element.innerHTML = nadiDots[boxIndex][subIndex] ? '•' : '';
+            element.classList.toggle('text-red-500', nadiDots[boxIndex][subIndex]);
+            element.classList.toggle('text-xl', nadiDots[boxIndex][subIndex]);
+
+            // Update hidden input
+            document.getElementById('nadiDotsInput').value = JSON.stringify(nadiDots);
+        }
+
+        // Initialize dots on page load (for editing existing data)
+        document.addEventListener('DOMContentLoaded', function() {
+            const dotsInput = document.getElementById('nadiDotsInput');
+            if (dotsInput && dotsInput.value) {
+                nadiDots = JSON.parse(dotsInput.value);
+                // Populate grid visually
+                const boxes = document.querySelectorAll('#nadiGrid > div');
+                boxes.forEach((box, boxIdx) => {
+                    const subs = box.querySelectorAll('div');
+                    subs.forEach((sub, subIdx) => {
+                        if (nadiDots[boxIdx] && nadiDots[boxIdx][subIdx]) {
+                            sub.innerHTML = '•';
+                            sub.classList.add('text-red-500');
+                            sub.classList.add('text-xl');
+                        }
+                    });
+                });
+            }
+        });
     </script>
 
     <!-- Chikitsa Script -->

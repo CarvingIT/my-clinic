@@ -39,6 +39,12 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+// Session extension route
+Route::post('/extend-session', function (Illuminate\Http\Request $request) {
+    $request->session()->regenerate();
+    return response()->json(['status' => 'extended']);
+})->middleware('auth')->name('extend.session');
+
 // locale
 
 Route::get('/set-locale/{locale}', function ($locale) {
@@ -148,6 +154,8 @@ Route::middleware(['auth', DoctorMiddleware::class])->group(function () {
 
     Route::resource('followups', FollowUpController::class)->except(['index']); // Doctor can manage follow-ups except for listing them
     Route::resource('reports', ReportController::class)->only(['store', 'destroy']); // Doctor can store and delete reports
+    Route::delete('/followups/{followup}/reports/{reportIndex}', [FollowUpController::class, 'deleteReport'])->name('followups.delete-report'); // Soft delete reports from follow-ups
+    Route::put('/followups/{followup}/reports/{reportIndex}', [FollowUpController::class, 'updateReport'])->name('followups.update-report'); // Update reports from follow-ups
     Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store'); // Doctor can upload files
     Route::delete('/uploads/{id}', [UploadController::class, 'destroy'])->name('uploads.destroy'); // Doctor can delete uploaded files
     Route::get('/uploads/{id}', [UploadController::class, 'show'])->name('uploads.show'); // Doctor can view uploaded files

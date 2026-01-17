@@ -120,6 +120,9 @@ class FollowUpController extends Controller
         // Explicitly handle reports field
         $checkUpInfo['reports'] = json_decode($request->input('reports', '[]'), true) ?? [];
 
+        // Explicitly handle nadi_dots field
+        $checkUpInfo['nadi_dots'] = json_decode($request->input('nadi_dots', '[[], [], []]'), true) ?? [[], [], []];
+
         // Adding user and branch info to $checkUpInfo
         $checkUpInfo['user_id'] = Auth::id();
         $checkUpInfo['user_name'] = Auth::user()->name;
@@ -437,6 +440,9 @@ class FollowUpController extends Controller
         // Explicitly handle reports field
         $newCheckUpInfo['reports'] = json_decode($request->input('reports', '[]'), true) ?? [];
 
+        // Explicitly handle nadi_dots field
+        $newCheckUpInfo['nadi_dots'] = json_decode($request->input('nadi_dots', '[[], [], []]'), true) ?? [[], [], []];
+
         // Preserve existing username and branch unless updated
         if (!isset($newCheckUpInfo['user_name']) && isset($existingCheckUpInfo['user_name'])) {
             $newCheckUpInfo['user_name'] = $existingCheckUpInfo['user_name'];
@@ -469,6 +475,66 @@ class FollowUpController extends Controller
         $patientId = $followup->patient_id;
         $followup->delete();
         return redirect()->route('patients.show', $patientId)->with('success', 'Follow Up Deleted Successfully');
+    }
+
+    public function deleteReport(Request $request, FollowUp $followup, $reportIndex)
+    {
+        // Get the current check_up_info
+        $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
+
+        // Check if reports exist
+        if (!isset($checkUpInfo['reports']) || !is_array($checkUpInfo['reports'])) {
+            return response()->json(['success' => false, 'message' => 'No reports found'], 404);
+        }
+
+        // Check if the report index exists
+        if (!isset($checkUpInfo['reports'][$reportIndex])) {
+            return response()->json(['success' => false, 'message' => 'Report not found'], 404);
+        }
+
+        // Soft delete the report by adding deleted_at timestamp
+        $checkUpInfo['reports'][$reportIndex]['deleted_at'] = now()->toISOString();
+
+        // Save the updated check_up_info
+        $followup->update([
+            'check_up_info' => json_encode($checkUpInfo)
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Report deleted successfully']);
+    }
+
+    public function updateReport(Request $request, FollowUp $followup, $reportIndex)
+    {
+        $request->validate([
+            'text' => 'required|string'
+        ]);
+
+        // Get the current check_up_info
+        $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
+
+        // Check if reports exist
+        if (!isset($checkUpInfo['reports']) || !is_array($checkUpInfo['reports'])) {
+            return response()->json(['success' => false, 'message' => 'No reports found'], 404);
+        }
+
+        // Check if the report index exists
+        if (!isset($checkUpInfo['reports'][$reportIndex])) {
+            return response()->json(['success' => false, 'message' => 'Report not found'], 404);
+        }
+
+        // Update the report text
+        $checkUpInfo['reports'][$reportIndex]['text'] = $request->text;
+
+        // Save the updated check_up_info
+        $followup->update([
+            'check_up_info' => json_encode($checkUpInfo)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Report updated successfully',
+            'report' => $checkUpInfo['reports'][$reportIndex]
+        ]);
     }
 
     public function exportFollowUps(Request $request)

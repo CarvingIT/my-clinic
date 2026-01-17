@@ -11,6 +11,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use App\Models\FollowUp;
 use App\Models\User;
+use App\Models\Upload;
 // use Knp\Snappy\Pdf;
 use PDF;
 use Illuminate\Support\Facades\Mail;
@@ -85,6 +86,23 @@ class PatientController extends Controller
             'weight' => ['nullable', 'numeric', 'min:1'],
         ]);
 
+        // Validate file uploads separately
+        if ($request->hasFile('photos')) {
+            $request->validate([
+                'photos.*' => ['image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            ]);
+        }
+        if ($request->hasFile('photo_file')) {
+            $request->validate([
+                'photo_file' => ['image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            ]);
+        }
+        if ($request->filled('photo_types')) {
+            $request->validate([
+                'photo_types' => ['string', 'json'],
+            ]);
+        }
+
         // Manually handle the birthdate:
         // if ($request->filled('birthdate')) {
         //     $validatedData['birthdate'] = Carbon::parse($request->birthdate)->format('Y-m-d');
@@ -112,6 +130,8 @@ class PatientController extends Controller
         // Save patient data along with generated patient_id
         $patient = Patient::create($request->all() + ['patient_id' => $patientId]);
 
+        // Handle photo uploads
+        $this->handlePhotoUploads($request, $patient);
 
         //return redirect()->route('patients.index')->with('success', 'Patient Created Successfully.');
         return redirect()->to('/patients/' . $patient->id);
@@ -187,9 +207,29 @@ class PatientController extends Controller
             'height' => 'nullable|numeric|min:50|max:250', // Height in cm
             'weight' => 'nullable|numeric|min:10|max:300', // Weight in kg
         ]);
+
+        // Validate file uploads separately
+        if ($request->hasFile('photos')) {
+            $request->validate([
+                'photos.*' => ['image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            ]);
+        }
+        if ($request->hasFile('photo_file')) {
+            $request->validate([
+                'photo_file' => ['image', 'mimes:jpeg,png,jpg', 'max:2048'],
+            ]);
+        }
+        if ($request->filled('photo_types')) {
+            $request->validate([
+                'photo_types' => ['string', 'json'],
+            ]);
+        }
         $patient->update($request->all());
 
-        return redirect()->route('patients.index')->with('success', 'Patient Updated Successfully.');
+        // Handle photo uploads
+        $this->handlePhotoUploads($request, $patient);
+
+        return redirect()->to('/patients/' . $patient->id)->with('success', 'Patient Updated Successfully.');
     }
 
     /**
@@ -548,6 +588,71 @@ class PatientController extends Controller
         } catch (\Exception $e) {
             Log::error('Error importing JSON file: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to import JSON file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Handle photo uploads for patient
+     */
+    private function handlePhotoUploads(Request $request, Patient $patient)
+    {
+        $patientName = str_replace(' ', '_', trim($patient->name));
+
+        // Handle camera captured photos
+        if ($request->hasFile('photos')) {
+            $photoTypes = $request->input('photo_types') ? json_decode($request->photo_types, true) : [];
+            if (!is_array($photoTypes)) {
+                $photoTypes = [];
+            }
+
+            foreach ($request->file('photos') as $index => $photo) {
+                $photoType = $photoTypes[$index] ?? 'patient_photo';
+                $extension = $photo->getClientOriginalExtension();
+                $baseName = "{$patientName}_{$photoType}";
+
+                // Find the next available number
+                $counter = 1;
+                $fileName = "{$baseName}_{$counter}.{$extension}";
+                while (Storage::disk('local')->exists("uploads/{$fileName}")) {
+                    $counter++;
+                    $fileName = "{$baseName}_{$counter}.{$extension}";
+                }
+
+                // Store the file
+                $filePath = $photo->storeAs('uploads', $fileName, 'local');
+
+                Upload::create([
+                    'patient_id' => $patient->id,
+                    'follow_up_id' => null,
+                    'photo_type' => $photoType,
+                    'file_path' => $filePath,
+                ]);
+            }
+        }
+
+        // Handle file upload
+        if ($request->hasFile('photo_file')) {
+            $photo = $request->file('photo_file');
+            $extension = $photo->getClientOriginalExtension();
+            $baseName = "{$patientName}_patient_photo";
+
+            // Find the next available number
+            $counter = 1;
+            $fileName = "{$baseName}_{$counter}.{$extension}";
+            while (Storage::disk('local')->exists("uploads/{$fileName}")) {
+                $counter++;
+                $fileName = "{$baseName}_{$counter}.{$extension}";
+            }
+
+            // Store the file
+            $filePath = $photo->storeAs('uploads', $fileName, 'local');
+
+            Upload::create([
+                'patient_id' => $patient->id,
+                'follow_up_id' => null,
+                'photo_type' => 'patient_photo',
+                'file_path' => $filePath,
+            ]);
         }
     }
 }
