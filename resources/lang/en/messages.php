@@ -121,7 +121,8 @@ return [
     'Import/Export' => 'Import/Export',
     'Age/Gender' => 'Age/Gender',
 
-
+    'Consent Form' => 'Consent Form',
+    'Generate Consent Form' => 'Generate Consent Form',
 
     'locale' => 'Language', // Label for dropdown
 ];

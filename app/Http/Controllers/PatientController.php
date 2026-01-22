@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
+use App\Models\Template;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -277,6 +278,67 @@ class PatientController extends Controller
         ]);
 
         return $pdf->inline('certificate_' . $patient->name . '.pdf');
+    }
+
+    /**
+     * Generate document from database template
+     */
+    public function generateFromTemplate(Patient $patient, Request $request, string $templateSlug)
+    {
+        $template = Template::findBySlug($templateSlug);
+
+        if (!$template || !$template->is_active) {
+            abort(404, 'Template not found or inactive');
+        }
+
+        // Build validation rules based on template type
+        $rules = [];
+        if ($templateSlug === 'medical_certificate') {
+            $rules = [
+                'start_date' => 'required|date',
+                'end_date' => 'required|date',
+                'medical_condition' => 'required|string',
+            ];
+        } elseif ($templateSlug === 'consent_form') {
+            $rules = [
+                'procedure_name' => 'required|string',
+            ];
+        }
+
+        $request->validate($rules);
+
+        // Get patient data
+        $checkUpInfo = json_decode($patient->followUps()->first()->check_up_info ?? '{}', true);
+        $patientAge = $patient->birthdate
+            ? floor(abs(now()->diffInYears($patient->birthdate)))
+            : 'N/A';
+
+        // Build placeholder data
+        $data = [
+            'patient_name' => $patient->name,
+            'patient_age' => $patientAge,
+            'current_date' => now()->format('d/m/Y'),
+            'branch' => $checkUpInfo['branch_name'] ?? '',
+        ];
+
+        // Add template-specific data
+        if ($templateSlug === 'medical_certificate') {
+            $data['start_date'] = Carbon::parse($request->start_date)->format('d/m/Y');
+            $data['end_date'] = Carbon::parse($request->end_date)->format('d/m/Y');
+            $data['medical_condition'] = $request->medical_condition;
+        } elseif ($templateSlug === 'consent_form') {
+            $data['procedure_name'] = $request->procedure_name;
+        }
+
+        // Render the template with data
+        $htmlContent = $template->render($data);
+
+        // Generate PDF from HTML content
+        $pdf = PDF::loadHTML($htmlContent);
+
+        $filename = Str::slug($template->name) . '_' . Str::slug($patient->name) . '.pdf';
+
+        return $pdf->inline($filename);
     }
 
     private function generatePatientId($name, $dob, $mobile)

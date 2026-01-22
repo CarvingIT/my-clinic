@@ -160,6 +160,7 @@ Route::middleware(['auth', DoctorMiddleware::class])->group(function () {
     Route::delete('/uploads/{id}', [UploadController::class, 'destroy'])->name('uploads.destroy'); // Doctor can delete uploaded files
     Route::get('/uploads/{id}', [UploadController::class, 'show'])->name('uploads.show'); // Doctor can view uploaded files
     Route::get('/patients/{patient}/certificate', [PatientController::class, 'generateCertificate'])->name('patients.certificate'); // Doctor can generate patient certificates
+    Route::get('/patients/{patient}/template/{templateSlug}', [PatientController::class, 'generateFromTemplate'])->name('patients.template'); // Doctor can generate documents from templates
     Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])->name('followups.export'); // Doctor can export follow-ups
 
     // Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index'); // Doctors can view the queue

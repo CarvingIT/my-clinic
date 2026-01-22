@@ -120,7 +120,8 @@ return [
     'Import/Export' => 'आयात/निर्यात',
     'Age/Gender' => 'वय/लिंग',
 
-
+    'Consent Form' => 'संमती पत्र',
+    'Generate Consent Form' => 'संमती पत्र तयार करा',
 
     'locale' => 'भाषा', // Label for dropdown
 
