@@ -125,4 +125,20 @@ return [
 
     'locale' => 'भाषा', // Label for dropdown
 
+    'templates' => 'नमुने',
+    'manage_document_templates_for_certificates_and_forms' => 'प्रमाणपत्रे आणि फॉर्मसाठी दस्तऐवज नमुने व्यवस्थापित करा',
+    'new_template' => 'नवीन नमुना',
+    'template' => 'नमुना',
+    'type' => 'प्रकार',
+    'placeholders' => 'स्थानधारक',
+    'status' => 'स्थिती',
+    'updated' => 'अद्यतनित',
+    'actions' => 'क्रिया',
+    'active' => 'सक्रिय',
+    'inactive' => 'निष्क्रिय',
+    'edit' => 'संपादित करा',
+    'delete' => 'हटवा',
+    'no_templates_yet' => 'अद्याप कोणतेही नमुने नाहीत',
+    'create_your_first_template_to_get_started' => 'सुरुवात करण्यासाठी आपला पहिला नमुना तयार करा',
+    'create_template' => 'नमुना तयार करा',
 ];

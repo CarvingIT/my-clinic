@@ -11,6 +11,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\PatientDuesController;
 use App\Http\Controllers\DataAnalysisController;
 use App\Http\Controllers\SyncController;
+use App\Http\Controllers\Admin\TemplateController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\StaffMiddleware;
 use App\Http\Middleware\DoctorMiddleware;
@@ -136,6 +137,10 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::get('/admin/download-export/{file}', [ImportExportController::class, 'download'])->name('admin.download-export');
     Route::get('/admin/export-files', [ImportExportController::class, 'listExportFiles'])->name('admin.export-files');
     Route::delete('/admin/export-files/{file}', [ImportExportController::class, 'deleteExportFile'])->name('admin.export-files.delete');
+
+    // Template Management
+    Route::resource('/admin/templates', TemplateController::class)->names('admin.templates');
+    Route::post('/admin/templates/{template}/toggle-status', [TemplateController::class, 'toggleStatus'])->name('admin.templates.toggle-status');
 });
 
 // Staff Routes

@@ -262,82 +262,98 @@
 
                             <div x-data="{ open: false }">
                                 <button @click="open = true"
-                                    class="bg-emerald-400	 hover:bg-emerald-500 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
-                                    {{ __('messages.Generate Certificate') }}
+                                    class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-6 ml-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                                    <i class="fas fa-certificate mr-2"></i>{{ __('messages.Generate Certificate') }}
                                 </button>
 
+                                <!-- Modal Backdrop -->
                                 <div x-show="open" x-cloak
-                                    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
-                                    <div class="relative w-auto max-w-3xl mx-auto my-6">
-                                        <!--content-->
-                                        <div
-                                            class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-                                            <!--header-->
-                                            <div
-                                                class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
-                                                <h3 class="text-3xl font-semibold text-gray-800 dark:text-gray-200">
+                                    x-transition:enter="transition ease-out duration-300"
+                                    x-transition:enter-start="opacity-0"
+                                    x-transition:enter-end="opacity-100"
+                                    x-transition:leave="transition ease-in duration-200"
+                                    x-transition:leave-start="opacity-100"
+                                    x-transition:leave-end="opacity-0"
+                                    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto bg-black bg-opacity-50 backdrop-blur-sm"
+                                    @keydown.escape.window="open = false">
+
+                                    <!-- Modal Content -->
+                                    <div x-show="open"
+                                        x-transition:enter="transition ease-out duration-300"
+                                        x-transition:enter-start="opacity-0 scale-95"
+                                        x-transition:enter-end="opacity-100 scale-100"
+                                        x-transition:leave="transition ease-in duration-200"
+                                        x-transition:leave-start="opacity-100 scale-100"
+                                        x-transition:leave-end="opacity-0 scale-95"
+                                        class="relative w-full max-w-2xl mx-4 my-6 bg-white rounded-xl shadow-2xl border border-gray-200"
+                                        @click.away="open = false">
+
+                                        <!-- Header -->
+                                        <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-green-50 rounded-t-xl">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center mr-3">
+                                                    <i class="fas fa-certificate text-white"></i>
+                                                </div>
+                                                <h3 class="text-xl font-bold text-gray-900">
                                                     {{ __('messages.Generate Certificate') }}
                                                 </h3>
-                                                <button
-                                                    class="p-1 ms-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                                                    onclick="toggleModal('modal-id')" @click="open = false">
-                                                    <span class=" text-red-800 h-6 w-6 text-2xl block">
-                                                        ×
-                                                    </span>
-                                                </button>
                                             </div>
-                                            <!--body-->
-                                            <div class="relative p-6 flex-auto">
-                                                <form method="GET"
-                                                    action="{{ route('patients.certificate', $patient) }}"
-                                                    target="_blank">
-                                                    @csrf
+                                            <button @click="open = false"
+                                                class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors duration-200"
+                                                aria-label="Close modal">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
 
-                                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                                        <div>
-                                                            <x-input-label for="start_date" :value="__('Start Date')" />
-                                                            <x-text-input type="date" id="start_date"
-                                                                name="start_date" value="{{ old('start_date') }}"
-                                                                class="mt-1 block w-full" />
-                                                            <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
-                                                        </div>
+                                        <!-- Body -->
+                                        <div class="p-6">
+                                            <form method="GET" action="{{ route('patients.certificate', $patient) }}" target="_blank">
+                                                @csrf
 
-                                                        <div>
-                                                            <x-input-label for="end_date" :value="__('End Date')" />
-                                                            <x-text-input type="date" id="end_date" name="end_date"
-                                                                value="{{ old('end_date') }}"
-                                                                class="mt-1 block w-full" />
-                                                            <x-input-error :messages="$errors->get('end_date')" class="mt-2" />
-                                                        </div>
-
-                                                        <div>
-                                                            <x-input-label for="medical_condition" :value="__('Medical Condition')" />
-                                                            <x-text-input type="text" id="medical_condition"
-                                                                name="medical_condition"
-                                                                value="{{ old('medical_condition') }}"
-                                                                class="mt-1 block w-full border-x-2" />
-                                                            <x-input-error :messages="$errors->get('medical_condition')" class="mt-2" />
-                                                        </div>
+                                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                                                    <div class="space-y-2">
+                                                        <x-input-label for="start_date" :value="__('Start Date')" class="text-sm font-medium text-gray-700" />
+                                                        <x-text-input type="date" id="start_date" name="start_date"
+                                                            value="{{ old('start_date') }}"
+                                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200"
+                                                            required />
+                                                        <x-input-error :messages="$errors->get('start_date')" class="text-sm text-red-600 mt-1" />
                                                     </div>
 
-
-                                                    <!--footer-->
-                                                    <div
-                                                        class="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b">
-                                                        <button
-                                                            class="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none ms-1 mb-1 ease-linear transition-all duration-150"
-                                                            type="button" @click="open = false">
-                                                            {{ __('messages.Close') }}
-                                                        </button>
-
-                                                        <button type="submit"
-                                                            class="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                                                            type="button">
-                                                            {{ __('messages.Generate Certificate') }}
-                                                        </button>
+                                                    <div class="space-y-2">
+                                                        <x-input-label for="end_date" :value="__('End Date')" class="text-sm font-medium text-gray-700" />
+                                                        <x-text-input type="date" id="end_date" name="end_date"
+                                                            value="{{ old('end_date') }}"
+                                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200"
+                                                            required />
+                                                        <x-input-error :messages="$errors->get('end_date')" class="text-sm text-red-600 mt-1" />
                                                     </div>
-                                                </form>
-                                            </div>
+
+                                                    <div class="space-y-2 md:col-span-2 lg:col-span-1">
+                                                        <x-input-label for="medical_condition" :value="__('Medical Condition')" class="text-sm font-medium text-gray-700" />
+                                                        <x-text-input type="text" id="medical_condition" name="medical_condition"
+                                                            value="{{ old('medical_condition') }}"
+                                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200"
+                                                            placeholder="Enter medical condition"
+                                                            required />
+                                                        <x-input-error :messages="$errors->get('medical_condition')" class="text-sm text-red-600 mt-1" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Footer -->
+                                                <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
+                                                    <button type="button" @click="open = false"
+                                                        class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
+                                                        {{ __('messages.Close') }}
+                                                    </button>
+                                                    <button type="submit"
+                                                        class="px-6 py-2.5 text-sm font-medium text-white bg-emerald-500 hover:bg-emerald-600 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                                                        <i class="fas fa-download mr-2"></i>{{ __('messages.Generate Certificate') }}
+                                                    </button>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>
@@ -346,65 +362,94 @@
                             {{-- Consent Form Button --}}
                             <div x-data="{ openConsentModal: false }">
                                 <button @click="openConsentModal = true"
-                                    class="bg-amber-500 hover:bg-amber-600 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
-                                    {{ __('messages.Consent Form') }}
+                                    class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 px-6 ml-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                                    <i class="fas fa-file-signature mr-2"></i>{{ __('messages.Consent Form') }}
                                 </button>
 
+                                <!-- Modal Backdrop -->
                                 <div x-show="openConsentModal" x-cloak
-                                    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none focus:outline-none">
-                                    <div class="relative w-auto max-w-3xl mx-auto my-6">
-                                        <!--content-->
-                                        <div
-                                            class="border-0 rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none">
-                                            <!--header-->
-                                            <div
-                                                class="flex items-start justify-between p-5 border-b border-solid border-blueGray-200 rounded-t">
-                                                <h3 class="text-3xl font-semibold text-gray-800 dark:text-gray-200">
+                                    x-transition:enter="transition ease-out duration-300"
+                                    x-transition:enter-start="opacity-0"
+                                    x-transition:enter-end="opacity-100"
+                                    x-transition:leave="transition ease-in duration-200"
+                                    x-transition:leave-start="opacity-100"
+                                    x-transition:leave-end="opacity-0"
+                                    class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto bg-black bg-opacity-50 backdrop-blur-sm"
+                                    @keydown.escape.window="openConsentModal = false">
+
+                                    <!-- Modal Content -->
+                                    <div x-show="openConsentModal"
+                                        x-transition:enter="transition ease-out duration-300"
+                                        x-transition:enter-start="opacity-0 scale-95"
+                                        x-transition:enter-end="opacity-100 scale-100"
+                                        x-transition:leave="transition ease-in duration-200"
+                                        x-transition:leave-start="opacity-100 scale-100"
+                                        x-transition:leave-end="opacity-0 scale-95"
+                                        class="relative w-full max-w-2xl mx-4 my-6 bg-white rounded-xl shadow-2xl border border-gray-200"
+                                        @click.away="openConsentModal = false">
+
+                                        <!-- Header -->
+                                        <div class="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-t-xl">
+                                            <div class="flex items-center">
+                                                <div class="flex-shrink-0 w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center mr-3">
+                                                    <i class="fas fa-file-signature text-white"></i>
+                                                </div>
+                                                <h3 class="text-xl font-bold text-gray-900">
                                                     {{ __('messages.Consent Form') }}
                                                 </h3>
-                                                <button
-                                                    class="p-1 ms-auto bg-transparent border-0 text-black opacity-5 float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                                                    @click="openConsentModal = false">
-                                                    <span class="text-red-800 h-6 w-6 text-2xl block">
-                                                        ×
-                                                    </span>
-                                                </button>
                                             </div>
-                                            <!--body-->
-                                            <div class="relative p-6 flex-auto">
-                                                <form method="GET"
-                                                    action="{{ route('patients.template', ['patient' => $patient, 'templateSlug' => 'consent_form']) }}"
-                                                    target="_blank">
-                                                    @csrf
+                                            <button @click="openConsentModal = false"
+                                                class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-colors duration-200"
+                                                aria-label="Close modal">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
 
-                                                    <div class="grid grid-cols-1 gap-6">
-                                                        <div>
-                                                            <x-input-label for="procedure_name" :value="__('Procedure/Treatment Name')" />
-                                                            <x-text-input type="text" id="procedure_name"
-                                                                name="procedure_name"
-                                                                value="{{ old('procedure_name') }}"
-                                                                class="mt-1 block w-full"
-                                                                placeholder="Enter procedure or treatment name" />
-                                                            <x-input-error :messages="$errors->get('procedure_name')" class="mt-2" />
+                                        <!-- Body -->
+                                        <div class="p-6">
+                                            <form method="GET" action="{{ route('patients.template', ['patient' => $patient, 'templateSlug' => 'consent_form']) }}" target="_blank">
+                                                @csrf
+
+                                                <div class="space-y-6">
+                                                    <div class="space-y-2">
+                                                        <x-input-label for="procedure_name" :value="__('Procedure/Treatment Name')" class="text-sm font-medium text-gray-700" />
+                                                        <x-text-input type="text" id="procedure_name" name="procedure_name"
+                                                            value="{{ old('procedure_name') }}"
+                                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-colors duration-200"
+                                                            placeholder="Enter procedure or treatment name"
+                                                            required />
+                                                        <x-input-error :messages="$errors->get('procedure_name')" class="text-sm text-red-600 mt-1" />
+                                                    </div>
+
+                                                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                                                        <div class="flex items-start">
+                                                            <div class="flex-shrink-0">
+                                                                <i class="fas fa-info-circle text-amber-500 mt-0.5"></i>
+                                                            </div>
+                                                            <div class="ml-3">
+                                                                <h4 class="text-sm font-medium text-amber-800">Information</h4>
+                                                                <p class="text-sm text-amber-700 mt-1">
+                                                                    This consent form will be generated with the patient's details and the specified procedure/treatment.
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
+                                                </div>
 
-                                                    <!--footer-->
-                                                    <div
-                                                        class="flex items-center justify-end p-6 border-t border-solid border-blueGray-200 rounded-b mt-4">
-                                                        <button
-                                                            class="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none ms-1 mb-1 ease-linear transition-all duration-150"
-                                                            type="button" @click="openConsentModal = false">
-                                                            {{ __('messages.Close') }}
-                                                        </button>
-
-                                                        <button type="submit"
-                                                            class="bg-amber-500 text-white active:bg-amber-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150">
-                                                            {{ __('messages.Generate Consent Form') }}
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
+                                                <!-- Footer -->
+                                                <div class="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200 mt-6">
+                                                    <button type="button" @click="openConsentModal = false"
+                                                        class="px-6 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
+                                                        {{ __('messages.Close') }}
+                                                    </button>
+                                                    <button type="submit"
+                                                        class="px-6 py-2.5 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                                                        <i class="fas fa-download mr-2"></i>{{ __('messages.Generate Consent Form') }}
+                                                    </button>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
                                 </div>

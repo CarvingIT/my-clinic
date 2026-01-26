@@ -267,17 +267,50 @@ class PatientController extends Controller
             'medical_condition' => 'required|string',
         ]);
 
-        $checkUpInfo = json_decode($patient->followUps()->first()->check_up_info ?? '', true);
+        // Use the medical certificate template from database
+        $template = Template::findBySlug('medical_certificate');
 
-        $pdf = PDF::loadView('patients.certificate', [
-            'patient' => $patient,
-            'checkUpInfo' => $checkUpInfo,
-            'startDate' => $request->start_date,
-            'endDate' => $request->end_date,
-            'medicalCondition' => $request->medical_condition,
-        ]);
+        if (!$template || !$template->is_active) {
+            // Fallback to old hardcoded method if template not found
+            $checkUpInfo = json_decode($patient->followUps()->first()->check_up_info ?? '', true);
 
-        return $pdf->inline('certificate_' . $patient->name . '.pdf');
+            $pdf = PDF::loadView('patients.certificate', [
+                'patient' => $patient,
+                'checkUpInfo' => $checkUpInfo,
+                'startDate' => $request->start_date,
+                'endDate' => $request->end_date,
+                'medicalCondition' => $request->medical_condition,
+            ]);
+
+            return $pdf->inline('certificate_' . $patient->name . '.pdf');
+        }
+
+        // Get patient data
+        $checkUpInfo = json_decode($patient->followUps()->first()->check_up_info ?? '{}', true);
+        $patientAge = $patient->birthdate
+            ? floor(abs(now()->diffInYears($patient->birthdate)))
+            : 'N/A';
+
+        // Build placeholder data
+        $data = [
+            'patient_name' => $patient->name,
+            'patient_age' => $patientAge,
+            'current_date' => now()->format('d/m/Y'),
+            'branch' => $checkUpInfo['branch_name'] ?? '',
+            'start_date' => \Carbon\Carbon::parse($request->start_date)->format('d/m/Y'),
+            'end_date' => \Carbon\Carbon::parse($request->end_date)->format('d/m/Y'),
+            'medical_condition' => $request->medical_condition,
+        ];
+
+        // Render the template with data
+        $htmlContent = $template->render($data);
+
+        // Generate PDF from HTML content
+        $pdf = PDF::loadHTML($htmlContent);
+
+        $filename = 'certificate_' . Str::slug($patient->name) . '.pdf';
+
+        return $pdf->inline($filename);
     }
 
     /**

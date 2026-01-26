@@ -117,6 +117,12 @@
                     <x-nav-link :href="route('queue.index')" :active="request()->routeIs('queue.index')">
                         {{ __('messages.Queue') }}
                     </x-nav-link>
+
+                    @if (Auth::user()->hasRole('admin'))
+                        <x-nav-link :href="route('admin.templates.index')" :active="request()->routeIs('admin.templates.*')">
+                            {{ __('messages.templates') }}
+                        </x-nav-link>
+                    @endif
                     {{-- <x-nav-link :href="route('data-analysis.index')" :active="request()->routeIs('data-analysis.index')">
                         {{ __('Data Analysis') }}
                     </x-nav-link> --}}
