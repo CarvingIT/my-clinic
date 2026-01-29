@@ -105,7 +105,7 @@
         <div class="footer">
             <div class="doctor-signature"></div>
             <p>Doctor's Name and Signature</p>
-            <p>Branch: {{ $checkUpInfo['branch'] ?? '' }}</p>
+            <p>Branch: {{ $checkUpInfo['branch_name'] ?? '' }}</p>
         </div>
     </div>
 </body>

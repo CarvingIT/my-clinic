@@ -121,7 +121,25 @@ return [
     'Import/Export' => 'Import/Export',
     'Age/Gender' => 'Age/Gender',
 
-
+    'Consent Form' => 'Consent Form',
+    'Generate Consent Form' => 'Generate Consent Form',
 
     'locale' => 'Language', // Label for dropdown
+
+    'templates' => 'Templates',
+    'manage_document_templates_for_certificates_and_forms' => 'Manage document templates for certificates and forms',
+    'new_template' => 'New Template',
+    'template' => 'Template',
+    'type' => 'Type',
+    'placeholders' => 'Placeholders',
+    'status' => 'Status',
+    'updated' => 'Updated',
+    'actions' => 'Actions',
+    'active' => 'Active',
+    'inactive' => 'Inactive',
+    'edit' => 'Edit',
+    'delete' => 'Delete',
+    'no_templates_yet' => 'No templates yet',
+    'create_your_first_template_to_get_started' => 'Create your first template to get started',
+    'create_template' => 'Create Template',
 ];
