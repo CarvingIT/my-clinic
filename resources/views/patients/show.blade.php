@@ -19,7 +19,9 @@
                     @endif
 
                     <div class="mb-4">
-                        <div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Patient Info (Left Side - 2/3 width) -->
+                        <div class="lg:col-span-2">
                             <!-- Patient Header with Profile Picture -->
                             <div class="flex items-center gap-4 mb-4">
                                 @php
@@ -73,10 +75,10 @@
                             </div>
 
                             <!-- Complete Patient Information Grid -->
-                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-sm" x-data="{ showMore: false }">
-                                <!-- Vishesh Field - Always visible and spans 3 columns -->
+                            <div class="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-3 text-sm" x-data="{ showMore: false }">
+                                <!-- Vishesh Field - Always visible and spans 2 columns -->
                                 @if ($patient->vishesh)
-                                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded lg:col-span-3 mt-4">
+                                    <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded lg:col-span-2 mt-4">
                                         <span class="font-semibold text-gray-700 dark:text-gray-300 text-lg">{{ __('messages.Vishesh') }}:</span>
                                         <span class="text-gray-600 dark:text-gray-400 ml-1 text-base leading-relaxed">
                                             {!! nl2br(html_entity_decode(strip_tags($patient->vishesh))) !!}
@@ -166,7 +168,7 @@
 
                                 <!-- Read More Button -->
                                                                 <!-- Read More Button -->
-                                <div class="lg:col-span-3 flex justify-center mt-2">
+                                <div class="lg:col-span-2 flex justify-center mt-2">
                                                                         <button @click="showMore = !showMore"
                                             class="bg-white hover:bg-indigo-50 text-indigo-600 hover:text-indigo-700 text-xs font-medium py-1 px-2 rounded-lg border border-indigo-200 hover:border-indigo-300 shadow-sm hover:shadow-md transition-all duration-300 ease-in-out transform hover:scale-105">
                                         <span x-show="!showMore">{{ __('Read More') }}</span>
@@ -180,10 +182,110 @@
 
                         </div>
 
+                        <!-- Reports Section (Right Side - 1/3 width) -->
+                        <div class="lg:col-span-1">
+                            @php
+                                $allReports = [];
+                                foreach ($patient->followUps as $followUp) {
+                                    $checkUpInfo = json_decode($followUp->check_up_info, true) ?? [];
+                                    if (!empty($checkUpInfo['reports']) && is_array($checkUpInfo['reports'])) {
+                                        foreach ($checkUpInfo['reports'] as $index => $report) {
+                                            if (isset($report['deleted_at'])) {
+                                                continue;
+                                            }
+                                            $allReports[] = [
+                                                'text' => $report['text'] ?? '',
+                                                'timestamp' => $report['timestamp'] ?? '',
+                                                'followup_date' => $followUp->created_at->format('d M Y'),
+                                                'followup_id' => $followUp->id,
+                                                'report_index' => $index
+                                            ];
+                                        }
+                                    }
+                                }
+                                usort($allReports, function($a, $b) {
+                                    return strtotime($b['timestamp']) <=> strtotime($a['timestamp']);
+                                });
+                            @endphp
+                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-5 h-full shadow-lg border border-gray-200 dark:border-gray-600">
+                                <!-- Header -->
+                                <div class="flex items-center justify-between mb-4">
+                                    <h4 class="text-lg font-bold text-gray-800 dark:text-white flex items-center">
+                                        <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                        Reports
+                                    </h4>
+                                    <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-full">
+                                        {{ count($allReports) }}
+                                    </span>
+                                </div>
 
+                                <!-- Search Bar -->
+                                <div class="mb-4">
+                                    <div class="relative">
+                                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                        <input type="text" id="showReportSearch" placeholder="Search reports..."
+                                            class="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 shadow-sm">
+                                    </div>
+                                </div>
 
+                                <!-- Reports List -->
+                                <div id="showReportsList" class="space-y-3 max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-300 dark:scrollbar-thumb-indigo-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
+                                    @if(count($allReports) > 0)
+                                        @foreach($allReports as $report)
+                                            <div class="show-report-item bg-white dark:bg-gray-600 p-3 rounded-md shadow-sm border border-gray-200 dark:border-gray-500"
+                                                 data-text="{{ strtolower($report['text']) }}"
+                                                 data-timestamp="{{ $report['timestamp'] }}"
+                                                 data-followup-date="{{ $report['followup_date'] }}"
+                                                 data-original-text="{{ $report['text'] }}"
+                                                 data-followup-id="{{ $report['followup_id'] }}"
+                                                 data-report-index="{{ $report['report_index'] }}">
+                                                <div class="flex justify-between items-start">
+                                                    <div class="flex-1">
+                                                        <div class="show-report-text text-sm text-gray-800 dark:text-gray-200 font-medium">
+                                                            {!! nl2br(e($report['text'])) !!}
+                                                        </div>
+                                                        <div class="show-report-date text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                            {{ $report['timestamp'] }} • Follow-up: {{ $report['followup_date'] }}
+                                                        </div>
+                                                    </div>
+                                                    @if (Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')))
+                                                    <div class="flex flex-col space-y-1 ml-2">
+                                                        <button type="button" onclick="showEditReport(this)"
+                                                            class="w-6 h-6 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center justify-center"
+                                                            title="Edit">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button type="button" onclick="showDeleteReport(this)"
+                                                            class="w-6 h-6 bg-red-500 text-white rounded hover:bg-red-600 transition flex items-center justify-center"
+                                                            title="Delete">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="text-center text-gray-500 dark:text-gray-400 py-8">
+                                            <svg class="w-10 h-10 mx-auto mb-2 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            <div class="text-sm">No reports found</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
 
-                        <!-- Add Follow Up Button -->
+                        </div>{{-- End grid --}}
                         <div class="flex justify-end mb-8 mt-3">
                             <a href="{{ route('followups.create', ['patient' => $patient->id]) }}"
                                 class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-md shadow-md transition duration-300">
@@ -1233,6 +1335,154 @@
     </div>
 
 </x-app-layout>
+
+<!-- Report Edit Modal (for show page) -->
+<div id="showReportModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Edit Report</h2>
+        <div class="mb-4">
+            <label class="block text-sm text-gray-700 dark:text-gray-300 mb-2">Report Text</label>
+            <textarea id="showReportText" rows="4" placeholder="Enter your report here..."
+                class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
+        </div>
+        <div class="flex justify-end gap-3">
+            <button type="button" onclick="closeShowReportModal()"
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500 rounded-lg">Cancel</button>
+            <button type="button" onclick="saveShowReport()"
+                class="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg">Update</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Show page report functionality
+    let showEditFollowupId = null;
+    let showEditReportIndex = null;
+    let showEditReportItem = null;
+
+    function showEditReport(button) {
+        const item = button.closest('.show-report-item');
+        showEditFollowupId = item.dataset.followupId;
+        showEditReportIndex = item.dataset.reportIndex;
+        showEditReportItem = item;
+        document.getElementById('showReportText').value = item.dataset.originalText;
+        const modal = document.getElementById('showReportModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('showReportText').focus();
+    }
+
+    function closeShowReportModal() {
+        const modal = document.getElementById('showReportModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.getElementById('showReportText').value = '';
+        showEditFollowupId = null;
+        showEditReportIndex = null;
+        showEditReportItem = null;
+    }
+
+    function saveShowReport() {
+        const reportText = document.getElementById('showReportText').value.trim();
+        if (!reportText) {
+            alert('Please enter a report.');
+            return;
+        }
+        fetch(`/followups/${showEditFollowupId}/reports/${showEditReportIndex}`, {
+            method: 'PUT',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text: reportText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const textDiv = showEditReportItem.querySelector('.show-report-text');
+                if (textDiv) {
+                    textDiv.innerHTML = reportText.replace(/\n/g, '<br>');
+                }
+                showEditReportItem.dataset.originalText = reportText;
+                showEditReportItem.dataset.text = reportText.toLowerCase();
+                closeShowReportModal();
+            } else {
+                alert('Error updating report: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(() => alert('Error updating report. Please try again.'));
+    }
+
+    function showDeleteReport(button) {
+        if (!confirm('Are you sure you want to delete this report?')) return;
+        const item = button.closest('.show-report-item');
+        const followupId = item.dataset.followupId;
+        const reportIndex = item.dataset.reportIndex;
+        fetch(`/followups/${followupId}/reports/${reportIndex}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                item.remove();
+                // Update count badge
+                const remaining = document.querySelectorAll('.show-report-item').length;
+                const badge = document.querySelector('#showReportsList').closest('.bg-gradient-to-br').querySelector('.rounded-full');
+                if (badge) badge.textContent = remaining;
+            } else {
+                alert('Error deleting report: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(() => alert('Error deleting report. Please try again.'));
+    }
+
+    // Search functionality for show page reports
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('showReportSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                const term = this.value.toLowerCase().trim();
+                document.querySelectorAll('.show-report-item').forEach(item => {
+                    const text = item.dataset.text || '';
+                    const followupDate = item.dataset.followupDate || '';
+                    const matches = !term || text.includes(term) || followupDate.toLowerCase().includes(term);
+                    item.style.display = matches ? 'block' : 'none';
+
+                    if (matches && term) {
+                        const textDiv = item.querySelector('.show-report-text');
+                        const dateDiv = item.querySelector('.show-report-date');
+                        const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                        if (textDiv) textDiv.innerHTML = item.dataset.originalText.replace(/\n/g, '<br>').replace(regex, '<mark>$1</mark>');
+                        if (dateDiv) dateDiv.innerHTML = (item.dataset.timestamp + ' • Follow-up: ' + item.dataset.followupDate).replace(regex, '<mark>$1</mark>');
+                    } else if (!term) {
+                        const textDiv = item.querySelector('.show-report-text');
+                        const dateDiv = item.querySelector('.show-report-date');
+                        if (textDiv) textDiv.innerHTML = item.dataset.originalText.replace(/\n/g, '<br>');
+                        if (dateDiv) dateDiv.innerHTML = item.dataset.timestamp + ' • Follow-up: ' + item.dataset.followupDate;
+                    }
+                });
+            });
+        }
+
+        // Close modal on outside click
+        document.getElementById('showReportModal').addEventListener('click', function (e) {
+            if (e.target === this) closeShowReportModal();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !document.getElementById('showReportModal').classList.contains('hidden')) {
+                closeShowReportModal();
+            }
+        });
+    });
+</script>
 
 <script>
     function confirmDelete() {
