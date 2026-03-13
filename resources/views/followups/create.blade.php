@@ -593,7 +593,7 @@ $previousChikitsa = $latestFollowUp
                                             // Payment method deselection functionality
                                             let lastSelectedPaymentMethod = null;
                                             const paymentMethodRadios = document.querySelectorAll('.payment-method-radio');
-                                            
+
                                             paymentMethodRadios.forEach(radio => {
                                                 radio.addEventListener('click', function(e) {
                                                     if (this.checked && lastSelectedPaymentMethod === this.value) {
