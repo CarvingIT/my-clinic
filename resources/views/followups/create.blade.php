@@ -573,21 +573,48 @@ $previousChikitsa = $latestFollowUp
                                                 {{ __('messages.Payment Method') }}
                                             </label>
                                             <div class="flex items-center space-x-2">
-                                                <label class="flex items-center space-x-1">
-                                                    <input type="radio" name="payment_method" value="cash" />
+                                                <label class="flex items-center space-x-1 cursor-pointer">
+                                                    <input type="radio" name="payment_method" value="cash" class="payment-method-radio" />
                                                     <span>Cash</span>
                                                 </label>
-                                                <label class="flex items-center space-x-1">
-                                                    <input type="radio" name="payment_method" value="card" />
+                                                <label class="flex items-center space-x-1 cursor-pointer">
+                                                    <input type="radio" name="payment_method" value="card" class="payment-method-radio" />
                                                     <span>Card</span>
                                                 </label>
-                                                <label class="flex items-center space-x-1">
-                                                    <input type="radio" name="payment_method" value="online" />
+                                                <label class="flex items-center space-x-1 cursor-pointer">
+                                                    <input type="radio" name="payment_method" value="online" class="payment-method-radio" />
                                                     <span>Online</span>
                                                 </label>
                                             </div>
                                             <x-input-error :messages="$errors->get('payment_method')" class="mt-1" />
                                         </div>
+
+                                        <script>
+                                            // Payment method deselection functionality
+                                            let lastSelectedPaymentMethod = null;
+                                            const paymentMethodRadios = document.querySelectorAll('.payment-method-radio');
+
+                                            paymentMethodRadios.forEach(radio => {
+                                                radio.addEventListener('click', function(e) {
+                                                    if (this.checked && lastSelectedPaymentMethod === this.value) {
+                                                        // If clicking the same option that's already selected, deselect it
+                                                        this.checked = false;
+                                                        lastSelectedPaymentMethod = null;
+                                                    } else {
+                                                        // If clicking a different option, select it
+                                                        lastSelectedPaymentMethod = this.value;
+                                                    }
+                                                });
+                                            });
+
+                                            // Initialize last selected on page load
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                const checkedRadio = document.querySelector('.payment-method-radio:checked');
+                                                if (checkedRadio) {
+                                                    lastSelectedPaymentMethod = checkedRadio.value;
+                                                }
+                                            });
+                                        </script>
 
 
                                     </div>

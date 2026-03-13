@@ -26,6 +26,7 @@ use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ImportExportController;
+use App\Http\Controllers\PrescriptionController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -167,6 +168,10 @@ Route::middleware(['auth', DoctorMiddleware::class])->group(function () {
     Route::get('/patients/{patient}/certificate', [PatientController::class, 'generateCertificate'])->name('patients.certificate'); // Doctor can generate patient certificates
     Route::get('/patients/{patient}/template/{templateSlug}', [PatientController::class, 'generateFromTemplate'])->name('patients.template'); // Doctor can generate documents from templates
     Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])->name('followups.export'); // Doctor can export follow-ups
+
+    // Prescription routes
+    Route::get('/followups/{followup}/prescription', [PrescriptionController::class, 'generate'])->name('followups.prescription'); // Generate prescription PDF
+    Route::get('/followups/{followup}/prescription/print', [PrescriptionController::class, 'printView'])->name('followups.prescription.print'); // Print-ready HTML view
 
     // Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index'); // Doctors can view the queue
     // Route::delete('/queue/{queue}', [QueueController::class, 'removeFromQueue'])->name('queue.remove'); // Doctors can remove patients from the queue
