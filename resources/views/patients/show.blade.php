@@ -25,7 +25,7 @@
                             <!-- Patient Header with Profile Picture -->
                             <div class="flex items-center gap-4 mb-4">
                                 @php
-                                    $profilePhoto = $uploads->where('photo_type', 'patient_photo')->sortByDesc('created_at')->first();
+                                    $profilePhoto = $uploads->where('photo_type', 'patient_photo')->sortBy('created_at')->first();
                                 @endphp
 
                                 <!-- Profile Picture -->
