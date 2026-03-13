@@ -31,6 +31,7 @@
             border-radius: 6px;
             overflow: hidden;
             position: relative;
+            margin-top: 60mm; /* Space for letterhead */
         }
 
         /* Header */
@@ -251,10 +252,7 @@
     <div class="prescription-page">
         <div class="watermark">PRESCRIPTION</div>
 
-        <div class="header">
-            <div class="clinic-name">जातेगांवकर चिकित्सालय</div>
-            <div class="clinic-tagline">{{ '{branch_name}' }}</div>
-        </div>
+        <!-- Header removed - using printed letterhead -->
 
         <div class="patient-bar">
             <div class="patient-grid">
