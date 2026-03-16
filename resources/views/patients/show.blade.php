@@ -185,8 +185,10 @@
                         <!-- Reports Section (Right Side - 1/3 width) -->
                         <div class="lg:col-span-1">
                             @php
+                                // Load ALL followups without pagination for reports section
+                                $allFollowups = \App\Models\FollowUp::where('patient_id', $patient->id)->get();
                                 $allReports = [];
-                                foreach ($patient->followUps as $followUp) {
+                                foreach ($allFollowups as $followUp) {
                                     $checkUpInfo = json_decode($followUp->check_up_info, true) ?? [];
                                     if (!empty($checkUpInfo['reports']) && is_array($checkUpInfo['reports'])) {
                                         foreach ($checkUpInfo['reports'] as $index => $report) {
@@ -216,9 +218,33 @@
                                         </svg>
                                         Reports
                                     </h4>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-full">
-                                        {{ count($allReports) }}
-                                    </span>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 bg-gray-200 dark:bg-gray-600 px-3 py-1 rounded-full font-medium">
+                                            {{ count($allReports) }}
+                                        </span>
+                                        @if (Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')) && $allFollowups->count() > 0)
+                                        <div class="relative" x-data="{ dropdownOpen: false }">
+                                            <button @click="dropdownOpen = !dropdownOpen" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white text-sm font-medium rounded-lg hover:from-indigo-700 hover:to-indigo-800 transform hover:scale-105 transition-all duration-200 shadow-md flex items-center gap-1" title="Add Report">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                                </svg>
+                                                <span>Add</span>
+                                            </button>
+                                            <!-- Dropdown Menu -->
+                                            <div @click.outside="dropdownOpen = false" x-show="dropdownOpen" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="absolute right-0 mt-2 bg-white dark:bg-gray-700 rounded-lg shadow-xl z-20 border border-gray-300 dark:border-gray-600 overflow-hidden min-w-56 max-h-72 overflow-y-auto">
+                                                @forelse ($allFollowups->sortByDesc('created_at') as $followUp)
+                                                    <button type="button" @click="dropdownOpen = false" onclick="openShowReportModal(this)" data-followup-id="{{ $followUp->id }}"
+                                                        class="block w-full text-left px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-indigo-50 dark:hover:bg-indigo-900/40 transition border-b border-gray-100 dark:border-gray-600 last:border-b-0">
+                                                        <div class="font-medium">{{ $followUp->created_at->format('d M Y') }}</div>
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400">{{ $followUp->created_at->format('H:i') }}</div>
+                                                    </button>
+                                                @empty
+                                                    <div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">No follow-ups available</div>
+                                                @endforelse
+                                            </div>
+                                        </div>
+                                        @endif
+                                    </div>
                                 </div>
 
                                 <!-- Search Bar -->
@@ -1336,10 +1362,10 @@
 
 </x-app-layout>
 
-<!-- Report Edit Modal (for show page) -->
+<!-- Report Modal (for show page) -->
 <div id="showReportModal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50">
     <div class="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Edit Report</h2>
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4" id="showReportModalTitle">Edit Report</h2>
         <div class="mb-4">
             <label class="block text-sm text-gray-700 dark:text-gray-300 mb-2">Report Text</label>
             <textarea id="showReportText" rows="4" placeholder="Enter your report here..."
@@ -1349,7 +1375,7 @@
             <button type="button" onclick="closeShowReportModal()"
                 class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-500 rounded-lg">Cancel</button>
             <button type="button" onclick="saveShowReport()"
-                class="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg">Update</button>
+                class="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg" id="showReportSaveBtn">Update</button>
         </div>
     </div>
 </div>
@@ -1359,14 +1385,44 @@
     let showEditFollowupId = null;
     let showEditReportIndex = null;
     let showEditReportItem = null;
+    let showReportMode = 'edit'; // 'edit' or 'create'
+
+    function openShowReportModal(button) {
+        // Creating a new report
+        showReportMode = 'create';
+        showEditFollowupId = button.dataset.followupId;
+        showEditReportIndex = null;
+        showEditReportItem = null;
+
+        const modal = document.getElementById('showReportModal');
+        const modalTitle = document.getElementById('showReportModalTitle');
+        const saveBtn = document.getElementById('showReportSaveBtn');
+
+        modalTitle.textContent = 'Add New Report';
+        saveBtn.textContent = 'Add Report';
+
+        document.getElementById('showReportText').value = '';
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.getElementById('showReportText').focus();
+    }
 
     function showEditReport(button) {
+        // Editing an existing report
         const item = button.closest('.show-report-item');
+        showReportMode = 'edit';
         showEditFollowupId = item.dataset.followupId;
         showEditReportIndex = item.dataset.reportIndex;
         showEditReportItem = item;
-        document.getElementById('showReportText').value = item.dataset.originalText;
+
         const modal = document.getElementById('showReportModal');
+        const modalTitle = document.getElementById('showReportModalTitle');
+        const saveBtn = document.getElementById('showReportSaveBtn');
+
+        modalTitle.textContent = 'Edit Report';
+        saveBtn.textContent = 'Update';
+
+        document.getElementById('showReportText').value = item.dataset.originalText;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.getElementById('showReportText').focus();
@@ -1377,6 +1433,7 @@
         modal.classList.add('hidden');
         modal.classList.remove('flex');
         document.getElementById('showReportText').value = '';
+        showReportMode = 'edit';
         showEditFollowupId = null;
         showEditReportIndex = null;
         showEditReportItem = null;
@@ -1388,6 +1445,76 @@
             alert('Please enter a report.');
             return;
         }
+
+        if (showReportMode === 'create') {
+            // Create new report
+            createNewReport(reportText);
+        } else {
+            // Edit existing report
+            updateExistingReport(reportText);
+        }
+    }
+
+    function createNewReport(reportText) {
+        const now = new Date();
+        const timestamp = now.getDate().toString().padStart(2, '0') + '/' +
+                         (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
+                         now.getFullYear() + ' ' +
+                         now.getHours().toString().padStart(2, '0') + ':' +
+                         now.getMinutes().toString().padStart(2, '0') + ':' +
+                         now.getSeconds().toString().padStart(2, '0');
+
+        fetch(`/followups/${showEditFollowupId}/reports`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ text: reportText })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Add the new report to the DOM
+                const reportList = document.getElementById('showReportsList');
+                if (reportList) {
+                    const newReportDiv = document.createElement('div');
+                    newReportDiv.className = 'show-report-item bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 p-4 rounded-lg shadow-sm hover:shadow-md transition';
+                    newReportDiv.dataset.followupId = showEditFollowupId;
+                    newReportDiv.dataset.reportIndex = data.reportIndex;
+                    newReportDiv.dataset.originalText = reportText;
+                    newReportDiv.dataset.text = reportText.toLowerCase();
+                    newReportDiv.dataset.timestamp = timestamp;
+                    newReportDiv.dataset.followupDate = new Date().toLocaleDateString();
+
+                    newReportDiv.innerHTML = `
+                        <div class="show-report-text text-sm font-medium text-gray-800 dark:text-white mb-2">${reportText.replace(/\n/g, '<br>')}</div>
+                        <div class="show-report-date text-xs text-gray-500 dark:text-gray-400 mb-3">${timestamp}</div>
+                        <div class="flex gap-2 justify-end">
+                            <button type="button" class="text-blue-500 hover:text-blue-700 text-xs font-medium" onclick="showEditReport(this)">Edit</button>
+                            <button type="button" class="text-red-500 hover:text-red-700 text-xs font-medium" onclick="showDeleteReport(this)">Delete</button>
+                        </div>
+                    `;
+
+                    reportList.insertBefore(newReportDiv, reportList.firstChild);
+
+                    // Update badge count
+                    const badge = reportList.closest('.bg-gradient-to-br')?.querySelector('.rounded-full');
+                    if (badge) {
+                        badge.textContent = document.querySelectorAll('.show-report-item').length;
+                    }
+
+                    closeShowReportModal();
+                }
+            } else {
+                alert('Error adding report: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(() => alert('Error adding report. Please try again.'));
+    }
+
+    function updateExistingReport(reportText) {
         fetch(`/followups/${showEditFollowupId}/reports/${showEditReportIndex}`, {
             method: 'PUT',
             headers: {

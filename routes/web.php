@@ -160,6 +160,7 @@ Route::middleware(['auth', DoctorMiddleware::class])->group(function () {
 
     Route::resource('followups', FollowUpController::class)->except(['index']); // Doctor can manage follow-ups except for listing them
     Route::resource('reports', ReportController::class)->only(['store', 'destroy']); // Doctor can store and delete reports
+    Route::post('/followups/{followup}/reports', [FollowUpController::class, 'storeReport'])->name('followups.store-report'); // Store reports for follow-ups
     Route::delete('/followups/{followup}/reports/{reportIndex}', [FollowUpController::class, 'deleteReport'])->name('followups.delete-report'); // Soft delete reports from follow-ups
     Route::put('/followups/{followup}/reports/{reportIndex}', [FollowUpController::class, 'updateReport'])->name('followups.update-report'); // Update reports from follow-ups
     Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store'); // Doctor can upload files
