@@ -1187,10 +1187,9 @@
                                             <td
                                                 class="px-6 py-4 text-gray-600 dark:text-gray-300 flex gap-4 items-center">
                                                 {{-- Print Prescription --}}
-                                                <a href="{{ route('followups.prescription.print', ['followup' => $followUp->id]) }}"
-                                                    target="_blank"
+                                                <a href="{{ route('followups.prescription.builder', ['followup' => $followUp->id]) }}"
                                                     class="text-green-600 hover:text-green-800 font-medium"
-                                                    title="Print Prescription">
+                                                    title="Build & Print Prescription">
                                                     <i class="fas fa-prescription"></i>
                                                 </a>
                                                 {{-- Download Prescription PDF --}}

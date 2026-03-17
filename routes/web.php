@@ -170,7 +170,13 @@ Route::middleware(['auth', DoctorMiddleware::class])->group(function () {
     Route::get('/patients/{patient}/template/{templateSlug}', [PatientController::class, 'generateFromTemplate'])->name('patients.template'); // Doctor can generate documents from templates
     Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])->name('followups.export'); // Doctor can export follow-ups
 
-    // Prescription routes
+
+    // Prescription routes - NEW WORKFLOW
+    Route::get('/followups/{followup}/prescription/builder', [PrescriptionController::class, 'builder'])->name('followups.prescription.builder'); // Show field selector
+    Route::post('/followups/{followup}/prescription/build', [PrescriptionController::class, 'buildWithSelection'])->name('followups.prescription.build'); // Build with selections
+    Route::post('/followups/{followup}/prescription/download', [PrescriptionController::class, 'downloadPdf'])->name('followups.prescription.download'); // Download as PDF
+
+    // Legacy routes (for backward compatibility)
     Route::get('/followups/{followup}/prescription', [PrescriptionController::class, 'generate'])->name('followups.prescription'); // Generate prescription PDF
     Route::get('/followups/{followup}/prescription/print', [PrescriptionController::class, 'printView'])->name('followups.prescription.print'); // Print-ready HTML view
 

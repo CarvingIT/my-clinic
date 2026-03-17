@@ -18,7 +18,279 @@ class PrescriptionController extends Controller
     }
 
     /**
-     * Generate a prescription PDF for a specific follow-up.
+     * Show the prescription builder where user can select fields to include.
+     *
+     * @param FollowUp $followup
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function builder(FollowUp $followup)
+    {
+        $patient = $followup->patient;
+        $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
+
+        // Build all available field data
+        $allFields = $this->buildAllFields($followup, $patient, $checkUpInfo);
+
+        // Default selected fields (all except some optional ones)
+        $defaultSelected = [
+            'patient_name', 'patient_id', 'patient_age', 'patient_gender',
+            'patient_mobile', 'patient_address', 'nadi', 'lakshane',
+            'nidan', 'chikitsa', 'days', 'packets', 'amount_billed',
+            'amount_paid', 'amount_due'
+        ];
+
+        return view('prescriptions.builder', [
+            'followup' => $followup,
+            'patient' => $patient,
+            'allFields' => $allFields,
+            'defaultSelected' => $defaultSelected,
+        ]);
+    }
+
+    /**
+     * Build prescription with selected fields and custom values.
+     *
+     * @param Request $request
+     * @param FollowUp $followup
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function buildWithSelection(Request $request, FollowUp $followup)
+    {
+        $patient = $followup->patient;
+        $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
+
+        // Get all available fields
+        $allFields = $this->buildAllFields($followup, $patient, $checkUpInfo);
+
+        // Get selected fields from request
+        $selectedFields = $request->get('selected_fields', []);
+        $customValues = $request->get('field_values', []);
+
+        // Build prescription data with custom values overriding defaults
+        $prescriptionData = [];
+        foreach ($allFields as $key => $field) {
+            if (in_array($key, $selectedFields)) {
+                // Use custom value if provided, otherwise use default
+                $prescriptionData[$key] = $customValues[$key] ?? $field['value'];
+                $prescriptionData[$key . '_label'] = $field['label'];
+            }
+        }
+
+        return view('prescriptions.generate', [
+            'followup' => $followup,
+            'patient' => $patient,
+            'data' => $prescriptionData,
+            'selectedFields' => $selectedFields,
+        ]);
+    }
+
+    /**
+     * Build all available fields from follow-up and patient data.
+     */
+    private function buildAllFields(FollowUp $followup, Patient $patient, array $checkUpInfo): array
+    {
+        // Calculate patient age
+        $patientAge = $patient->birthdate
+            ? floor(abs(now()->diffInYears($patient->birthdate)))
+            : 'N/A';
+
+        // Build nadi text from check_up_info fields (plain text only, stripped of HTML tags)
+        $nadiParts = [];
+        $nadiKeys = ['वात', 'पित्त', 'कफ', 'सूक्ष्म'];
+        foreach ($nadiKeys as $key) {
+            if (!empty($checkUpInfo[$key])) {
+                $value = is_array($checkUpInfo[$key]) ? implode(', ', $checkUpInfo[$key]) : $checkUpInfo[$key];
+                $nadiParts[] = "{$key}: " . strip_tags($value);
+            }
+        }
+        if (!empty($checkUpInfo['nadi'])) {
+            $nadiParts[] = strip_tags($checkUpInfo['nadi']);
+        }
+        $nadiText = !empty($nadiParts) ? implode("\n", $nadiParts) : '';
+
+        // Doctor name
+        $doctorName = $checkUpInfo['user_name'] ?? ($followup->doctor ? $followup->doctor->name : 'Doctor');
+        $branchName = $checkUpInfo['branch_name'] ?? 'Clinic';
+
+        return [
+            // Patient Information Section
+            'patient_name' => [
+                'label' => __('messages.patient_name'),
+                'value' => $patient->name ?? '',
+                'type' => 'text',
+                'section' => 'patient_info'
+            ],
+            'patient_id' => [
+                'label' => __('messages.patient_id'),
+                'value' => $patient->patient_id ?? $patient->id,
+                'type' => 'text',
+                'section' => 'patient_info'
+            ],
+            'patient_age' => [
+                'label' => __('messages.patient_age'),
+                'value' => $patientAge,
+                'type' => 'text',
+                'section' => 'patient_info'
+            ],
+            'patient_gender' => [
+                'label' => __('messages.patient_gender'),
+                'value' => $patient->gender ?? '',
+                'type' => 'text',
+                'section' => 'patient_info'
+            ],
+            'patient_mobile' => [
+                'label' => __('messages.patient_mobile'),
+                'value' => $patient->mobile_phone ?? '',
+                'type' => 'text',
+                'section' => 'patient_info'
+            ],
+            'patient_address' => [
+                'label' => __('messages.patient_address'),
+                'value' => $patient->address ?? '',
+                'type' => 'textarea',
+                'section' => 'patient_info'
+            ],
+            'patient_weight' => [
+                'label' => __('messages.patient_weight'),
+                'value' => $patient->weight ?? '',
+                'type' => 'text',
+                'section' => 'patient_info'
+            ],
+            'patient_height' => [
+                'label' => __('messages.patient_height'),
+                'value' => $patient->height ?? '',
+                'type' => 'text',
+                'section' => 'patient_info'
+            ],
+
+            // Medical Information Section
+            'nadi' => [
+                'label' => __('messages.nadi'),
+                'value' => $nadiText,
+                'type' => 'textarea',
+                'section' => 'medical_info'
+            ],
+            'lakshane' => [
+                'label' => __('messages.lakshane'),
+                'value' => strip_tags($followup->diagnosis ?? ''),
+                'type' => 'textarea',
+                'section' => 'medical_info'
+            ],
+            'nidan' => [
+                'label' => __('messages.nidan'),
+                'value' => strip_tags($checkUpInfo['nidan'] ?? ''),
+                'type' => 'textarea',
+                'section' => 'medical_info'
+            ],
+            'chikitsa' => [
+                'label' => __('messages.chikitsa'),
+                'value' => strip_tags($checkUpInfo['chikitsa'] ?? ''),
+                'type' => 'textarea',
+                'section' => 'medical_info'
+            ],
+
+            // Treatment Details Section
+            'days' => [
+                'label' => __('messages.days'),
+                'value' => $checkUpInfo['days'] ?? '',
+                'type' => 'text',
+                'section' => 'treatment_details'
+            ],
+            'packets' => [
+                'label' => __('messages.packets'),
+                'value' => $checkUpInfo['packets'] ?? '',
+                'type' => 'text',
+                'section' => 'treatment_details'
+            ],
+            'vishesh' => [
+                'label' => __('messages.vishesh'),
+                'value' => strip_tags($checkUpInfo['vishesh'] ?? ''),
+                'type' => 'textarea',
+                'section' => 'treatment_details'
+            ],
+
+            // Payment Information Section
+            'amount_billed' => [
+                'label' => __('messages.amount_billed'),
+                'value' => number_format($followup->amount_billed ?? 0, 2),
+                'type' => 'text',
+                'section' => 'payment_info'
+            ],
+            'amount_paid' => [
+                'label' => __('messages.amount_paid'),
+                'value' => number_format($followup->amount_paid ?? 0, 2),
+                'type' => 'text',
+                'section' => 'payment_info'
+            ],
+            'amount_due' => [
+                'label' => __('messages.amount_due'),
+                'value' => number_format($followup->total_due ?? 0, 2),
+                'type' => 'text',
+                'section' => 'payment_info'
+            ],
+
+            // Clinic Information
+            'branch_name' => [
+                'label' => __('messages.branch_clinic'),
+                'value' => $branchName,
+                'type' => 'text',
+                'section' => 'clinic_info'
+            ],
+            'doctor_name' => [
+                'label' => __('messages.doctor_name'),
+                'value' => $doctorName,
+                'type' => 'text',
+                'section' => 'clinic_info'
+            ],
+        ];
+    }
+
+    /**
+     * Download the prescription as PDF.
+     *
+     * @param Request $request
+     * @param FollowUp $followup
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\Response
+     */
+    public function downloadPdf(Request $request, FollowUp $followup)
+    {
+        $patient = $followup->patient;
+        $selectedFields = $request->get('selected_fields', []);
+        $customValues = $request->get('field_values', []);
+
+        // Build prescription data
+        $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
+        $allFields = $this->buildAllFields($followup, $patient, $checkUpInfo);
+
+        $data = [];
+        foreach ($allFields as $key => $field) {
+            if (in_array($key, $selectedFields)) {
+                $data[$key] = $customValues[$key] ?? $field['value'];
+                $data[$key . '_label'] = $field['label'];
+            }
+        }
+
+        $pdf = PDF::loadView('prescriptions.pdf-download', [
+            'data' => $data,
+            'followup' => $followup,
+            'patient' => $patient,
+            'selectedFields' => $selectedFields,
+        ]);
+        $pdf->setOption('page-size', 'A4');
+        $pdf->setOption('margin-top', '10mm');
+        $pdf->setOption('margin-bottom', '10mm');
+        $pdf->setOption('margin-left', '10mm');
+        $pdf->setOption('margin-right', '10mm');
+        $pdf->setOption('encoding', 'UTF-8');
+        $pdf->setOption('enable-local-file-access', true);
+
+        $filename = 'prescription_' . str_replace(' ', '_', $patient->name) . '_' . $followup->created_at->format('Y-m-d') . '.pdf';
+
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Legacy: Generate a prescription PDF for a specific follow-up.
      *
      * @param  FollowUp  $followup
      * @return \Illuminate\Http\Response

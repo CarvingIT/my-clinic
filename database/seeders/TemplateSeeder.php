@@ -718,7 +718,7 @@ HTML;
 
             <!-- Vishesh -->
             <div class="instructions-box">
-                <div class="title">विशेष सूचना (Special Instructions)</div>
+                <div class="title">विशेष (Special Instructions)</div>
                 <div>{vishesh}</div>
             </div>
         </div>

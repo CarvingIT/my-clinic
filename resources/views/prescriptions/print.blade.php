@@ -397,7 +397,7 @@
             </div>
 
             <div class="instructions-box">
-                <div class="title">विशेष सूचना (Special Instructions)</div>
+                <div class="title">विशेष</div>
                 <div>{{ $vishesh }}</div>
             </div>
         </div>
