@@ -1591,7 +1591,7 @@ $previousChikitsa = $latestFollowUp
         editor.focus();
     }
 </script>
-<script src="https://unpkg.com/animate-css-grid@latest"></script>
+
 {{-- Dravya dynamic script --}}
 <script>
     const dravyaFieldId = {{ \App\Models\Field::where('name', 'dravya')->first()->id ?? 0 }};

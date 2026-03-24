@@ -20,7 +20,16 @@
         "@rollup/rollup-win32-x64-msvc": "^4.35.0"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^7.2.0",
+        "animate-css-grid": "^1.5.1",
+        "bootstrap": "^5.3.8",
         "chart.js": "^4.4.9",
-        "flatpickr": "^4.6.13"
+        "chartjs-plugin-datalabels": "^2.2.0",
+        "flatpickr": "^4.6.13",
+        "html2canvas": "^1.4.1",
+        "jquery": "^4.0.0",
+        "jspdf": "^4.2.1",
+        "select2": "^4.1.0-rc.0",
+        "sortablejs": "^1.15.7"
     }
 }

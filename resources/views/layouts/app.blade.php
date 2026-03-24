@@ -16,21 +16,11 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ asset('build/assets/app.css') }}">
 
-    {{-- Icons --}}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-
-    {{-- alpine js --}}
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
-
-    <!-- Scripts -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+    <!-- All styles and scripts bundled via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
     {{-- Script to disable dark mode --}}
     <script>
@@ -38,17 +28,6 @@
             document.documentElement.classList.remove('dark');
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {{-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"> --}}
-
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
-    {{-- For Grid Animation --}}
-    <script src="https://cdn.jsdelivr.net/npm/animate-css-grid@1.1.0/dist/main.js"></script>
-
-    {{-- For Drag and Drop --}}
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 
 

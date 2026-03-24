@@ -403,7 +403,6 @@
     }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Form submission functions
     function formSubmit() {
