@@ -129,7 +129,8 @@
     <script>
         tinymce.init({
             selector: '.tinymce-editor',
-            plugins: 'lists link table textcolor',
+            license_key: 'gpl',
+            plugins: 'lists link table',
             toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
             menubar: false,
             branding: false,
@@ -137,7 +138,6 @@
             elementpath: false,
             height: 200,
             resize: true,
-            forced_root_block: false,
             content_style: `
                                 body {
                                 line-height: 1.4 !important;
@@ -155,7 +155,8 @@
     <script>
         tinymce.init({
             selector: '.tinymce-editor002',
-            plugins: 'lists link table textcolor',
+            license_key: 'gpl',
+            plugins: 'lists link table',
             toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
             menubar: false,
             branding: false,
@@ -168,7 +169,8 @@
     <script>
         tinymce.init({
             selector: '.tinymce-editor003',
-            plugins: 'lists link table textcolor',
+            license_key: 'gpl',
+            plugins: 'lists link table',
             toolbar: 'undo redo | bold italic underline | bullist numlist | forecolor backcolor',
             menubar: false,
             branding: false,
