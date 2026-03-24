@@ -20,8 +20,6 @@
     <!-- All styles and scripts bundled via Vite -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-
     {{-- Script to disable dark mode --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -180,9 +178,6 @@
 
         });
     </script>
-
-    <!-- Dashboard Enhancements -->
-    <script src="{{ asset('resources/js/dashboard-enhancements.js') }}"></script>
 
     <!-- Session Expiry Warning Modal -->
     <div id="session-expiry-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">

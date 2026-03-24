@@ -43,7 +43,8 @@ window.jsPDF = jsPDF;
 
 // Animate CSS Grid
 import "animate-css-grid";
-
+// Dashboard Enhancements
+import './dashboard-enhancements';
 // Start Alpine
 Alpine.start();
 
