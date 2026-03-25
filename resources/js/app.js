@@ -14,10 +14,8 @@ import "flatpickr/dist/flatpickr.css";
 import axios from "axios";
 window.axios = axios;
 
-// Chart.js with plugin
+// Chart.js
 import Chart from "chart.js/auto";
-import ChartDataLabels from "chartjs-plugin-datalabels";
-Chart.register(ChartDataLabels);
 window.Chart = Chart;
 
 // Select2
