@@ -51,7 +51,7 @@ class AuthenticatedSessionController extends Controller
             $request->session()->flash('welcome_back', 'Welcome back! You\'re still logged in from your last session.');
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->route('dashboard');
     }
 
     /**
