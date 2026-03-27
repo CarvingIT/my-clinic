@@ -1,3 +1,13 @@
+/* Font Awesome Icons */
+@import '@fortawesome/fontawesome-free/css/all.css';
+
+/* Select2 Styles */
+@import 'select2/dist/css/select2.css';
+
+/* Bootstrap Styles */
+@import 'bootstrap/dist/css/bootstrap.css';
+
+/* Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

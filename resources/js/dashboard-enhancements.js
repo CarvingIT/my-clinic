@@ -271,7 +271,7 @@ class DashboardEnhancer {
             await navigator.serviceWorker.register('/sw.js');
             console.log('Service Worker registered successfully');
         } catch (error) {
-            console.warn('Service Worker registration failed:', error);
+            // Service Worker registration is optional, silently fail if not available
         }
     }
 

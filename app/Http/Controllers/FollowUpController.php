@@ -537,6 +537,49 @@ class FollowUpController extends Controller
         ]);
     }
 
+    public function storeReport(Request $request, FollowUp $followup)
+    {
+        $request->validate([
+            'text' => 'required|string'
+        ]);
+
+        // Get the current check_up_info
+        $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
+
+        // Initialize reports array if it doesn't exist
+        if (!isset($checkUpInfo['reports']) || !is_array($checkUpInfo['reports'])) {
+            $checkUpInfo['reports'] = [];
+        }
+
+        // Create timestamp for the report
+        $now = now();
+        $timestamp = $now->format('d/m/Y H:i:s');
+
+        // Create new report
+        $newReport = [
+            'text' => $request->text,
+            'timestamp' => $timestamp
+        ];
+
+        // Add the report to the array
+        $checkUpInfo['reports'][] = $newReport;
+
+        // Get the index of the newly added report
+        $reportIndex = count($checkUpInfo['reports']) - 1;
+
+        // Save the updated check_up_info
+        $followup->update([
+            'check_up_info' => json_encode($checkUpInfo)
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Report created successfully',
+            'reportIndex' => $reportIndex,
+            'report' => $newReport
+        ]);
+    }
+
     public function exportFollowUps(Request $request)
     {
         // Validate the time_period input

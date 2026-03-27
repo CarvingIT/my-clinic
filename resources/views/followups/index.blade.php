@@ -11,23 +11,23 @@
 
                 {{-- Filters Section --}}
                 <form method="GET" action="{{ route('followups.index') }}" id="follow_ups"
-                    class="flex gap-4 mb-6 items-end">
-                    <div class="flex flex-col font-weight-semibold">
-                        <label for="from_date" class="text-gray-800 dark:text-gray-300 font-semibold">From:</label>
+                    class="flex flex-wrap gap-3 mb-6 items-end">
+                    <div class="flex flex-col">
+                        <label for="from_date" class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">From:</label>
                         <input type="date" id="from_date" name="from_date" value="{{ request('from_date') }}"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm dark:bg-gray-800 dark:text-white shadow-sm">
                     </div>
 
                     <div class="flex flex-col">
-                        <label for="to_date" class="text-gray-800 dark:text-gray-300 font-semibold">To:</label>
+                        <label for="to_date" class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">To:</label>
                         <input type="date" id="to_date" name="to_date" value="{{ request('to_date') }}"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm dark:bg-gray-800 dark:text-white shadow-sm">
                     </div>
 
                     <div class="flex flex-col">
-                        <label for="branch_name" class="text-gray-800 dark:text-gray-300 font-semibold">Branch:</label>
+                        <label for="branch_name" class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">Branch:</label>
                         <select id="branch_name" name="branch_name"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md pr-4 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm dark:bg-gray-800 dark:text-white shadow-sm">
                             <option value="all" {{ request('branch_name') == 'all' ? 'selected' : '' }}>All
                             </option>
                             @foreach ($branches as $branch)
@@ -40,9 +40,9 @@
                     </div>
 
                     <div class="flex flex-col">
-                        <label for="doctor" class="text-gray-800 dark:text-gray-300 font-semibold">Doctor:</label>
+                        <label for="doctor" class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">Doctor:</label>
                         <select id="doctor" name="doctor"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md px-2 py-2 dark:bg-gray-800 dark:text-white shadow-sm">
+                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm dark:bg-gray-800 dark:text-white shadow-sm">
                             <option value="all" {{ request('doctor') == 'all' ? 'selected' : '' }}>All
                             </option>
                             @php
@@ -69,34 +69,34 @@
                     </div>
                     {{-- Filter for Today, Last Week, Last Month --}}
                     <div class="flex flex-col">
-                        <label class="text-gray-800 dark:text-gray-300 font-semibold">Time Period:</label>
-                        <div class="flex gap-1">
+                        <label class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">Period:</label>
+                        <div class="flex gap-1.5">
                             <input type="hidden" id="time_period" name="time_period" value="{{ request('time_period', 'all') }}">
                             <button type="button" onclick="setTimePeriod('all')"
-                                class="px-2 py-1 text-xs {{ request('time_period', 'all') == 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                class="px-2.5 py-1.5 text-xs {{ request('time_period', 'all') == 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
                                 All
                             </button>
                             <button type="button" onclick="setTimePeriod('today')"
-                                class="px-2 py-1 text-xs {{ request('time_period') == 'today' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                class="px-2.5 py-1.5 text-xs {{ request('time_period') == 'today' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
                                 Today
                             </button>
                             <button type="button" onclick="setTimePeriod('last_week')"
-                                class="px-2 py-1 text-xs {{ request('time_period') == 'last_week' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                Last Week
+                                class="px-2.5 py-1.5 text-xs {{ request('time_period') == 'last_week' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                Week
                             </button>
                             <button type="button" onclick="setTimePeriod('last_month')"
-                                class="px-2 py-1 text-xs {{ request('time_period') == 'last_month' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                Last Month
+                                class="px-2.5 py-1.5 text-xs {{ request('time_period') == 'last_month' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
+                                Month
                             </button>
                         </div>
                     </div>
 
                     <button onclick="formSubmit();"
-                        class="px-5 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
+                        class="px-5 py-1.5 text-sm bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
                         Filter
                     </button>
                     <button id="exportCSV" onclick="csvExport();"
-                        class="px-3 py-2 bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">CSV</button>
+                        class="px-4 py-1.5 text-sm bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">CSV</button>
                 </form>
 
                 {{-- Insights Section --}}
@@ -403,7 +403,6 @@
     }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Form submission functions
     function formSubmit() {
@@ -422,15 +421,42 @@
         const toDate = document.getElementById('to_date');
         timePeriodInput.value = period;
 
-        // Disable and clear date inputs if period is not 'all'
+        // Set date range based on period and disable inputs
         if (period !== 'all') {
+            let startDate, endDate;
+            const today = new Date();
+
+            if (period === 'today') {
+                startDate = new Date(today);
+                endDate = new Date(today);
+            } else if (period === 'last_week') {
+                // Get the start of this week (Monday)
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+                endDate = new Date(today);
+            } else if (period === 'last_month') {
+                // Get the start of this month
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = new Date(today);
+            }
+
+            // Format dates as YYYY-MM-DD
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            fromDate.value = formatDate(startDate);
+            toDate.value = formatDate(endDate);
             fromDate.disabled = true;
             toDate.disabled = true;
-            fromDate.value = '';
-            toDate.value = '';
         } else {
             fromDate.disabled = false;
             toDate.disabled = false;
+            fromDate.value = '';
+            toDate.value = '';
         }
 
         // Update button styles
@@ -455,12 +481,34 @@
         const toDate = document.getElementById('to_date');
         const period = timePeriodInput.value || 'all';
 
-        // Set input states
+        // Set date range based on period
         if (period !== 'all') {
+            let startDate, endDate;
+            const today = new Date();
+
+            if (period === 'today') {
+                startDate = new Date(today);
+                endDate = new Date(today);
+            } else if (period === 'last_week') {
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
+                endDate = new Date(today);
+            } else if (period === 'last_month') {
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = new Date(today);
+            }
+
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            fromDate.value = formatDate(startDate);
+            toDate.value = formatDate(endDate);
             fromDate.disabled = true;
             toDate.disabled = true;
-            fromDate.value = '';
-            toDate.value = '';
         } else {
             fromDate.disabled = false;
             toDate.disabled = false;

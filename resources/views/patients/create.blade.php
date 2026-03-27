@@ -289,7 +289,7 @@
 
 
                         <!-- Address -->
-                        <div>
+                        <div class="lg:col-span-2">
                             <x-input-label for="address" :value="__('messages.address')" />
                             <x-text-input id="address"
                                 class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"

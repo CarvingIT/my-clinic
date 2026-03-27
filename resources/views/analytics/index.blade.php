@@ -230,11 +230,6 @@
 </x-app-layout>
 
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
     // Export to PDF with modern interactive button
     document.getElementById('exportPdfBtn').addEventListener('click', async function () {
@@ -444,10 +439,10 @@
     });
 </script>
 <script>
-    // Chart.register(ChartDataLabels);
-
-    // Chart 1: Follow-Up Frequency (Daily)
-    if (@json($followUpFrequencyDaily->count())) {
+    // Wait for Chart.js to be available from Vite bundle
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chart 1: Follow-Up Frequency (Daily)
+        if (@json($followUpFrequencyDaily->count())) {
         const dailyCtx = document.getElementById('followUpFrequencyDailyChart').getContext('2d');
         new Chart(dailyCtx, {
             type: 'line',
@@ -457,6 +452,7 @@
                     label: 'Follow-Ups',
                     data: @json($followUpFrequencyDaily->pluck('count')),
                     borderColor: '#60a5fa',
+                    borderWidth: 1,
                     backgroundColor: (ctx) => {
                         const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
                         gradient.addColorStop(0, 'rgba(96, 165, 250, 0.6)');
@@ -465,20 +461,29 @@
                     },
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#60a5fa',
-                    pointHoverRadius: 6
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#60a5fa'
                 }]
             },
             options: {
                 responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     tooltip: {
+                        enabled: true,
+                        displayColors: false,
                         callbacks: {
                             label: function(context) {
                                 return `Follow-Ups: ${context.parsed.y}`;
                             }
                         }
+                    },
+                    datalabels: {
+                        enabled: false
                     },
                     title: {
                         display: true,
@@ -521,6 +526,7 @@
                     label: 'Follow-Ups',
                     data: @json($followUpFrequencyMonthly->pluck('count')),
                     borderColor: '#34D399',
+                    borderWidth: 1,
                     backgroundColor: (ctx) => {
                         const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
                         gradient.addColorStop(0, 'rgba(52, 211, 153, 0.5)');
@@ -529,16 +535,32 @@
                     },
                     fill: true,
                     tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#34D399',
+                    pointRadius: 0,
                     pointHoverRadius: 6,
+                    pointBackgroundColor: '#34D399',
                     pointHoverBorderWidth: 2,
                     pointHoverBorderColor: '#10B981'
                 }]
             },
             options: {
                 responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
+                    tooltip: {
+                        enabled: true,
+                        displayColors: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `Follow-Ups: ${context.parsed.y}`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        enabled: false
+                    },
                     title: {
                         display: true,
                         text: 'Monthly Follow-Ups'
@@ -579,7 +601,6 @@
 
         new Chart(ageCtx, {
             type: 'doughnut',
-            plugins: [ChartDataLabels],
             data: {
                 labels: ageLabels,
                 datasets: [{
@@ -605,30 +626,17 @@
                                 const data = chart.data;
                                 const dataset = data.datasets[0];
                                 return data.labels.map((label, i) => {
-                                    const value = dataset.data[i];
-                                    const percentage = ((value / total) * 100).toFixed(1);
                                     return {
-                                        text: `${label} (${percentage}%)`,
+                                        text: label,
                                         fillStyle: dataset.backgroundColor[i],
                                         strokeStyle: dataset.borderColor[i],
                                         lineWidth: dataset.borderWidth,
-                                        hidden: isNaN(value),
+                                        hidden: isNaN(dataset.data[i]),
                                         index: i
                                     };
                                 });
                             }
                         }
-                    },
-                    datalabels: {
-                        color: '#fff',
-                        formatter: (value) => {
-                            return value; // Actual number on pie slice
-                        },
-                        font: {
-                            weight: 'bold'
-                        },
-                        anchor: 'center',
-                        align: 'center'
                     }
                 }
             }
@@ -665,7 +673,7 @@
                     backgroundColor: gradientBilled,
                     borderWidth: 1,
                     fill: true,
-                    pointRadius: 2,
+                    pointRadius: 0,
                     pointBackgroundColor: '#60a5fa',
                     pointHoverRadius: 6,
                     tension: 0.4
@@ -676,7 +684,7 @@
                     backgroundColor: gradientPaid,
                     borderWidth: 1,
                     fill: true,
-                    pointRadius: 2,
+                    pointRadius: 0,
                     pointBackgroundColor: '#34d399',
                     pointHoverRadius: 6,
                     tension: 0.4
@@ -687,7 +695,7 @@
                     backgroundColor: gradientDue,
                     borderWidth: 1,
                     fill: true,
-                    pointRadius: 2,
+                    pointRadius: 0,
                     pointBackgroundColor: '#f87171',
                     pointHoverRadius: 6,
                     tension: 0.4
@@ -695,13 +703,22 @@
             },
             options: {
                 responsive: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     tooltip: {
+                        enabled: true,
+                        displayColors: false,
                         callbacks: {
                             label: function(context) {
                                 return `${context.dataset.label}: ₹${context.parsed.y}`;
                             }
                         }
+                    },
+                    datalabels: {
+                        enabled: false
                     },
                     title: {
                         display: true,
@@ -741,7 +758,6 @@
 
         new Chart(newVsExistingCtx, {
             type: 'doughnut',
-            plugins: [ChartDataLabels],
             data: {
                 labels: ['New Patients', 'Old Patients'],
                 datasets: [{
@@ -767,30 +783,17 @@
                                 const data = chart.data;
                                 const dataset = data.datasets[0];
                                 return data.labels.map((label, i) => {
-                                    const value = dataset.data[i];
-                                    const percentage = ((value / total) * 100).toFixed(1);
                                     return {
-                                        text: `${label} (${percentage}%)`,
+                                        text: label,
                                         fillStyle: dataset.backgroundColor[i],
                                         strokeStyle: dataset.borderColor[i],
                                         lineWidth: dataset.borderWidth,
-                                        hidden: isNaN(value),
+                                        hidden: isNaN(dataset.data[i]),
                                         index: i
                                     };
                                 });
                             }
                         }
-                    },
-                    datalabels: {
-                        color: '#fff',
-                        formatter: (value) => {
-                            return value; // only the actual number on pie slice
-                        },
-                        font: {
-                            weight: 'bold'
-                        },
-                        anchor: 'center',
-                        align: 'center'
                     }
                 }
             }
@@ -811,7 +814,6 @@
 
         new Chart(genderCtx, {
             type: 'doughnut',
-            plugins: [ChartDataLabels],
             data: {
                 labels: genderLabels,
                 datasets: [{
@@ -837,30 +839,17 @@
                                 const data = chart.data;
                                 const dataset = data.datasets[0];
                                 return data.labels.map((label, i) => {
-                                    const value = dataset.data[i];
-                                    const percentage = ((value / total) * 100).toFixed(1);
                                     return {
-                                        text: `${label} (${percentage}%)`,
+                                        text: label,
                                         fillStyle: dataset.backgroundColor[i],
                                         strokeStyle: dataset.borderColor[i],
                                         lineWidth: dataset.borderWidth,
-                                        hidden: isNaN(value),
+                                        hidden: isNaN(dataset.data[i]),
                                         index: i
                                     };
                                 });
                             }
                         }
-                    },
-                    datalabels: {
-                        color: '#fff',
-                        formatter: (value) => {
-                            return value; // Only number on the pie slice
-                        },
-                        font: {
-                            weight: 'bold'
-                        },
-                        anchor: 'center',
-                        align: 'center'
                     }
                 }
             }
@@ -869,4 +858,5 @@
         document.getElementById('genderDistributionChart').parentElement.innerHTML =
             '<p class="text-gray-600 dark:text-gray-400">No gender data available.</p>';
     }
+    }); // Close DOMContentLoaded
 </script>

@@ -31,11 +31,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        // If logged in with remember, set session to never expire
-        if (Auth::viaRemember()) {
-            // Set session lifetime to 1 year for remembered users
-            $request->session()->put('_session_lifetime', 525600); // 1 year in minutes
-        }
+        // Check if remember was requested BEFORE regenerating session
+        $rememberRequested = $request->boolean('remember');
 
         // Store branch information in the session after successful authentication:
         $request->session()->put('branch_id', $request->branch_id);
@@ -43,15 +40,15 @@ class AuthenticatedSessionController extends Controller
         $request->session()->put('branch_name', $branch->name);
 
         // Store login method for debugging
-        $request->session()->put('login_method', Auth::viaRemember() ? 'remember_token' : 'credentials');
+        $request->session()->put('login_method', $rememberRequested ? 'remember_token' : 'credentials');
         $request->session()->put('login_time', now()->format('Y-m-d H:i:s'));
 
-        // Add welcome back message only if logged in via remember token
-        if (Auth::viaRemember()) {
+        // Add welcome back message if remember was checked
+        if ($rememberRequested) {
             $request->session()->flash('welcome_back', 'Welcome back! You\'re still logged in from your last session.');
         }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->route('dashboard');
     }
 
     /**

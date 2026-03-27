@@ -32,9 +32,9 @@ return [
     |
     */
 
-    'lifetime' => env('SESSION_LIFETIME', 120), // Back to 2 hours for normal sessions
+    'lifetime' => env('SESSION_LIFETIME', 120), // 2 hours for normal sessions
 
-    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', true),
+    'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false), // Must be FALSE for remember me to work
 
     /*
     |--------------------------------------------------------------------------

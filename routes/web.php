@@ -26,6 +26,7 @@ use App\Http\Controllers\UploadController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\ImportExportController;
+use App\Http\Controllers\PrescriptionController;
 
 // Route::get('/', function () {
 //     return view('welcome');
@@ -159,6 +160,7 @@ Route::middleware(['auth', DoctorMiddleware::class])->group(function () {
 
     Route::resource('followups', FollowUpController::class)->except(['index']); // Doctor can manage follow-ups except for listing them
     Route::resource('reports', ReportController::class)->only(['store', 'destroy']); // Doctor can store and delete reports
+    Route::post('/followups/{followup}/reports', [FollowUpController::class, 'storeReport'])->name('followups.store-report'); // Store reports for follow-ups
     Route::delete('/followups/{followup}/reports/{reportIndex}', [FollowUpController::class, 'deleteReport'])->name('followups.delete-report'); // Soft delete reports from follow-ups
     Route::put('/followups/{followup}/reports/{reportIndex}', [FollowUpController::class, 'updateReport'])->name('followups.update-report'); // Update reports from follow-ups
     Route::post('/uploads', [UploadController::class, 'store'])->name('uploads.store'); // Doctor can upload files
@@ -167,6 +169,16 @@ Route::middleware(['auth', DoctorMiddleware::class])->group(function () {
     Route::get('/patients/{patient}/certificate', [PatientController::class, 'generateCertificate'])->name('patients.certificate'); // Doctor can generate patient certificates
     Route::get('/patients/{patient}/template/{templateSlug}', [PatientController::class, 'generateFromTemplate'])->name('patients.template'); // Doctor can generate documents from templates
     Route::get('/export-followups', [FollowUpController::class, 'exportFollowUps'])->name('followups.export'); // Doctor can export follow-ups
+
+
+    // Prescription routes - NEW WORKFLOW
+    Route::get('/followups/{followup}/prescription/builder', [PrescriptionController::class, 'builder'])->name('followups.prescription.builder'); // Show field selector
+    Route::post('/followups/{followup}/prescription/build', [PrescriptionController::class, 'buildWithSelection'])->name('followups.prescription.build'); // Build with selections
+    Route::post('/followups/{followup}/prescription/download', [PrescriptionController::class, 'downloadPdf'])->name('followups.prescription.download'); // Download as PDF
+
+    // Legacy routes (for backward compatibility)
+    Route::get('/followups/{followup}/prescription', [PrescriptionController::class, 'generate'])->name('followups.prescription'); // Generate prescription PDF
+    Route::get('/followups/{followup}/prescription/print', [PrescriptionController::class, 'printView'])->name('followups.prescription.print'); // Print-ready HTML view
 
     // Route::get('/queue', [QueueController::class, 'showQueue'])->name('queue.index'); // Doctors can view the queue
     // Route::delete('/queue/{queue}', [QueueController::class, 'removeFromQueue'])->name('queue.remove'); // Doctors can remove patients from the queue
