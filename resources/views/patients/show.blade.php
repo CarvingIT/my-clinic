@@ -209,7 +209,7 @@
                                     return strtotime($b['timestamp']) <=> strtotime($a['timestamp']);
                                 });
                             @endphp
-                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-5 h-full shadow-lg border border-gray-200 dark:border-gray-600">
+                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-4 h-full shadow-lg border border-gray-200 dark:border-gray-600">
                                 <!-- Header -->
                                 <div class="flex items-center justify-between mb-4">
                                     <h4 class="text-lg font-bold text-gray-800 dark:text-white flex items-center">
@@ -262,9 +262,23 @@
                                 <div id="showReportsList" class="space-y-3 max-h-56 overflow-y-auto scrollbar-thin scrollbar-thumb-indigo-300 dark:scrollbar-thumb-indigo-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800">
                                     @if(count($allReports) > 0)
                                         @foreach($allReports as $report)
+                                            @php
+                                                // Convert timestamp to ISO format for data-timestamp if it's in DD/MM/YYYY format
+                                                $isoTimestamp = $report['timestamp'];
+                                                if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2}):(\d{2})$/', $report['timestamp'], $matches)) {
+                                                    // Convert DD/MM/YYYY HH:MM:SS to ISO 8601
+                                                    try {
+                                                        $date = new DateTime("{$matches[3]}-{$matches[2]}-{$matches[1]} {$matches[4]}:{$matches[5]}:{$matches[6]}");
+                                                        $isoTimestamp = $date->format(DateTime::ATOM);
+                                                    } catch (Exception $e) {
+                                                        // If parsing fails, keep original
+                                                        $isoTimestamp = $report['timestamp'];
+                                                    }
+                                                }
+                                            @endphp
                                             <div class="show-report-item bg-white dark:bg-gray-600 p-3 rounded-md shadow-sm border border-gray-200 dark:border-gray-500"
                                                  data-text="{{ strtolower($report['text']) }}"
-                                                 data-timestamp="{{ $report['timestamp'] }}"
+                                                 data-display-timestamp="{{ $report['timestamp'] }}"
                                                  data-followup-date="{{ $report['followup_date'] }}"
                                                  data-original-text="{{ $report['text'] }}"
                                                  data-followup-id="{{ $report['followup_id'] }}"
@@ -274,7 +288,7 @@
                                                         <div class="show-report-text text-sm text-gray-800 dark:text-gray-200 font-medium">
                                                             {!! nl2br(e($report['text'])) !!}
                                                         </div>
-                                                        <div class="show-report-date text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                        <div class="show-report-date text-xs text-gray-500 dark:text-gray-400 mt-1" data-timestamp="{{ $isoTimestamp }}">
                                                             {{ $report['timestamp'] }} • Follow-up: {{ $report['followup_date'] }}
                                                         </div>
                                                     </div>
@@ -1456,7 +1470,10 @@
 
     function createNewReport(reportText) {
         const now = new Date();
-        const timestamp = now.getDate().toString().padStart(2, '0') + '/' +
+        // Store ISO format for data-timestamp (used by dashboard-enhancements.js)
+        const isoTimestamp = now.toISOString();
+        // Format display timestamp for UI (DD/MM/YYYY HH:MM:SS)
+        const displayTimestamp = now.getDate().toString().padStart(2, '0') + '/' +
                          (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
                          now.getFullYear() + ' ' +
                          now.getHours().toString().padStart(2, '0') + ':' +
@@ -1470,7 +1487,7 @@
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ text: reportText })
+            body: JSON.stringify({ text: reportText, timestamp: displayTimestamp })
         })
         .then(response => response.json())
         .then(data => {
@@ -1484,12 +1501,12 @@
                     newReportDiv.dataset.reportIndex = data.reportIndex;
                     newReportDiv.dataset.originalText = reportText;
                     newReportDiv.dataset.text = reportText.toLowerCase();
-                    newReportDiv.dataset.timestamp = timestamp;
+                    newReportDiv.dataset.displayTimestamp = displayTimestamp;
                     newReportDiv.dataset.followupDate = new Date().toLocaleDateString();
 
                     newReportDiv.innerHTML = `
                         <div class="show-report-text text-sm font-medium text-gray-800 dark:text-white mb-2">${reportText.replace(/\n/g, '<br>')}</div>
-                        <div class="show-report-date text-xs text-gray-500 dark:text-gray-400 mb-3">${timestamp}</div>
+                        <div class="show-report-date text-xs text-gray-500 dark:text-gray-400 mb-3" data-timestamp="${isoTimestamp}">${displayTimestamp}</div>
                         <div class="flex gap-2 justify-end">
                             <button type="button" class="text-blue-500 hover:text-blue-700 text-xs font-medium" onclick="showEditReport(this)">Edit</button>
                             <button type="button" class="text-red-500 hover:text-red-700 text-xs font-medium" onclick="showDeleteReport(this)">Delete</button>
@@ -1585,12 +1602,12 @@
                         const dateDiv = item.querySelector('.show-report-date');
                         const regex = new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
                         if (textDiv) textDiv.innerHTML = item.dataset.originalText.replace(/\n/g, '<br>').replace(regex, '<mark>$1</mark>');
-                        if (dateDiv) dateDiv.innerHTML = (item.dataset.timestamp + ' • Follow-up: ' + item.dataset.followupDate).replace(regex, '<mark>$1</mark>');
+                        if (dateDiv) dateDiv.innerHTML = (item.dataset.displayTimestamp + ' • Follow-up: ' + item.dataset.followupDate).replace(regex, '<mark>$1</mark>');
                     } else if (!term) {
                         const textDiv = item.querySelector('.show-report-text');
                         const dateDiv = item.querySelector('.show-report-date');
                         if (textDiv) textDiv.innerHTML = item.dataset.originalText.replace(/\n/g, '<br>');
-                        if (dateDiv) dateDiv.innerHTML = item.dataset.timestamp + ' • Follow-up: ' + item.dataset.followupDate;
+                        if (dateDiv) dateDiv.innerHTML = item.dataset.displayTimestamp + ' • Follow-up: ' + item.dataset.followupDate;
                     }
                 });
             });

@@ -540,7 +540,8 @@ class FollowUpController extends Controller
     public function storeReport(Request $request, FollowUp $followup)
     {
         $request->validate([
-            'text' => 'required|string'
+            'text' => 'required|string',
+            'timestamp' => 'nullable|string' // Optional timestamp from frontend
         ]);
 
         // Get the current check_up_info
@@ -552,8 +553,15 @@ class FollowUpController extends Controller
         }
 
         // Create timestamp for the report
-        $now = now();
-        $timestamp = $now->format('d/m/Y H:i:s');
+        // Use frontend timestamp if provided (from JavaScript), else create one
+        if ($request->has('timestamp') && !empty($request->timestamp)) {
+            // Frontend sends display format: use as-is for display
+            $timestamp = $request->timestamp;
+        } else {
+            // Fallback: create from server (but send ISO format for data-timestamp)
+            $now = now();
+            $timestamp = $now->format('d/m/Y H:i:s');
+        }
 
         // Create new report
         $newReport = [
