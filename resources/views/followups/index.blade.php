@@ -82,11 +82,11 @@
                             </button>
                             <button type="button" onclick="setTimePeriod('last_week')"
                                 class="px-2.5 py-1.5 text-xs {{ request('time_period') == 'last_week' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                Week
+                                Last Week
                             </button>
                             <button type="button" onclick="setTimePeriod('last_month')"
                                 class="px-2.5 py-1.5 text-xs {{ request('time_period') == 'last_month' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                Month
+                                Last Month
                             </button>
                         </div>
                     </div>
@@ -430,14 +430,15 @@
                 startDate = new Date(today);
                 endDate = new Date(today);
             } else if (period === 'last_week') {
-                // Get the start of this week (Monday)
+                // Get the start of LAST week (previous Monday to Sunday)
                 startDate = new Date(today);
-                startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
-                endDate = new Date(today);
+                startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
+                endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
             } else if (period === 'last_month') {
-                // Get the start of this month
-                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                endDate = new Date(today);
+                // Get the start of LAST month
+                startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                endDate = new Date(today.getFullYear(), today.getMonth(), 0);
             }
 
             // Format dates as YYYY-MM-DD
@@ -491,11 +492,12 @@
                 endDate = new Date(today);
             } else if (period === 'last_week') {
                 startDate = new Date(today);
-                startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1));
-                endDate = new Date(today);
+                startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
+                endDate = new Date(startDate);
+                endDate.setDate(startDate.getDate() + 6);
             } else if (period === 'last_month') {
-                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-                endDate = new Date(today);
+                startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                endDate = new Date(today.getFullYear(), today.getMonth(), 0);
             }
 
             const formatDate = (date) => {
