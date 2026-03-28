@@ -146,7 +146,7 @@
                                     return strtotime($b['timestamp']) <=> strtotime($a['timestamp']);
                                 });
                             @endphp
-                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-5 h-full shadow-lg border border-gray-200 dark:border-gray-600">
+                            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-4 h-full shadow-lg border border-gray-200 dark:border-gray-600">
                                 <!-- Header -->
                                 <div class="flex items-center justify-between mb-4">
                                     <h4 class="text-lg font-bold text-gray-800 dark:text-white flex items-center">
@@ -184,9 +184,23 @@
 
                                     @if(count($allReports) > 0)
                                         @foreach($allReports as $report)
+                                            @php
+                                                // Convert timestamp to ISO format for data-timestamp if it's in DD/MM/YYYY format
+                                                $isoTimestamp = $report['timestamp'];
+                                                if (preg_match('/^(\d{2})\/(\d{2})\/(\d{4})\s(\d{2}):(\d{2}):(\d{2})$/', $report['timestamp'], $matches)) {
+                                                    // Convert DD/MM/YYYY HH:MM:SS to ISO 8601
+                                                    try {
+                                                        $date = new DateTime("{$matches[3]}-{$matches[2]}-{$matches[1]} {$matches[4]}:{$matches[5]}:{$matches[6]}");
+                                                        $isoTimestamp = $date->format(DateTime::ATOM);
+                                                    } catch (Exception $e) {
+                                                        // If parsing fails, keep original
+                                                        $isoTimestamp = $report['timestamp'];
+                                                    }
+                                                }
+                                            @endphp
                                             <div class="report-item bg-white dark:bg-gray-600 p-3 rounded-md shadow-sm border border-gray-200 dark:border-gray-500"
                                                  data-text="{{ strtolower($report['text']) }}"
-                                                 data-timestamp="{{ $report['timestamp'] }}"
+                                                 data-display-timestamp="{{ $report['timestamp'] }}"
                                                  data-followup-date="{{ $report['followup_date'] }}"
                                                  data-original-text="{{ $report['text'] }}"
                                                  data-followup-id="{{ $report['followup_id'] }}"
@@ -196,7 +210,7 @@
                                                         <div class="text-sm text-gray-800 dark:text-gray-200 font-medium">
                                                             {!! nl2br(e($report['text'])) !!}
                                                         </div>
-                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1" data-timestamp="{{ $isoTimestamp }}">
                                                             {{ $report['timestamp'] }} • Follow-up: {{ $report['followup_date'] }}
                                                         </div>
                                                     </div>
@@ -2715,7 +2729,10 @@ $previousChikitsa = $latestFollowUp
         } else {
             // Add new report
             const now = new Date();
-            const timestamp = now.getDate().toString().padStart(2, '0') + '/' +
+            // Store ISO format for data-timestamp (used by dashboard-enhancements.js)
+            const isoTimestamp = now.toISOString();
+            // Format display timestamp for UI (DD/MM/YYYY HH:MM:SS)
+            const displayTimestamp = now.getDate().toString().padStart(2, '0') + '/' +
                              (now.getMonth() + 1).toString().padStart(2, '0') + '/' +
                              now.getFullYear() + ' ' +
                              now.getHours().toString().padStart(2, '0') + ':' +
@@ -2724,7 +2741,8 @@ $previousChikitsa = $latestFollowUp
 
             const report = {
                 text: reportText,
-                timestamp: timestamp
+                timestamp: displayTimestamp,
+                isoTimestamp: isoTimestamp
             };
 
             reports.push(report);
@@ -2749,17 +2767,23 @@ $previousChikitsa = $latestFollowUp
         // Add new dynamic reports at the top
         reports.forEach((report, index) => {
             const reportDiv = document.createElement('div');
-            reportDiv.className = 'dynamic-report flex justify-between items-start p-2 bg-gray-50 dark:bg-gray-800 rounded mb-2';
+            reportDiv.className = 'dynamic-report report-item bg-gray-50 dark:bg-gray-800 p-3 rounded mb-2 flex justify-between items-start';
+            reportDiv.dataset.text = report.text.toLowerCase();
+            reportDiv.dataset.displayTimestamp = report.timestamp;
+            reportDiv.dataset.originalText = report.text;
 
             const contentDiv = document.createElement('div');
             contentDiv.className = 'flex-1';
 
             const textDiv = document.createElement('div');
-            textDiv.className = 'text-sm';
+            textDiv.className = 'text-sm text-gray-800 dark:text-gray-200 font-medium';
             textDiv.innerHTML = report.text.replace(/\n/g, '<br>');
 
             const timestampDiv = document.createElement('div');
             timestampDiv.className = 'text-xs text-gray-500 dark:text-gray-400 mt-1';
+            if (report.isoTimestamp) {
+                timestampDiv.setAttribute('data-timestamp', report.isoTimestamp);
+            }
             timestampDiv.textContent = report.timestamp;
 
             const buttonsDiv = document.createElement('div');
@@ -2857,12 +2881,12 @@ $previousChikitsa = $latestFollowUp
         const allReports = document.querySelectorAll('.report-item');
         allReports.forEach(report => {
             const text = report.dataset.text || '';
-            const timestamp = report.dataset.timestamp || '';
+            const displayTimestamp = report.dataset.displayTimestamp || '';
             const followupDate = report.dataset.followupDate || '';
 
             const matchesSearch = !searchTerm ||
                 text.includes(searchTerm) ||
-                timestamp.includes(searchTerm) ||
+                displayTimestamp.toLowerCase().includes(searchTerm) ||
                 followupDate.toLowerCase().includes(searchTerm);
 
             report.style.display = matchesSearch ? 'block' : 'none';
