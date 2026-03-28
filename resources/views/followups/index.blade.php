@@ -96,7 +96,7 @@
                         Filter
                     </button>
                     <button id="exportCSV" onclick="csvExport();"
-                        class="px-4 py-1.5 text-sm bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300">CSV</button>
+                        class="px-4 py-1.5 text-sm bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300 -ml-2">CSV</button>
                 </form>
 
                 {{-- Insights Section --}}
