@@ -1,136 +1,168 @@
 <x-app-layout>
+<?php
+if (!function_exists('indFormat')) {
+    function indFormat($num) {
+        $num = round((float)$num);
+        return preg_replace('/(\d+?)(?=(\d\d)+(\d)(?!\d))/i', '\1,', (string)$num);
+    }
+}
+?>
     <x-slot name="header">
         <h2 class="font-bold text-xl text-gray-900 dark:text-gray-100 leading-tight">
             {{ __('messages.Ledger') }}
         </h2>
     </x-slot>
 
-    <div class="py-6">
+    <div class="py-2 md:py-4">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white dark:bg-gray-900 shadow-lg rounded-lg p-6">
+            <div class="bg-white dark:bg-gray-900 shadow-lg rounded-lg p-3 md:p-5">
 
-                {{-- Filters Section --}}
+                                {{-- Filters Section --}}
                 <form method="GET" action="{{ route('followups.index') }}" id="follow_ups"
-                    class="flex flex-wrap gap-3 mb-6 items-end">
-                    <div class="flex flex-col">
-                        <label for="from_date" class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">From:</label>
-                        <input type="date" id="from_date" name="from_date" value="{{ request('from_date') }}"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm dark:bg-gray-800 dark:text-white shadow-sm">
-                    </div>
+                    class="mb-4 bg-gray-50 dark:bg-gray-800/50 p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm space-y-3">
 
-                    <div class="flex flex-col">
-                        <label for="to_date" class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">To:</label>
-                        <input type="date" id="to_date" name="to_date" value="{{ request('to_date') }}"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm dark:bg-gray-800 dark:text-white shadow-sm">
-                    </div>
+                    {{-- Top Row: Quick Periods & Action Buttons --}}
+                    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                        <div class="flex flex-col">
+                            <label class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                Quick Period
+                            </label>
+                            <div class="flex flex-wrap gap-2">
+                                <input type="hidden" id="time_period" name="time_period" value="{{ request('time_period', 'all') }}">
 
-                    <div class="flex flex-col">
-                        <label for="branch_name" class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">Branch:</label>
-                        <select id="branch_name" name="branch_name"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm dark:bg-gray-800 dark:text-white shadow-sm">
-                            <option value="all" {{ request('branch_name') == 'all' ? 'selected' : '' }}>All
-                            </option>
-                            @foreach ($branches as $branch)
-                                <option value="{{ $branch }}"
-                                    {{ request('branch_name') == $branch ? 'selected' : '' }}>
-                                    {{ $branch }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                                @php
+                                    $periods = [
+                                        'all' => 'All',
+                                        'today' => 'Today',
+                                        'last_week' => 'Last Week',
+                                        'this_month' => 'This Month',
+                                        'last_month' => 'Last Month',
+                                        'last_3_months' => '3 Months',
+                                        'last_6_months' => '6 Months',
+                                        'last_12_months' => '12 Months',
+                                    ];
+                                    $currentPeriod = request('time_period', 'all');
+                                @endphp
 
-                    <div class="flex flex-col">
-                        <label for="doctor" class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">Doctor:</label>
-                        <select id="doctor" name="doctor"
-                            class="border border-gray-300 dark:border-gray-700 rounded-md px-3 py-1.5 text-sm dark:bg-gray-800 dark:text-white shadow-sm">
-                            <option value="all" {{ request('doctor') == 'all' ? 'selected' : '' }}>All
-                            </option>
-                            @php
-                                // Get unique user_names from follow_ups check_up_info JSON
-                                $doctorNames = \DB::table('follow_ups')
-                                    ->select('check_up_info')
-                                    ->get()
-                                    ->map(function($fu) {
-                                        $data = json_decode($fu->check_up_info, true);
-                                        return $data['user_name'] ?? null;
-                                    })
-                                    ->filter()
-                                    ->unique()
-                                    ->sort()
-                                    ->values();
-                            @endphp
-                            @foreach ($doctorNames as $doctorName)
-                                <option value="{{ $doctorName }}"
-                                    {{ request('doctor') == $doctorName ? 'selected' : '' }}>
-                                    {{ $doctorName }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    {{-- Filter for Today, Last Week, Last Month --}}
-                    <div class="flex flex-col">
-                        <label class="text-gray-800 dark:text-gray-300 font-semibold text-sm mb-1">Period:</label>
-                        <div class="flex gap-1.5">
-                            <input type="hidden" id="time_period" name="time_period" value="{{ request('time_period', 'all') }}">
-                            <button type="button" onclick="setTimePeriod('all')"
-                                class="px-2.5 py-1.5 text-xs {{ request('time_period', 'all') == 'all' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                All
+                                @foreach($periods as $key => $label)
+                                    <button type="button" onclick="setTimePeriod('{{ $key }}', this)"
+                                        class="period-btn px-3 py-1.5 text-xs font-semibold rounded-md transition-all duration-200 border shadow-sm
+                                        {{ $currentPeriod == $key
+                                            ? 'bg-indigo-600 border-indigo-600 text-white ring-1 ring-indigo-300 dark:ring-indigo-800'
+                                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-indigo-600 dark:hover:text-indigo-400' }}">
+                                        {{ $label }}
+                                    </button>
+                                @endforeach
+                            </div>
+                        </div>
+
+                        {{-- Action Buttons --}}
+                        <div class="flex items-center gap-2 pt-1 xl:pt-0 self-start xl:self-end">
+                            <button type="button" onclick="formSubmit();"
+                                class="flex items-center gap-1.5 px-5 py-2 text-sm bg-indigo-600 text-white font-semibold rounded-md shadow hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                                Filter
                             </button>
-                            <button type="button" onclick="setTimePeriod('today')"
-                                class="px-2.5 py-1.5 text-xs {{ request('time_period') == 'today' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                Today
-                            </button>
-                            <button type="button" onclick="setTimePeriod('last_week')"
-                                class="px-2.5 py-1.5 text-xs {{ request('time_period') == 'last_week' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                Last Week
-                            </button>
-                            <button type="button" onclick="setTimePeriod('last_month')"
-                                class="px-2.5 py-1.5 text-xs {{ request('time_period') == 'last_month' ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }} rounded font-semibold hover:bg-indigo-700 hover:text-white transition focus:ring focus:ring-indigo-300">
-                                Last Month
+                            <button type="button" id="exportCSV" onclick="csvExport();"
+                                class="flex items-center gap-1.5 px-4 py-2 text-sm bg-green-600 text-white font-semibold rounded-md shadow hover:bg-green-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-gray-900">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                CSV
                             </button>
                         </div>
                     </div>
 
-                    <button onclick="formSubmit();"
-                        class="px-5 py-1.5 text-sm bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 transition focus:ring focus:ring-indigo-300">
-                        Filter
-                    </button>
-                    <button id="exportCSV" onclick="csvExport();"
-                        class="px-4 py-1.5 text-sm bg-green-600 text-white font-semibold rounded-md shadow-md hover:bg-green-700 transition focus:ring focus:ring-green-300 -ml-2">CSV</button>
+                    <div class="h-px bg-gray-200 dark:bg-gray-700 w-full"></div>
+
+                    {{-- Bottom Row: Custom Controls --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+                        <div class="flex flex-col relative">
+                            <label for="from_date" class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>From Date:</label>
+                            <input type="date" id="from_date" name="from_date" value="{{ request('from_date') }}"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2.5 py-1.5 text-sm bg-white dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition">
+                        </div>
+
+                        <div class="flex flex-col relative">
+                            <label for="to_date" class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>To Date:</label>
+                            <input type="date" id="to_date" name="to_date" value="{{ request('to_date') }}"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2.5 py-1.5 text-sm bg-white dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition">
+                        </div>
+
+                        <div class="flex flex-col relative">
+                            <label for="branch_name" class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>Branch:</label>
+                            <select id="branch_name" name="branch_name"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2.5 py-1.5 text-sm bg-white dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition">
+                                <option value="all" {{ request('branch_name') == 'all' ? 'selected' : '' }}>All Branches</option>
+                                @foreach ($branches as $branch)
+                                    <option value="{{ $branch }}" {{ request('branch_name') == $branch ? 'selected' : '' }}>
+                                        {{ $branch }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col relative">
+                            <label for="doctor" class="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>Reporting Doctor:</label>
+                            <select id="doctor" name="doctor"
+                                class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2.5 py-1.5 text-sm bg-white dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition">
+                                <option value="all" {{ request('doctor') == 'all' ? 'selected' : '' }}>All Doctors</option>
+                                @php
+                                    $doctorNames = \DB::table('follow_ups')
+                                        ->select('check_up_info')
+                                        ->get()
+                                        ->map(function($fu) {
+                                            $data = json_decode($fu->check_up_info, true);
+                                            return $data['user_name'] ?? null;
+                                        })
+                                        ->filter()
+                                        ->unique()
+                                        ->sort()
+                                        ->values();
+                                @endphp
+                                @foreach ($doctorNames as $doctorName)
+                                    <option value="{{ $doctorName }}" {{ request('doctor') == $doctorName ? 'selected' : '' }}>
+                                        {{ $doctorName }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </form>
 
                 {{-- Insights Section --}}
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6">
-                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-4">📊 {{ __('messages.Insights') }}
+                <div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl shadow-sm p-4 mb-4 border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        {{ __('messages.Insights') }}
                     </h3>
 
                     {{-- Filter Summary Section --}}
-                    <div class="bg-blue-50 dark:bg-gray-900 border-l-4 border-blue-500 p-4 mb-6 rounded-md">
-                        <h4 class="text-md font-semibold text-blue-800 dark:text-blue-300 mb-3">Filter Summary</h4>
-                        <ul class="text-sm list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
+                    <div class="bg-indigo-50/50 dark:bg-indigo-900/20 border-l-4 border-indigo-500 p-3 mb-3 rounded-r-md flex flex-col sm:flex-row sm:items-center gap-3">
+                        <h4 class="text-sm font-bold text-indigo-800 dark:text-indigo-300 m-0 uppercase tracking-wide whitespace-nowrap">Filter Summary:</h4>
+                        <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700 dark:text-gray-300">
                             @php
                                 $filterSummary = [];
 
                                 if (request('time_period') && request('time_period') != 'all') {
                                     $filterSummary[] = [
-                                        'icon' => '⏳',
-                                        'label' => 'Time Period',
+                                        'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                                        'label' => 'Period',
                                         'value' => match (request('time_period')) {
                                             'today' => 'Today',
                                             'last_week' => 'Last Week',
+                                            'this_month' => 'This Month',
                                             'last_month' => 'Last Month',
+                                            'last_3_months' => 'Last 3 Months',
+                                            'last_6_months' => 'Last 6 Months',
+                                            'last_12_months' => 'Last 12 Months',
                                             default => 'Unknown',
                                         },
                                     ];
                                 } elseif (request('from_date') || request('to_date')) {
-                                    $from = request('from_date')
-                                        ? \Carbon\Carbon::parse(request('from_date'))->format('d M Y')
-                                        : 'Start';
-                                    $to = request('to_date')
-                                        ? \Carbon\Carbon::parse(request('to_date'))->format('d M Y')
-                                        : 'End';
+                                    $from = request('from_date') ? \Carbon\Carbon::parse(request('from_date'))->format('d M Y') : 'Start';
+                                    $to = request('to_date') ? \Carbon\Carbon::parse(request('to_date'))->format('d M Y') : 'End';
                                     $filterSummary[] = [
-                                        'icon' => '📅',
+                                        'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>',
                                         'label' => 'Date Range',
                                         'value' => "$from → $to",
                                     ];
@@ -138,7 +170,7 @@
 
                                 if (request('branch_name') && request('branch_name') != 'all') {
                                     $filterSummary[] = [
-                                        'icon' => '🏢',
+                                        'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
                                         'label' => 'Branch',
                                         'value' => request('branch_name'),
                                     ];
@@ -146,7 +178,7 @@
 
                                 if (request('doctor') && request('doctor') != 'all') {
                                     $filterSummary[] = [
-                                        'icon' => '👨‍⚕️',
+                                        'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>',
                                         'label' => 'Doctor',
                                         'value' => request('doctor'),
                                     ];
@@ -154,23 +186,23 @@
                             @endphp
 
                             @if (empty($filterSummary))
-                                <li class="text-gray-500 dark:text-gray-400 italic">No filters applied</li>
+                                <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-400 italic">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    No filters applied (showing all records)
+                                </div>
                             @else
                                 @foreach ($filterSummary as $filter)
-                                    <li>
-                                        <span class="mr-1">{{ $filter['icon'] }}</span>
-                                        {{ $filter['label'] }}: <span class="font-bold">{{ $filter['value'] }}</span>
-                                    </li>
+                                    <div class="flex items-center gap-1.5 bg-white dark:bg-gray-800 px-2 py-1 rounded-md border border-indigo-100 dark:border-indigo-900/30 shadow-sm">
+                                        <span class="text-indigo-500">{!! $filter['icon'] !!}</span>
+                                        <span class="font-medium text-gray-600 dark:text-gray-400">{{ $filter['label'] }}:</span>
+                                        <span class="font-bold text-gray-900 dark:text-white">{{ $filter['value'] }}</span>
+                                    </div>
                                 @endforeach
-                                {{-- Example for total results if available --}}
-                                {{-- @if (isset($totalPatients))
-                                        <li>📊 Total Results: <span class="font-bold">{{ $totalPatients }}</span></li>
-                                    @endif --}}
                             @endif
-                        </ul>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5">
                         {{-- <div
                             class="p-4 rounded-lg bg-gradient-to-br from-yellow-200 to-gray-50 dark:from-gray-800 dark:to-gray-900 shadow
                     transition-all duration-300 ease-in-out hover:bg-gradient-to-bl hover:from-gray-50 hover:to-yellow-200 hover:scale-105 hover:shadow-lg">
@@ -195,56 +227,453 @@
 
 
 
-                        <div
-                            class="p-4 rounded-lg bg-gradient-to-br from-cyan-200 to-white dark:from-blue-900 dark:to-gray-900 shadow
-                    transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-cyan-200 hover:scale-105 hover:shadow-lg">
-                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">👤
-                                {{ __('messages.Total Patients') }}</p>
-                            <p class="text-xl font-bold text-cyan-600 dark:text-blue-300">{{ $totalPatients }}</p>
-                        </div>
+                        <div x-data="{ openPatients: false }" class="h-full">
+                            <div @click="openPatients = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
+    
+    <!-- Animated Bottom Accent Line -->
+    <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-600 to-blue-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+    
+    <!-- Immersive Glow Blob Behind Icon on Hover -->
+    <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-cyan-600 to-blue-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
 
-                        <div
-                            class="p-4 rounded-lg bg-gradient-to-br from-purple-200 to-white dark:from-purple-900 dark:to-gray-900 shadow
-                    transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-purple-200 hover:scale-105 hover:shadow-lg">
-                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">🔄
-                                {{ __('messages.Total Follow-ups') }}</p>
-                            <p class="text-lg font-bold text-purple-600 dark:text-purple-300">{{ $totalFollowUps }}</p>
-                        </div>
-
-                        <div
-                            class="p-4 rounded-lg bg-gradient-to-br from-green-200 to-white dark:from-green-900 dark:to-gray-900 shadow
-                    transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-green-200 hover:scale-105 hover:shadow-lg">
-                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">💰
-                                {{ __('messages.Total Payment Received') }}</p>
-                            <p class="text-lg font-bold text-green-600 dark:text-green-300">
-                                ₹{{ number_format($totalIncome) }}</p>
-                        </div>
-                        <div
-                            class="p-4 rounded-lg bg-gradient-to-br from-teal-200 to-white dark:from-teal-900 dark:to-gray-900 shadow transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-teal-200 hover:scale-105 hover:shadow-lg">
-                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">💵
-                                {{ __('messages.Cash Payments') }}</p>
-                            <p class="text-lg font-bold text-teal-600 dark:text-teal-300">{{ $cashPayments }}</p>
-                        </div>
-                        <a href="{{ route('patient-dues.index') }}">
-                            <div
-                                class="p-4 rounded-lg bg-gradient-to-br from-red-200 to-white dark:from-red-900 dark:to-gray-900 shadow transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-red-200 hover:scale-105 hover:shadow-lg">
-                                <p class="text-sm font-semibold text-gray-600 dark:text-gray-400 gap-1">
-                                    ⚠️ {{ __('messages.Total Outstanding Balance') }}
-                                    <span class="text-xs text-gray-500">➡️</span>
-                                </p>
-
-                                <p class="text-lg font-bold text-red-600 dark:text-red-300">
-                                    ₹{{ number_format($totalDueAll) }}
-                                </p>
-
-                                {{-- <p class="text-xs text-gray-500 dark:text-gray-400">Click to view details</p> --}}
+    <div class="flex justify-between items-start mb-3 relative z-10">
+        <div class="pr-2">
+            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{{ __('messages.Total Patients') }}</h3>
+            <!-- Added group-hover:brightness-50 to make the numbers dramatically darker on hover -->
+            <p class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-blue-500 truncate break-words transform origin-left group-hover:scale-105 filter group-hover:brightness-75 dark:group-hover:brightness-125 transition-all duration-300">
+                {{ $totalPatients }}
+            </p>
+        </div>
+        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-cyan-50 dark:bg-cyan-900/30 border-cyan-100 dark:border-cyan-800 border shadow-inner group-hover:bg-white dark:group-hover:bg-gray-800 transition-colors duration-300">
+            <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">👤</span>
+        </div>
+    </div>
+    
+    <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
+        <span>View detailed log</span>
+        <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+    </div>
+</div>
+                            <div x-show="openPatients" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" style="display: none;">
+                                <div @click.away="openPatients = false" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[80vh] overflow-hidden">
+                                    <div class="px-5 py-4 border-b dark:border-gray-700 flex justify-between items-center bg-cyan-50 dark:bg-cyan-900/30">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                            <span>👤</span> Patient Log
+                                        </h3>
+                                        <button @click="openPatients = false" class="text-gray-500 hover:text-red-500 transition-colors p-1 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:shadow">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-0 overflow-y-auto flex-1">
+                                        <table class="w-full text-sm text-left">
+                                            <thead class="bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 sticky top-0 z-10">
+                                                <tr>
+                                                    <th class="px-5 py-3 font-semibold w-16 text-center">#</th>
+                                                    <th class="px-5 py-3 font-semibold">Patient Name</th>
+                                                    <th class="px-5 py-3 font-semibold text-right">Phone</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                                @forelse($patientsList as $index => $patient)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
+                                                        <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
+                                                        <td class="px-5 py-3 font-medium">{{ $patient->name }}</td>
+                                                        <td class="px-5 py-3 text-right">{{ $patient->mobile_phone ?? 'N/A' }}</td>
+                                                    </tr>
+                                                @empty
+                                                <tr><td colspan="3" class="px-5 py-8 text-center text-gray-500 italic">No patients in this period.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
-                        </a>
-                        <div
-                            class="p-4 rounded-lg bg-gradient-to-br from-pink-200 to-white dark:from-pink-900 dark:to-gray-900 shadow transition-all duration-400 ease-in-out hover:bg-gradient-to-bl hover:from-white hover:to-pink-200 hover:scale-105 hover:shadow-lg">
-                            <p class="text-sm font-semibold text-gray-600 dark:text-gray-400">💳
-                                {{ __('messages.Online Payments') }}</p>
-                            <p class="text-lg font-bold text-pink-600 dark:text-pink-300">{{ $onlinePayments }}</p>
+                        </div>
+
+                        <div x-data="{ openFollowups: false }" class="h-full">
+                            <div @click="openFollowups = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
+    
+    <!-- Animated Bottom Accent Line -->
+    <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-600 to-fuchsia-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+    
+    <!-- Immersive Glow Blob Behind Icon on Hover -->
+    <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-purple-600 to-fuchsia-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
+
+    <div class="flex justify-between items-start mb-3 relative z-10">
+        <div class="pr-2">
+            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{{ __('messages.Total Follow-ups') }}</h3>
+            <!-- Added group-hover:brightness-50 to make the numbers dramatically darker on hover -->
+            <p class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-fuchsia-500 truncate break-words transform origin-left group-hover:scale-105 filter group-hover:brightness-75 dark:group-hover:brightness-125 transition-all duration-300">
+                {{ $totalFollowUps }}
+            </p>
+        </div>
+        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-purple-50 dark:bg-purple-900/30 border-purple-100 dark:border-purple-800 border shadow-inner group-hover:bg-white dark:group-hover:bg-gray-800 transition-colors duration-300">
+            <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">🔄</span>
+        </div>
+    </div>
+    
+    <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
+        <span>View detailed log</span>
+        <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+    </div>
+</div>
+                            <div x-show="openFollowups" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" style="display: none;">
+                                <div @click.away="openFollowups = false" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[80vh] overflow-hidden">
+                                    <div class="px-5 py-4 border-b dark:border-gray-700 flex justify-between items-center bg-purple-50 dark:bg-purple-900/30">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                            <span>🔄</span> Follow-ups Log
+                                        </h3>
+                                        <button @click="openFollowups = false" class="text-gray-500 hover:text-red-500 transition-colors p-1 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:shadow">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-0 overflow-y-auto flex-1">
+                                        <table class="w-full text-sm text-left">
+                                            <thead class="bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 sticky top-0 z-10">
+                                                <tr>
+                                                    <th class="px-5 py-3 font-semibold w-16 text-center">#</th>
+                                                    <th class="px-5 py-3 font-semibold">Date</th>
+                                                    <th class="px-5 py-3 font-semibold">Patient</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                                @forelse($allFollowUpsList as $index => $fu)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
+                                                        <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
+                                                        <td class="px-5 py-3">{{ $fu->created_at->format('d M Y') }}</td>
+                                                        <td class="px-5 py-3 font-medium">
+<a target="_blank" href="{{ route('patients.show', $fu->patient_id) }}" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">{{ optional($fu->patient)->name ?? 'Unknown' }}</a>
+</td>
+                                                    </tr>
+                                                @empty
+                                                <tr><td colspan="3" class="px-5 py-8 text-center text-gray-500 italic">No follow-ups in this period.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div x-data="{ openIncome: false }" class="h-full">
+                            <div @click="openIncome = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
+    
+    <!-- Animated Bottom Accent Line -->
+    <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-green-600 to-emerald-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+    
+    <!-- Immersive Glow Blob Behind Icon on Hover -->
+    <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-green-600 to-emerald-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
+
+    <div class="flex justify-between items-start mb-3 relative z-10">
+        <div class="pr-2">
+            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{{ __('messages.Total Payment Received') }}</h3>
+            <!-- Added group-hover:brightness-50 to make the numbers dramatically darker on hover -->
+            <p class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-500 truncate break-words transform origin-left group-hover:scale-105 filter group-hover:brightness-75 dark:group-hover:brightness-125 transition-all duration-300">
+                ₹{{ indFormat($totalIncome) }}
+            </p>
+        </div>
+        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-green-50 dark:bg-green-900/30 border-green-100 dark:border-green-800 border shadow-inner group-hover:bg-white dark:group-hover:bg-gray-800 transition-colors duration-300">
+            <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">💰</span>
+        </div>
+    </div>
+    
+    <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
+        <span>View detailed log</span>
+        <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+    </div>
+</div>
+                            <div x-show="openIncome" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" style="display: none;">
+                                <div @click.away="openIncome = false" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[80vh] overflow-hidden">
+                                    <div class="px-5 py-4 border-b dark:border-gray-700 flex justify-between items-center bg-green-50 dark:bg-green-900/30">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                            <span>💰</span> Income Log
+                                        </h3>
+                                        <button @click="openIncome = false" class="text-gray-500 hover:text-red-500 transition-colors p-1 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:shadow">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-0 overflow-y-auto flex-1">
+                                        <table class="w-full text-sm text-left">
+                                            <thead class="bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 sticky top-0 z-10">
+                                                <tr>
+                                                    <th class="px-5 py-3 font-semibold w-16 text-center">#</th>
+                                                    <th class="px-5 py-3 font-semibold">Date</th>
+                                                    <th class="px-5 py-3 font-semibold">Patient</th>
+                                                    <th class="px-5 py-3 font-semibold text-right">Amount Paid</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                                @forelse($paidFollowUpsList as $index => $fu)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
+                                                        <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
+                                                        <td class="px-5 py-3">{{ $fu->created_at->format('d M Y') }}</td>
+                                                        <td class="px-5 py-3 font-medium">
+<a target="_blank" href="{{ route('patients.show', $fu->patient_id) }}" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">{{ optional($fu->patient)->name ?? 'Unknown' }}</a>
+</td>
+                                                        <td class="px-5 py-3 text-right font-bold text-green-600 dark:text-green-400">₹{{ indFormat($fu->amount_paid) }}</td>
+                                                    </tr>
+                                                @empty
+                                                <tr><td colspan="4" class="px-5 py-8 text-center text-gray-500 italic">No payments received in this period.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div x-data="{ openCash: false }" class="h-full">
+                            <div @click="openCash = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
+    
+    <!-- Animated Bottom Accent Line -->
+    <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-teal-600 to-emerald-400 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+    
+    <!-- Immersive Glow Blob Behind Icon on Hover -->
+    <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-teal-600 to-emerald-400 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
+
+    <div class="flex justify-between items-start mb-3 relative z-10">
+        <div class="pr-2">
+            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{{ __('messages.Cash Payments') }}</h3>
+            <!-- Added group-hover:brightness-50 to make the numbers dramatically darker on hover -->
+            <p class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-400 truncate break-words transform origin-left group-hover:scale-105 filter group-hover:brightness-75 dark:group-hover:brightness-125 transition-all duration-300">
+                ₹{{ indFormat($cashPayments) }}
+            </p>
+        </div>
+        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-teal-50 dark:bg-teal-900/30 border-teal-100 dark:border-teal-800 border shadow-inner group-hover:bg-white dark:group-hover:bg-gray-800 transition-colors duration-300">
+            <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">💵</span>
+        </div>
+    </div>
+    
+    <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
+        <span>View detailed log</span>
+        <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+    </div>
+</div>
+                            <div x-show="openCash" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" style="display: none;">
+                                <div @click.away="openCash = false" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[80vh] overflow-hidden">
+                                    <div class="px-5 py-4 border-b dark:border-gray-700 flex justify-between items-center bg-teal-50 dark:bg-teal-900/30">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                            <span>💵</span> Cash Payments Log
+                                        </h3>
+                                        <button @click="openCash = false" class="text-gray-500 hover:text-red-500 transition-colors p-1 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:shadow">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-0 overflow-y-auto flex-1">
+                                        <table class="w-full text-sm text-left">
+                                            <thead class="bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 sticky top-0 z-10">
+                                                <tr>
+                                                    <th class="px-5 py-3 font-semibold w-16 text-center">#</th>
+                                                    <th class="px-5 py-3 font-semibold">Date</th>
+                                                    <th class="px-5 py-3 font-semibold">Patient</th>
+                                                    <th class="px-5 py-3 font-semibold text-right">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                                @forelse($cashFollowUps as $index => $fu)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
+                                                        <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
+                                                        <td class="px-5 py-3">{{ $fu->created_at->format('d M Y') }}</td>
+                                                        <td class="px-5 py-3 font-medium">
+<a target="_blank" href="{{ route('patients.show', $fu->patient_id) }}" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">{{ optional($fu->patient)->name ?? 'Unknown' }}</a>
+</td>
+                                                        <td class="px-5 py-3 text-right font-bold text-teal-600 dark:text-teal-400">₹{{ indFormat($fu->amount_paid) }}</td>
+                                                    </tr>
+                                                @empty
+                                                <tr><td colspan="4" class="px-5 py-8 text-center text-gray-500 italic">No cash payments in this period.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div x-data="{ openDue: false }" class="h-full">
+                            <div @click="openDue = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
+    
+    <!-- Animated Bottom Accent Line -->
+    <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-600 to-orange-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+    
+    <!-- Immersive Glow Blob Behind Icon on Hover -->
+    <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-red-600 to-orange-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
+
+    <div class="flex justify-between items-start mb-3 relative z-10">
+        <div class="pr-2">
+            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{{ __('messages.Total Outstanding Balance') }}</h3>
+            <!-- Added group-hover:brightness-50 to make the numbers dramatically darker on hover -->
+            <p class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 truncate break-words transform origin-left group-hover:scale-105 filter group-hover:brightness-75 dark:group-hover:brightness-125 transition-all duration-300">
+                ₹{{ indFormat($totalDueAll) }}
+            </p>
+        </div>
+        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-red-50 dark:bg-red-900/30 border-red-100 dark:border-red-800 border shadow-inner group-hover:bg-white dark:group-hover:bg-gray-800 transition-colors duration-300">
+            <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">⚠️</span>
+        </div>
+    </div>
+    
+    <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
+        <span>View detailed log</span>
+        <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+    </div>
+</div>
+                            <div x-show="openDue" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" style="display: none;">
+                                <div @click.away="openDue = false" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[80vh] overflow-hidden">
+                                    <div class="px-5 py-4 border-b dark:border-gray-700 flex justify-between items-center bg-red-50 dark:bg-red-900/30">
+                                        <div class="flex items-center gap-3">
+                                            <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                                <span>⚠️</span> Due Balance Log
+                                            </h3>
+                                            <a href="{{ route('patient-dues.index') }}" class="text-xs bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 px-3 py-1 rounded-full font-semibold hover:bg-red-200 transition-colors">
+                                                Manage Patient Dues ➡️
+                                            </a>
+                                        </div>
+                                        <button @click="openDue = false" class="text-gray-500 hover:text-red-500 transition-colors p-1 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:shadow">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-0 overflow-y-auto flex-1">
+                                        <table class="w-full text-sm text-left">
+                                            <thead class="bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 sticky top-0 z-10">
+                                                <tr>
+                                                    <th class="px-5 py-3 font-semibold w-16 text-center">#</th>
+                                                    <th class="px-5 py-3 font-semibold">Date</th>
+                                                    <th class="px-5 py-3 font-semibold">Patient</th>
+                                                    <th class="px-5 py-3 font-semibold text-right">Visit Bill</th><th class="px-5 py-3 font-semibold text-right">Account Net</th><th class="px-5 py-3 font-bold text-right text-red-600 dark:text-red-500">Actual Due</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                                @forelse($dueFollowUpsList as $index => $fu)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
+                                                        <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
+                                                        <td class="px-5 py-3">{{ $fu->created_at->format('d M Y') }}</td>
+                                                        <td class="px-5 py-3 font-medium">
+<a target="_blank" href="{{ route('patients.show', $fu->patient_id) }}" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">{{ optional($fu->patient)->name ?? 'Unknown' }}</a>
+</td>
+                                                        <td class="px-5 py-3 text-right font-medium text-gray-600 dark:text-gray-400">₹{{ indFormat($fu->amount_billed - $fu->amount_paid) }}</td>
+<td class="px-5 py-3 text-right font-medium text-blue-600 dark:text-blue-400">₹{{ indFormat($patientBalances[$fu->patient_id] ?? 0) }}</td>
+<td class="px-5 py-3 text-right font-bold text-red-600 dark:text-red-500 text-base">₹{{ indFormat($fu->real_due ?? 0) }}</td>
+                                                    </tr>
+                                                @empty
+                                                <tr><td colspan="6" class="px-5 py-8 text-center text-gray-500 italic">No missing dues in this period.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                            <tfoot class="sticky bottom-0 z-20"><tr><td colspan="6" class="p-0 border-0">
+    <div class="bg-gray-50 dark:bg-gray-800/95 border-t-2 border-gray-200 dark:border-gray-700 p-5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            
+            <!-- Left Side: Explanation -->
+            <div class="text-xs text-gray-500 dark:text-gray-400 max-w-sm space-y-2">
+                <h4 class="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-1"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> How is this calculated?</h4>
+                <p>We sum up all outstanding visit bills, but automatically deduct any <strong class="text-green-600 dark:text-green-500">Advance Payments</strong> those specific patients already hold in their accounts to give you the true outstanding amount.</p>
+            </div>
+
+            @php
+                $grossDues = $dueFollowUpsList->sum(fn($fu) => $fu->amount_billed - $fu->amount_paid);
+                $advApplied = $grossDues - $totalDueAll;
+                $advancesWithinDue = $dueFollowUpsList->unique('patient_id')->sum(function($fu) use ($patientBalances) {
+                    return ($patientBalances[$fu->patient_id] ?? 0) < 0 ? abs($patientBalances[$fu->patient_id]) : 0;
+                });
+            @endphp
+
+            <!-- Right Side: The Math -->
+            <div class="flex flex-col gap-2 w-full md:w-auto min-w-[320px]">
+                <!-- Line 1: Gross -->
+                <div class="flex justify-between items-center text-sm font-medium text-gray-600 dark:text-gray-400">
+                    <span>Total Visit Bills (Raw):</span>
+                    <span>₹{{ indFormat($grossDues) }}</span>
+                </div>
+                
+                <!-- Line 2: Advances -->
+                <div class="flex justify-between items-center text-sm font-medium text-green-600 dark:text-green-400 border-b border-gray-300 dark:border-gray-600 pb-2">
+                    <span>Minus (-) Advances Used:</span>
+                    <span>- ₹{{ indFormat($advApplied) }}</span>
+                </div>
+
+                <!-- Line 3: Net Real Outstanding -->
+                <div class="flex justify-between items-center text-lg font-black text-red-600 dark:text-red-400 pt-1">
+                    <span>Real Outstanding Owed:</span>
+                    <span class="bg-red-100 dark:bg-red-900/40 px-3 py-1 rounded shadow-sm border border-red-200 dark:border-red-800">₹{{ indFormat($totalDueAll) }}</span>
+                </div>
+
+                @if($advancesWithinDue > 0)
+                <div class="text-right mt-1">
+                    <span class="text-[11px] font-medium text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full border border-green-200 dark:border-green-800">
+                        Total advances sitting in these accounts: ₹{{ indFormat($advancesWithinDue) }}
+                    </span>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
+    </td></tr></tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div x-data="{ openOnline: false }" class="h-full">
+                            <div @click="openOnline = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
+    
+    <!-- Animated Bottom Accent Line -->
+    <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-pink-600 to-rose-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+    
+    <!-- Immersive Glow Blob Behind Icon on Hover -->
+    <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-pink-600 to-rose-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
+
+    <div class="flex justify-between items-start mb-3 relative z-10">
+        <div class="pr-2">
+            <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{{ __('messages.Online Payments') }}</h3>
+            <!-- Added group-hover:brightness-50 to make the numbers dramatically darker on hover -->
+            <p class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-rose-500 truncate break-words transform origin-left group-hover:scale-105 filter group-hover:brightness-75 dark:group-hover:brightness-125 transition-all duration-300">
+                ₹{{ indFormat($onlinePayments) }}
+            </p>
+        </div>
+        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-pink-50 dark:bg-pink-900/30 border-pink-100 dark:border-pink-800 border shadow-inner group-hover:bg-white dark:group-hover:bg-gray-800 transition-colors duration-300">
+            <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">💳</span>
+        </div>
+    </div>
+    
+    <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
+        <span>View detailed log</span>
+        <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+    </div>
+</div>
+                            <div x-show="openOnline" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" style="display: none;">
+                                <div @click.away="openOnline = false" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[80vh] overflow-hidden">
+                                    <div class="px-5 py-4 border-b dark:border-gray-700 flex justify-between items-center bg-pink-50 dark:bg-pink-900/30">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                            <span>💳</span> Online Payments Log
+                                        </h3>
+                                        <button @click="openOnline = false" class="text-gray-500 hover:text-red-500 transition-colors p-1 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:shadow">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-0 overflow-y-auto flex-1">
+                                        <table class="w-full text-sm text-left">
+                                            <thead class="bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 sticky top-0 z-10">
+                                                <tr>
+                                                    <th class="px-5 py-3 font-semibold w-16 text-center">#</th>
+                                                    <th class="px-5 py-3 font-semibold">Date</th>
+                                                    <th class="px-5 py-3 font-semibold">Patient</th>
+                                                    <th class="px-5 py-3 font-semibold text-right">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                                @forelse($onlineFollowUps as $index => $fu)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
+                                                        <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
+                                                        <td class="px-5 py-3">{{ $fu->created_at->format('d M Y') }}</td>
+                                                        <td class="px-5 py-3 font-medium">
+<a target="_blank" href="{{ route('patients.show', $fu->patient_id) }}" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">{{ optional($fu->patient)->name ?? 'Unknown' }}</a>
+</td>
+                                                        <td class="px-5 py-3 text-right font-bold text-pink-600 dark:text-pink-400">₹{{ indFormat($fu->amount_paid) }}</td>
+                                                    </tr>
+                                                @empty
+                                                <tr><td colspan="4" class="px-5 py-8 text-center text-gray-500 italic">No online payments in this period.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                     </div>
@@ -261,7 +690,7 @@
                             </p>
 
                             <p class="text-lg font-bold text-red-600 dark:text-red-300">
-                                ₹{{ number_format($totalDueAll) }}
+                                ₹{{ indFormat($totalDueAll) }}
                             </p>
 
                             <p class="text-xs text-gray-500 dark:text-gray-400">Click to view details</p>
@@ -356,7 +785,7 @@
                                         </td>
                                         <td
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
-                                            ₹{{ number_format(@$followUp->amount_billed, 2) }}
+                                            ₹{{ indFormat(@$followUp->amount_billed) }}
                                         </td>
                                         <td
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
@@ -364,7 +793,7 @@
                                         </td>
                                         {{-- <td
                                             class="text-right px-4 py-3 font-semibold text-green-600 dark:text-green-300">
-                                            ₹{{ number_format(@$followUp->amount_paid, 2) }}
+                                            ₹{{ indFormat(@$followUp->amount_paid) }}
                                         </td> --}}
                                         <td
                                             class="text-right px-4 py-3 font-semibold
@@ -373,7 +802,7 @@
                                                 : ($followUp->amount_paid > $followUp->amount_billed
                                                     ? 'text-green-600 dark:text-green-300'
                                                     : 'text-blue-600 dark:text-blue-300') }}">
-                                            ₹{{ number_format(@$followUp->amount_paid, 2) }}
+                                            ₹{{ indFormat(@$followUp->amount_paid) }}
                                         </td>
 
                                     </tr>
@@ -415,121 +844,156 @@
         document.getElementById('follow_ups').submit();
     }
 
-    function setTimePeriod(period) {
+    function setTimePeriod(period, btnElement) {
         const timePeriodInput = document.getElementById('time_period');
         const fromDate = document.getElementById('from_date');
         const toDate = document.getElementById('to_date');
+
         timePeriodInput.value = period;
 
-        // Set date range based on period and disable inputs
         if (period !== 'all') {
-            let startDate, endDate;
             const today = new Date();
+            let start, end;
+
+            // Handle date math accurately
+            // For month calculations, jump to the 1st of the current month first to prevent overflow
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
 
             if (period === 'today') {
-                startDate = new Date(today);
-                endDate = new Date(today);
+                start = new Date(today);
+                end = new Date(today);
             } else if (period === 'last_week') {
-                // Get the start of LAST week (previous Monday to Sunday)
-                startDate = new Date(today);
-                startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
-                endDate = new Date(startDate);
-                endDate.setDate(startDate.getDate() + 6);
+                start = new Date(today);
+                start.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
+                end = new Date(start);
+                end.setDate(start.getDate() + 6);
+            } else if (period === 'this_month') {
+                start = new Date(currentYear, currentMonth, 1);
+                end = new Date(currentYear, currentMonth + 1, 0);
             } else if (period === 'last_month') {
-                // Get the start of LAST month
-                startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                start = new Date(currentYear, currentMonth - 1, 1);
+                end = new Date(currentYear, currentMonth, 0);
+            } else if (period === 'last_3_months') {
+                start = new Date(currentYear, currentMonth - 2, 1);
+                end = new Date(currentYear, currentMonth + 1, 0);
+            } else if (period === 'last_6_months') {
+                start = new Date(currentYear, currentMonth - 5, 1);
+                end = new Date(currentYear, currentMonth + 1, 0);
+            } else if (period === 'last_12_months') {
+                start = new Date(currentYear, currentMonth - 11, 1);
+                end = new Date(currentYear, currentMonth + 1, 0);
             }
 
-            // Format dates as YYYY-MM-DD
-            const formatDate = (date) => {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
+            const fmt = d => {
+                let m = (d.getMonth() + 1).toString().padStart(2, '0');
+                let day = d.getDate().toString().padStart(2, '0');
+                return d.getFullYear() + '-' + m + '-' + day;
             };
 
-            fromDate.value = formatDate(startDate);
-            toDate.value = formatDate(endDate);
-            fromDate.disabled = true;
-            toDate.disabled = true;
+            fromDate.value = fmt(start);
+            toDate.value = fmt(end);
+
+            // visually indicate they are managed by the quick filter
+            fromDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+            toDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
         } else {
-            fromDate.disabled = false;
-            toDate.disabled = false;
             fromDate.value = '';
             toDate.value = '';
+            fromDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+            toDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
         }
 
-        // Update button styles
-        document.querySelectorAll('.time-period-btn').forEach(btn => {
-            btn.classList.remove('bg-indigo-600', 'text-white');
-            btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-        });
-        const activeButton = document.querySelector(`button[onclick="setTimePeriod('${period}')"]`);
-        if (activeButton) {
-            activeButton.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-            activeButton.classList.add('bg-indigo-600', 'text-white');
-        }
-
-        // Submit form
+        // Auto-submit the form to apply filters
         formSubmit();
     }
 
-    // Initialize button styles and input states on page load without submitting
+    // Initialize inputs state directly based on value on load
     function initializeTimePeriod() {
         const timePeriodInput = document.getElementById('time_period');
         const fromDate = document.getElementById('from_date');
         const toDate = document.getElementById('to_date');
-        const period = timePeriodInput.value || 'all';
+        const period = timePeriodInput ? timePeriodInput.value : 'all';
 
-        // Set date range based on period
         if (period !== 'all') {
-            let startDate, endDate;
             const today = new Date();
+            let start, end;
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
 
             if (period === 'today') {
-                startDate = new Date(today);
-                endDate = new Date(today);
+                start = new Date(today);
+                end = new Date(today);
             } else if (period === 'last_week') {
-                startDate = new Date(today);
-                startDate.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
-                endDate = new Date(startDate);
-                endDate.setDate(startDate.getDate() + 6);
+                start = new Date(today);
+                start.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
+                end = new Date(start);
+                end.setDate(start.getDate() + 6);
+            } else if (period === 'this_month') {
+                start = new Date(currentYear, currentMonth, 1);
+                end = new Date(currentYear, currentMonth + 1, 0);
             } else if (period === 'last_month') {
-                startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-                endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                start = new Date(currentYear, currentMonth - 1, 1);
+                end = new Date(currentYear, currentMonth, 0);
+            } else if (period === 'last_3_months') {
+                start = new Date(currentYear, currentMonth - 2, 1);
+                end = new Date(currentYear, currentMonth + 1, 0);
+            } else if (period === 'last_6_months') {
+                start = new Date(currentYear, currentMonth - 5, 1);
+                end = new Date(currentYear, currentMonth + 1, 0);
+            } else if (period === 'last_12_months') {
+                start = new Date(currentYear, currentMonth - 11, 1);
+                end = new Date(currentYear, currentMonth + 1, 0);
             }
 
-            const formatDate = (date) => {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
+            const fmt = d => {
+                if(!d) return '';
+                let m = (d.getMonth() + 1).toString().padStart(2, '0');
+                let day = d.getDate().toString().padStart(2, '0');
+                return d.getFullYear() + '-' + m + '-' + day;
             };
 
-            fromDate.value = formatDate(startDate);
-            toDate.value = formatDate(endDate);
-            fromDate.disabled = true;
-            toDate.disabled = true;
-        } else {
-            fromDate.disabled = false;
-            toDate.disabled = false;
-        }
+            if (!fromDate.value) fromDate.value = fmt(start);
+            if (!toDate.value) toDate.value = fmt(end);
 
-        // Update button styles
-        document.querySelectorAll('.time-period-btn').forEach(btn => {
-            btn.classList.remove('bg-indigo-600', 'text-white');
-            btn.classList.add('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-        });
-        const activeButton = document.querySelector(`button[onclick="setTimePeriod('${period}')"]`);
-        if (activeButton) {
-            activeButton.classList.remove('bg-gray-200', 'dark:bg-gray-700', 'text-gray-800', 'dark:text-gray-200');
-            activeButton.classList.add('bg-indigo-600', 'text-white');
+            fromDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+            toDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+        } else {
+            fromDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+            toDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
         }
     }
 
-    // Run initialization on page load
-    document.addEventListener('DOMContentLoaded', initializeTimePeriod);
+    // Automatically reset 'time_period' to 'all' if user interacts with custom date fields
+    document.addEventListener('DOMContentLoaded', () => {
+        const fromDate = document.getElementById('from_date');
+        const toDate = document.getElementById('to_date');
+        const changeToAll = () => {
+            const timePeriodInput = document.getElementById('time_period');
+            if (timePeriodInput.value !== 'all') {
+                timePeriodInput.value = 'all';
+                fromDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+                toDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+
+                // Remove active styling from filter buttons
+                document.querySelectorAll('.period-btn').forEach(btn => {
+                    btn.classList.remove('bg-indigo-600', 'border-indigo-600', 'text-white', 'ring-1', 'ring-indigo-300', 'dark:ring-indigo-800');
+                    btn.classList.add('bg-white', 'dark:bg-gray-800', 'border-gray-200', 'dark:border-gray-600', 'text-gray-600', 'dark:text-gray-300');
+                });
+
+                // Set the All button to active if it exists
+                const allBtn = document.querySelector(`button[onclick="setTimePeriod('all', this)"]`);
+                if (allBtn) {
+                    allBtn.classList.remove('bg-white', 'dark:bg-gray-800', 'border-gray-200', 'dark:border-gray-600', 'text-gray-600', 'dark:text-gray-300');
+                    allBtn.classList.add('bg-indigo-600', 'border-indigo-600', 'text-white', 'ring-1', 'ring-indigo-300', 'dark:ring-indigo-800');
+                }
+            }
+        };
+        if(fromDate) fromDate.addEventListener('change', changeToAll);
+        if(toDate) toDate.addEventListener('change', changeToAll);
+
+        initializeTimePeriod();
+    });
     // Chart 1: Follow-Up Frequency (Daily)
     if (@json($followUpFrequencyDaily->count())) {
         const dailyCtx = document.getElementById('followUpFrequencyDailyChart').getContext('2d');

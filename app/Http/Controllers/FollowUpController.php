@@ -217,10 +217,36 @@ class FollowUpController extends Controller
                         Carbon::now()->subWeek()->endOfWeek(),
                     ]);
                     break;
-                case 'last_month':
+                case 'this_month':
                     $query->whereBetween('created_at', [
-                        Carbon::now()->subMonth()->startOfMonth(),
-                        Carbon::now()->subMonth()->endOfMonth(),
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_month':
+                    // Prevent Carbon overflow (e.g., Mar 31 -> Feb 28 instead of Mar 3)
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonth()->startOfMonth(),
+                        Carbon::now()->startOfMonth()->subMonth()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_3_months':
+                    // Current month + previous 2 months (e.g., Jan 1 to Mar 31)
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonths(2)->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_6_months':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonths(5)->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_12_months':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonths(11)->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
                     ]);
                     break;
             }
@@ -250,16 +276,75 @@ class FollowUpController extends Controller
 
         $totalBilled = $summaryQuery->sum('amount_billed');
         $totalPaid = $summaryQuery->sum('amount_paid');
-        $totalDueAll = $totalBilled - $totalPaid;
+        // We will calculate later to only sum positive dues
 
         // Payment methods count grouped by method
-        $paymentCounts = $summaryQuery
+        $paymentCounts = (clone $summaryQuery)
             ->selectRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) as method, COUNT(*) as count")
             ->groupBy('method')
             ->pluck('count', 'method');
 
         $cashPayments = $paymentCounts['cash'] ?? 0;
         $onlinePayments = $paymentCounts['online'] ?? 0;
+
+        // Fetch detailed data for the modals
+        $cashFollowUps = (clone $summaryQuery)
+            ->whereRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) = 'cash'")
+            ->with(['patient' => function($q) { $q->select('id', 'name'); }])
+            ->latest()
+            ->get(['id', 'patient_id', 'amount_paid', 'created_at']);
+
+        $onlineFollowUps = (clone $summaryQuery)
+            ->whereRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) = 'online'")
+            ->with(['patient' => function($q) { $q->select('id', 'name'); }])
+            ->latest()
+            ->get(['id', 'patient_id', 'amount_paid', 'created_at']);
+        $allFollowUpsList = (clone $summaryQuery)
+            ->with(['patient' => function($q) { $q->select('id', 'name'); }])
+            ->latest()
+            ->get(['id', 'patient_id', 'amount_paid', 'amount_billed', 'created_at']);
+
+        $patientIds = $allFollowUpsList->pluck('patient_id')->unique();
+        $patientsList = \App\Models\Patient::withSum('followUps', 'amount_billed')
+            ->withSum('followUps', 'amount_paid')
+            ->whereIn('id', $patientIds)
+            ->get(['id', 'name', 'mobile_phone', 'created_at']);
+
+        $patientBalances = $patientsList->mapWithKeys(function($p) {
+            $bal = ($p->follow_ups_sum_amount_billed ?? 0) - ($p->follow_ups_sum_amount_paid ?? 0);
+            return [$p->id => $bal];
+        });
+
+        $paidFollowUpsList = $allFollowUpsList->filter(function($fu) {
+            return $fu->amount_paid > 0;
+        });
+
+        $dueFollowUpsList = $allFollowUpsList->filter(function($fu) {
+            return ($fu->amount_billed - $fu->amount_paid) > 0;
+        });
+        
+        // Calculate "Real Due" considering patient's global net advances
+        $patientRealDueAllocation = [];
+        foreach ($patientBalances as $pid => $bal) {
+            // A patient can never owe more than their global positive net balance
+            $patientRealDueAllocation[$pid] = max(0, $bal); 
+        }
+
+        $totalDueAll = 0;
+        foreach ($dueFollowUpsList as $fu) {
+            $visitDue = $fu->amount_billed - $fu->amount_paid;
+            $owedGlobally = $patientRealDueAllocation[$fu->patient_id] ?? 0;
+            
+            $realDue = min($visitDue, $owedGlobally);
+            
+            if (isset($patientRealDueAllocation[$fu->patient_id])) {
+                $patientRealDueAllocation[$fu->patient_id] -= $realDue;
+            }
+            
+            $fu->real_due = $realDue; // Inject for the view
+            $totalDueAll += $realDue;
+        }
+
 
         // Paginate main data for display
         $followUps = $query->latest()->paginate(10);
@@ -347,6 +432,13 @@ class FollowUpController extends Controller
         // Return the view with all variables
         return view('followups.index', compact(
             'followUps',
+            'cashFollowUps',
+            'onlineFollowUps',
+            'allFollowUpsList',
+            'patientsList',
+            'patientBalances',
+            'paidFollowUpsList',
+            'dueFollowUpsList',
             'totalIncome',
             'totalPatients',
             'totalFollowUps',
@@ -592,7 +684,7 @@ class FollowUpController extends Controller
     {
         // Validate the time_period input
         $request->validate([
-            'time_period' => 'nullable|in:all,today,last_week,last_month',
+            'time_period' => 'nullable|in:all,today,last_week,this_month,last_month,last_3_months,last_6_months,last_12_months',
         ]);
 
         return Excel::download(new FollowUpExport($request), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
