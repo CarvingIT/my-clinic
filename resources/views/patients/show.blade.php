@@ -1042,14 +1042,14 @@
                                                                 {!! $checkUpInfo['nadi'] !!}
                                                             </p>
                                                         @endif
-                                                        
+
                                                         @if (isset($checkUpInfo['nadi_dots']))
                                                                 @php
                                                                     $nadiDots = $checkUpInfo['nadi_dots'] ?? [[], [], []];
-                                                                    
+
                                                                     $hasNadiData = false;
-                                                                    $hasOuterDots = false; 
-                                                                    
+                                                                    $hasOuterDots = false;
+
                                                                     foreach ($nadiDots as $box) {
                                                                         if (is_array($box)) {
                                                                             foreach ($box as $idx => $val) {
@@ -1062,19 +1062,19 @@
                                                                             }
                                                                         }
                                                                     }
-                                                                    
+
                                                                     // Check the environment configuration
                                                                     $is5x1 = env('NADI_GRID_TYPE', '3x3') === '5x1';
-                                                                    
+
                                                                     // Safety fallback: if environment is 5x1 but old data has points in index 5, 6, 7, or 8, force 3x3 so old dots aren't hidden
                                                                     if ($hasOuterDots) {
                                                                         $is5x1 = false;
                                                                     }
-                                                                    
+
                                                                     $cols = $is5x1 ? 5 : 3;
                                                                     $totalDots = $is5x1 ? 5 : 9;
                                                                 @endphp
-                                                                
+
                                                                 @if ($hasNadiData)
                                                                     <div class="mt-2 flex gap-0.5">
                                                                         @foreach($nadiDots as $boxIndex => $box)
