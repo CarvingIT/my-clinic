@@ -1041,23 +1041,60 @@
                                                                     class="font-bold text-gray-800 dark:text-gray-200">{{ __('नाडी') }}:</span> --}}
                                                                 {!! $checkUpInfo['nadi'] !!}
                                                             </p>
-                                                            @if (isset($checkUpInfo['nadi_dots']))
+                                                        @endif
+                                                        
+                                                        @if (isset($checkUpInfo['nadi_dots']))
                                                                 @php
                                                                     $nadiDots = $checkUpInfo['nadi_dots'] ?? [[], [], []];
+                                                                    
+                                                                    $hasNadiData = false;
+                                                                    $hasOuterDots = false; 
+                                                                    
+                                                                    foreach ($nadiDots as $box) {
+                                                                        if (is_array($box)) {
+                                                                            foreach ($box as $idx => $val) {
+                                                                                if ($val) {
+                                                                                    $hasNadiData = true;
+                                                                                    if ($idx > 4) {
+                                                                                        $hasOuterDots = true;
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    // Check the environment configuration
+                                                                    $is5x1 = env('NADI_GRID_TYPE', '3x3') === '5x1';
+                                                                    
+                                                                    // Safety fallback: if environment is 5x1 but old data has points in index 5, 6, 7, or 8, force 3x3 so old dots aren't hidden
+                                                                    if ($hasOuterDots) {
+                                                                        $is5x1 = false;
+                                                                    }
+                                                                    
+                                                                    $cols = $is5x1 ? 5 : 3;
+                                                                    $totalDots = $is5x1 ? 5 : 9;
                                                                 @endphp
-                                                                <div class="mt-2 flex gap-0.5">
-                                                                    @foreach($nadiDots as $box)
-                                                                        <div class="grid grid-cols-3 gap-0 bg-gray-100 dark:bg-gray-600 p-0.25 rounded border border-gray-100 dark:border-gray-600">
-                                                                            @for($i = 0; $i < 9; $i++)
-                                                                                <div class="w-3 h-3 flex items-center justify-center bg-white dark:bg-gray-800 {{ $i % 3 != 2 ? 'border-r border-gray-300 dark:border-gray-500' : '' }} {{ $i < 6 ? 'border-b border-gray-300 dark:border-gray-500' : '' }} {{ ($box[$i] ?? false) ? 'text-red-500 text-sm' : '' }}">
-                                                                                    {{ ($box[$i] ?? false) ? '•' : '' }}
-                                                                                </div>
-                                                                            @endfor
-                                                                        </div>
-                                                                    @endforeach
-                                                                </div>
+                                                                
+                                                                @if ($hasNadiData)
+                                                                    <div class="mt-2 flex gap-0.5">
+                                                                        @foreach($nadiDots as $boxIndex => $box)
+                                                                            <div class="grid grid-cols-{{ $cols }} gap-0 bg-gray-100 dark:bg-gray-600 p-0.25 rounded border border-gray-100 dark:border-gray-600">
+                                                                                @for($i = 0; $i < $totalDots; $i++)
+                                                                                    @php
+                                                                                        $isRightEdge = ($i % $cols) == ($cols - 1);
+                                                                                        $isBottomEdge = $i >= ($totalDots - $cols);
+                                                                                        $borderRight = !$isRightEdge ? 'border-r border-gray-300 dark:border-gray-500' : '';
+                                                                                        $borderBottom = !$isBottomEdge ? 'border-b border-gray-300 dark:border-gray-500' : '';
+                                                                                    @endphp
+                                                                                    <div class="w-3 h-3 flex items-center justify-center bg-white dark:bg-gray-800 {{ $borderRight }} {{ $borderBottom }} {{ ($box[$i] ?? false) ? 'text-red-500 text-sm' : '' }}">
+                                                                                        {{ ($box[$i] ?? false) ? '•' : '' }}
+                                                                                    </div>
+                                                                                @endfor
+                                                                            </div>
+                                                                        @endforeach
+                                                                    </div>
+                                                                @endif
                                                             @endif
-                                                        @endif
 
 @if (isset($followUp->diagnosis) && $followUp->diagnosis !== null && $followUp->diagnosis !== '')
     {{-- Note the change here --}}
