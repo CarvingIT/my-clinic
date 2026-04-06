@@ -126,6 +126,7 @@ Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::resource('users', UserController::class); // Admin can manage users
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index'); // Admin can view analytics
     Route::get('/followups', [FollowUpController::class, 'index'])->name('followups.index'); // List follow-ups
+    Route::get('/followups/fetch', [FollowUpController::class, 'fetchFollowUps'])->name('followups.fetch'); // Fetch follow-ups via AJAX
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit'); // Profile management
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update'); // Update profile
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy'); // Delete profile

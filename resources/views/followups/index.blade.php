@@ -229,10 +229,10 @@ if (!function_exists('indFormat')) {
 
                         <div x-data="{ openPatients: false }" class="h-full">
                             <div @click="openPatients = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
-    
+
     <!-- Animated Bottom Accent Line -->
     <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-600 to-blue-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
-    
+
     <!-- Immersive Glow Blob Behind Icon on Hover -->
     <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-cyan-600 to-blue-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
 
@@ -248,7 +248,7 @@ if (!function_exists('indFormat')) {
             <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">👤</span>
         </div>
     </div>
-    
+
     <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
         <span>View detailed log</span>
         <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -292,10 +292,10 @@ if (!function_exists('indFormat')) {
 
                         <div x-data="{ openFollowups: false }" class="h-full">
                             <div @click="openFollowups = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
-    
+
     <!-- Animated Bottom Accent Line -->
     <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-600 to-fuchsia-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
-    
+
     <!-- Immersive Glow Blob Behind Icon on Hover -->
     <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-purple-600 to-fuchsia-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
 
@@ -311,7 +311,7 @@ if (!function_exists('indFormat')) {
             <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">🔄</span>
         </div>
     </div>
-    
+
     <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
         <span>View detailed log</span>
         <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -357,10 +357,10 @@ if (!function_exists('indFormat')) {
 
                         <div x-data="{ openIncome: false }" class="h-full">
                             <div @click="openIncome = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
-    
+
     <!-- Animated Bottom Accent Line -->
     <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-green-600 to-emerald-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
-    
+
     <!-- Immersive Glow Blob Behind Icon on Hover -->
     <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-green-600 to-emerald-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
 
@@ -376,7 +376,7 @@ if (!function_exists('indFormat')) {
             <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">💰</span>
         </div>
     </div>
-    
+
     <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
         <span>View detailed log</span>
         <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -423,10 +423,10 @@ if (!function_exists('indFormat')) {
                         </div>
                         <div x-data="{ openCash: false }" class="h-full">
                             <div @click="openCash = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
-    
+
     <!-- Animated Bottom Accent Line -->
     <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-teal-600 to-emerald-400 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
-    
+
     <!-- Immersive Glow Blob Behind Icon on Hover -->
     <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-teal-600 to-emerald-400 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
 
@@ -442,7 +442,7 @@ if (!function_exists('indFormat')) {
             <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">💵</span>
         </div>
     </div>
-    
+
     <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
         <span>View detailed log</span>
         <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -489,10 +489,10 @@ if (!function_exists('indFormat')) {
                         </div>
                         <div x-data="{ openDue: false }" class="h-full">
                             <div @click="openDue = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
-    
+
     <!-- Animated Bottom Accent Line -->
     <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-red-600 to-orange-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
-    
+
     <!-- Immersive Glow Blob Behind Icon on Hover -->
     <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-red-600 to-orange-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
 
@@ -508,7 +508,7 @@ if (!function_exists('indFormat')) {
             <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">⚠️</span>
         </div>
     </div>
-    
+
     <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
         <span>View detailed log</span>
         <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -558,7 +558,7 @@ if (!function_exists('indFormat')) {
                                             <tfoot class="sticky bottom-0 z-20"><tr><td colspan="6" class="p-0 border-0">
     <div class="bg-gray-50 dark:bg-gray-800/95 border-t-2 border-gray-200 dark:border-gray-700 p-5 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-            
+
             <!-- Left Side: Explanation -->
             <div class="text-xs text-gray-500 dark:text-gray-400 max-w-sm space-y-2">
                 <h4 class="font-bold text-gray-700 dark:text-gray-200 flex items-center gap-1"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> How is this calculated?</h4>
@@ -580,7 +580,7 @@ if (!function_exists('indFormat')) {
                     <span>Total Visit Bills (Raw):</span>
                     <span>₹{{ indFormat($grossDues) }}</span>
                 </div>
-                
+
                 <!-- Line 2: Advances -->
                 <div class="flex justify-between items-center text-sm font-medium text-green-600 dark:text-green-400 border-b border-gray-300 dark:border-gray-600 pb-2">
                     <span>Minus (-) Advances Used:</span>
@@ -611,10 +611,10 @@ if (!function_exists('indFormat')) {
                         </div>
                         <div x-data="{ openOnline: false }" class="h-full">
                             <div @click="openOnline = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
-    
+
     <!-- Animated Bottom Accent Line -->
     <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-pink-600 to-rose-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
-    
+
     <!-- Immersive Glow Blob Behind Icon on Hover -->
     <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-pink-600 to-rose-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
 
@@ -630,7 +630,7 @@ if (!function_exists('indFormat')) {
             <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">💳</span>
         </div>
     </div>
-    
+
     <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
         <span>View detailed log</span>
         <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
@@ -743,10 +743,90 @@ if (!function_exists('indFormat')) {
 
 
 
-                {{-- Table --}}
-                <div class="overflow-x-auto">
-                    <table class="w-full border border-gray-200 dark:border-gray-700 rounded-lg">
-                        <thead class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200">
+                {{-- Table with Infinite Scroll --}}
+                <div x-data="{
+                    currentPage: {{ (int) $followUps->currentPage() }},
+                    isLoading: false,
+                    hasMore: @json($followUps->hasMorePages()),
+                    totalCount: {{ (int) $followUps->total() }},
+                    shownCount: {{ (int) ($followUps->lastItem() ?? 0) }},
+                    remainingCount: {{ max(0, (int) $followUps->total() - (int) ($followUps->lastItem() ?? 0)) }},
+                    init() {
+                        // Monitor form submission to reset pagination
+                        const form = document.getElementById('follow_ups');
+                        if (form) {
+                            const originalSubmit = form.onsubmit;
+                            form.onsubmit = (e) => {
+                                this.resetPagination();
+                                if (originalSubmit) return originalSubmit(e);
+                            };
+                        }
+                    },
+                    resetPagination() {
+                        this.currentPage = 1;
+                        this.hasMore = true;
+                        this.isLoading = false;
+                        this.totalCount = {{ (int) $followUps->total() }};
+                        this.shownCount = {{ (int) ($followUps->lastItem() ?? 0) }};
+                        this.remainingCount = {{ max(0, (int) $followUps->total() - (int) ($followUps->lastItem() ?? 0)) }};
+                    },
+                    progressPercent() {
+                        if (!this.totalCount) return 0;
+                        return Math.min(100, Math.round((this.shownCount / this.totalCount) * 100));
+                    },
+                    loadMore() {
+                        if (this.isLoading || !this.hasMore) return;
+
+                        this.isLoading = true;
+                        this.currentPage++;
+
+                        const params = new URLSearchParams({
+                            page: this.currentPage,
+                            branch_name: document.getElementById('branch_name')?.value || 'all',
+                            doctor: document.getElementById('doctor')?.value || 'all',
+                            time_period: document.getElementById('time_period')?.value || 'all',
+                            from_date: document.getElementById('from_date')?.value || '',
+                            to_date: document.getElementById('to_date')?.value || ''
+                        });
+
+                        fetch('{{ route('followups.fetch') }}?' + params.toString())
+                            .then(response => response.json())
+                            .then(data => {
+                                const tbody = document.getElementById('followups-main-tbody');
+                                if (tbody && data.html) {
+                                    tbody.innerHTML += data.html;
+                                }
+                                this.hasMore = data.hasMore;
+                                this.currentPage = data.currentPage;
+                                this.totalCount = Number(data.total ?? this.totalCount);
+                                this.shownCount = Number(data.shownCount ?? this.shownCount);
+                                this.remainingCount = Number(data.remainingCount ?? Math.max(0, this.totalCount - this.shownCount));
+                                this.isLoading = false;
+                            })
+                            .catch(error => {
+                                console.error('Error loading more:', error);
+                                this.isLoading = false;
+                            });
+                    }
+                }" class="overflow-x-auto" x-cloak>
+                    {{-- Results status --}}
+                    <div class="mb-3 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <p class="text-sm font-semibold text-gray-700 dark:text-gray-200">
+                                Showing <span class="text-indigo-600 dark:text-indigo-400" x-text="shownCount"></span>
+                                of <span x-text="totalCount"></span> records
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                Remaining: <span class="font-semibold" x-text="remainingCount"></span>
+                            </p>
+                        </div>
+                        <div class="mt-2 h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-indigo-500 to-cyan-500 transition-all duration-300" :style="`width: ${progressPercent()}%`"></div>
+                        </div>
+                    </div>
+
+                    <table id="followups-main-table" class="w-full border border-gray-200 dark:border-gray-700 rounded-lg">
+                        <thead class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 sticky top-0 z-10">
                             <tr>
                                 <th class="px-4 py-3 text-left font-semibold">{{ __('messages.Created At') }} 📅</th>
                                 <th class="px-4 py-3 text-center font-semibold">{{ __('messages.Patient Name') }} 👤
@@ -760,11 +840,11 @@ if (!function_exists('indFormat')) {
                             </tr>
                         </thead>
 
-                        <tbody class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200">
+                        <tbody id="followups-main-tbody" class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200">
                             @foreach ($followUps as $followUp)
                                 @if ($followUp->patient)
                                     <tr
-                                        class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                                        class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 animate-fadeIn">
                                         <td class="text-left px-4 py-3">
                                             {{ $followUp->created_at->format('d M Y, h:i A') }}</td>
                                         <td class="text-center px-4 py-3">
@@ -791,10 +871,6 @@ if (!function_exists('indFormat')) {
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
                                             {{ @json_decode($followUp->check_up_info)->payment_method }}
                                         </td>
-                                        {{-- <td
-                                            class="text-right px-4 py-3 font-semibold text-green-600 dark:text-green-300">
-                                            ₹{{ indFormat(@$followUp->amount_paid) }}
-                                        </td> --}}
                                         <td
                                             class="text-right px-4 py-3 font-semibold
                                             {{ $followUp->amount_paid < $followUp->amount_billed
@@ -811,532 +887,262 @@ if (!function_exists('indFormat')) {
                         </tbody>
 
                     </table>
-                </div>
 
-                <div class="mt-4">
-                    {{ $followUps->appends(request()->query())->links() }}
+                    {{-- No results message --}}
+                    @if($followUps->count() === 0)
+                    <div class="py-12 text-center">
+                        <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12H3m0 0l6-6m-6 6l-6-6m18 0H15m0 0l6 6m-6-6l-6 6m0 12H3m0 0l6-6m-6 6l-6-6m18 0h-6m0 0l6 6m-6-6l-6 6"></path></svg>
+                        <p class="text-lg font-semibold text-gray-600 dark:text-gray-300">No records found</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your filters</p>
+                    </div>
+                    @endif
+
+                    {{-- Bottom progress (near action button for better context) --}}
+                    <div class="pt-4" x-show="totalCount > 0">
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                Progress: <span class="font-semibold" x-text="shownCount"></span>/<span class="font-semibold" x-text="totalCount"></span>
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="progressPercent() + '%'">0%</p>
+                        </div>
+                        <div class="h-2 w-full rounded-full bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                            <div class="h-full bg-gradient-to-r from-indigo-500 to-cyan-500 transition-all duration-300" :style="`width: ${progressPercent()}%`"></div>
+                        </div>
+                    </div>
+
+                    {{-- Manual loader --}}
+                    <div class="pt-4 text-center" x-show="hasMore">
+                        <button type="button" @click="loadMore()"
+                            :disabled="isLoading"
+                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md border border-indigo-300 text-indigo-700 hover:bg-indigo-50 dark:border-indigo-700 dark:text-indigo-300 dark:hover:bg-indigo-900/30 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                            <span x-show="!isLoading">Load more records (<span x-text="Math.min(remainingCount, 15)"></span>)</span>
+                            <span x-show="isLoading">Loading...</span>
+                        </button>
+                    </div>
+
+                    {{-- Loading Indicator --}}
+                    <div id="infinite-scroll-sentinel" class="py-8 flex justify-center items-center" :class="{ 'opacity-0': !isLoading }" x-show="isLoading">
+                        <div class="flex items-center gap-3">
+                            <div class="flex space-x-2">
+                                <div class="w-2 h-2 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full animate-bounce" style="animation-delay: 0s;"></div>
+                                <div class="w-2 h-2 bg-gradient-to-r from-cyan-500 to-green-500 rounded-full animate-bounce" style="animation-delay: 0.1s;"></div>
+                                <div class="w-2 h-2 bg-gradient-to-r from-green-500 to-blue-500 rounded-full animate-bounce" style="animation-delay: 0.2s;"></div>
+                            </div>
+                            <span class="text-sm font-medium text-gray-600 dark:text-gray-400" x-show="isLoading">
+                                Loading more records...
+                            </span>
+                        </div>
+                    </div>
+
+                    {{-- End of list message --}}
+                    <div class="py-8 text-center transition-all duration-300" :class="{ 'opacity-100': !hasMore, 'opacity-0 pointer-events-none': hasMore }">
+                        <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                            ✨ You've reached the end of the list
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</x-app-layout>
-<script>
-    function formSubmit() {
-        document.getElementById('follow_ups').action = "/followups";
-        document.getElementById('follow_ups').submit();
-    }
 
-    function csvExport() {
-        document.getElementById('follow_ups').action = "/export-followups";
-        document.getElementById('follow_ups').submit();
-    }
-</script>
-
-<script>
-    // Form submission functions
-    function formSubmit() {
-        document.getElementById('follow_ups').action = "{{ route('followups.index') }}";
-        document.getElementById('follow_ups').submit();
-    }
-
-    function csvExport() {
-        document.getElementById('follow_ups').action = "{{ route('followups.export') }}";
-        document.getElementById('follow_ups').submit();
-    }
-
-    function setTimePeriod(period, btnElement) {
-        const timePeriodInput = document.getElementById('time_period');
-        const fromDate = document.getElementById('from_date');
-        const toDate = document.getElementById('to_date');
-
-        timePeriodInput.value = period;
-
-        if (period !== 'all') {
-            const today = new Date();
-            let start, end;
-
-            // Handle date math accurately
-            // For month calculations, jump to the 1st of the current month first to prevent overflow
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth();
-
-            if (period === 'today') {
-                start = new Date(today);
-                end = new Date(today);
-            } else if (period === 'last_week') {
-                start = new Date(today);
-                start.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
-                end = new Date(start);
-                end.setDate(start.getDate() + 6);
-            } else if (period === 'this_month') {
-                start = new Date(currentYear, currentMonth, 1);
-                end = new Date(currentYear, currentMonth + 1, 0);
-            } else if (period === 'last_month') {
-                start = new Date(currentYear, currentMonth - 1, 1);
-                end = new Date(currentYear, currentMonth, 0);
-            } else if (period === 'last_3_months') {
-                start = new Date(currentYear, currentMonth - 2, 1);
-                end = new Date(currentYear, currentMonth + 1, 0);
-            } else if (period === 'last_6_months') {
-                start = new Date(currentYear, currentMonth - 5, 1);
-                end = new Date(currentYear, currentMonth + 1, 0);
-            } else if (period === 'last_12_months') {
-                start = new Date(currentYear, currentMonth - 11, 1);
-                end = new Date(currentYear, currentMonth + 1, 0);
+    {{-- Added CSS Animations --}}
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
             }
-
-            const fmt = d => {
-                let m = (d.getMonth() + 1).toString().padStart(2, '0');
-                let day = d.getDate().toString().padStart(2, '0');
-                return d.getFullYear() + '-' + m + '-' + day;
-            };
-
-            fromDate.value = fmt(start);
-            toDate.value = fmt(end);
-
-            // visually indicate they are managed by the quick filter
-            fromDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
-            toDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
-        } else {
-            fromDate.value = '';
-            toDate.value = '';
-            fromDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
-            toDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        // Auto-submit the form to apply filters
-        formSubmit();
-    }
-
-    // Initialize inputs state directly based on value on load
-    function initializeTimePeriod() {
-        const timePeriodInput = document.getElementById('time_period');
-        const fromDate = document.getElementById('from_date');
-        const toDate = document.getElementById('to_date');
-        const period = timePeriodInput ? timePeriodInput.value : 'all';
-
-        if (period !== 'all') {
-            const today = new Date();
-            let start, end;
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth();
-
-            if (period === 'today') {
-                start = new Date(today);
-                end = new Date(today);
-            } else if (period === 'last_week') {
-                start = new Date(today);
-                start.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
-                end = new Date(start);
-                end.setDate(start.getDate() + 6);
-            } else if (period === 'this_month') {
-                start = new Date(currentYear, currentMonth, 1);
-                end = new Date(currentYear, currentMonth + 1, 0);
-            } else if (period === 'last_month') {
-                start = new Date(currentYear, currentMonth - 1, 1);
-                end = new Date(currentYear, currentMonth, 0);
-            } else if (period === 'last_3_months') {
-                start = new Date(currentYear, currentMonth - 2, 1);
-                end = new Date(currentYear, currentMonth + 1, 0);
-            } else if (period === 'last_6_months') {
-                start = new Date(currentYear, currentMonth - 5, 1);
-                end = new Date(currentYear, currentMonth + 1, 0);
-            } else if (period === 'last_12_months') {
-                start = new Date(currentYear, currentMonth - 11, 1);
-                end = new Date(currentYear, currentMonth + 1, 0);
-            }
-
-            const fmt = d => {
-                if(!d) return '';
-                let m = (d.getMonth() + 1).toString().padStart(2, '0');
-                let day = d.getDate().toString().padStart(2, '0');
-                return d.getFullYear() + '-' + m + '-' + day;
-            };
-
-            if (!fromDate.value) fromDate.value = fmt(start);
-            if (!toDate.value) toDate.value = fmt(end);
-
-            fromDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
-            toDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
-        } else {
-            fromDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
-            toDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
         }
-    }
 
-    // Automatically reset 'time_period' to 'all' if user interacts with custom date fields
-    document.addEventListener('DOMContentLoaded', () => {
-        const fromDate = document.getElementById('from_date');
-        const toDate = document.getElementById('to_date');
-        const changeToAll = () => {
+        @keyframes shimmer {
+            0% {
+                background-position: -1000px 0;
+            }
+            100% {
+                background-position: 1000px 0;
+            }
+        }
+
+        .animate-shimmer {
+            background: linear-gradient(
+                90deg,
+                #f3f4f6 25%,
+                #e5e7eb 50%,
+                #f3f4f6 75%
+            );
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
+        }
+    </style>
+
+    <script>
+        // Form submission functions
+        function formSubmit() {
+            document.getElementById('follow_ups').action = "{{ route('followups.index') }}";
+            document.getElementById('follow_ups').submit();
+        }
+
+        function csvExport() {
+            document.getElementById('follow_ups').action = "{{ route('followups.export') }}";
+            document.getElementById('follow_ups').submit();
+        }
+
+        function setTimePeriod(period, btnElement) {
             const timePeriodInput = document.getElementById('time_period');
-            if (timePeriodInput.value !== 'all') {
-                timePeriodInput.value = 'all';
+            const fromDate = document.getElementById('from_date');
+            const toDate = document.getElementById('to_date');
+
+            timePeriodInput.value = period;
+
+            if (period !== 'all') {
+                const today = new Date();
+                let start, end;
+
+                // Handle date math accurately
+                const currentYear = today.getFullYear();
+                const currentMonth = today.getMonth();
+
+                if (period === 'today') {
+                    start = new Date(today);
+                    end = new Date(today);
+                } else if (period === 'last_week') {
+                    start = new Date(today);
+                    start.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
+                    end = new Date(start);
+                    end.setDate(start.getDate() + 6);
+                } else if (period === 'this_month') {
+                    start = new Date(currentYear, currentMonth, 1);
+                    end = new Date(currentYear, currentMonth + 1, 0);
+                } else if (period === 'last_month') {
+                    start = new Date(currentYear, currentMonth - 1, 1);
+                    end = new Date(currentYear, currentMonth, 0);
+                } else if (period === 'last_3_months') {
+                    start = new Date(currentYear, currentMonth - 2, 1);
+                    end = new Date(currentYear, currentMonth + 1, 0);
+                } else if (period === 'last_6_months') {
+                    start = new Date(currentYear, currentMonth - 5, 1);
+                    end = new Date(currentYear, currentMonth + 1, 0);
+                } else if (period === 'last_12_months') {
+                    start = new Date(currentYear, currentMonth - 11, 1);
+                    end = new Date(currentYear, currentMonth + 1, 0);
+                }
+
+                const fmt = d => {
+                    let m = (d.getMonth() + 1).toString().padStart(2, '0');
+                    let day = d.getDate().toString().padStart(2, '0');
+                    return d.getFullYear() + '-' + m + '-' + day;
+                };
+
+                fromDate.value = fmt(start);
+                toDate.value = fmt(end);
+
+                // visually indicate they are managed by the quick filter
+                fromDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+                toDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+            } else {
+                fromDate.value = '';
+                toDate.value = '';
                 fromDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
                 toDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
-
-                // Remove active styling from filter buttons
-                document.querySelectorAll('.period-btn').forEach(btn => {
-                    btn.classList.remove('bg-indigo-600', 'border-indigo-600', 'text-white', 'ring-1', 'ring-indigo-300', 'dark:ring-indigo-800');
-                    btn.classList.add('bg-white', 'dark:bg-gray-800', 'border-gray-200', 'dark:border-gray-600', 'text-gray-600', 'dark:text-gray-300');
-                });
-
-                // Set the All button to active if it exists
-                const allBtn = document.querySelector(`button[onclick="setTimePeriod('all', this)"]`);
-                if (allBtn) {
-                    allBtn.classList.remove('bg-white', 'dark:bg-gray-800', 'border-gray-200', 'dark:border-gray-600', 'text-gray-600', 'dark:text-gray-300');
-                    allBtn.classList.add('bg-indigo-600', 'border-indigo-600', 'text-white', 'ring-1', 'ring-indigo-300', 'dark:ring-indigo-800');
-                }
             }
-        };
-        if(fromDate) fromDate.addEventListener('change', changeToAll);
-        if(toDate) toDate.addEventListener('change', changeToAll);
 
-        initializeTimePeriod();
-    });
-    // Chart 1: Follow-Up Frequency (Daily)
-    if (@json($followUpFrequencyDaily->count())) {
-        const dailyCtx = document.getElementById('followUpFrequencyDailyChart').getContext('2d');
-        new Chart(dailyCtx, {
-            type: 'line',
-            data: {
-                labels: @json($followUpFrequencyDaily->pluck('date')),
-                datasets: [{
-                    label: 'Follow-Ups',
-                    data: @json($followUpFrequencyDaily->pluck('count')),
-                    borderColor: '#60a5fa',
-                    backgroundColor: (ctx) => {
-                        const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
-                        gradient.addColorStop(0, 'rgba(96, 165, 250, 0.6)');
-                        gradient.addColorStop(1, 'rgba(96, 165, 250, 0.05)');
-                        return gradient;
-                    },
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#60a5fa',
-                    pointHoverRadius: 6
-                }]
+            // Auto-submit the form to apply filters
+            formSubmit();
+        }
 
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `Follow-Ups: ${context.parsed.y}`;
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Daily Follow-Ups'
-                    },
-                    legend: {
-                        position: 'top'
-                    }
-                },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Number of Follow-Ups'
-                        },
-                        beginAtZero: true
-                    }
+        // Initialize inputs state directly based on value on load
+        function initializeTimePeriod() {
+            const timePeriodInput = document.getElementById('time_period');
+            const fromDate = document.getElementById('from_date');
+            const toDate = document.getElementById('to_date');
+            const period = timePeriodInput ? timePeriodInput.value : 'all';
+
+            if (period !== 'all') {
+                const today = new Date();
+                let start, end;
+                const currentYear = today.getFullYear();
+                const currentMonth = today.getMonth();
+
+                if (period === 'today') {
+                    start = new Date(today);
+                    end = new Date(today);
+                } else if (period === 'last_week') {
+                    start = new Date(today);
+                    start.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1) - 7);
+                    end = new Date(start);
+                    end.setDate(start.getDate() + 6);
+                } else if (period === 'this_month') {
+                    start = new Date(currentYear, currentMonth, 1);
+                    end = new Date(currentYear, currentMonth + 1, 0);
+                } else if (period === 'last_month') {
+                    start = new Date(currentYear, currentMonth - 1, 1);
+                    end = new Date(currentYear, currentMonth, 0);
+                } else if (period === 'last_3_months') {
+                    start = new Date(currentYear, currentMonth - 2, 1);
+                    end = new Date(currentYear, currentMonth + 1, 0);
+                } else if (period === 'last_6_months') {
+                    start = new Date(currentYear, currentMonth - 5, 1);
+                    end = new Date(currentYear, currentMonth + 1, 0);
+                } else if (period === 'last_12_months') {
+                    start = new Date(currentYear, currentMonth - 11, 1);
+                    end = new Date(currentYear, currentMonth + 1, 0);
                 }
+
+                const fmt = d => {
+                    if(!d) return '';
+                    let m = (d.getMonth() + 1).toString().padStart(2, '0');
+                    let day = d.getDate().toString().padStart(2, '0');
+                    return d.getFullYear() + '-' + m + '-' + day;
+                };
+
+                if (!fromDate.value) fromDate.value = fmt(start);
+                if (!toDate.value) toDate.value = fmt(end);
+
+                fromDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+                toDate.classList.add('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+            } else {
+                fromDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+                toDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
             }
-        });
-    } else {
-        document.getElementById('followUpFrequencyDailyChart').parentElement.innerHTML =
-            '<p class="text-gray-600 dark:text-gray-400">No daily follow-up data available.</p>';
-    }
+        }
 
-    // Chart 2: Follow-Up Frequency (Monthly)
-    if (@json($followUpFrequencyMonthly->count())) {
-        const monthlyCtx = document.getElementById('followUpFrequencyMonthlyChart').getContext('2d');
-        new Chart(monthlyCtx, {
-            type: 'line',
-            data: {
-                labels: @json($followUpFrequencyMonthly->pluck('month')),
-                datasets: [{
-                    label: 'Follow-Ups',
-                    data: @json($followUpFrequencyMonthly->pluck('count')),
-                    borderColor: '#34D399', // Tailwind green-400
-                    backgroundColor: (ctx) => {
-                        const gradient = ctx.chart.ctx.createLinearGradient(0, 0, 0, 300);
-                        gradient.addColorStop(0, 'rgba(52, 211, 153, 0.5)'); // lighter green top
-                        gradient.addColorStop(1, 'rgba(52, 211, 153, 0.05)'); // fade to transparent
-                        return gradient;
-                    },
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 4,
-                    pointBackgroundColor: '#34D399',
-                    pointHoverRadius: 6,
-                    pointHoverBorderWidth: 2,
-                    pointHoverBorderColor: '#10B981'
-                }]
+        // Automatically reset 'time_period' to 'all' if user interacts with custom date fields
+        document.addEventListener('DOMContentLoaded', () => {
+            const fromDate = document.getElementById('from_date');
+            const toDate = document.getElementById('to_date');
+            const changeToAll = () => {
+                const timePeriodInput = document.getElementById('time_period');
+                if (timePeriodInput.value !== 'all') {
+                    timePeriodInput.value = 'all';
+                    fromDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
+                    toDate.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-semibold', 'border-indigo-300', 'dark:bg-indigo-900/30', 'dark:text-indigo-300', 'dark:border-indigo-700');
 
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Monthly Follow-Ups'
-                    },
-                    legend: {
-                        position: 'top'
-                    }
-                },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Month'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Number of Follow-Ups'
-                        },
-                        beginAtZero: true
+                    // Remove active styling from filter buttons
+                    document.querySelectorAll('.period-btn').forEach(btn => {
+                        btn.classList.remove('bg-indigo-600', 'border-indigo-600', 'text-white', 'ring-1', 'ring-indigo-300', 'dark:ring-indigo-800');
+                        btn.classList.add('bg-white', 'dark:bg-gray-800', 'border-gray-200', 'dark:border-gray-600', 'text-gray-600', 'dark:text-gray-300');
+                    });
+
+                    // Set the All button to active if it exists
+                    const allBtn = document.querySelector(`button[onclick="setTimePeriod('all', this)"]`);
+                    if (allBtn) {
+                        allBtn.classList.remove('bg-white', 'dark:bg-gray-800', 'border-gray-200', 'dark:border-gray-600', 'text-gray-600', 'dark:text-gray-300');
+                        allBtn.classList.add('bg-indigo-600', 'border-indigo-600', 'text-white', 'ring-1', 'ring-indigo-300', 'dark:ring-indigo-800');
                     }
                 }
-            }
+            };
+            if(fromDate) fromDate.addEventListener('change', changeToAll);
+            if(toDate) toDate.addEventListener('change', changeToAll);
+
+            initializeTimePeriod();
         });
-    } else {
-        document.getElementById('followUpFrequencyMonthlyChart').parentElement.innerHTML =
-            '<p class="text-gray-600 dark:text-gray-400">No monthly follow-up data available.</p>';
-    }
-
-    // Chart 3: Follow-Up Frequency (Yearly)
-    // if (@json($followUpFrequencyYearly->count())) {
-    //     const yearlyCtx = document.getElementById('followUpFrequencyYearlyChart').getContext('2d');
-    //     new Chart(yearlyCtx, {
-    //         type: 'line',
-    //         data: {
-    //             labels: @json($followUpFrequencyYearly->pluck('year')),
-    //             datasets: [{
-    //                 label: 'Follow-Ups',
-    //                 data: @json($followUpFrequencyYearly->pluck('count')),
-    //                 borderColor: '#FF6B6B',
-    //                 backgroundColor: 'rgba(255, 107, 107, 0.2)',
-    //                 fill: true,
-    //                 tension: 0.4
-    //             }]
-    //         },
-    //         options: {
-    //             responsive: true,
-    //             plugins: {
-    //                 title: {
-    //                     display: true,
-    //                     text: 'Yearly Follow-Ups'
-    //                 },
-    //                 legend: {
-    //                     position: 'top'
-    //                 }
-    //             },
-    //             scales: {
-    //                 x: {
-    //                     title: {
-    //                         display: true,
-    //                         text: 'Year'
-    //                     }
-    //                 },
-    //                 y: {
-    //                     title: {
-    //                         display: true,
-    //                         text: 'Number of Follow-Ups'
-    //                     },
-    //                     beginAtZero: true
-    //                 }
-    //             }
-    //         }
-    //     });
-    // } else {
-    //     document.getElementById('followUpFrequencyYearlyChart').parentElement.innerHTML =
-    //         '<p class="text-gray-600 dark:text-gray-400">No yearly follow-up data available.</p>';
-    // }
-
-    // Chart 4: Age Distribution
-    if (@json($ageDistribution->count())) {
-        const ageCtx = document.getElementById('ageDistributionChart').getContext('2d');
-        new Chart(ageCtx, {
-            type: 'doughnut',
-            data: {
-                labels: @json($ageDistribution->pluck('age_group')),
-                datasets: [{
-                    label: 'Patient Count',
-                    data: @json($ageDistribution->pluck('count')),
-                    backgroundColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
-                    borderColor: ['#86efac', '#93c5fd', '#FF6384', '#4BC0C0'],
-                    borderWidth: 1,
-                    hoverOffset: 20
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Age Distribution of Patients'
-                    },
-                    legend: {
-                        position: 'top'
-                    }
-                }
-            }
-        });
-    } else {
-        document.getElementById('ageDistributionChart').parentElement.innerHTML =
-            '<p class="text-gray-600 dark:text-gray-400">No age data available.</p>';
-    }
-
-    // Chart 5: Payment Status
-    if (@json($paymentStatus->count())) {
-        const paymentCtx = document.getElementById('paymentStatusChart').getContext('2d');
-
-        const gradientBilled = paymentCtx.createLinearGradient(0, 0, 0, 300);
-        gradientBilled.addColorStop(0, 'rgba(147, 197, 253, 0.6)'); // Tailwind blue-300
-        gradientBilled.addColorStop(1, 'rgba(147, 197, 253, 0.05)');
-
-        const gradientPaid = paymentCtx.createLinearGradient(0, 0, 0, 300);
-        gradientPaid.addColorStop(0, 'rgba(134, 239, 172, 0.6)'); // Tailwind green-300
-        gradientPaid.addColorStop(1, 'rgba(134, 239, 172, 0.05)');
-
-        const gradientDue = paymentCtx.createLinearGradient(0, 0, 0, 300);
-        gradientDue.addColorStop(0, 'rgba(252, 165, 165, 0.6)'); // Tailwind red-300
-        gradientDue.addColorStop(1, 'rgba(252, 165, 165, 0.05)');
-
-        new Chart(paymentCtx, {
-            type: 'line',
-            data: {
-                labels: @json($paymentStatus->pluck('date')),
-                datasets: [{
-                        label: 'Billed',
-                        data: @json($paymentStatus->pluck('billed')),
-                        borderColor: '#60a5fa', // Tailwind blue-400
-                        backgroundColor: gradientBilled,
-                        borderWidth: 1,
-                        fill: true,
-                        pointRadius: 2,
-                        pointBackgroundColor: '#60a5fa',
-                        pointHoverRadius: 6,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Paid',
-                        data: @json($paymentStatus->pluck('paid')),
-                        borderColor: '#34d399', // Tailwind green-400
-                        backgroundColor: gradientPaid,
-                        borderWidth: 1,
-                        fill: true,
-                        pointRadius: 2,
-                        pointBackgroundColor: '#34d399',
-                        pointHoverRadius: 6,
-                        tension: 0.4
-                    },
-                    {
-                        label: 'Due',
-                        data: @json($paymentStatus->pluck('due')),
-                        borderColor: '#f87171', // Tailwind red-400
-                        backgroundColor: gradientDue,
-                        borderWidth: 1,
-                        fill: true,
-                        pointRadius: 2,
-                        pointBackgroundColor: '#f87171',
-                        pointHoverRadius: 6,
-                        tension: 0.4
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: ₹${context.parsed.y}`;
-                            }
-                        }
-                    },
-                    title: {
-                        display: true,
-                        text: 'Payment Status'
-                    },
-                    legend: {
-                        position: 'top'
-                    }
-                },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Date'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Amount (₹)'
-                        },
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    } else {
-        document.getElementById('paymentStatusChart').parentElement.innerHTML =
-            '<p class="text-gray-600 dark:text-gray-400">No payment data available.</p>';
-    }
-
-
-    // Chart 6: New vs. Existing Patients
-    if (@json($newVsExistingPatients['new'] + $newVsExistingPatients['existing'])) {
-        const newVsExistingCtx = document.getElementById('newVsExistingPatientsChart').getContext('2d');
-        new Chart(newVsExistingCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['New Patients', 'Old Patients'],
-                datasets: [{
-                    label: 'Patient Count',
-                    data: [@json($newVsExistingPatients['new']), @json($newVsExistingPatients['existing'])],
-                    backgroundColor: ['#93c5fd', '#86efac'],
-                    borderColor: ['#93c5fd', '#86efac'],
-                    borderWidth: 1,
-                    hoverOffset: 20
-
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'New vs. Old Patients'
-                    },
-                    legend: {
-                        position: 'top'
-                    }
-                },
-
-            }
-        });
-    } else {
-        document.getElementById('newVsExistingPatientsChart').parentElement.innerHTML =
-            '<p class="text-gray-600 dark:text-gray-400">No patient data available.</p>';
-    }
-</script>
-
-
-
+    </script>
+</x-app-layout>

@@ -47,3 +47,4 @@ Homestead.json
 /.vagrant
 .phpunit.result.cache
 dashboard_logic_changes.md
+doc.md
