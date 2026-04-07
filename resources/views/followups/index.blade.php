@@ -435,7 +435,7 @@ if (!function_exists('indFormat')) {
             <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{{ __('messages.Cash Payments') }}</h3>
             <!-- Added group-hover:brightness-50 to make the numbers dramatically darker on hover -->
             <p class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-400 truncate break-words transform origin-left group-hover:scale-105 filter group-hover:brightness-75 dark:group-hover:brightness-125 transition-all duration-300">
-                ₹{{ indFormat($cashPayments) }}
+                {{ indFormat($cashPayments) }}
             </p>
         </div>
         <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-teal-50 dark:bg-teal-900/30 border-teal-100 dark:border-teal-800 border shadow-inner group-hover:bg-white dark:group-hover:bg-gray-800 transition-colors duration-300">
@@ -623,7 +623,7 @@ if (!function_exists('indFormat')) {
             <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{{ __('messages.Online Payments') }}</h3>
             <!-- Added group-hover:brightness-50 to make the numbers dramatically darker on hover -->
             <p class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-rose-500 truncate break-words transform origin-left group-hover:scale-105 filter group-hover:brightness-75 dark:group-hover:brightness-125 transition-all duration-300">
-                ₹{{ indFormat($onlinePayments) }}
+                {{ indFormat($onlinePayments) }}
             </p>
         </div>
         <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-pink-50 dark:bg-pink-900/30 border-pink-100 dark:border-pink-800 border shadow-inner group-hover:bg-white dark:group-hover:bg-gray-800 transition-colors duration-300">
