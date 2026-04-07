@@ -12,6 +12,26 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+        <script>
+            (function() {
+                var key = 'clinic_text_scale';
+                var allowed = ['100', '110', '120', '130'];
+                var scale = '100';
+
+                try {
+                    var saved = localStorage.getItem(key);
+                    if (saved && allowed.includes(saved)) {
+                        scale = saved;
+                    }
+                } catch (e) {
+                    scale = '100';
+                }
+
+                document.documentElement.setAttribute('data-text-scale', scale);
+                document.documentElement.style.setProperty('--app-text-scale-factor', String(Number(scale) / 100));
+            })();
+        </script>
+
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
