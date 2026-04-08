@@ -217,10 +217,36 @@ class FollowUpController extends Controller
                         Carbon::now()->subWeek()->endOfWeek(),
                     ]);
                     break;
-                case 'last_month':
+                case 'this_month':
                     $query->whereBetween('created_at', [
-                        Carbon::now()->subMonth()->startOfMonth(),
-                        Carbon::now()->subMonth()->endOfMonth(),
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_month':
+                    // Prevent Carbon overflow (e.g., Mar 31 -> Feb 28 instead of Mar 3)
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonth()->startOfMonth(),
+                        Carbon::now()->startOfMonth()->subMonth()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_3_months':
+                    // Current month + previous 2 months (e.g., Jan 1 to Mar 31)
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonths(2)->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_6_months':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonths(5)->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_12_months':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonths(11)->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
                     ]);
                     break;
             }
@@ -250,10 +276,10 @@ class FollowUpController extends Controller
 
         $totalBilled = $summaryQuery->sum('amount_billed');
         $totalPaid = $summaryQuery->sum('amount_paid');
-        $totalDueAll = $totalBilled - $totalPaid;
+        // We will calculate later to only sum positive dues
 
         // Payment methods count grouped by method
-        $paymentCounts = $summaryQuery
+        $paymentCounts = (clone $summaryQuery)
             ->selectRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) as method, COUNT(*) as count")
             ->groupBy('method')
             ->pluck('count', 'method');
@@ -261,8 +287,67 @@ class FollowUpController extends Controller
         $cashPayments = $paymentCounts['cash'] ?? 0;
         $onlinePayments = $paymentCounts['online'] ?? 0;
 
-        // Paginate main data for display
-        $followUps = $query->latest()->paginate(10);
+        // Fetch detailed data for the modals
+        $cashFollowUps = (clone $summaryQuery)
+            ->whereRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) = 'cash'")
+            ->with(['patient' => function($q) { $q->select('id', 'name'); }])
+            ->latest()
+            ->get(['id', 'patient_id', 'amount_paid', 'created_at']);
+
+        $onlineFollowUps = (clone $summaryQuery)
+            ->whereRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) = 'online'")
+            ->with(['patient' => function($q) { $q->select('id', 'name'); }])
+            ->latest()
+            ->get(['id', 'patient_id', 'amount_paid', 'created_at']);
+        $allFollowUpsList = (clone $summaryQuery)
+            ->with(['patient' => function($q) { $q->select('id', 'name'); }])
+            ->latest()
+            ->get(['id', 'patient_id', 'amount_paid', 'amount_billed', 'created_at']);
+
+        $patientIds = $allFollowUpsList->pluck('patient_id')->unique();
+        $patientsList = \App\Models\Patient::withSum('followUps', 'amount_billed')
+            ->withSum('followUps', 'amount_paid')
+            ->whereIn('id', $patientIds)
+            ->get(['id', 'name', 'mobile_phone', 'created_at']);
+
+        $patientBalances = $patientsList->mapWithKeys(function($p) {
+            $bal = ($p->follow_ups_sum_amount_billed ?? 0) - ($p->follow_ups_sum_amount_paid ?? 0);
+            return [$p->id => $bal];
+        });
+
+        $paidFollowUpsList = $allFollowUpsList->filter(function($fu) {
+            return $fu->amount_paid > 0;
+        });
+
+        $dueFollowUpsList = $allFollowUpsList->filter(function($fu) {
+            return ($fu->amount_billed - $fu->amount_paid) > 0;
+        });
+
+        // Calculate "Real Due" considering patient's global net advances
+        $patientRealDueAllocation = [];
+        foreach ($patientBalances as $pid => $bal) {
+            // A patient can never owe more than their global positive net balance
+            $patientRealDueAllocation[$pid] = max(0, $bal);
+        }
+
+        $totalDueAll = 0;
+        foreach ($dueFollowUpsList as $fu) {
+            $visitDue = $fu->amount_billed - $fu->amount_paid;
+            $owedGlobally = $patientRealDueAllocation[$fu->patient_id] ?? 0;
+
+            $realDue = min($visitDue, $owedGlobally);
+
+            if (isset($patientRealDueAllocation[$fu->patient_id])) {
+                $patientRealDueAllocation[$fu->patient_id] -= $realDue;
+            }
+
+            $fu->real_due = $realDue; // Inject for the view
+            $totalDueAll += $realDue;
+        }
+
+
+        // Paginate main data for display (15 items per page matches AJAX endpoint)
+        $followUps = $query->latest()->paginate(15);
 
         // Prepare chart data (daily, monthly, yearly)
         $commonFilters = function ($q) use ($request, $selectedBranch, $selectedDoctor) {
@@ -347,6 +432,13 @@ class FollowUpController extends Controller
         // Return the view with all variables
         return view('followups.index', compact(
             'followUps',
+            'cashFollowUps',
+            'onlineFollowUps',
+            'allFollowUpsList',
+            'patientsList',
+            'patientBalances',
+            'paidFollowUpsList',
+            'dueFollowUpsList',
             'totalIncome',
             'totalPatients',
             'totalFollowUps',
@@ -362,6 +454,137 @@ class FollowUpController extends Controller
             'cashPayments',
             'onlinePayments'
         ));
+    }
+
+    /**
+     * Fetch follow-ups for infinite scroll (AJAX endpoint)
+     */
+    public function fetchFollowUps(Request $request)
+    {
+        $page = $request->input('page', 1);
+        $perPage = 15; // Items per scroll load
+
+        // Get filter inputs
+        $selectedBranch = $request->input('branch_name', 'all');
+        $selectedDoctor = $request->input('doctor', 'all');
+        $timePeriod = $request->input('time_period', 'all');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        // Base query
+        $query = FollowUp::whereHas('patient');
+
+        // Apply filters
+        if ($selectedBranch !== 'all' && !empty($selectedBranch)) {
+            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
+        }
+
+        if ($selectedDoctor !== 'all') {
+            $query->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.user_name')) = ?", [$selectedDoctor]);
+        }
+
+        if ($timePeriod !== 'all') {
+            switch ($timePeriod) {
+                case 'today':
+                    $query->whereDate('created_at', Carbon::today());
+                    break;
+                case 'last_week':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->subWeek()->startOfWeek(),
+                        Carbon::now()->subWeek()->endOfWeek(),
+                    ]);
+                    break;
+                case 'this_month':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_month':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonth()->startOfMonth(),
+                        Carbon::now()->startOfMonth()->subMonth()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_3_months':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonths(2)->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_6_months':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonths(5)->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+                case 'last_12_months':
+                    $query->whereBetween('created_at', [
+                        Carbon::now()->startOfMonth()->subMonths(11)->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
+                    ]);
+                    break;
+            }
+        } else {
+            if ($fromDate) {
+                $query->whereDate('created_at', '>=', Carbon::parse($fromDate)->startOfDay());
+            }
+            if ($toDate) {
+                $query->whereDate('created_at', '<=', Carbon::parse($toDate)->endOfDay());
+            }
+        }
+
+        // Get paginated results
+        $followUps = $query->latest()->paginate($perPage, ['*'], 'page', $page);
+
+        // Transform data for JSON response
+        $rows = $followUps->items();
+        $html = '';
+
+        $renderedCount = 0;
+        foreach ($rows as $followUp) {
+            if ($followUp->patient) {
+            $renderedCount++;
+                $checkUpInfo = json_decode($followUp->check_up_info, true);
+                $paymentMethod = $checkUpInfo['payment_method'] ?? 'N/A';
+
+                $colorClass = $followUp->amount_paid < $followUp->amount_billed
+                    ? 'text-red-600 dark:text-red-400'
+                    : 'text-indigo-700 dark:text-indigo-400';
+
+                $amountColorClass = $followUp->amount_paid < $followUp->amount_billed
+                    ? 'text-red-600 dark:text-red-400'
+                    : ($followUp->amount_paid > $followUp->amount_billed
+                        ? 'text-green-600 dark:text-green-300'
+                        : 'text-blue-600 dark:text-blue-300');
+
+                $html .= '<tr class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 animate-fadeIn">';
+                $html .= '<td class="text-left px-4 py-3">' . $followUp->created_at->format('d M Y, h:i A') . '</td>';
+                $html .= '<td class="text-center px-4 py-3"><a href="' . route('patients.show', $followUp->patient->id) . '" class="font-semibold hover:underline ' . $colorClass . '">' . $followUp->patient->name . '</a></td>';
+                $html .= '<td class="text-center px-4 py-3">' . ($checkUpInfo['user_name'] ?? 'N/A') . '</td>';
+                $html .= '<td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">₹' . $this->indFormat($followUp->amount_billed) . '</td>';
+                $html .= '<td class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">' . $paymentMethod . '</td>';
+                $html .= '<td class="text-right px-4 py-3 font-semibold ' . $amountColorClass . '">₹' . $this->indFormat($followUp->amount_paid) . '</td>';
+                $html .= '</tr>';
+            }
+        }
+
+        return response()->json([
+            'html' => $html,
+            'hasMore' => $followUps->hasMorePages(),
+            'nextPage' => $page + 1,
+            'currentPage' => $followUps->currentPage(),
+            'total' => $followUps->total(),
+            'shownCount' => (int) ($followUps->lastItem() ?? 0),
+            'remainingCount' => max(0, (int) $followUps->total() - (int) ($followUps->lastItem() ?? 0)),
+            'pageCount' => $renderedCount,
+            'lastPage' => $followUps->lastPage(),
+        ]);
+    }
+
+    private function indFormat($num) {
+        $num = round((float)$num);
+        return preg_replace('/(\d+?)(?=(\d\d)+(\d)(?!\d))/i', '\1,', (string)$num);
     }
 
 
@@ -592,7 +815,7 @@ class FollowUpController extends Controller
     {
         // Validate the time_period input
         $request->validate([
-            'time_period' => 'nullable|in:all,today,last_week,last_month',
+            'time_period' => 'nullable|in:all,today,last_week,this_month,last_month,last_3_months,last_6_months,last_12_months',
         ]);
 
         return Excel::download(new FollowUpExport($request), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
