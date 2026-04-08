@@ -1,0 +1,25 @@
+/* Figtree Font - Self-hosted */
+
+@font-face {
+    font-family: 'Figtree';
+    src: url('/fonts/figtree-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Figtree';
+    src: url('/fonts/figtree-500.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Figtree';
+    src: url('/fonts/figtree-600.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
