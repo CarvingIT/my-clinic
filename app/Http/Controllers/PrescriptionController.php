@@ -277,10 +277,11 @@ class PrescriptionController extends Controller
 
         $pdf = PDF::loadView('prescriptions.pdf-download', $prescriptionData);
         $pdf->setOption('page-size', 'A4');
-        $pdf->setOption('margin-top', '10mm');
-        $pdf->setOption('margin-bottom', '10mm');
-        $pdf->setOption('margin-left', '10mm');
-        $pdf->setOption('margin-right', '10mm');
+                // Dynamic Margins
+        $pdf->setOption('margin-top', $request->get('margin_top', 10) . 'mm');
+        $pdf->setOption('margin-bottom', $request->get('margin_bottom', 10) . 'mm');
+        $pdf->setOption('margin-left', $request->get('margin_left', 10) . 'mm');
+        $pdf->setOption('margin-right', $request->get('margin_right', 10) . 'mm');
         $pdf->setOption('encoding', 'UTF-8');
         $pdf->setOption('enable-local-file-access', true);
 
