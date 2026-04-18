@@ -6,6 +6,9 @@
     <title>Prescription Preview - {{ $patient->name }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
+        :root {
+            --font-scale: 1;
+        }
         @page {
             size: A4;
             margin: 10mm;
@@ -37,7 +40,7 @@
 
         .section-header {
             font-weight: bold;
-            font-size: 13px;
+            font-size: calc(13px * var(--font-scale));
             text-transform: uppercase;
             text-decoration: underline;
             margin-bottom: 6px;
@@ -46,7 +49,7 @@
         }
 
         .section-body {
-            font-size: 13px;
+            font-size: calc(13px * var(--font-scale));
             line-height: 1.6;
             color: #000;
             white-space: pre-wrap;
@@ -57,7 +60,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
-            font-size: 12px;
+            font-size: calc(12px * var(--font-scale));
             margin-bottom: 12px;
             padding-bottom: 8px;
             border-bottom: 1px solid #000;
@@ -69,7 +72,7 @@
 
         .patient-label {
             font-weight: bold;
-            font-size: 11px;
+            font-size: calc(11px * var(--font-scale));
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 2px;
@@ -79,14 +82,14 @@
             display: flex;
             gap: 40px;
             margin-bottom: 10px;
-            font-size: 12px;
+            font-size: calc(12px * var(--font-scale));
         }
 
         .payment-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            font-size: 12px;
+            font-size: calc(12px * var(--font-scale));
         }
 
         .payment-item {
@@ -95,13 +98,13 @@
 
         .payment-label {
             font-weight: bold;
-            font-size: 11px;
+            font-size: calc(11px * var(--font-scale));
             text-transform: uppercase;
             margin-bottom: 2px;
         }
 
         .payment-amount {
-            font-size: 14px;
+            font-size: calc(14px * var(--font-scale));
             font-weight: bold;
         }
 
@@ -123,18 +126,18 @@
         }
 
         .doctor-name {
-            font-size: 12px;
+            font-size: calc(12px * var(--font-scale));
             font-weight: bold;
         }
 
         .doctor-title {
-            font-size: 10px;
+            font-size: calc(10px * var(--font-scale));
             margin-top: 2px;
         }
 
         .rx-symbol {
             text-align: left;
-            font-size: 28px;
+            font-size: calc(28px * var(--font-scale));
             font-weight: bold;
             font-style: italic;
             margin-bottom: 8px;
@@ -152,7 +155,18 @@
                 </h1>
                 <p class="text-sm text-gray-600 mt-1">{{ $patient->name }} • {{ now()->format('d M Y') }}</p>
             </div>
-            <div class="flex gap-3">
+                        <div class="flex gap-3 items-center">
+                <div class="flex items-center bg-gray-200 rounded-lg px-2 shadow-sm border border-gray-300">
+                    <span class="text-xs font-semibold uppercase text-gray-500 mr-2 ml-1">Font Size</span>
+                    <button onclick="changeFontSize(-0.1)" type="button" class="p-2 text-gray-700 hover:text-black focus:outline-none" title="Decrease Font Size">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <span class="mx-1 font-bold w-12 text-center" id="fontSizeDisplay">100%</span>
+                    <button onclick="changeFontSize(0.1)" type="button" class="p-2 text-gray-700 hover:text-black focus:outline-none" title="Increase Font Size">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button onclick="resetFontSize()" type="button" class="ml-1 px-2 py-1 text-xs text-blue-600 hover:bg-blue-100 rounded transition" title="Reset Font Size">Reset</button>
+                </div>
                 <button onclick="goBack()" class="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition flex items-center gap-2">
                     <i class="fas fa-arrow-left"></i> Edit
                 </button>
@@ -169,6 +183,7 @@
                             <input type="hidden" name="field_values[{{ str_replace('_label', '', $key) }}]" value="{{ $value }}">
                         @endif
                     @endforeach
+                    <input type="hidden" name="font_scale" id="fontScaleInput" value="1">
                     <button type="submit" class="px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-semibold transition flex items-center gap-2">
                         <i class="fas fa-download"></i> Download PDF
                     </button>
@@ -316,8 +331,8 @@
             <div class="footer-section">
                 @if (in_array('branch_name', $selectedFields))
                     <div>
-                        <div style="font-weight: bold; font-size: 11px; text-transform: uppercase; margin-bottom: 2px;">Clinic</div>
-                        <div style="font-size: 12px;">{{ strip_tags($data['branch_name'] ?? '') }}</div>
+                        <div style="font-weight: bold; font-size: calc(11px * var(--font-scale)); text-transform: uppercase; margin-bottom: 2px;">Clinic</div>
+                        <div style="font-size: calc(12px * var(--font-scale));">{{ strip_tags($data['branch_name'] ?? '') }}</div>
                     </div>
                 @endif
                 @if (in_array('doctor_name', $selectedFields))
@@ -331,9 +346,29 @@
         </div>
     </div>
 
-    <script>
+        <script>
         function goBack() {
-            history.back();
+            window.history.back();
+        }
+        
+        let currentFontScale = 1;
+        
+        function changeFontSize(delta) {
+            currentFontScale += delta;
+            if (currentFontScale < 0.5) currentFontScale = 0.5;
+            if (currentFontScale > 2.0) currentFontScale = 2.0;
+            updateFontScale();
+        }
+
+        function resetFontSize() {
+            currentFontScale = 1;
+            updateFontScale();
+        }
+
+        function updateFontScale() {
+            document.documentElement.style.setProperty('--font-scale', currentFontScale);
+            document.getElementById('fontSizeDisplay').textContent = Math.round(currentFontScale * 100) + '%';
+            document.getElementById('fontScaleInput').value = currentFontScale.toFixed(2);
         }
     </script>
 </body>
