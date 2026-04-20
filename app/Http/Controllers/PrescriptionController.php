@@ -270,12 +270,15 @@ class PrescriptionController extends Controller
             }
         }
 
-        $prescriptionData['followup'] = $followup;
-        $prescriptionData['patient'] = $patient;
-        $prescriptionData['selectedFields'] = $selectedFields;
-        $prescriptionData['font_scale'] = $request->get('font_scale', 1);
+        $viewData = [
+            'data' => $prescriptionData,
+            'followup' => $followup,
+            'patient' => $patient,
+            'selectedFields' => $selectedFields,
+            'font_scale' => $request->get('font_scale', 1)
+        ];
 
-        $pdf = PDF::loadView('prescriptions.pdf-download', $prescriptionData);
+        $pdf = PDF::loadView('prescriptions.pdf-download', $viewData);
         $pdf->setOption('page-size', 'A4');
                 // Dynamic Margins
         $pdf->setOption('margin-top', $request->get('margin_top', 10) . 'mm');
