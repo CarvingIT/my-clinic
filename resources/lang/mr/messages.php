@@ -21,7 +21,7 @@ return [
     'Email ID' => 'ई-मेल आयडी',
     'Vishesh' => 'विशेष',
     'Balance' => 'शिल्लक',
-    'Patient ID' => 'रुग्ण आयडी',
+    'Patient ID' => 'रुग्ण ID',
      'Patient Details' => 'रुग्णाची माहिती',
      'Remark' => 'टीप',
 
@@ -149,7 +149,7 @@ return [
     'chikitsa' => 'चिकित्सा',
     'vishesh' => 'विशेष',
     'patient_name' => 'रुग्णाचे नाव',
-    'patient_id' => 'रुग्ण आयडी',
+    'patient_id' => 'रुग्ण ID',
     'patient_age' => 'वय',
     'patient_gender' => 'लिंग',
     'patient_mobile' => 'मोबाईल नंबर',

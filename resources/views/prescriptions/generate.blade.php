@@ -36,7 +36,7 @@
         @page { size: A4; margin: 15mm 15mm 15mm 15mm; }
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: calc(12px * var(--font-scale));
+            font-size: calc(16px * var(--font-scale));
             color: #2c221e; /* Deep Earthy Grey/Brown */
             line-height: 1.6;
             background: #ffffff;
@@ -58,7 +58,7 @@
         .patient-table {
             width: 100%; border-collapse: collapse; margin-bottom: 25px;
             border-radius: 6px; overflow: hidden;
-            font-size: calc(11px * var(--font-scale));
+            font-size: calc(14px * var(--font-scale));
             border: 1px solid #e6d8c3; /* Sandalwood Border */
         }
         .patient-table th, .patient-table td {
@@ -70,7 +70,7 @@
             color: #744210; /* Deep Warm Brown */
             font-weight: 700; width: 15%;
             text-transform: uppercase; letter-spacing: 0.5px;
-            font-size: calc(10px * var(--font-scale));
+            font-size: calc(15px * var(--font-scale));
         }
         .patient-table td { color: #2c221e; width: 35%; font-weight: 500; }
 
@@ -82,7 +82,7 @@
         /* Section Titles - Classical Serif & Ayurvedic Green */
         .section-title {
             font-family: 'Georgia', serif;
-            font-size: calc(12px * var(--font-scale));
+            font-size: calc(15px * var(--font-scale));
             font-weight: 700;
             color: #276749; /* Leafy Ayurvedic Green */
             text-transform: uppercase;
@@ -134,7 +134,13 @@
             box-shadow: inset 0 0 5px rgba(0,0,0,0.02);
         }
         .payment-line { margin-bottom: 3px; }
-        .payment-line strong { display: inline-block; width: 100px; color: #744210; }
+        .payment-line strong {
+            display: inline-block;
+            width: 120px;
+            color: #744210;
+            font-size: 15px;
+            font-weight: 700;
+        }
 
         .signature-area { margin-top: 20px; }
         .signature-line { display: inline-block; border-bottom: 1px solid #744210; width: 220px; margin-bottom: 8px; }
@@ -253,20 +259,20 @@
         <table class="patient-table">
             <tr>
                 @if (in_array('patient_name', $selectedFields))
-                    <th>Patient Name</th>
+                    <th>{{ __('messages.Patient Name') }}</th>
                     <td><strong>{{ strip_tags($data['patient_name'] ?? '') }}</strong></td>
                 @endif
                 @if (in_array('patient_id', $selectedFields))
-                    <th>Patient ID</th>
+                    <th>{{ __('messages.Patient ID') }}</th>
                     <td>{{ strip_tags($data['patient_id'] ?? '') }}</td>
                 @else
-                    <th>Date</th>
+                    <th>{{ __('messages.Date') }}</th>
                     <td>{{ \Carbon\Carbon::parse($followup->created_at)->format('d M Y, h:i A') }}</td>
                 @endif
             </tr>
             <tr>
                 @if (in_array('patient_age', $selectedFields) || in_array('patient_gender', $selectedFields))
-                    <th>Age / Gender</th>
+                    <th>{{ __('messages.Age/Gender') }}</th>
                     <td>
                         {{ strip_tags($data['patient_age'] ?? '') }}
                         @if(in_array('patient_gender', $selectedFields) && !empty($data['patient_gender']))
@@ -275,13 +281,13 @@
                     </td>
                 @endif
                 @if (in_array('patient_mobile', $selectedFields))
-                    <th>Contact</th>
+                    <th>{{ __('messages.mobile_phone') }}</th>
                     <td>{{ strip_tags($data['patient_mobile'] ?? '') }}</td>
                 @endif
             </tr>
             @if (in_array('patient_address', $selectedFields) && !empty($data['patient_address']))
             <tr>
-                <th>Address</th>
+                <th>{{ __('messages.address') }}</th>
                 <td colspan="3">{{ strip_tags($data['patient_address'] ?? '') }}</td>
             </tr>
             @endif
@@ -292,19 +298,19 @@
             <!-- LEFT COLUMN: Patient Info & Vitals -->
             <div class="left-col">
                 @if (in_array('lakshane', $selectedFields) && !empty($data['lakshane']))
-                    <div class="section-title">Symptoms & Complaints</div>
+                    <div class="section-title">{{ __('messages.lakshane') }}</div>
                     <div class="content-text">{{ trim(strip_tags($data['lakshane'])) }}</div>
                 @endif
                 @if (in_array('nadi', $selectedFields) && !empty($data['nadi']))
-                    <div class="section-title">Vitals & Examination</div>
+                    <div class="section-title">{{ __('messages.nadi') }}</div>
                     <div class="content-text">{{ trim(strip_tags($data['nadi'])) }}</div>
                 @endif
                 @if (in_array('nidan', $selectedFields) && !empty($data['nidan']))
-                    <div class="section-title">Diagnosis</div>
+                    <div class="section-title">{{ __('messages.diagnosis') }}</div>
                     <div class="content-text"><strong>{{ trim(strip_tags($data['nidan'])) }}</strong></div>
                 @endif
                 @if (in_array('vishesh', $selectedFields) && !empty($data['vishesh']))
-                    <div class="section-title">Special Advice</div>
+                    <div class="section-title">{{ __('messages.Vishesh') }}</div>
                     <div class="content-text" style="color: #c05621; font-weight: 500;">{{ trim(strip_tags($data['vishesh'])) }}</div>
                 @endif
             </div>
@@ -330,13 +336,13 @@
                 @if (in_array('days', $selectedFields) || in_array('packets', $selectedFields))
                     <div class="duration-box">
                         @if (in_array('days', $selectedFields) && !empty($data['days']))
-                            <div class="duration-item">
-                                <strong>Duration:</strong> {{ strip_tags($data['days']) }} Days
+                            <div class="duration-item" style="font-size: calc(15px * var(--font-scale)); font-weight: 700; color: #744210;">
+                                <strong>दिवस:</strong> {{ strip_tags($data['days']) }}
                             </div>
                         @endif
                         @if (in_array('packets', $selectedFields) && !empty($data['packets']))
-                            <div class="duration-item" style="border-left: 1px dashed #d4b895; padding-left: 20px;">
-                                <strong>Packets:</strong> {{ strip_tags($data['packets']) }}
+                            <div class="duration-item" style="border-left: 1px dashed #d4b895; padding-left: 20px; font-size: calc(15px * var(--font-scale)); font-weight: 700; color: #744210;">
+                                <strong>पुड्या:</strong> {{ strip_tags($data['packets']) }}
                             </div>
                         @endif
                     </div>
@@ -351,17 +357,17 @@
                     <div class="payment-box">
                         @if (in_array('amount_billed', $selectedFields) && !empty($data['amount_billed']))
                             <div class="payment-line">
-                                <strong>Amount Billed:</strong> ₹{{ strip_tags($data['amount_billed']) }}
+                                <strong>{{ __('messages.Amount Billed') }}:</strong> ₹{{ strip_tags($data['amount_billed']) }}
                             </div>
                         @endif
                         @if (in_array('amount_paid', $selectedFields) && !empty($data['amount_paid']))
                             <div class="payment-line">
-                                <strong>Amount Paid:</strong> ₹{{ strip_tags($data['amount_paid']) }}
+                                <strong>{{ __('messages.Amount Paid') }}:</strong> ₹{{ strip_tags($data['amount_paid']) }}
                             </div>
                         @endif
                         @if (in_array('amount_due', $selectedFields) && !empty($data['amount_due']))
                             <div class="payment-line" style="color: #c05621; font-weight: bold; margin-top: 5px;">
-                                <strong>Balance Due:</strong> ₹{{ strip_tags($data['amount_due']) }}
+                                <strong>{{ __('messages.Balance Due') }}:</strong> ₹{{ strip_tags($data['amount_due']) }}
                             </div>
                         @endif
                     </div>
