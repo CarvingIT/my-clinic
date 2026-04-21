@@ -14,6 +14,8 @@ return [
     */
 
     'name' => env('APP_NAME', 'Laravel'),
+    
+    'clinic_name' => env('CLINIC_NAME', 'My Clinic'),
 
     /*
     |--------------------------------------------------------------------------
