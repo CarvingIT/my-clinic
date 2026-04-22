@@ -262,25 +262,26 @@ class PrescriptionController extends Controller
         $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
         $allFields = $this->buildAllFields($followup, $patient, $checkUpInfo);
 
-        $data = [];
+        $prescriptionData = [];
         foreach ($allFields as $key => $field) {
             if (in_array($key, $selectedFields)) {
-                $data[$key] = $customValues[$key] ?? $field['value'];
-                $data[$key . '_label'] = $field['label'];
+                $prescriptionData[$key] = $customValues[$key] ?? $field['value'];
+                $prescriptionData[$key . '_label'] = $field['label'];
             }
         }
 
-        $pdf = PDF::loadView('prescriptions.pdf-download', [
-            'data' => $data,
-            'followup' => $followup,
-            'patient' => $patient,
-            'selectedFields' => $selectedFields,
-        ]);
+        $prescriptionData['followup'] = $followup;
+        $prescriptionData['patient'] = $patient;
+        $prescriptionData['selectedFields'] = $selectedFields;
+        $prescriptionData['font_scale'] = $request->get('font_scale', 1);
+
+        $pdf = PDF::loadView('prescriptions.pdf-download', $prescriptionData);
         $pdf->setOption('page-size', 'A4');
-        $pdf->setOption('margin-top', '10mm');
-        $pdf->setOption('margin-bottom', '10mm');
-        $pdf->setOption('margin-left', '10mm');
-        $pdf->setOption('margin-right', '10mm');
+                // Dynamic Margins
+        $pdf->setOption('margin-top', $request->get('margin_top', 10) . 'mm');
+        $pdf->setOption('margin-bottom', $request->get('margin_bottom', 10) . 'mm');
+        $pdf->setOption('margin-left', $request->get('margin_left', 10) . 'mm');
+        $pdf->setOption('margin-right', $request->get('margin_right', 10) . 'mm');
         $pdf->setOption('encoding', 'UTF-8');
         $pdf->setOption('enable-local-file-access', true);
 

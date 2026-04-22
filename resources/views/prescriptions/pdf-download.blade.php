@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    @php
+        $fontScale = $font_scale ?? 1;
+    @endphp
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prescription - {{ $patient->name }}</title>
     <style>
@@ -18,7 +21,7 @@
 
         body {
             font-family: 'Noto Sans Devanagari', 'Arial', 'Times New Roman', serif;
-            font-size: 13px;
+            font-size: {{ 13 * $fontScale }}px;
             color: #000000;
             line-height: 1.5;
             background: white;
@@ -39,7 +42,7 @@
         /* Rx Symbol */
         .rx-symbol {
             text-align: left;
-            font-size: 28px;
+            font-size: {{ 28 * $fontScale }}px;
             font-weight: bold;
             font-style: italic;
             margin-bottom: 8px;
@@ -58,7 +61,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
-            font-size: 12px;
+            font-size: {{ 12 * $fontScale }}px;
         }
 
         .patient-field {
@@ -67,7 +70,7 @@
 
         .patient-label {
             font-weight: bold;
-            font-size: 11px;
+            font-size: {{ 11 * $fontScale }}px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-bottom: 2px;
@@ -76,7 +79,7 @@
 
         .patient-value {
             color: #000;
-            font-size: 12px;
+            font-size: {{ 12 * $fontScale }}px;
         }
 
         /* Section Headers */
@@ -87,7 +90,7 @@
 
         .section-header {
             font-weight: bold;
-            font-size: 12px;
+            font-size: {{ 12 * $fontScale }}px;
             text-transform: uppercase;
             text-decoration: underline;
             margin-bottom: 6px;
@@ -97,7 +100,7 @@
 
         .section-body {
             padding-left: 0;
-            font-size: 13px;
+            font-size: {{ 13 * $fontScale }}px;
             line-height: 1.6;
             color: #000;
             margin-left: 0;
@@ -116,7 +119,7 @@
             display: flex;
             gap: 40px;
             margin-bottom: 10px;
-            font-size: 12px;
+            font-size: {{ 12 * $fontScale }}px;
             page-break-inside: avoid;
         }
 
@@ -144,7 +147,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 20px;
-            font-size: 12px;
+            font-size: {{ 12 * $fontScale }}px;
         }
 
         .payment-item {
@@ -153,13 +156,13 @@
 
         .payment-label {
             font-weight: bold;
-            font-size: 11px;
+            font-size: {{ 11 * $fontScale }}px;
             text-transform: uppercase;
             margin-bottom: 2px;
         }
 
         .payment-amount {
-            font-size: 14px;
+            font-size: {{ 14 * $fontScale }}px;
             font-weight: bold;
         }
 
@@ -175,18 +178,18 @@
         }
 
         .clinic-info {
-            font-size: 12px;
+            font-size: {{ 12 * $fontScale }}px;
         }
 
         .clinic-label {
             font-weight: bold;
-            font-size: 11px;
+            font-size: {{ 11 * $fontScale }}px;
             text-transform: uppercase;
             margin-bottom: 2px;
         }
 
         .clinic-value {
-            font-size: 12px;
+            font-size: {{ 12 * $fontScale }}px;
         }
 
         .signature-area {
@@ -201,12 +204,12 @@
         }
 
         .doctor-name {
-            font-size: 12px;
+            font-size: {{ 12 * $fontScale }}px;
             font-weight: bold;
         }
 
         .doctor-title {
-            font-size: 10px;
+            font-size: {{ 10 * $fontScale }}px;
             margin-top: 2px;
         }
 

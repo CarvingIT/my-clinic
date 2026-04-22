@@ -70,7 +70,7 @@ class DashboardEnhancer {
     async updateDashboardMetrics() {
         try {
             const response = await fetch('/api/dashboard/metrics');
-            if (response.ok) {
+            if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
                 const data = await response.json();
                 this.updateMetricCards(data);
             }
@@ -85,7 +85,7 @@ class DashboardEnhancer {
     async updateQueueCount() {
         try {
             const response = await fetch('/api/queue/count');
-            if (response.ok) {
+            if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
                 const data = await response.json();
                 const queueElements = document.querySelectorAll('[data-queue-count]');
                 queueElements.forEach(el => {
@@ -318,6 +318,8 @@ class DashboardEnhancer {
         setInterval(async () => {
             try {
                 const response = await fetch('/api/queue/count');
+                if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) return;
+                
                 const data = await response.json();
 
                 if (data.count > lastQueueCount && lastQueueCount > 0) {

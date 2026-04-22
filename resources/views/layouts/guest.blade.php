@@ -36,19 +36,26 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
 
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-            <div>
-                <a href="/">
-                    {{-- <x-application-logo class="w-20 h-20 fill-current text-gray-500" /> --}}
-
+    <body class="font-sans text-gray-900 antialiased bg-slate-50 bg-gradient-to-br from-indigo-50 via-white to-blue-50 overflow-y-auto">
+        <div class="min-h-screen flex flex-col justify-center items-center p-4">
+            <div class="text-center transition-all duration-500 transform hover:-translate-y-1">
+                <a href="/" class="inline-block relative">
+                    <div class="absolute inset-0 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
                     <img src="{{ asset('images/logofullt.png') }}" alt="Clinic Logo"
-                        class="h-[11rem] object-contain filter drop-shadow-md transition-transform duration-300 hover:scale-105" />
+                        class="relative h-28 sm:h-32 object-contain filter drop-shadow-xl transition-transform duration-300 hover:scale-105 mx-auto" />
                 </a>
+                <h1 class="mt-4 text-2xl sm:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-700 tracking-wider drop-shadow-sm">
+                    {{ config('app.clinic_name', 'My Clinic') }}
+                </h1>
+                <p class="text-xs sm:text-sm text-indigo-400 mt-1 tracking-widest uppercase font-semibold opacity-80">Secure Portal Access</p>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-1 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div class="w-full sm:max-w-md mt-6 px-6 py-6 sm:px-8 sm:py-8 bg-white/90 backdrop-blur-xl shadow-2xl shadow-blue-900/10 sm:rounded-2xl border border-white/60">
                 {{ $slot }}
+            </div>
+            
+            <div class="mt-6 text-center text-xs text-gray-400 font-medium">
+                &copy; {{ date('Y') }} {{ config('app.clinic_name', 'My Clinic') }}. All rights reserved.
             </div>
         </div>
     </body>
