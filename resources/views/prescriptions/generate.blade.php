@@ -74,78 +74,143 @@
         }
         .patient-table td { color: #2c221e; width: 35%; font-weight: 500; }
 
-        /* Split Layout */
-        .main-body { width: 100%; display: table; table-layout: fixed; }
-        .left-col { display: table-cell; width: 35%; vertical-align: top; padding-right: 25px; border-right: 1px solid #e6d8c3; }
-        .right-col { display: table-cell; width: 65%; vertical-align: top; padding-left: 25px; }
+        /* Single Column Professional Layout */
+        .main-body { width: 100%; display: block; margin: 30px 0; }
+        .left-col { width: 100%; margin-bottom: 20px; padding: 20px; background: #fffaf0; border: 1px solid #e6d8c3; border-radius: 6px; }
+        .left-col:empty { display: none; margin-bottom: 0; padding: 0; background: none; border: none; }
+        .right-col { width: 100%; margin-bottom: 20px; }
 
         /* Section Titles - Classical Serif & Ayurvedic Green */
         .section-title {
             font-family: 'Georgia', serif;
-            font-size: calc(15px * var(--font-scale));
+            font-size: calc(13px * var(--font-scale));
             font-weight: 700;
-            color: #276749; /* Leafy Ayurvedic Green */
+            color: #744210;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px; margin-top: 22px;
-            border-bottom: 1px solid #e6d8c3;
-            padding-bottom: 4px;
+            letter-spacing: 1.5px;
+            margin-bottom: 0;
+            margin-top: 0;
+            padding-bottom: 0;
+            border-bottom: none;
             position: relative;
-        }
-        .section-title::after {
-            content: ''; position: absolute; bottom: -1px; left: 0;
-            width: 35px; height: 2px;
-            background-color: #c05621; /* Saffron underline */
+            display: inline;
+            padding-bottom: 0;
+            border-bottom: none;
+            white-space: nowrap;
+            margin-right: 12px;
         }
         .section-title:first-child { margin-top: 0; }
 
-        .content-text { font-size: calc(13px * var(--font-scale)); color: #2c221e; margin-bottom: 6px; white-space: pre-wrap; word-break: break-word; }
+        /* Inline Item Container */
+        .field-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        /* Hide section titles when labels disabled */
+        .prescription-wrapper.hide-labels .section-title {
+            display: none;
+        }
+
+        .content-text {
+            font-size: calc(13px * var(--font-scale));
+            color: #2c221e;
+            margin-bottom: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            flex: 1;
+        }
+
+        .field-item .content-text {
+            margin-bottom: 0;
+        }
 
         /* Rx Styling */
-        .rx-wrapper { margin-bottom: 15px; }
+        .rx-wrapper {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px 0;
+            border-top: 2px solid #e6d8c3;
+            border-bottom: 2px solid #e6d8c3;
+        }
         .rx-icon {
             font-family: 'Georgia', serif;
-            font-size: calc(36px * var(--font-scale));
-            font-weight: bold; font-style: italic;
+            font-size: calc(48px * var(--font-scale));
+            font-weight: bold;
+            font-style: italic;
             color: #276749;
             line-height: 1;
         }
 
-        .treatment-box { margin-top: 10px; }
-
-        /* Duration box matching traditional feel */
-        .duration-box {
-            margin-top: 30px; background: #fffaf0;
-            border: 1px dashed #d4b895; padding: 12px 15px;
-            border-radius: 5px; font-size: calc(12px * var(--font-scale));
+        .treatment-box {
+            margin-top: 8px;
+            padding: 2px 5px;
+            background: #ffffff;
+            border: 1px solid #e6d8c3;
+            border-radius: 4px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 8px;
+            align-items: flex-start;
         }
-        .duration-box strong { color: #744210; }
-        .duration-item { display: inline-block; margin-right: 20px; }
 
-        .bottom-details { width: 100%; margin-top: 50px; display: table; table-layout: fixed; }
-        .bottom-cell-left { display: table-cell; width: 50%; vertical-align: bottom; }
-        .bottom-cell-right { display: table-cell; width: 50%; vertical-align: bottom; text-align: right; }
+        .treatment-content {
+            padding-right: 8px;
+            border-right: 1px solid #e6d8c3;
+            min-width: 0;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* Duration box with partition */
+        .duration-box {
+            margin: 0;
+            padding: 32px 15px 0 12px;
+            background: transparent;
+            border: none;
+            font-size: calc(12px * var(--font-scale));
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .duration-box strong { color: #744210; font-weight: 700; }
+        .duration-item { display: block; margin: 2px 0; font-weight: 600; }
+
+        .bottom-details { width: 100%; margin-top: 50px; display: flex; gap: 40px; justify-content: space-between; align-items: flex-end; }
+        .bottom-cell-left { flex: 1; text-align: left; }
+        .bottom-cell-right { flex: 1; text-align: right; }
 
         /* Payment Area */
         .payment-box {
-            border: 1px solid #e6d8c3; padding: 10px;
-            background: #fffaf0; border-radius: 4px;
-            display: inline-block; font-size: calc(11px * var(--font-scale));
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.02);
-        }
-        .payment-line { margin-bottom: 3px; }
-        .payment-line strong {
+            border: 2px solid #e6d8c3;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #fffaf0 0%, #fdf6ed 100%);
+            border-radius: 5px;
             display: inline-block;
-            width: 120px;
+            font-size: calc(12px * var(--font-scale));
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.03);
+        }
+        .payment-line {
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .payment-line:last-child { margin-bottom: 0; }
+        .payment-line strong {
             color: #744210;
-            font-size: 15px;
             font-weight: 700;
+            min-width: 110px;
         }
 
-        .signature-area { margin-top: 20px; }
-        .signature-line { display: inline-block; border-bottom: 1px solid #744210; width: 220px; margin-bottom: 8px; }
-        .doctor-name { font-family: 'Georgia', serif; font-weight: bold; color: #276749; font-size: calc(15px * var(--font-scale)); margin-top: 5px; }
-        .clinic-name { color: #c05621; font-weight: 500; font-size: calc(11px * var(--font-scale)); margin-top: 2px; }
+        .signature-area { margin-top: 20px; text-align: center; }
+        .signature-line { display: inline-block; border-bottom: 2px solid #744210; width: 200px; margin-bottom: 8px; }
+        .doctor-name { font-family: 'Georgia', serif; font-weight: bold; color: #276749; font-size: calc(14px * var(--font-scale)); margin-top: 8px; }
+        .clinic-name { color: #c05621; font-weight: 600; font-size: calc(11px * var(--font-scale)); margin-top: 3px; }
 
     </style>
 </head>
@@ -204,6 +269,14 @@
                     </div>
                 </div>
 
+                <!-- Labels Toggle -->
+                <div class="flex items-center bg-gray-50 rounded-lg p-1 border border-gray-200 shadow-inner">
+                    <label class="flex items-center cursor-pointer px-2 py-1 gap-2">
+                        <input type="checkbox" id="showLabelsToggle" checked onchange="toggleLabels()" class="w-4 h-4 rounded">
+                        <span class="text-[10px] font-bold text-gray-700">Section Labels</span>
+                    </label>
+                </div>
+
                 <!-- Actions -->
                 <div class="flex items-center gap-2 pl-2 border-l border-gray-300">
                     <button onclick="goBack()" class="h-9 px-4 bg-white border border-gray-300 hover:bg-gray-50 hover:text-blue-600 text-gray-700 rounded-lg text-sm font-semibold transition flex items-center gap-2 shadow-sm">
@@ -255,21 +328,24 @@
 
         <div class="invocation">|| श्री ||</div>
 
-        <!-- Patient Banner Table -->
+        <!-- Patient Banner Table - Dynamic Layout -->
         <table class="patient-table">
+            <!-- Row 1: Name and ID/Date -->
             <tr>
                 @if (in_array('patient_name', $selectedFields))
-                    <th>{{ __('messages.Patient Name') }}</th>
+                    <th>{{ __('messages.Name') }}</th>
                     <td><strong>{{ strip_tags($data['patient_name'] ?? '') }}</strong></td>
                 @endif
                 @if (in_array('patient_id', $selectedFields))
-                    <th>{{ __('messages.Patient ID') }}</th>
+                    <th>{{ __('ID') }}</th>
                     <td>{{ strip_tags($data['patient_id'] ?? '') }}</td>
-                @else
+                @elseif (in_array('patient_name', $selectedFields))
                     <th>{{ __('messages.Date') }}</th>
                     <td>{{ \Carbon\Carbon::parse($followup->created_at)->format('d M Y, h:i A') }}</td>
                 @endif
             </tr>
+
+            <!-- Row 2: Age/Gender and Mobile -->
             <tr>
                 @if (in_array('patient_age', $selectedFields) || in_array('patient_gender', $selectedFields))
                     <th>{{ __('messages.Age/Gender') }}</th>
@@ -285,6 +361,22 @@
                     <td>{{ strip_tags($data['patient_mobile'] ?? '') }}</td>
                 @endif
             </tr>
+
+            <!-- Row 3: Weight/Height -->
+            @if (in_array('patient_weight', $selectedFields) || in_array('patient_height', $selectedFields))
+            <tr>
+                @if (in_array('patient_weight', $selectedFields) && !empty($data['patient_weight']))
+                    <th>{{ __('messages.patient_weight') }}</th>
+                    <td>{{ strip_tags($data['patient_weight']) }}</td>
+                @endif
+                @if (in_array('patient_height', $selectedFields) && !empty($data['patient_height']))
+                    <th>{{ __('messages.patient_height') }}</th>
+                    <td>{{ strip_tags($data['patient_height']) }}</td>
+                @endif
+            </tr>
+            @endif
+
+            <!-- Row 4: Address -->
             @if (in_array('patient_address', $selectedFields) && !empty($data['patient_address']))
             <tr>
                 <th>{{ __('messages.address') }}</th>
@@ -293,55 +385,69 @@
             @endif
         </table>
 
-        <!-- Layout Matrix -->
-        <div class="main-body">
-            <!-- LEFT COLUMN: Patient Info & Vitals -->
-            <div class="left-col">
-                @if (in_array('lakshane', $selectedFields) && !empty($data['lakshane']))
-                    <div class="section-title">{{ __('messages.lakshane') }}</div>
+        <!-- Medical Information Section -->
+        @if (in_array('lakshane', $selectedFields) || in_array('nadi', $selectedFields) || in_array('nidan', $selectedFields) || in_array('vishesh', $selectedFields) || in_array('chikitsa', $selectedFields))
+        <div class="left-col" style="margin-top: 20px;">
+            <!-- Clinical Findings -->
+            @if (in_array('lakshane', $selectedFields) && !empty($data['lakshane']))
+                <div class="field-item">
+                    <span class="section-title">{{ __('messages.lakshane') }}:</span>
                     <div class="content-text">{{ trim(strip_tags($data['lakshane'])) }}</div>
-                @endif
-                @if (in_array('nadi', $selectedFields) && !empty($data['nadi']))
-                    <div class="section-title">{{ __('messages.nadi') }}</div>
-                    <div class="content-text">{{ trim(strip_tags($data['nadi'])) }}</div>
-                @endif
-                @if (in_array('nidan', $selectedFields) && !empty($data['nidan']))
-                    <div class="section-title">{{ __('messages.diagnosis') }}</div>
-                    <div class="content-text"><strong>{{ trim(strip_tags($data['nidan'])) }}</strong></div>
-                @endif
-                @if (in_array('vishesh', $selectedFields) && !empty($data['vishesh']))
-                    <div class="section-title">{{ __('messages.Vishesh') }}</div>
-                    <div class="content-text" style="color: #c05621; font-weight: 500;">{{ trim(strip_tags($data['vishesh'])) }}</div>
-                @endif
-            </div>
-
-            <!-- RIGHT COLUMN: Rx Medicine -->
-            <div class="right-col">
-                <div class="rx-wrapper">
-                    <span class="rx-icon">℞</span>
                 </div>
+            @endif
 
-                @if (in_array('chikitsa', $selectedFields) && !empty($data['chikitsa']))
-                    <div class="treatment-box">
+            @if (in_array('nadi', $selectedFields) && !empty($data['nadi']))
+                <div class="field-item">
+                    <span class="section-title">{{ __('messages.nadi') }}:</span>
+                    <div class="content-text">{{ trim(strip_tags($data['nadi'])) }}</div>
+                </div>
+            @endif
+
+            @if (in_array('nidan', $selectedFields) && !empty($data['nidan']))
+                <div class="field-item">
+                    <span class="section-title">{{ __('messages.diagnosis') }}:</span>
+                    <div class="content-text"><strong>{{ trim(strip_tags($data['nidan'])) }}</strong></div>
+                </div>
+            @endif
+
+            @if (in_array('vishesh', $selectedFields) && !empty($data['vishesh']))
+                <div class="field-item">
+                    <span class="section-title">{{ __('messages.Vishesh') }}:</span>
+                    <div class="content-text" style="color: #c05621; font-weight: 500;">{{ trim(strip_tags($data['vishesh'])) }}</div>
+                </div>
+            @endif
+        </div>
+        @endif
+
+        <!-- Treatment Section -->
+        @if (in_array('chikitsa', $selectedFields) || in_array('days', $selectedFields) || in_array('packets', $selectedFields))
+        <div class="right-col" style="margin-top: 20px;">
+            <div class="section-title" style="display: block; width: 100%; text-align: center; border: none; padding-bottom: 10px; margin-bottom: 15px;">{{ __('messages.Treatment') }}</div>
+
+            <div class="treatment-box">
+                <div class="treatment-content">
+                    @if (in_array('chikitsa', $selectedFields) && !empty($data['chikitsa']))
                         <div class="content-text" style="font-size: calc(14px * var(--font-scale)); line-height: 1.8;">
-                            {!! $data['chikitsa'] !!}
+                            {!! trim(preg_replace('/\s+/', ' ', strip_tags($data['chikitsa']))) !!}
                         </div>
-                    </div>
-                @else
-                    <div class="content-text" style="color: #a0aec0; font-style: italic; margin-top: 10px;">
-                        No medication prescribed for this visit.
-                    </div>
-                @endif
+                    @elseif(in_array('chikitsa', $selectedFields))
+                        <div class="content-text" style="color: #a0aec0; font-style: italic; text-align: center;">
+                            <em>No medication prescribed for this visit.</em>
+                        </div>
+                    @else
+                        <div style="min-height: 40px;"></div>
+                    @endif
+                </div>
 
                 @if (in_array('days', $selectedFields) || in_array('packets', $selectedFields))
                     <div class="duration-box">
                         @if (in_array('days', $selectedFields) && !empty($data['days']))
-                            <div class="duration-item" style="font-size: calc(15px * var(--font-scale)); font-weight: 700; color: #744210;">
+                            <div class="duration-item" style="font-size: calc(12px * var(--font-scale)); font-weight: 700; color: #744210;">
                                 <strong>दिवस:</strong> {{ strip_tags($data['days']) }}
                             </div>
                         @endif
                         @if (in_array('packets', $selectedFields) && !empty($data['packets']))
-                            <div class="duration-item" style="border-left: 1px dashed #d4b895; padding-left: 20px; font-size: calc(15px * var(--font-scale)); font-weight: 700; color: #744210;">
+                            <div class="duration-item" style="font-size: calc(12px * var(--font-scale)); font-weight: 700; color: #744210;">
                                 <strong>पुड्या:</strong> {{ strip_tags($data['packets']) }}
                             </div>
                         @endif
@@ -349,11 +455,14 @@
                 @endif
             </div>
         </div>
+        @endif
 
         <!-- Footer block -->
-        <div class="bottom-details">
+        <div class="bottom-details" style="margin-top: 40px;">
             <div class="bottom-cell-left">
-                @if (in_array('amount_billed', $selectedFields) || in_array('amount_paid', $selectedFields))
+                @if ((in_array('amount_billed', $selectedFields) && !empty($data['amount_billed'])) ||
+                     (in_array('amount_paid', $selectedFields) && !empty($data['amount_paid'])) ||
+                     (in_array('amount_due', $selectedFields) && !empty($data['amount_due'])))
                     <div class="payment-box">
                         @if (in_array('amount_billed', $selectedFields) && !empty($data['amount_billed']))
                             <div class="payment-line">
@@ -378,7 +487,11 @@
                 <div style="margin-bottom: 40px;"></div>
                 <div class="signature-line"></div><br>
                 <div class="doctor-name">
-                    Dr. {{ !empty($data['doctor_name']) ? strip_tags($data['doctor_name']) : 'Authorized Signatory' }}
+                    @if (in_array('doctor_name', $selectedFields) && !empty($data['doctor_name']))
+                        Dr. {{ strip_tags($data['doctor_name']) }}
+                    @else
+                        Dr. Authorized Signatory
+                    @endif
                 </div>
                 @if (in_array('branch_name', $selectedFields) && !empty($data['branch_name']))
                     <div class="clinic-name">{{ strip_tags($data['branch_name']) }}</div>
@@ -386,12 +499,54 @@
             </div>
         </div>
 
-
             </div>
         </div>
     </div>
 
     <script>
+        const STORAGE_KEY = 'prescription-settings';
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const settings = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+            // Restore font scale
+            if (settings.fontScale) {
+                currentFontScale = settings.fontScale;
+                updateFontScale();
+            }
+
+            // Restore margins
+            if (settings.margins) {
+                document.getElementById('marginTop').value = settings.margins.top || 10;
+                document.getElementById('marginRight').value = settings.margins.right || 10;
+                document.getElementById('marginBottom').value = settings.margins.bottom || 10;
+                document.getElementById('marginLeft').value = settings.margins.left || 10;
+                updateMargins();
+            }
+
+            // Restore label visibility
+            if (settings.showLabels !== undefined) {
+                document.getElementById('showLabelsToggle').checked = settings.showLabels;
+                toggleLabels();
+            }
+        }
+
+        // Save settings to localStorage
+        function saveSettings() {
+            const settings = {
+                fontScale: currentFontScale,
+                margins: {
+                    top: document.getElementById('marginTop').value,
+                    right: document.getElementById('marginRight').value,
+                    bottom: document.getElementById('marginBottom').value,
+                    left: document.getElementById('marginLeft').value
+                },
+                showLabels: document.getElementById('showLabelsToggle').checked
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+        }
+
         function goBack() {
             window.history.back();
         }
@@ -403,14 +558,27 @@
             if (currentFontScale < 0.5) currentFontScale = 0.5;
             if (currentFontScale > 2.0) currentFontScale = 2.0;
             updateFontScale();
+            saveSettings();
         }
 
         function resetFontSize() {
             currentFontScale = 1;
             updateFontScale();
+            saveSettings();
         }
 
-                function updateMargins() {
+        function toggleLabels() {
+            const isVisible = document.getElementById('showLabelsToggle').checked;
+            const wrapper = document.getElementById('prescriptionVisual');
+            if (isVisible) {
+                wrapper.classList.remove('hide-labels');
+            } else {
+                wrapper.classList.add('hide-labels');
+            }
+            saveSettings();
+        }
+
+        function updateMargins() {
             const mt = document.getElementById('marginTop').value || 0;
             const mr = document.getElementById('marginRight').value || 0;
             const mb = document.getElementById('marginBottom').value || 0;
@@ -425,6 +593,8 @@
             document.getElementById('input_margin_right').value = mr;
             document.getElementById('input_margin_bottom').value = mb;
             document.getElementById('input_margin_left').value = ml;
+
+            saveSettings();
         }
 
         function updateFontScale() {
@@ -432,6 +602,9 @@
             document.getElementById('fontSizeDisplay').textContent = Math.round(currentFontScale * 100) + '%';
             document.getElementById('fontScaleInput').value = currentFontScale.toFixed(2);
         }
+
+        // Load settings when page loads
+        document.addEventListener('DOMContentLoaded', loadSettings);
     </script>
 </body>
 </html>

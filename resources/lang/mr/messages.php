@@ -10,7 +10,7 @@ return [
     'name' => 'नाव',
     'address' => 'पत्ता',
     'occupation' => 'व्यवसाय',
-    'mobile_phone' => 'मोबाईल नंबर',
+    'mobile_phone' => 'मो. नंबर',
     'remark' => 'शेरा',
     'add_follow_up' => 'फॉलो अप जोडा',
     'patients' => 'रुग्ण',
@@ -170,4 +170,5 @@ return [
     'edit_prescription' => 'प्रेक्षणपत्र संपादित करा',
     'download_pdf' => 'पीडीएफ डाउनलोड करा',
     'print' => 'मुद्रण करा',
+    'Treatment' => 'उपचार',
 ];

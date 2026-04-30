@@ -10,7 +10,7 @@ return [
     'name' => 'Name',
     'address' => 'Address',
     'occupation' => 'Occupation',
-    'mobile_phone' => 'Mobile Phone',
+    'mobile_phone' => 'M. Number',
     'remark' => 'Remark',
     'add_follow_up' => 'Add Follow Up',
     'patients' => 'Patients',
@@ -171,4 +171,6 @@ return [
     'edit_prescription' => 'Edit Prescription',
     'download_pdf' => 'Download PDF',
     'print' => 'Print',
+    'Date' => 'Date',
+    'Treatment' => 'Treatment',
 ];
