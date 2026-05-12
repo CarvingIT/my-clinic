@@ -37,55 +37,63 @@
         body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: calc(16px * var(--font-scale));
-            color: #2c221e; /* Deep Earthy Grey/Brown */
+            color: #2c221e;
             line-height: 1.6;
             background: #ffffff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
-        .prescription-container { width: 100%; margin: 0 auto; padding-top: 5px; }
+        .prescription-container { width: 100%; margin: 0 auto; padding-top: 8px; letter-spacing: 0.2px; }
 
         /* Ayurvedic Motif / Invocation */
         .invocation {
             text-align: center;
             font-family: 'Noto Sans Devanagari', 'Georgia', serif;
-            font-size: calc(16px * var(--font-scale));
+            font-size: calc(18px * var(--font-scale));
             font-weight: 600;
-            color: #c05621; /* Saffron Accent */
-            margin-bottom: 12px;
-            letter-spacing: 2px;
+            color: #000;
+            margin-bottom: 14px;
+            letter-spacing: 3px;
+            text-shadow: none;
         }
 
-        /* Patient Banner - Warm Earthy Tones */
+        /* Patient Banner - Professional B&W Print Ready */
         .patient-table {
-            width: 100%; border-collapse: collapse; margin-bottom: 25px;
-            border-radius: 6px; overflow: hidden;
-            font-size: calc(14px * var(--font-scale));
-            border: 1px solid #e6d8c3; /* Sandalwood Border */
+            width: 100%; border-collapse: collapse; margin-bottom: 20px;
+            border-radius: 0; overflow: hidden;
+            font-size: calc(13px * var(--font-scale));
+            border: none;
+            background: transparent;
+            padding: 0;
+            border-bottom: 2px solid #000;
         }
         .patient-table th, .patient-table td {
-            padding: 7px 12px; border: 1px solid #e6d8c3;
+            padding: 6px 0; border: none; border-bottom: 1px solid #e0e0e0;
             text-align: left; vertical-align: top;
         }
         .patient-table th {
-            background-color: #fffaf0; /* Cream Background */
-            color: #744210; /* Deep Warm Brown */
-            font-weight: 700; width: 15%;
-            text-transform: uppercase; letter-spacing: 0.5px;
-            font-size: calc(15px * var(--font-scale));
+            background-color: transparent;
+            color: #000;
+            font-weight: 700; width: auto;
+            text-transform: uppercase; letter-spacing: 1px;
+            font-size: calc(11px * var(--font-scale));
+            padding-right: 15px;
+            font-style: italic;
         }
-        .patient-table td { color: #2c221e; width: 35%; font-weight: 500; }
+        .patient-table td { color: #000; width: auto; font-weight: 500; }
 
-        /* Single Column Professional Layout */
+        /* Single Column Professional Layout - B&W Print Ready */
         .main-body { width: 100%; display: block; margin: 30px 0; }
-        .left-col { width: 100%; margin-bottom: 20px; padding: 20px; background: #fffaf0; border: 1px solid #e6d8c3; border-radius: 6px; }
+        .left-col { width: 100%; margin-bottom: 18px; padding: 10px 0; background: transparent; border: none; border-bottom: 1px solid #e0e0e0; border-radius: 0; text-align: left; }
         .left-col:empty { display: none; margin-bottom: 0; padding: 0; background: none; border: none; }
-        .right-col { width: 100%; margin-bottom: 20px; }
+        .right-col { width: 100%; margin-bottom: 18px; text-align: left; padding: 0; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px; }
 
-        /* Section Titles - Classical Serif & Ayurvedic Green */
+        /* Section Titles - Bold Typography for B&W */
         .section-title {
             font-family: 'Georgia', serif;
-            font-size: calc(13px * var(--font-scale));
+            font-size: calc(12px * var(--font-scale));
             font-weight: 700;
-            color: #744210;
+            color: #000;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             margin-bottom: 0;
@@ -96,8 +104,9 @@
             display: inline;
             padding-bottom: 0;
             border-bottom: none;
-            white-space: nowrap;
-            margin-right: 12px;
+            white-space: normal;
+            margin-right: 8px;
+            font-style: italic;
         }
         .section-title:first-child { margin-top: 0; }
 
@@ -106,7 +115,9 @@
             display: flex;
             align-items: flex-start;
             gap: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            padding-bottom: 0;
+            border-bottom: none;
         }
 
         /* Hide section titles when labels disabled */
@@ -116,12 +127,13 @@
 
         .content-text {
             font-size: calc(13px * var(--font-scale));
-            color: #2c221e;
+            color: #000;
             margin-bottom: 0;
-            white-space: pre-wrap;
+            white-space: normal;
             word-break: break-word;
-            line-height: 1.6;
+            line-height: 1.65;
             flex: 1;
+            letter-spacing: 0.2px;
         }
 
         .field-item .content-text {
@@ -146,71 +158,73 @@
         }
 
         .treatment-box {
-            margin-top: 8px;
-            padding: 2px 5px;
-            background: #ffffff;
-            border: 1px solid #e6d8c3;
-            border-radius: 4px;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 8px;
-            align-items: flex-start;
+            margin-top: 6px;
+            padding: 0;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            display: block;
+            text-align: left;
+            box-shadow: none;
         }
 
         .treatment-content {
-            padding-right: 8px;
-            border-right: 1px solid #e6d8c3;
+            padding: 0;
+            border: none;
             min-width: 0;
             word-wrap: break-word;
             overflow-wrap: break-word;
+            margin-bottom: 6px;
+            text-align: left;
         }
 
         /* Duration box with partition */
         .duration-box {
             margin: 0;
-            padding: 32px 15px 0 12px;
+            padding: 6px 0 0 0;
             background: transparent;
-            border: none;
+            border-top: none;
             font-size: calc(12px * var(--font-scale));
             text-align: left;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+            display: block;
+            padding-top: 6px;
+            margin-top: 6px;
         }
-        .duration-box strong { color: #744210; font-weight: 700; }
-        .duration-item { display: block; margin: 2px 0; font-weight: 600; }
+        .duration-box strong { color: #000; font-weight: 700; }
+        .duration-item { display: block; margin: 4px 0; font-weight: 700; text-align: left; font-size: calc(12px * var(--font-scale)); }
 
-        .bottom-details { width: 100%; margin-top: 50px; display: flex; gap: 40px; justify-content: space-between; align-items: flex-end; }
+        .bottom-details { width: 100%; margin-top: 50px; display: flex; gap: 30px; justify-content: space-between; align-items: flex-end; padding-top: 12px; border-top: 1px solid #000; }
         .bottom-cell-left { flex: 1; text-align: left; }
         .bottom-cell-right { flex: 1; text-align: right; }
 
         /* Payment Area */
         .payment-box {
-            border: 2px solid #e6d8c3;
-            padding: 12px 15px;
-            background: linear-gradient(135deg, #fffaf0 0%, #fdf6ed 100%);
-            border-radius: 5px;
+            border: 1px solid #000;
+            padding: 12px 14px;
+            background: transparent;
+            border-radius: 0;
             display: inline-block;
             font-size: calc(12px * var(--font-scale));
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.03);
+            box-shadow: none;
         }
         .payment-line {
-            margin-bottom: 5px;
+            margin-bottom: 6px;
             display: flex;
             justify-content: space-between;
             gap: 20px;
         }
         .payment-line:last-child { margin-bottom: 0; }
         .payment-line strong {
-            color: #744210;
+            color: #000;
             font-weight: 700;
             min-width: 110px;
+            letter-spacing: 0.3px;
         }
 
-        .signature-area { margin-top: 20px; text-align: center; }
-        .signature-line { display: inline-block; border-bottom: 2px solid #744210; width: 200px; margin-bottom: 8px; }
-        .doctor-name { font-family: 'Georgia', serif; font-weight: bold; color: #276749; font-size: calc(14px * var(--font-scale)); margin-top: 8px; }
-        .clinic-name { color: #c05621; font-weight: 600; font-size: calc(11px * var(--font-scale)); margin-top: 3px; }
+        .signature-area { margin-top: 25px; text-align: center; }
+        .signature-line { display: inline-block; border-bottom: 1px solid #000; width: 220px; margin-bottom: 8px; }
+        .doctor-name { font-family: 'Georgia', serif; font-weight: bold; color: #000; font-size: calc(12px * var(--font-scale)); margin-top: 6px; letter-spacing: 0.5px; }
+        .clinic-name { color: #000; font-weight: 600; font-size: calc(11px * var(--font-scale)); margin-top: 2px; letter-spacing: 0.3px; font-style: italic; }
 
     </style>
 </head>
@@ -413,7 +427,7 @@
             @if (in_array('vishesh', $selectedFields) && !empty($data['vishesh']))
                 <div class="field-item">
                     <span class="section-title">{{ __('messages.Vishesh') }}:</span>
-                    <div class="content-text" style="color: #c05621; font-weight: 500;">{{ trim(strip_tags($data['vishesh'])) }}</div>
+                    <div class="content-text" style="font-weight: 600;">{{ trim(strip_tags($data['vishesh'])) }}</div>
                 </div>
             @endif
         </div>
@@ -422,20 +436,18 @@
         <!-- Treatment Section -->
         @if (in_array('chikitsa', $selectedFields) || in_array('days', $selectedFields) || in_array('packets', $selectedFields))
         <div class="right-col" style="margin-top: 20px;">
-            <div class="section-title" style="display: block; width: 100%; text-align: center; border: none; padding-bottom: 10px; margin-bottom: 15px;">{{ __('messages.Treatment') }}</div>
+            <div class="section-title" style="display: inline; margin-bottom: 8px;">{{ __('messages.Treatment') }}:</div>
 
             <div class="treatment-box">
                 <div class="treatment-content">
                     @if (in_array('chikitsa', $selectedFields) && !empty($data['chikitsa']))
-                        <div class="content-text" style="font-size: calc(14px * var(--font-scale)); line-height: 1.8;">
+                        <div class="content-text" style="display: inline;">
                             {!! trim(preg_replace('/\s+/', ' ', strip_tags($data['chikitsa']))) !!}
                         </div>
                     @elseif(in_array('chikitsa', $selectedFields))
-                        <div class="content-text" style="color: #a0aec0; font-style: italic; text-align: center;">
+                        <div class="content-text" style="font-style: italic; display: inline;">
                             <em>No medication prescribed for this visit.</em>
                         </div>
-                    @else
-                        <div style="min-height: 40px;"></div>
                     @endif
                 </div>
 
@@ -475,7 +487,7 @@
                             </div>
                         @endif
                         @if (in_array('amount_due', $selectedFields) && !empty($data['amount_due']))
-                            <div class="payment-line" style="color: #c05621; font-weight: bold; margin-top: 5px;">
+                            <div class="payment-line" style="font-weight: bold; margin-top: 4px;">
                                 <strong>{{ __('messages.Balance Due') }}:</strong> ₹{{ strip_tags($data['amount_due']) }}
                             </div>
                         @endif
