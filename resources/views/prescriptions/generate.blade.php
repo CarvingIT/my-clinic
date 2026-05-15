@@ -406,28 +406,28 @@
             @if (in_array('lakshane', $selectedFields) && !empty($data['lakshane']))
                 <div class="field-item">
                     <span class="section-title">{{ __('messages.lakshane') }}:</span>
-                    <div class="content-text">{{ trim(strip_tags($data['lakshane'])) }}</div>
+                    <div class="content-text">{!! nl2br(trim(strip_tags($data['lakshane']))) !!}</div>
                 </div>
             @endif
 
             @if (in_array('nadi', $selectedFields) && !empty($data['nadi']))
                 <div class="field-item">
                     <span class="section-title">{{ __('messages.nadi') }}:</span>
-                    <div class="content-text">{{ trim(strip_tags($data['nadi'])) }}</div>
+                    <div class="content-text">{!! nl2br(trim(strip_tags($data['nadi']))) !!}</div>
                 </div>
             @endif
 
             @if (in_array('nidan', $selectedFields) && !empty($data['nidan']))
                 <div class="field-item">
                     <span class="section-title">{{ __('messages.diagnosis') }}:</span>
-                    <div class="content-text"><strong>{{ trim(strip_tags($data['nidan'])) }}</strong></div>
+                    <div class="content-text"><strong>{!! nl2br(trim(strip_tags($data['nidan']))) !!}</strong></div>
                 </div>
             @endif
 
             @if (in_array('vishesh', $selectedFields) && !empty($data['vishesh']))
                 <div class="field-item">
                     <span class="section-title">{{ __('messages.Vishesh') }}:</span>
-                    <div class="content-text" style="font-weight: 600;">{{ trim(strip_tags($data['vishesh'])) }}</div>
+                    <div class="content-text" style="font-weight: 600;">{!! nl2br(trim(strip_tags($data['vishesh']))) !!}</div>
                 </div>
             @endif
         </div>
@@ -442,7 +442,7 @@
                 <div class="treatment-content">
                     @if (in_array('chikitsa', $selectedFields) && !empty($data['chikitsa']))
                         <div class="content-text" style="display: inline;">
-                            {!! trim(preg_replace('/\s+/', ' ', strip_tags($data['chikitsa']))) !!}
+                            {!! nl2br(trim(strip_tags($data['chikitsa']))) !!}
                         </div>
                     @elseif(in_array('chikitsa', $selectedFields))
                         <div class="content-text" style="font-style: italic; display: inline;">
