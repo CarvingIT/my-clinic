@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Str;
 use App\Models\FollowUp;
+use App\Models\Payment;
 use App\Models\User;
 use App\Models\Upload;
 // use Knp\Snappy\Pdf;
@@ -160,9 +161,14 @@ class PatientController extends Controller
         // Get total amount billed and total amount paid across all follow-ups
         $totalBilled = $patient->followUps()->sum('amount_billed');
         $totalPaid = $patient->followUps()->sum('amount_paid');
+        $standalonePaid = Payment::where('patient_id', $patient->id)
+            ->whereNull('follow_up_id')
+            ->where('source', 'manual')
+            ->where('status', 'posted')
+            ->sum('amount');
 
         // Calculate total outstanding balance (Total Due)
-        $totalDueAll = $totalBilled - $totalPaid;
+        $totalDueAll = ($totalBilled - $totalPaid) - $standalonePaid;
 
         // Load paginated follow-ups and reports
         $patient->followUps = $patient->followUps()->orderBy('created_at', 'desc')->paginate(5);

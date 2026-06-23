@@ -55,4 +55,9 @@ class FollowUp extends Model
     {
         return $this->hasMany(Upload::class, 'follow_up_id');
     }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'follow_up_id');
+    }
 }

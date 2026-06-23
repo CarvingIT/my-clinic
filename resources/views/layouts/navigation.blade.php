@@ -25,6 +25,12 @@
                         </x-nav-link>
                     @endif
 
+                    @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('staff') || Auth::user()->hasRole('doctor'))
+                        <x-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.*')">
+                            Payments
+                        </x-nav-link>
+                    @endif
+
 
                     <!-- Analysis Dropdown -->
                     @if (Auth::user()->hasRole('admin'))

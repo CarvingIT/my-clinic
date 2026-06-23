@@ -17,6 +17,7 @@ use App\Http\Middleware\StaffMiddleware;
 use App\Http\Middleware\DoctorMiddleware;
 use App\Models\FollowUp;
 use App\Http\Controllers\PresetController;
+use App\Http\Controllers\PaymentController;
 
 
 use Illuminate\Support\Facades\App;
@@ -194,6 +195,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/followup-images/{filename}', [FollowupImageController::class, 'show'])->name('followup.image'); // Show follow-up images
     Route::get('/patients/{patient}/followup-images', [FollowUpImageController::class, 'showFollowUpImages'])->name('followup.images'); // Show follow-up images for a patient
     Route::get('/analytics/data-analysis', [DataAnalysisController::class, 'index'])->name('data-analysis.index');   // Data analysis for analytics
+
+    // Standalone payments management
+    Route::resource('payments', PaymentController::class)->except(['show']);
 });
 
 // Patient Deletion (Admin only)
