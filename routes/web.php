@@ -198,6 +198,8 @@ Route::middleware('auth')->group(function () {
 
     // Standalone payments management
     Route::resource('payments', PaymentController::class)->except(['show']);
+    Route::get('/payments/patients/search', [PaymentController::class, 'searchPatients'])->name('payments.patients.search');
+    Route::get('/payments/followups', [PaymentController::class, 'followUpsByPatient'])->name('payments.followups');
 });
 
 // Patient Deletion (Admin only)

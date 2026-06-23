@@ -54,7 +54,6 @@ class PaymentController extends Controller
 
     public function create(Request $request)
     {
-        $patients = Patient::orderBy('name')->get(['id', 'name', 'patient_id', 'mobile_phone']);
         $selectedPatientId = $request->input('patient_id');
         $followUps = collect();
 
@@ -64,7 +63,39 @@ class PaymentController extends Controller
                 ->get(['id', 'created_at']);
         }
 
-        return view('payments.create', compact('patients', 'followUps', 'selectedPatientId'));
+        return view('payments.create', compact('followUps', 'selectedPatientId'));
+    }
+
+    public function searchPatients(Request $request)
+    {
+        $term = trim((string) $request->input('q', ''));
+
+        if ($term === '') {
+            return response()->json([]);
+        }
+
+        $patients = Patient::query()
+            ->where('name', 'like', "%{$term}%")
+            ->orWhere('mobile_phone', 'like', "%{$term}%")
+            ->orWhere('patient_id', 'like', "%{$term}%")
+            ->orderBy('name')
+            ->limit(20)
+            ->get(['id', 'name', 'patient_id', 'mobile_phone']);
+
+        return response()->json($patients);
+    }
+
+    public function followUpsByPatient(Request $request)
+    {
+        $data = $request->validate([
+            'patient_id' => ['required', 'exists:patients,id'],
+        ]);
+
+        $followUps = FollowUp::where('patient_id', $data['patient_id'])
+            ->latest('created_at')
+            ->get(['id', 'created_at']);
+
+        return response()->json($followUps);
     }
 
     public function store(Request $request)

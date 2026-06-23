@@ -12,27 +12,20 @@
                     @csrf
 
                     <div class="md:col-span-2">
-                        <label class="block text-sm font-medium mb-1">Patient</label>
-                        <select name="patient_id" class="w-full border-gray-300 rounded-md shadow-sm" required>
-                            <option value="">Select patient</option>
-                            @foreach ($patients as $patient)
-                                <option value="{{ $patient->id }}" @selected(old('patient_id', $selectedPatientId) == $patient->id)>
-                                    {{ $patient->name }} ({{ $patient->patient_id }}) {{ $patient->mobile_phone ? '- ' . $patient->mobile_phone : '' }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <label class="block text-sm font-medium mb-1">Patient search</label>
+                        <input type="hidden" name="patient_id" id="patient_id" value="{{ old('patient_id', $selectedPatientId) }}">
+                        <div class="relative">
+                            <input type="text" id="patient_search" autocomplete="off" placeholder="Type name, mobile, or patient ID"
+                                class="w-full border-gray-300 rounded-md shadow-sm" value="">
+                            <div id="patient_results" class="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg hidden max-h-64 overflow-y-auto"></div>
+                        </div>
                         @error('patient_id') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium mb-1">Follow-up (optional)</label>
-                        <select name="follow_up_id" class="w-full border-gray-300 rounded-md shadow-sm">
+                        <select name="follow_up_id" id="follow_up_id" class="w-full border-gray-300 rounded-md shadow-sm" disabled>
                             <option value="">Payment without follow-up</option>
-                            @foreach ($followUps as $followUp)
-                                <option value="{{ $followUp->id }}" @selected(old('follow_up_id') == $followUp->id)>
-                                    #{{ $followUp->id }} - {{ $followUp->created_at->format('d M Y H:i') }}
-                                </option>
-                            @endforeach
                         </select>
                         @error('follow_up_id') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
                     </div>
@@ -81,4 +74,83 @@
             </div>
         </div>
     </div>
+
+    <script>
+        const searchInput = document.getElementById('patient_search');
+        const patientIdInput = document.getElementById('patient_id');
+        const resultsBox = document.getElementById('patient_results');
+        const followUpSelect = document.getElementById('follow_up_id');
+        let searchTimer = null;
+
+        function renderPatients(items) {
+            resultsBox.innerHTML = '';
+            if (!items.length) {
+                resultsBox.classList.add('hidden');
+                return;
+            }
+
+            items.forEach((patient) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'w-full text-left px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 border-b last:border-b-0';
+                button.textContent = `${patient.name} (${patient.patient_id})${patient.mobile_phone ? ' - ' + patient.mobile_phone : ''}`;
+                button.addEventListener('click', () => {
+                    searchInput.value = button.textContent;
+                    patientIdInput.value = patient.id;
+                    resultsBox.classList.add('hidden');
+                    loadFollowUps(patient.id);
+                });
+                resultsBox.appendChild(button);
+            });
+
+            resultsBox.classList.remove('hidden');
+        }
+
+        async function loadFollowUps(patientId) {
+            followUpSelect.innerHTML = '<option value="">Loading...</option>';
+            followUpSelect.disabled = true;
+
+            const response = await fetch(`{{ route('payments.followups') }}?patient_id=${encodeURIComponent(patientId)}`, {
+                headers: { 'Accept': 'application/json' }
+            });
+
+            const items = await response.json();
+            followUpSelect.innerHTML = '<option value="">Payment without follow-up</option>';
+            items.forEach((followUp) => {
+                const option = document.createElement('option');
+                option.value = followUp.id;
+                option.textContent = `#${followUp.id} - ${new Date(followUp.created_at).toLocaleString()}`;
+                followUpSelect.appendChild(option);
+            });
+            followUpSelect.disabled = false;
+        }
+
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimer);
+            const term = searchInput.value.trim();
+            patientIdInput.value = '';
+            followUpSelect.innerHTML = '<option value="">Payment without follow-up</option>';
+            followUpSelect.disabled = true;
+
+            if (term.length < 2) {
+                resultsBox.classList.add('hidden');
+                resultsBox.innerHTML = '';
+                return;
+            }
+
+            searchTimer = setTimeout(async () => {
+                const response = await fetch(`{{ route('payments.patients.search') }}?q=${encodeURIComponent(term)}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const items = await response.json();
+                renderPatients(items);
+            }, 200);
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!resultsBox.contains(event.target) && event.target !== searchInput) {
+                resultsBox.classList.add('hidden');
+            }
+        });
+    </script>
 </x-app-layout>
