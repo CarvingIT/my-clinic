@@ -937,7 +937,34 @@
 
                     {{-- Outstanding Balance End --}}
 
-                    @if ($patient->followUps->count() > 0)
+                    @php
+                        $timelineEntries = $patient->followUps()
+                            ->with('uploads')
+                            ->get()
+                            ->map(function ($followUp) {
+                                return (object) [
+                                    'type' => 'followup',
+                                    'date' => $followUp->created_at,
+                                    'followUp' => $followUp,
+                                ];
+                            })
+                            ->merge(
+                                \App\Models\Payment::where('patient_id', $patient->id)
+                                    ->where('status', 'posted')
+                                    ->get()
+                                    ->map(function ($payment) {
+                                        return (object) [
+                                            'type' => 'payment',
+                                            'date' => $payment->paid_at,
+                                            'payment' => $payment,
+                                        ];
+                                    })
+                            )
+                            ->sortByDesc('date')
+                            ->values();
+                    @endphp
+
+                    @if ($timelineEntries->count() > 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-600">
                                 <thead class="bg-gray-50 text-black dark:bg-gray-700 dark:text-gray-200">
@@ -966,7 +993,31 @@
                                 </thead>
 
                                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-600">
-                                    @foreach ($patient->followUps->sortByDesc('created_at') as $followUp)
+                                    @foreach ($timelineEntries as $entry)
+                                        @if ($entry->type === 'payment')
+                                            @php $payment = $entry->payment; @endphp
+                                            <tr class="hover:bg-gray-50 transition duration-300 dark:hover:bg-gray-700">
+                                                <td class="w-[220px] px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
+                                                    <p>{{ optional($payment->paid_at)->format('d M Y, h:i A') }}</p>
+                                                    <p><span class="font-bold text-gray-800 dark:text-gray-200">Payment</span></p>
+                                                    @if ($payment->reference_no)
+                                                        <p class="text-xs">Ref: {{ $payment->reference_no }}</p>
+                                                    @endif
+                                                </td>
+                                                <td class="px-6 py-4 align-top text-gray-600 dark:text-gray-300">Standalone payment</td>
+                                                <td class="px-2 py-4 align-top text-gray-600 dark:text-gray-300">-</td>
+                                                <td class="w-[250px] px-6 py-2 align-top text-gray-600 dark:text-gray-300">
+                                                    <p>{{ strtoupper($payment->payment_method) }}</p>
+                                                    <p class="font-bold text-gray-800 dark:text-gray-200">₹{{ number_format($payment->amount, 2) }}</p>
+                                                </td>
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300 flex gap-4 items-center">
+                                                    <a href="{{ route('payments.edit', $payment) }}" class="text-indigo-600 hover:text-indigo-900 font-medium" title="Edit Payment">
+                                                        <i class="fas fa-pen"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        @else
+                                            @php $followUp = $entry->followUp; @endphp
                                         <tr class="hover:bg-gray-50 transition duration-300 dark:hover:bg-gray-700">
                                             <td class="w-[220px] px-6 py-4 text-gray-600 dark:text-gray-300"
                                                 style="vertical-align: top;">
@@ -1269,15 +1320,15 @@
                                             </td>
 
                                         </tr>
+                                        @endif
                                     @endforeach
 
                                 </tbody>
                             </table>
-                            {{ $patient->followUps->links() }}
                         </div>
                     @else
                         <p class="text-gray-600 bg-gray-100 p-4 rounded-md shadow-sm">
-                            No follow-ups added for the patient.
+                            No follow-ups or payments added for the patient.
                         </p>
                     @endif
                 </div>
