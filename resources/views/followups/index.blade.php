@@ -869,7 +869,7 @@ if (!function_exists('indFormat')) {
                                         </td>
                                         <td
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
-                                            {{ @json_decode($followUp->check_up_info)->payment_method }}
+                                            {{ $followUp->payment_method }}
                                         </td>
                                         <td
                                             class="text-right px-4 py-3 font-semibold

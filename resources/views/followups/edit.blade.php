@@ -290,17 +290,17 @@
                                             <div class="flex items-center space-x-2">
                                                 <label class="flex items-center space-x-1">
                                                     <input type="radio" name="payment_method" value="cash"
-                                                        @if (old('payment_method', isset($checkUpInfo['payment_method']) ? $checkUpInfo['payment_method'] : '') == 'cash') checked @endif />
+                                                        @if (str_contains(strtolower(old('payment_method', $followup->payment_method)), 'cash')) checked @endif />
                                                     <span>Cash</span>
                                                 </label>
                                                 <label class="flex items-center space-x-1">
                                                     <input type="radio" name="payment_method" value="card"
-                                                        @if (old('payment_method', isset($checkUpInfo['payment_method']) ? $checkUpInfo['payment_method'] : '') == 'card') checked @endif />
+                                                        @if (str_contains(strtolower(old('payment_method', $followup->payment_method)), 'card')) checked @endif />
                                                     <span>Card</span>
                                                 </label>
                                                 <label class="flex items-center space-x-1">
                                                     <input type="radio" name="payment_method" value="online"
-                                                        @if (old('payment_method', isset($checkUpInfo['payment_method']) ? $checkUpInfo['payment_method'] : '') == 'online') checked @endif />
+                                                        @if (str_contains(strtolower(old('payment_method', $followup->payment_method)), 'online')) checked @endif />
                                                     <span>Online</span>
                                                 </label>
                                             </div>

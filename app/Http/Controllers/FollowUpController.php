@@ -654,7 +654,7 @@ class FollowUpController extends Controller
             if ($followUp->patient) {
             $renderedCount++;
                 $checkUpInfo = json_decode($followUp->check_up_info, true);
-                $paymentMethod = $checkUpInfo['payment_method'] ?? 'N/A';
+                $paymentMethod = $followUp->payment_method;
 
                 $colorClass = $followUp->amount_paid < $followUp->amount_billed
                     ? 'text-red-600 dark:text-red-400'
