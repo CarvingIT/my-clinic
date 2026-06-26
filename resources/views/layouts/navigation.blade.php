@@ -27,7 +27,7 @@
 
                     @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('staff') || Auth::user()->hasRole('doctor'))
                         <x-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.*') || request()->routeIs('groups.*')">
-                            Payments
+                            {{ __('messages.Payments') }}
                         </x-nav-link>
                     @endif
 
