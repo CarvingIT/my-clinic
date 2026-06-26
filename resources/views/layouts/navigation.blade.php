@@ -26,7 +26,7 @@
                     @endif
 
                     @if (Auth::user()->hasRole('admin') || Auth::user()->hasRole('staff') || Auth::user()->hasRole('doctor'))
-                        <x-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.*')">
+                        <x-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.*') || request()->routeIs('groups.*')">
                             Payments
                         </x-nav-link>
                     @endif

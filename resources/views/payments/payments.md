@@ -100,3 +100,26 @@ Important rules for future changes
 - Do not count `followup_auto` rows as standalone dues payments.
 - Keep `manual` standalone payments separate from follow-up-linked payments in reporting unless intentionally reconciling them.
 - Keep the patient timeline table as the single combined display for both follow-ups and payment-only visits.
+
+## Family Group Payments & Patient Groups
+
+### Database and Modeling
+- New model: `App\Models\PatientGroup`.
+- New migration adding `patient_groups` table and a `patient_group_id` column to the `patients` table.
+- Relationships:
+    - `Patient belongsTo PatientGroup`
+    - `PatientGroup hasMany Patient` (as `members`)
+
+### Group Management
+- Registered `groups` resource routes mapping to `PatientGroupController`.
+- All group management actions (index, store, update, delete) are redirected/integrated directly under the **Patient Groups (Families)** tab of the Payments dashboard at `/payments?tab=groups`.
+- Members are added to/removed from groups dynamically via an AJAX patient search in the group create/edit views.
+
+### Group Payments Workflow
+- When adding a payment, selecting a patient who belongs to a group automatically loads the **Family/Group Payment** section.
+- This section lists all members of the family group, calculates their respective outstanding dues, and provides inputs to allocate the payment amount across any subset of the group.
+- On form submission, `PaymentController@store` processes the transaction by automatically splitting the total amount and inserting individual ledger records in the `payments` table for each selected family member. This ensures backward compatibility with the legacy ledger reporting and the combined patient timelines.
+- Added a **Record Payment** action link next to each group on the family list table. This button routes directly to `/payments/create?patient_id={member_id}`, which pre-populates the primary payer and triggers auto-rendering of the family group payments section on load.
+
+### UI Styling and Icons
+- Consolidated payments action buttons to use unified FontAwesome icons (`<i class="fas fa-edit"></i>`, `<i class="fas fa-trash"></i>`) with appropriate tooltips for actions (`Edit`, `Delete`, `Void`), matching the rest of the application.

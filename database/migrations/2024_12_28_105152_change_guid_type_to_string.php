@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('patients', function (Blueprint $table) {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
 
+        Schema::table('patients', function (Blueprint $table) {
             $table->dropColumn('guid');
         });
 
         Schema::table('patients', function (Blueprint $table) {
             $table->string('guid')->nullable()->unique();
-
         });
     }
 
@@ -27,13 +29,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('patients', function (Blueprint $table) {
+        if (Schema::getConnection()->getDriverName() === 'sqlite') {
+            return;
+        }
 
+        Schema::table('patients', function (Blueprint $table) {
             $table->dropColumn('guid');
         });
 
         Schema::table('patients', function (Blueprint $table) {
-
             $table->uuid('guid')->nullable();
         });
     }

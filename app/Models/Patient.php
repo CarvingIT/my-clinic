@@ -30,6 +30,7 @@ class Patient extends Model
         'weight',
         'occupation',
         'reference',
+        'patient_group_id',
         'created_at',
         'updated_at',
 
@@ -54,6 +55,12 @@ class Patient extends Model
 
         });
     }
+
+    public function group()
+    {
+        return $this->belongsTo(PatientGroup::class, 'patient_group_id');
+    }
+
     public function followUps()
     {
         return $this->hasMany(FollowUp::class);

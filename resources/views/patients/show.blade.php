@@ -71,6 +71,14 @@
                                     <p class="text-sm text-gray-600 dark:text-gray-400 font-medium">
                                         Patient ID: {{ $patient->patient_id }}
                                     </p>
+                                    @if ($patient->group)
+                                        <p class="text-sm mt-1">
+                                            <span class="font-semibold text-gray-600 dark:text-gray-400">Group:</span>
+                                            <a href="{{ route('groups.edit', $patient->group->id) }}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300 hover:bg-indigo-200 dark:hover:bg-indigo-900/60 transition duration-150">
+                                                {{ $patient->group->name }}
+                                            </a>
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
 
@@ -941,6 +949,7 @@
                         $timelineEntries = $patient->followUps()
                             ->with('uploads')
                             ->get()
+                            ->toBase()
                             ->map(function ($followUp) {
                                 return (object) [
                                     'type' => 'followup',
@@ -952,6 +961,7 @@
                                 \App\Models\Payment::where('patient_id', $patient->id)
                                     ->where('status', 'posted')
                                     ->get()
+                                    ->toBase()
                                     ->map(function ($payment) {
                                         return (object) [
                                             'type' => 'payment',

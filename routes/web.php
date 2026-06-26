@@ -18,6 +18,7 @@ use App\Http\Middleware\DoctorMiddleware;
 use App\Models\FollowUp;
 use App\Http\Controllers\PresetController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PatientGroupController;
 
 
 use Illuminate\Support\Facades\App;
@@ -200,6 +201,11 @@ Route::middleware('auth')->group(function () {
     Route::resource('payments', PaymentController::class)->except(['show']);
     Route::get('/payments/patients/search', [PaymentController::class, 'searchPatients'])->name('payments.patients.search');
     Route::get('/payments/followups', [PaymentController::class, 'followUpsByPatient'])->name('payments.followups');
+    Route::get('/payments/group-members', [PaymentController::class, 'groupMembersByPatient'])->name('payments.group-members');
+
+    // Patient groups management
+    Route::resource('groups', PatientGroupController::class);
+    Route::get('/groups/search', [PatientGroupController::class, 'searchGroups'])->name('groups.search');
 });
 
 // Patient Deletion (Admin only)
