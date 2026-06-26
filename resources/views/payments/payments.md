@@ -59,12 +59,12 @@ Controllers
     - AJAX patient search
     - AJAX follow-up loading for selected patient
 
-Follow-up sync
+Follow-up payments
 
-- `FollowUpController` auto-creates/updates a linked payment row when follow-up `amount_paid` is saved.
-- That sync uses `source = followup_auto`.
-- Historical imported follow-up payments use `source = followup_legacy`.
-- Manual standalone payments use `source = manual`.
+- `FollowUpController` creates/updates a linked payment row in the `payments` table within a database transaction when follow-ups are saved or updated.
+- Legacy `syncFollowUpAutoPayment()` helper has been entirely removed.
+- Payments created during follow-up entry now use `source = manual`.
+- Historical imported follow-up payments use `source = followup_legacy` or `followup_auto`.
 
 Backfill command
 
@@ -78,9 +78,9 @@ Backfill command
 
 Balance logic
 
-- Patient outstanding calculations now subtract only standalone posted manual payments.
-- Follow-up-linked payments are not double-counted in dues.
-- Existing follow-up totals still work.
+- Patient outstanding calculations are simplified to: `$outstandingBalance = $totalBilled - $totalPaid`
+- `$totalBilled` is the sum of `amount_billed` from follow-ups.
+- `$totalPaid` is the sum of `amount` from the `payments` table where `status` is `posted`.
 
 Patient page timeline
 
@@ -96,9 +96,8 @@ Operational notes
 
 Important rules for future changes
 
-- Do not remove follow-up amount fields yet; they are still used by existing screens.
-- Do not count `followup_auto` rows as standalone dues payments.
-- Keep `manual` standalone payments separate from follow-up-linked payments in reporting unless intentionally reconciling them.
+- The `amount_paid` database column in `follow_ups` table is kept for database schema stability but is no longer actively written to or queried.
+- All reads of follow-up paid amounts are routed through the `amount_paid` model accessor which dynamically queries the `payments` table.
 - Keep the patient timeline table as the single combined display for both follow-ups and payment-only visits.
 
 ## Family Group Payments & Patient Groups

@@ -45,13 +45,8 @@ class FollowUpController extends Controller
         }
         // Calculate total due using simple subtraction
         $totalBilled = $patient->followUps()->sum('amount_billed');
-        $totalPaid = $patient->followUps()->sum('amount_paid');
-        $standalonePaid = Payment::where('patient_id', $patient->id)
-            ->whereNull('follow_up_id')
-            ->where('source', 'manual')
-            ->where('status', 'posted')
-            ->sum('amount');
-        $totalDueAll = ($totalBilled - $totalPaid) - $standalonePaid;
+        $totalPaid = \App\Models\Payment::where('patient_id', $patient->id)->where('status', 'posted')->sum('amount');
+        $totalDueAll = $totalBilled - $totalPaid;
 
         $parameters = Parameter::orderBy('display_order')->get();
 
@@ -135,18 +130,32 @@ class FollowUpController extends Controller
         $checkUpInfo['branch_id'] = session('branch_id');
         $checkUpInfo['branch_name'] = session('branch_name');
 
-        $followUp = FollowUp::create([
-            'patient_id' => $request->patient_id,
-            'doctor_id' => Auth::id(),
-            'check_up_info' => json_encode($checkUpInfo),
-            'diagnosis' => $request->diagnosis,
-            'treatment' => $request->treatment,
-            'amount_billed' => $request->amount_billed,
-            'amount_paid' => $amount_paid, // Ensuring it does not exceed the total_due
+        $followUp = DB::transaction(function () use ($request, $checkUpInfo) {
+            $fu = FollowUp::create([
+                'patient_id' => $request->patient_id,
+                'doctor_id' => Auth::id(),
+                'check_up_info' => json_encode($checkUpInfo),
+                'diagnosis' => $request->diagnosis,
+                'treatment' => $request->treatment,
+                'amount_billed' => $request->amount_billed,
+            ]);
 
-        ]);
+            if ($request->filled('amount_paid') && $request->amount_paid > 0) {
+                Payment::create([
+                    'patient_id' => $fu->patient_id,
+                    'follow_up_id' => $fu->id,
+                    'amount' => $request->amount_paid,
+                    'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                    'paid_at' => $fu->created_at,
+                    'status' => 'posted',
+                    'source' => 'manual',
+                    'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                    'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                ]);
+            }
 
-    $this->syncFollowUpAutoPayment($followUp, $checkUpInfo);
+            return $fu;
+        });
 
         $followUp->patient->update(['vishesh' => $request->vishesh]);
 
@@ -270,11 +279,72 @@ class FollowUpController extends Controller
         // Clone for summary data before pagination
         $summaryQuery = clone $query;
 
-        // Calculate summary values
-        $totalIncome = $summaryQuery->sum('amount_paid');
-
         // Use pluck ids to ensure consistency
         $followUpIds = $summaryQuery->pluck('id');
+
+        // Base query for payments
+        $paymentsQuery = \App\Models\Payment::where('status', 'posted')
+            ->when($selectedBranch !== 'all' && !empty($selectedBranch), function ($q) use ($selectedBranch) {
+                $q->where('branch_name', $selectedBranch);
+            })
+            ->when($selectedDoctor !== 'all', function ($q) use ($selectedDoctor) {
+                $q->whereHas('receiver', function ($sq) use ($selectedDoctor) {
+                    $sq->where('name', $selectedDoctor);
+                });
+            })
+            ->when($timePeriod !== 'all', function ($q) use ($timePeriod) {
+                switch ($timePeriod) {
+                    case 'today':
+                        $q->whereDate('paid_at', Carbon::today());
+                        break;
+                    case 'last_week':
+                        $q->whereBetween('paid_at', [
+                            Carbon::now()->subWeek()->startOfWeek(),
+                            Carbon::now()->subWeek()->endOfWeek(),
+                        ]);
+                        break;
+                    case 'this_month':
+                        $q->whereBetween('paid_at', [
+                            Carbon::now()->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_month':
+                        $q->whereBetween('paid_at', [
+                            Carbon::now()->startOfMonth()->subMonth()->startOfMonth(),
+                            Carbon::now()->startOfMonth()->subMonth()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_3_months':
+                        $q->whereBetween('paid_at', [
+                            Carbon::now()->startOfMonth()->subMonths(2)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_6_months':
+                        $q->whereBetween('paid_at', [
+                            Carbon::now()->startOfMonth()->subMonths(5)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_12_months':
+                        $q->whereBetween('paid_at', [
+                            Carbon::now()->startOfMonth()->subMonths(11)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                }
+            }, function ($q) use ($fromDate, $toDate) {
+                if ($fromDate) {
+                    $q->whereDate('paid_at', '>=', Carbon::parse($fromDate)->startOfDay());
+                }
+                if ($toDate) {
+                    $q->whereDate('paid_at', '<=', Carbon::parse($toDate)->endOfDay());
+                }
+            });
+
+        // Calculate summary values from payments table
+        $totalIncome = (clone $paymentsQuery)->sum('amount');
 
         $totalPatients = FollowUp::whereIn('id', $followUpIds)
             ->distinct('patient_id')
@@ -283,49 +353,52 @@ class FollowUpController extends Controller
         $totalFollowUps = $summaryQuery->count();
 
         $totalBilled = $summaryQuery->sum('amount_billed');
-        $totalPaid = $summaryQuery->sum('amount_paid');
-        // We will calculate later to only sum positive dues
+        $totalPaid = $totalIncome;
 
-        // Payment methods count grouped by method
-        $paymentCounts = (clone $summaryQuery)
-            ->selectRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) as method, COUNT(*) as count")
-            ->groupBy('method')
-            ->pluck('count', 'method');
+        $cashPayments = (clone $paymentsQuery)->where('payment_method', 'cash')->sum('amount');
+        $onlinePayments = (clone $paymentsQuery)->where('payment_method', 'online')->sum('amount');
 
-        $cashPayments = $paymentCounts['cash'] ?? 0;
-        $onlinePayments = $paymentCounts['online'] ?? 0;
-
-        // Fetch detailed data for the modals
-        $cashFollowUps = (clone $summaryQuery)
-            ->whereRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) = 'cash'")
+        // Fetch detailed data for the modals from payments table
+        $cashFollowUps = (clone $paymentsQuery)
+            ->where('payment_method', 'cash')
             ->with(['patient' => function($q) { $q->select('id', 'name'); }])
             ->latest()
-            ->get(['id', 'patient_id', 'amount_paid', 'created_at']);
+            ->get(['id', 'patient_id', 'amount', 'created_at']);
 
-        $onlineFollowUps = (clone $summaryQuery)
-            ->whereRaw("LOWER(TRIM(JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.payment_method')))) = 'online'")
+        $onlineFollowUps = (clone $paymentsQuery)
+            ->where('payment_method', 'online')
             ->with(['patient' => function($q) { $q->select('id', 'name'); }])
             ->latest()
-            ->get(['id', 'patient_id', 'amount_paid', 'created_at']);
+            ->get(['id', 'patient_id', 'amount', 'created_at']);
+
         $allFollowUpsList = (clone $summaryQuery)
-            ->with(['patient' => function($q) { $q->select('id', 'name'); }])
+            ->with(['patient' => function($q) { $q->select('id', 'name'); }, 'payments'])
             ->latest()
-            ->get(['id', 'patient_id', 'amount_paid', 'amount_billed', 'created_at']);
+            ->get(['id', 'patient_id', 'amount_billed', 'created_at']);
 
         $patientIds = $allFollowUpsList->pluck('patient_id')->unique();
         $patientsList = \App\Models\Patient::withSum('followUps', 'amount_billed')
-            ->withSum('followUps', 'amount_paid')
             ->whereIn('id', $patientIds)
             ->get(['id', 'name', 'mobile_phone', 'created_at']);
 
-        $patientBalances = $patientsList->mapWithKeys(function($p) {
-            $bal = ($p->follow_ups_sum_amount_billed ?? 0) - ($p->follow_ups_sum_amount_paid ?? 0);
+        // Fetch total paid for each of these patients from the payments table
+        $patientPayments = \App\Models\Payment::whereIn('patient_id', $patientIds)
+            ->where('status', 'posted')
+            ->groupBy('patient_id')
+            ->selectRaw('patient_id, SUM(amount) as total_paid')
+            ->pluck('total_paid', 'patient_id');
+
+        $patientBalances = $patientsList->mapWithKeys(function($p) use ($patientPayments) {
+            $totalBilled = $p->follow_ups_sum_amount_billed ?? 0;
+            $totalPaid = $patientPayments[$p->id] ?? 0;
+            $bal = $totalBilled - $totalPaid;
             return [$p->id => $bal];
         });
 
-        $paidFollowUpsList = $allFollowUpsList->filter(function($fu) {
-            return $fu->amount_paid > 0;
-        });
+        $paidFollowUpsList = (clone $paymentsQuery)
+            ->with(['patient' => function($q) { $q->select('id', 'name'); }])
+            ->latest()
+            ->get(['id', 'patient_id', 'amount', 'created_at']);
 
         $dueFollowUpsList = $allFollowUpsList->filter(function($fu) {
             return ($fu->amount_billed - $fu->amount_paid) > 0;
@@ -353,9 +426,13 @@ class FollowUpController extends Controller
             $totalDueAll += $realDue;
         }
 
+        // Filter out follow-ups that have 0 real due
+        $dueFollowUpsList = $dueFollowUpsList->filter(function($fu) {
+            return $fu->real_due > 0;
+        });
 
         // Paginate main data for display (15 items per page matches AJAX endpoint)
-        $followUps = $query->latest()->paginate(15);
+        $followUps = $query->with('payments')->latest()->paginate(15);
 
         // Prepare chart data (daily, monthly, yearly)
         $commonFilters = function ($q) use ($request, $selectedBranch, $selectedDoctor) {
@@ -419,12 +496,35 @@ class FollowUpController extends Controller
             ->get();
 
         // Payment Status Chart
-        $paymentStatus = FollowUp::selectRaw('DATE(created_at) as raw_date, DATE_FORMAT(created_at, "%d-%m-%y") as date, SUM(amount_billed) as billed, SUM(amount_paid) as paid, SUM(amount_billed - amount_paid) as due')
+        $dailyBilled = FollowUp::selectRaw('DATE(created_at) as raw_date, DATE_FORMAT(created_at, "%d-%m-%y") as date, SUM(amount_billed) as billed')
             ->whereHas('patient')
             ->when(true, $commonFilters)
             ->groupBy('raw_date', 'date')
             ->orderBy('raw_date', 'asc')
-            ->get();
+            ->get()
+            ->keyBy('raw_date');
+
+        $dailyPaid = (clone $paymentsQuery)
+            ->selectRaw('DATE(paid_at) as raw_date, DATE_FORMAT(paid_at, "%d-%m-%y") as date, SUM(amount) as paid')
+            ->groupBy('raw_date', 'date')
+            ->orderBy('raw_date', 'asc')
+            ->get()
+            ->keyBy('raw_date');
+
+        $allDates = $dailyBilled->keys()->merge($dailyPaid->keys())->unique()->sort();
+        $paymentStatus = $allDates->map(function ($date) use ($dailyBilled, $dailyPaid) {
+            $billedObj = $dailyBilled->get($date);
+            $paidObj = $dailyPaid->get($date);
+            $billed = $billedObj ? $billedObj->billed : 0;
+            $paid = $paidObj ? $paidObj->paid : 0;
+            return (object)[
+                'raw_date' => $date,
+                'date' => $billedObj ? $billedObj->date : ($paidObj ? $paidObj->date : Carbon::parse($date)->format('d-m-y')),
+                'billed' => $billed,
+                'paid' => $paid,
+                'due' => $billed - $paid,
+            ];
+        });
 
         // New vs Existing Patients
         $newVsExistingPatients = FollowUp::whereHas('patient')
@@ -543,7 +643,7 @@ class FollowUpController extends Controller
         }
 
         // Get paginated results
-        $followUps = $query->latest()->paginate($perPage, ['*'], 'page', $page);
+        $followUps = $query->with('payments')->latest()->paginate($perPage, ['*'], 'page', $page);
 
         // Transform data for JSON response
         $rows = $followUps->items();
@@ -625,21 +725,16 @@ class FollowUpController extends Controller
 
         // Calculate total due
         $totalBilled = $patient->followUps()->sum('amount_billed');
-        $totalPaid = $patient->followUps()->sum('amount_paid');
-        $standalonePaid = Payment::where('patient_id', $patient->id)
-            ->whereNull('follow_up_id')
-            ->where('source', 'manual')
-            ->where('status', 'posted')
-            ->sum('amount');
-        $totalDueAll = ($totalBilled - $totalPaid) - $standalonePaid;
+        $totalPaid = \App\Models\Payment::where('patient_id', $patient->id)->where('status', 'posted')->sum('amount');
+        $totalDueAll = $totalBilled - $totalPaid;
 
         // Fetch parameters
         $parameters = Parameter::all();
 
-        // Fetch values directly from FollowUp model
+        // Fetch values
         $totalDue = $totalDueAll; // as per create.blade.php
         $amountBilled = $followup->amount_billed ?? '';
-        $amountPaid = $followup->amount_paid ?? '';
+        $amountPaid = \App\Models\Payment::where('follow_up_id', $followup->id)->where('status', 'posted')->sum('amount');
 
         return view('followups.edit', compact(
             'followup',
@@ -691,16 +786,43 @@ class FollowUpController extends Controller
         // Merge existing and new check_up_info
         $updatedCheckUpInfo = array_merge($existingCheckUpInfo, $newCheckUpInfo);
 
-        // Update the follow-up
-        $followup->update([
-            'check_up_info' => json_encode($updatedCheckUpInfo),
-            'diagnosis' => $request->diagnosis,
-            'treatment' => $request->treatment,
-            'amount_billed' => $request->amount_billed,
-            'amount_paid' => $request->amount_paid,
-        ]);
+        DB::transaction(function () use ($request, $followup, $updatedCheckUpInfo) {
+            $followup->update([
+                'check_up_info' => json_encode($updatedCheckUpInfo),
+                'diagnosis' => $request->diagnosis,
+                'treatment' => $request->treatment,
+                'amount_billed' => $request->amount_billed,
+            ]);
 
-        $this->syncFollowUpAutoPayment($followup, $updatedCheckUpInfo);
+            $payment = Payment::where('follow_up_id', $followup->id)->first();
+            if ($payment) {
+                if ($request->amount_paid <= 0) {
+                    $payment->delete();
+                } else {
+                    $payment->update([
+                        'amount' => $request->amount_paid,
+                        'payment_method' => strtolower(trim($updatedCheckUpInfo['payment_method'] ?? 'cash')),
+                        'paid_at' => $followup->created_at,
+                        'branch_id' => $updatedCheckUpInfo['branch_id'] ?? null,
+                        'branch_name' => $updatedCheckUpInfo['branch_name'] ?? null,
+                    ]);
+                }
+            } else {
+                if ($request->amount_paid > 0) {
+                    Payment::create([
+                        'patient_id' => $followup->patient_id,
+                        'follow_up_id' => $followup->id,
+                        'amount' => $request->amount_paid,
+                        'payment_method' => strtolower(trim($updatedCheckUpInfo['payment_method'] ?? 'cash')),
+                        'paid_at' => $followup->created_at,
+                        'status' => 'posted',
+                        'source' => 'manual',
+                        'branch_id' => $updatedCheckUpInfo['branch_id'] ?? null,
+                        'branch_name' => $updatedCheckUpInfo['branch_name'] ?? null,
+                    ]);
+                }
+            }
+        });
 
         $followup->patient->update(['vishesh' => $request->vishesh]);
 
@@ -836,45 +958,5 @@ class FollowUpController extends Controller
         return Excel::download(new FollowUpExport($request), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
-    }
-
-    private function syncFollowUpAutoPayment(FollowUp $followUp, array $checkUpInfo = []): void
-    {
-        $existingAutoPayment = Payment::where('follow_up_id', $followUp->id)
-            ->where('source', 'followup_auto')
-            ->first();
-
-        if ((float) $followUp->amount_paid <= 0) {
-            if ($existingAutoPayment) {
-                $existingAutoPayment->update([
-                    'status' => 'void',
-                    'notes' => trim(($existingAutoPayment->notes ? $existingAutoPayment->notes . ' | ' : '') . 'Auto-voided due to zero follow-up payment'),
-                ]);
-            }
-
-            return;
-        }
-
-        $paymentData = [
-            'patient_id' => $followUp->patient_id,
-            'follow_up_id' => $followUp->id,
-            'received_by' => $followUp->doctor_id,
-            'amount' => $followUp->amount_paid,
-            'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
-            'paid_at' => $followUp->created_at,
-            'status' => 'posted',
-            'reference_no' => null,
-            'notes' => 'Auto-synced from follow-up payment fields',
-            'branch_id' => $checkUpInfo['branch_id'] ?? null,
-            'branch_name' => $checkUpInfo['branch_name'] ?? null,
-            'source' => 'followup_auto',
-        ];
-
-        if ($existingAutoPayment) {
-            $existingAutoPayment->update($paymentData);
-            return;
-        }
-
-        Payment::create($paymentData);
     }
 }

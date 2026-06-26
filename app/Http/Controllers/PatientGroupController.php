@@ -60,7 +60,7 @@ class PatientGroupController extends Controller
      */
     public function edit(PatientGroup $group)
     {
-        $group->load('members:id,name,patient_id,mobile_phone');
+        $group->load('members:id,name,patient_id,mobile_phone,patient_group_id');
         return view('groups.edit', compact('group'));
     }
 
@@ -122,7 +122,7 @@ class PatientGroupController extends Controller
             return response()->json([]);
         }
 
-        $groups = PatientGroup::with('members:id,name,patient_id,mobile_phone')
+        $groups = PatientGroup::with('members:id,name,patient_id,mobile_phone,patient_group_id')
             ->where('name', 'like', "%{$term}%")
             ->orderBy('name')
             ->limit(20)

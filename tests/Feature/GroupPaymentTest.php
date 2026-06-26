@@ -78,14 +78,21 @@ it('can fetch group members and calculate their dues correctly via AJAX', functi
         'patient_group_id' => $group->id
     ]);
 
-    // Create follow-up and billed amount for John
     $followUp = FollowUp::create([
         'patient_id' => $patient1->id,
         'doctor_id' => $this->user->id,
         'amount_billed' => 1000,
-        'amount_paid' => 200,
         'check_up_info' => json_encode(['diagnosis' => 'fever']),
         'guid' => (string) \Illuminate\Support\Str::uuid(),
+    ]);
+
+    Payment::create([
+        'patient_id' => $patient1->id,
+        'follow_up_id' => $followUp->id,
+        'amount' => 200,
+        'payment_method' => 'cash',
+        'status' => 'posted',
+        'paid_at' => now(),
     ]);
 
     $response = $this->actingAs($this->user)

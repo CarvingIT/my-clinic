@@ -218,7 +218,7 @@ class PrescriptionController extends Controller
             ],
             'amount_paid' => [
                 'label' => __('messages.amount_paid'),
-                'value' => number_format($followup->amount_paid ?? 0, 2),
+                'value' => number_format(\App\Models\Payment::where('follow_up_id', $followup->id)->where('status', 'posted')->sum('amount'), 2),
                 'type' => 'text',
                 'section' => 'payment_info'
             ],
@@ -427,7 +427,8 @@ TOOLBAR;
 
         // Payment info
         $amountBilled = number_format($followup->amount_billed ?? 0, 2);
-        $amountPaid = number_format($followup->amount_paid ?? 0, 2);
+        $amountPaidVal = \App\Models\Payment::where('follow_up_id', $followup->id)->where('status', 'posted')->sum('amount');
+        $amountPaid = number_format($amountPaidVal, 2);
         $amountDue = number_format($followup->total_due ?? 0, 2);
 
         return [

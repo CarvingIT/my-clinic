@@ -148,13 +148,8 @@ class PaymentController extends Controller
 
         $members = $group->members->map(function ($member) {
             $totalBilled = $member->followUps()->sum('amount_billed');
-            $totalPaid = $member->followUps()->sum('amount_paid');
-            $standalonePaid = Payment::where('patient_id', $member->id)
-                ->whereNull('follow_up_id')
-                ->where('source', 'manual')
-                ->where('status', 'posted')
-                ->sum('amount');
-            $due = ($totalBilled - $totalPaid) - $standalonePaid;
+            $totalPaid = \App\Models\Payment::where('patient_id', $member->id)->where('status', 'posted')->sum('amount');
+            $due = $totalBilled - $totalPaid;
 
             return [
                 'id' => $member->id,
@@ -201,10 +196,19 @@ class PaymentController extends Controller
 
             $primaryPatient = Patient::findOrFail($validated['patient_id']);
             $payerName = $primaryPatient->name;
+            $hasFollowUp = !empty($validated['follow_up_id']);
 
             foreach ($groupAmounts as $pId => $amount) {
-                // Link follow-up only for the primary patient
-                $linkedFollowUpId = ((int)$pId === (int)$validated['patient_id']) ? ($validated['follow_up_id'] ?? null) : null;
+                // Link follow-up for primary patient, or auto-link to latest follow-up for other members if primary is linked
+                $linkedFollowUpId = null;
+                if ((int)$pId === (int)$validated['patient_id']) {
+                    $linkedFollowUpId = $validated['follow_up_id'] ?? null;
+                } elseif ($hasFollowUp) {
+                    $latestFollowUp = FollowUp::where('patient_id', $pId)->latest()->first();
+                    if ($latestFollowUp) {
+                        $linkedFollowUpId = $latestFollowUp->id;
+                    }
+                }
                 
                 // Add a note referencing the group payment
                 $note = trim($validated['notes'] ?? '');

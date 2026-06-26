@@ -140,8 +140,8 @@ class AnalyticsController extends Controller
             ->orderByRaw('FIELD(age_group, "0-18", "19-45", "46+", "Unknown")')
             ->get();
 
-        // Chart 5: Payment Status
-        $paymentStatus = FollowUp::selectRaw('DATE(created_at) as raw_date, DATE_FORMAT(created_at, "%d-%m-%y") as date, SUM(amount_billed) as billed, SUM(amount_paid) as paid, SUM(amount_billed - amount_paid) as due')
+        // Chart 5: Payment Status (Reconciled from follow-ups billing and payments ledger)
+        $dailyBilled = FollowUp::selectRaw('DATE(created_at) as raw_date, DATE_FORMAT(created_at, "%d-%m-%y") as date, SUM(amount_billed) as billed')
             ->when($request->filled('from_date'), fn($q) => $q->whereDate('created_at', '>=', $request->from_date))
             ->when($request->filled('to_date'), fn($q) => $q->whereDate('created_at', '<=', $request->to_date))
             ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]))
@@ -149,7 +149,45 @@ class AnalyticsController extends Controller
             ->when($selectedGender !== 'all' && !empty($selectedGender), fn($q) => $q->whereHas('patient', fn($pq) => $pq->where('gender', $selectedGender)))
             ->groupBy('raw_date', 'date')
             ->orderBy('raw_date', 'asc')
-            ->get();
+            ->get()
+            ->keyBy('raw_date');
+
+        $dailyPaid = \App\Models\Payment::where('status', 'posted')
+            ->selectRaw('DATE(paid_at) as raw_date, DATE_FORMAT(paid_at, "%d-%m-%y") as date, SUM(amount) as paid')
+            ->when($request->filled('from_date'), fn($q) => $q->whereDate('paid_at', '>=', $request->from_date))
+            ->when($request->filled('to_date'), fn($q) => $q->whereDate('paid_at', '<=', $request->to_date))
+            ->when($selectedBranch !== 'all' && !empty($selectedBranch), fn($q) => $q->where('branch_name', $selectedBranch))
+            ->when($selectedDoctor !== 'all' && !empty($selectedDoctor), function($q) use ($selectedDoctor) {
+                $q->whereHas('followUp', fn($sq) => $sq->where('doctor_id', $selectedDoctor));
+            })
+            ->when($selectedGender !== 'all' && !empty($selectedGender), function($q) use ($selectedGender) {
+                $q->whereHas('patient', fn($pq) => $pq->where('gender', $selectedGender));
+            })
+            ->groupBy('raw_date', 'date')
+            ->orderBy('raw_date', 'asc')
+            ->get()
+            ->keyBy('raw_date');
+
+        $allDates = $dailyBilled->keys()->concat($dailyPaid->keys())->unique()->sort();
+
+        $paymentStatus = $allDates->map(function($raw_date) use ($dailyBilled, $dailyPaid) {
+            $billedItem = $dailyBilled->get($raw_date);
+            $paidItem = $dailyPaid->get($raw_date);
+            
+            $billed = (float)($billedItem ? $billedItem->billed : 0);
+            $paid = (float)($paidItem ? $paidItem->paid : 0);
+            $due = $billed - $paid;
+            
+            $date = $billedItem ? $billedItem->date : ($paidItem ? $paidItem->date : Carbon::parse($raw_date)->format('d-m-y'));
+            
+            return (object)[
+                'raw_date' => $raw_date,
+                'date' => $date,
+                'billed' => $billed,
+                'paid' => $paid,
+                'due' => $due,
+            ];
+        })->values();
 
         // Chart 6: New vs. Existing Patients
         $newVsExistingPatients = FollowUp::whereHas('patient', function ($q) use ($selectedGender) {

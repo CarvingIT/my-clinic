@@ -16,7 +16,9 @@ class ImportExportTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(\Database\Seeders\RoleSeeder::class);
         $this->user = User::factory()->create();
+        $this->user->assignRoles(['admin']);
         $this->actingAs($this->user);
     }
 
@@ -36,7 +38,6 @@ class ImportExportTest extends TestCase
             'import_source' => 'upload',
             // Missing 'file' field
         ]);
-
         $response->assertSessionHasErrors('file');
     }
 

@@ -202,7 +202,7 @@
                             ->whereDate('created_at', today())
                             ->count();
                         $new_patients_today = \App\Models\Patient::whereDate('created_at', today())->count();
-                        $revenue_today = \App\Models\FollowUp::whereDate('created_at', today())->sum('amount_paid');
+                        $revenue_today = \App\Models\Payment::where('status', 'posted')->whereDate('paid_at', today())->sum('amount');
                         $recurring_patients_today = \App\Models\FollowUp::whereDate('created_at', today())
                                 ->whereHas('patient', function($q) {
                                     $q->whereDate('created_at', '<', today());
@@ -280,7 +280,7 @@
                     $total_patients = \App\Models\Patient::count();
                     $new_patients_this_month = \App\Models\Patient::whereMonth('created_at', now()->month)->count();
                     $follow_ups_this_month = \App\Models\FollowUp::whereMonth('created_at', now()->month)->count();
-                    $total_revenue = \App\Models\FollowUp::sum('amount_paid');
+                    $total_revenue = \App\Models\Payment::where('status', 'posted')->sum('amount');
 
                     // Calculate growth percentages (mock data for now)
                     $patient_growth = 12.5;
