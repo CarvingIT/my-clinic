@@ -35,9 +35,13 @@ class AuthenticatedSessionController extends Controller
         $rememberRequested = $request->boolean('remember');
 
         // Store branch information in the session after successful authentication:
-        $request->session()->put('branch_id', $request->branch_id);
-        $branch = Branch::find($request->branch_id);
-        $request->session()->put('branch_name', $branch->name);
+        if ($request->filled('branch_id')) {
+            $request->session()->put('branch_id', $request->branch_id);
+            $branch = Branch::find($request->branch_id);
+            if ($branch) {
+                $request->session()->put('branch_name', $branch->name);
+            }
+        }
 
         // Store login method for debugging
         $request->session()->put('login_method', $rememberRequested ? 'remember_token' : 'credentials');

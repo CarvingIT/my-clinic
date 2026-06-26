@@ -946,32 +946,72 @@
                     {{-- Outstanding Balance End --}}
 
                     @php
-                        $timelineEntries = $patient->followUps()
-                            ->with('uploads')
-                            ->get()
-                            ->toBase()
-                            ->map(function ($followUp) {
-                                return (object) [
-                                    'type' => 'followup',
-                                    'date' => $followUp->created_at,
-                                    'followUp' => $followUp,
-                                ];
-                            })
-                            ->merge(
-                                \App\Models\Payment::where('patient_id', $patient->id)
-                                    ->where('status', 'posted')
-                                    ->get()
-                                    ->toBase()
-                                    ->map(function ($payment) {
-                                        return (object) [
-                                            'type' => 'payment',
-                                            'date' => $payment->paid_at,
-                                            'payment' => $payment,
-                                        ];
-                                    })
-                            )
-                            ->sortByDesc('date')
-                            ->values();
+                        // 1. Get all follow-ups for this patient, chronologically (oldest to newest)
+                        $chronoFollowUps = $patient->followUps()->orderBy('created_at', 'asc')->get();
+                        
+                        // 2. Get all posted payments for this patient, chronologically
+                        $allPayments = \App\Models\Payment::where('patient_id', $patient->id)
+                            ->where('status', 'posted')
+                            ->orderBy('paid_at', 'asc')
+                            ->orderBy('id', 'asc')
+                            ->get();
+
+                        // 3. Allocate payments to follow-ups chronologically (FIFO)
+                        $paymentPool = $allPayments->map(function($p) {
+                            return [
+                                'model' => $p,
+                                'remaining' => (float)$p->amount,
+                            ];
+                        })->toArray();
+
+                        $followUpAllocations = []; // follow_up_id => [payment_id => allocated_amount]
+                        $allocatedFollowUpPaid = []; // follow_up_id => total_allocated_paid
+
+                        foreach ($chronoFollowUps as $fu) {
+                            $billed = (float)($fu->amount_billed ?? 0);
+                            $allocatedForFu = 0.0;
+                            
+                            // First, try to allocate payments that are EXPLICITLY linked to this follow-up
+                            foreach ($paymentPool as &$pItem) {
+                                if ($pItem['remaining'] > 0 && $pItem['model']->follow_up_id == $fu->id) {
+                                    $alloc = min($pItem['remaining'], $billed - $allocatedForFu);
+                                    if ($alloc > 0) {
+                                        $pItem['remaining'] -= $alloc;
+                                        $allocatedForFu += $alloc;
+                                        $followUpAllocations[$fu->id][$pItem['model']->id] = ($followUpAllocations[$fu->id][$pItem['model']->id] ?? 0.0) + $alloc;
+                                    }
+                                }
+                            }
+                            unset($pItem);
+                            
+                            $allocatedFollowUpPaid[$fu->id] = $allocatedForFu;
+                        }
+
+                        // 4. Build timeline entries
+                        $timelineEntries = collect();
+                        
+                        // Add follow-ups to timeline
+                        foreach ($patient->followUps()->with('uploads')->get() as $fu) {
+                            $timelineEntries->push((object)[
+                                'type' => 'followup',
+                                'date' => $fu->created_at,
+                                'followUp' => $fu,
+                                'allocated_paid' => $allocatedFollowUpPaid[$fu->id] ?? 0.0,
+                            ]);
+                        }
+                        
+                        // Add all standalone payments to timeline (regardless of allocation)
+                        foreach ($allPayments as $p) {
+                            if (empty($p->follow_up_id)) {
+                                $timelineEntries->push((object)[
+                                    'type' => 'payment',
+                                    'date' => $p->paid_at,
+                                    'payment' => $p,
+                                ]);
+                            }
+                        }
+                        
+                        $timelineEntries = $timelineEntries->sortByDesc('date')->values();
                     @endphp
 
                     @if ($timelineEntries->count() > 0)
@@ -1261,11 +1301,10 @@
 
                                                     </div>
                                                     <div>
-                                                        {{-- @foreach ($patient->followUps as $followUp) --}}
                                                         @php
-                                                            $amountBilled = $followUp->amount_billed ?? 0; // Total amount billed
-                                                            $amountPaid = $followUp->amount_paid ?? 0; // Amount patient paid
-                                                            $totalDue = $amountBilled - $amountPaid; // Due for this follow-up
+                                                             $amountBilled = $followUp->amount_billed ?? 0; // Total amount billed
+                                                             $amountPaid = $entry->allocated_paid ?? 0; // Amount patient paid
+                                                             $totalDue = $amountBilled - $amountPaid; // Due for this follow-up
                                                         @endphp
 
                                                         <div class="    ">

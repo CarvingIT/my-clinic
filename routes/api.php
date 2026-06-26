@@ -15,7 +15,7 @@ Route::middleware('auth')->group(function () {
             'total_patients' => \App\Models\Patient::count(),
             'new_patients_this_month' => \App\Models\Patient::whereMonth('created_at', now()->month)->count(),
             'follow_ups_this_month' => \App\Models\FollowUp::whereMonth('created_at', now()->month)->count(),
-            'total_revenue' => \App\Models\FollowUp::sum('amount_paid'),
+            'total_revenue' => \App\Models\Payment::where('status', 'posted')->sum('amount'),
         ]);
     });
 

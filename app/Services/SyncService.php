@@ -57,11 +57,17 @@ class SyncService
 
         // Normalize follow-up timestamps
         $exported = $patients->map(function ($patient) {
+            $followUpModels = $patient->followUps;
             $data = $patient->toArray();
 
-            $data['follow_ups'] = collect($data['follow_ups'])->map(function ($fup) {
+            $data['follow_ups'] = collect($data['follow_ups'])->map(function ($fup) use ($followUpModels) {
                 $fup['created_at'] = Carbon::parse($fup['created_at'])->setTimezone($this->timezone)->toDateTimeString();
                 $fup['updated_at'] = Carbon::parse($fup['updated_at'])->setTimezone($this->timezone)->toDateTimeString();
+                
+                // Retrieve amount_paid from the model accessor
+                $model = $followUpModels->firstWhere('id', $fup['id']);
+                $fup['amount_paid'] = $model ? (float)$model->amount_paid : 0.0;
+                
                 return $fup;
             });
 
@@ -239,11 +245,64 @@ class SyncService
                                 if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
                                     $backgroundOperations[] = "Updating existing follow-up for patient {$name}";
                                     $followUpData['updated_at'] = now()->setTimezone($this->timezone)->toDateTimeString();
+                                    
+                                    $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                                    unset($followUpData['amount_paid']);
+                                    
                                     $existingFollowUp->update($followUpData);
+                                    
+                                    // Update or create corresponding payment
+                                    $payment = Payment::where('follow_up_id', $existingFollowUp->id)->first();
+                                    if ($payment) {
+                                        if ($amountPaid <= 0) {
+                                            $payment->delete();
+                                        } else {
+                                            $checkUpInfo = json_decode($existingFollowUp->check_up_info, true) ?? [];
+                                            $payment->update([
+                                                'amount' => $amountPaid,
+                                                'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                                'paid_at' => $existingFollowUp->created_at,
+                                            ]);
+                                        }
+                                    } elseif ($amountPaid > 0) {
+                                        $checkUpInfo = json_decode($existingFollowUp->check_up_info, true) ?? [];
+                                        Payment::create([
+                                            'patient_id' => $existingFollowUp->patient_id,
+                                            'follow_up_id' => $existingFollowUp->id,
+                                            'amount' => $amountPaid,
+                                            'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                            'paid_at' => $existingFollowUp->created_at,
+                                            'status' => 'posted',
+                                            'source' => 'sync',
+                                            'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                            'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                        ]);
+                                    }
+                                    
                                     $updatedFollowUpsCount++;
                                     $updatedFollowUpPatientNames[] = $name;
                                     $syncLogs[] = "Updated follow-up for patient: {$name}";
                                 } else {
+                                    // Sync safety: ensure payment is backfilled if not exists
+                                    $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                                    if ($amountPaid > 0) {
+                                        $paymentExists = Payment::where('follow_up_id', $existingFollowUp->id)->exists();
+                                        if (!$paymentExists) {
+                                            $checkUpInfo = json_decode($existingFollowUp->check_up_info, true) ?? [];
+                                            Payment::create([
+                                                'patient_id' => $existingFollowUp->patient_id,
+                                                'follow_up_id' => $existingFollowUp->id,
+                                                'amount' => $amountPaid,
+                                                'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                                'paid_at' => $existingFollowUp->created_at,
+                                                'status' => 'posted',
+                                                'source' => 'sync',
+                                                'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                                'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                            ]);
+                                        }
+                                    }
+                                    
                                     $backgroundOperations[] = "Follow-up is up to date for patient {$name}";
                                     $skippedFollowUpsCount++;
                                     $syncLogs[] = "Skipped follow-up (up to date) for patient: {$name}";
@@ -258,7 +317,27 @@ class SyncService
                             $backgroundOperations[] = "Creating new follow-up for patient {$name}";
                             try {
                                 $followUpData['patient_id'] = $existingPatient->id;
-                                FollowUp::create($followUpData);
+                                
+                                $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                                unset($followUpData['amount_paid']);
+                                
+                                $fu = FollowUp::create($followUpData);
+                                
+                                if ($amountPaid > 0) {
+                                    $checkUpInfo = json_decode($fu->check_up_info, true) ?? [];
+                                    Payment::create([
+                                        'patient_id' => $fu->patient_id,
+                                        'follow_up_id' => $fu->id,
+                                        'amount' => $amountPaid,
+                                        'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                        'paid_at' => $fu->created_at,
+                                        'status' => 'posted',
+                                        'source' => 'sync',
+                                        'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                        'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                    ]);
+                                }
+                                
                                 $newFollowUpsCount++;
                                 $addedFollowUpPatientNames[] = $name;
                                 $syncLogs[] = "Added new follow-up for patient: {$name}";
@@ -333,7 +412,27 @@ class SyncService
                         $backgroundOperations[] = "Creating follow-up for new patient {$name}";
                         try {
                             $followUpData['patient_id'] = $patient->id;
-                            FollowUp::create($followUpData);
+                            
+                            $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                            unset($followUpData['amount_paid']);
+                            
+                            $fu = FollowUp::create($followUpData);
+                            
+                            if ($amountPaid > 0) {
+                                $checkUpInfo = json_decode($fu->check_up_info, true) ?? [];
+                                Payment::create([
+                                    'patient_id' => $fu->patient_id,
+                                    'follow_up_id' => $fu->id,
+                                    'amount' => $amountPaid,
+                                    'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                    'paid_at' => $fu->created_at,
+                                    'status' => 'posted',
+                                    'source' => 'sync',
+                                    'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                    'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                ]);
+                            }
+                            
                             $newFollowUpsCount++;
                             $addedFollowUpPatientNames[] = $name;
                             $syncLogs[] = "Added follow-up for new patient: {$name}";
@@ -349,10 +448,62 @@ class SyncService
                         try {
                             $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($this->timezone);
                             if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
+                                $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                                unset($followUpData['amount_paid']);
+                                
                                 $existingFollowUp->update($followUpData);
+                                
+                                // Update or create corresponding payment
+                                $payment = Payment::where('follow_up_id', $existingFollowUp->id)->first();
+                                if ($payment) {
+                                    if ($amountPaid <= 0) {
+                                        $payment->delete();
+                                    } else {
+                                        $checkUpInfo = json_decode($existingFollowUp->check_up_info, true) ?? [];
+                                        $payment->update([
+                                            'amount' => $amountPaid,
+                                            'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                            'paid_at' => $existingFollowUp->created_at,
+                                        ]);
+                                    }
+                                } elseif ($amountPaid > 0) {
+                                    $checkUpInfo = json_decode($existingFollowUp->check_up_info, true) ?? [];
+                                    Payment::create([
+                                        'patient_id' => $existingFollowUp->patient_id,
+                                        'follow_up_id' => $existingFollowUp->id,
+                                        'amount' => $amountPaid,
+                                        'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                        'paid_at' => $existingFollowUp->created_at,
+                                        'status' => 'posted',
+                                        'source' => 'sync',
+                                        'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                        'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                    ]);
+                                }
+                                
                                 $updatedFollowUpsCount++;
                                 $syncLogs[] = "Updated existing follow-up for new patient: {$name}";
                             } else {
+                                // Sync safety: ensure payment is backfilled if not exists
+                                $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                                if ($amountPaid > 0) {
+                                    $paymentExists = Payment::where('follow_up_id', $existingFollowUp->id)->exists();
+                                    if (!$paymentExists) {
+                                        $checkUpInfo = json_decode($existingFollowUp->check_up_info, true) ?? [];
+                                        Payment::create([
+                                            'patient_id' => $existingFollowUp->patient_id,
+                                            'follow_up_id' => $existingFollowUp->id,
+                                            'amount' => $amountPaid,
+                                            'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                            'paid_at' => $existingFollowUp->created_at,
+                                            'status' => 'posted',
+                                            'source' => 'sync',
+                                            'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                            'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                        ]);
+                                    }
+                                }
+                                
                                 $skippedFollowUpsCount++;
                                 $syncLogs[] = "Skipped follow-up (up to date) for new patient: {$name}";
                             }

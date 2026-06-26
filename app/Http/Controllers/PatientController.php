@@ -160,15 +160,10 @@ class PatientController extends Controller
 
         // Get total amount billed and total amount paid across all follow-ups
         $totalBilled = $patient->followUps()->sum('amount_billed');
-        $totalPaid = $patient->followUps()->sum('amount_paid');
-        $standalonePaid = Payment::where('patient_id', $patient->id)
-            ->whereNull('follow_up_id')
-            ->where('source', 'manual')
-            ->where('status', 'posted')
-            ->sum('amount');
+        $totalPaid = \App\Models\Payment::where('patient_id', $patient->id)->where('status', 'posted')->sum('amount');
 
         // Calculate total outstanding balance (Total Due)
-        $totalDueAll = ($totalBilled - $totalPaid) - $standalonePaid;
+        $totalDueAll = $totalBilled - $totalPaid;
 
         // Load paginated follow-ups and reports
         $patient->followUps = $patient->followUps()->orderBy('created_at', 'desc')->paginate(5);

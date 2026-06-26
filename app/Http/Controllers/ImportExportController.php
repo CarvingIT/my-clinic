@@ -107,11 +107,17 @@ class ImportExportController extends Controller
 
         // Normalize follow-up timestamps
         $exported = $patients->map(function ($patient) use ($timezone) {
+            $followUpModels = $patient->followUps;
             $data = $patient->toArray();
 
-            $data['follow_ups'] = collect($data['follow_ups'])->map(function ($fup) use ($timezone) {
+            $data['follow_ups'] = collect($data['follow_ups'])->map(function ($fup) use ($timezone, $followUpModels) {
                 $fup['created_at'] = Carbon::parse($fup['created_at'])->setTimezone($timezone)->toDateTimeString();
                 $fup['updated_at'] = Carbon::parse($fup['updated_at'])->setTimezone($timezone)->toDateTimeString();
+                
+                // Retrieve amount_paid from the model accessor
+                $model = $followUpModels->firstWhere('id', $fup['id']);
+                $fup['amount_paid'] = $model ? (float)$model->amount_paid : 0.0;
+                
                 return $fup;
             });
 
@@ -331,10 +337,62 @@ class ImportExportController extends Controller
                                 try {
                                     $existingFollowUpUpdatedAt = Carbon::parse($existingFollowUp->updated_at)->setTimezone($timezone);
                                     if ($existingFollowUpUpdatedAt->lessThan(Carbon::parse($followUpData['updated_at']))) {
+                                        $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                                        unset($followUpData['amount_paid']);
+                                        
                                         $existingFollowUp->update($followUpData);
+                                        
+                                        // Update or create corresponding payment
+                                        $payment = \App\Models\Payment::where('follow_up_id', $existingFollowUp->id)->first();
+                                        if ($payment) {
+                                            if ($amountPaid <= 0) {
+                                                $payment->delete();
+                                            } else {
+                                                $checkUpInfo = json_decode($existingFollowUp->check_up_info, true) ?? [];
+                                                $payment->update([
+                                                    'amount' => $amountPaid,
+                                                    'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                                    'paid_at' => $existingFollowUp->created_at,
+                                                ]);
+                                            }
+                                        } elseif ($amountPaid > 0) {
+                                            $checkUpInfo = json_decode($existingFollowUp->check_up_info, true) ?? [];
+                                            \App\Models\Payment::create([
+                                                'patient_id' => $existingFollowUp->patient_id,
+                                                'follow_up_id' => $existingFollowUp->id,
+                                                'amount' => $amountPaid,
+                                                'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                                'paid_at' => $existingFollowUp->created_at,
+                                                'status' => 'posted',
+                                                'source' => 'import',
+                                                'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                                'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                            ]);
+                                        }
+                                        
                                         $updatedFollowUpsCount++;
                                         $updatedFollowUpNames[] = $name;
                                     } else {
+                                        // Backup safety: ensure payment is backfilled if not exists
+                                        $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                                        if ($amountPaid > 0) {
+                                            $paymentExists = \App\Models\Payment::where('follow_up_id', $existingFollowUp->id)->exists();
+                                            if (!$paymentExists) {
+                                                $checkUpInfo = json_decode($existingFollowUp->check_up_info, true) ?? [];
+                                                \App\Models\Payment::create([
+                                                    'patient_id' => $existingFollowUp->patient_id,
+                                                    'follow_up_id' => $existingFollowUp->id,
+                                                    'amount' => $amountPaid,
+                                                    'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                                    'paid_at' => $existingFollowUp->created_at,
+                                                    'status' => 'posted',
+                                                    'source' => 'import',
+                                                    'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                                    'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                                ]);
+                                            }
+                                        }
+                                        
                                         $skippedFollowUpsCount++;
                                         $skippedFollowUpNames[] = $name;
                                     }
@@ -346,7 +404,27 @@ class ImportExportController extends Controller
                             } else {
                                 try {
                                     $followUpData['patient_id'] = $existingPatient->id;
-                                    \App\Models\FollowUp::create($followUpData);
+                                    
+                                    $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                                    unset($followUpData['amount_paid']);
+                                    
+                                    $fu = \App\Models\FollowUp::create($followUpData);
+                                    
+                                    if ($amountPaid > 0) {
+                                        $checkUpInfo = json_decode($fu->check_up_info, true) ?? [];
+                                        \App\Models\Payment::create([
+                                            'patient_id' => $fu->patient_id,
+                                            'follow_up_id' => $fu->id,
+                                            'amount' => $amountPaid,
+                                            'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                            'paid_at' => $fu->created_at,
+                                            'status' => 'posted',
+                                            'source' => 'import',
+                                            'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                            'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                        ]);
+                                    }
+                                    
                                     $newFollowUpsCount++;
                                     $addedFollowUpNames[] = $name;
                                 } catch (\Exception $e) {
@@ -403,7 +481,27 @@ class ImportExportController extends Controller
 
                         try {
                             $followUpData['patient_id'] = $patient->id;
-                            \App\Models\FollowUp::create($followUpData);
+                            
+                            $amountPaid = (float)($followUpData['amount_paid'] ?? 0);
+                            unset($followUpData['amount_paid']);
+                            
+                            $fu = \App\Models\FollowUp::create($followUpData);
+                            
+                            if ($amountPaid > 0) {
+                                $checkUpInfo = json_decode($fu->check_up_info, true) ?? [];
+                                \App\Models\Payment::create([
+                                    'patient_id' => $fu->patient_id,
+                                    'follow_up_id' => $fu->id,
+                                    'amount' => $amountPaid,
+                                    'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+                                    'paid_at' => $fu->created_at,
+                                    'status' => 'posted',
+                                    'source' => 'import',
+                                    'branch_id' => $checkUpInfo['branch_id'] ?? null,
+                                    'branch_name' => $checkUpInfo['branch_name'] ?? null,
+                                ]);
+                            }
+                            
                             $newFollowUpsCount++;
                             $addedFollowUpNames[] = $name;
                         } catch (\Exception $e) {
@@ -458,6 +556,8 @@ class ImportExportController extends Controller
 
             return back()->with('success', 'Import completed successfully.')->with('show_import_details', true);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             // Clean up temp file if it exists
             if (isset($path) && isset($importSource) && $importSource === 'upload') {

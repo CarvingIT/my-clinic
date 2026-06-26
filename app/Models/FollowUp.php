@@ -16,7 +16,6 @@ class FollowUp extends Model
         'diagnosis',
         'treatment',
         'amount_billed',
-        'amount_paid',
         // 'patient_photos',
         'created_at',
         'updated_at',
@@ -42,6 +41,48 @@ class FollowUp extends Model
 
         // If there was a previous follow-up, return its due amount
         return $lastFollowUp ? $lastFollowUp->total_due : 0;
+    }
+
+    protected static $allocatedPaidCache = [];
+
+    public function getAmountPaidAttribute()
+    {
+        if (isset(self::$allocatedPaidCache[$this->id])) {
+            return self::$allocatedPaidCache[$this->id];
+        }
+
+        $patientId = $this->patient_id;
+        
+        $chronoFollowUps = FollowUp::where('patient_id', $patientId)->orderBy('created_at', 'asc')->get();
+        $allPayments = Payment::where('patient_id', $patientId)->where('status', 'posted')->orderBy('paid_at', 'asc')->orderBy('id', 'asc')->get();
+        
+        $paymentPool = $allPayments->map(function($p) {
+            return [
+                'model' => $p,
+                'remaining' => (float)$p->amount,
+            ];
+        })->toArray();
+
+        foreach ($chronoFollowUps as $fu) {
+            $billed = (float)($fu->amount_billed ?? 0);
+            $allocatedForFu = 0.0;
+            
+            // First, try to allocate payments that are EXPLICITLY linked to this follow-up
+            foreach ($paymentPool as &$pItem) {
+                if ($pItem['remaining'] > 0 && $pItem['model']->follow_up_id == $fu->id) {
+                    $alloc = min($pItem['remaining'], $billed - $allocatedForFu);
+                    if ($alloc > 0) {
+                        $pItem['remaining'] -= $alloc;
+                        $allocatedForFu += $alloc;
+                    }
+                }
+            }
+            unset($pItem);
+            
+            self::$allocatedPaidCache[$fu->id] = $allocatedForFu;
+        }
+
+        return self::$allocatedPaidCache[$this->id] ?? 0.0;
     }
 
     // Caltulate total_due to include previous_due
