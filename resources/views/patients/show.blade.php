@@ -1288,17 +1288,11 @@
                                                     @endphp
 
                                                     <div>
-                                                        @if (isset($checkUpInfo['payment_method']) &&
-                                                                $checkUpInfo['payment_method'] !== null &&
-                                                                $checkUpInfo['payment_method'] !== '')
+                                                        @if ($followUp->payment_method && $followUp->payment_method !== 'N/A')
                                                             <p class="">
-                                                                {{-- <span
-                                                                    class="font-bold text-gray-800 dark:text-gray-200">{{ __('messages.Payment Method') }}:</span> --}}
-                                                                {{ $checkUpInfo['payment_method'] }}
+                                                                {{ $followUp->payment_method }}
                                                             </p>
                                                         @endif
-
-
                                                     </div>
                                                     <div>
                                                         @php

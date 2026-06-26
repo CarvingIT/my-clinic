@@ -86,7 +86,7 @@ class FollowUpExport implements FromCollection, WithHeadings, WithMapping, WithC
             $patientId,
             $checkUpInfo['user_name'] ?? 'N/A',
             number_format($followUp->amount_billed, 2),
-            $checkUpInfo['payment_method'] ?? 'N/A',
+            $followUp->payment_method,
             number_format($followUp->amount_paid, 2),
             $branchName,
         ];

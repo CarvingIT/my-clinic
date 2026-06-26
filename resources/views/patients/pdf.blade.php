@@ -242,9 +242,9 @@
                             @endif
                         </td>
                         <td>
-                            @if (isset($checkUpInfo['payment_method']))
+                            @if ($followUp->payment_method && $followUp->payment_method !== 'N/A')
                                 <strong>{{ __('messages.Payment Method') }}:</strong>
-                                {{ $checkUpInfo['payment_method'] }}<br>
+                                {{ $followUp->payment_method }}<br>
                             @endif
                             <strong>{{ __('messages.Amount Billed') }}:</strong>
                             ₹{{ number_format($followUp->amount_billed ?? 0, 2) }}<br>

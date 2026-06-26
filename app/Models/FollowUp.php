@@ -91,6 +91,32 @@ class FollowUp extends Model
         return ($this->amount_billed + $this->previous_due) - $this->amount_paid;
     }
 
+    public function getPaymentMethodAttribute()
+    {
+        $paymentMethods = $this->payments->pluck('payment_method')->filter()->unique()->map(function($method) {
+            return ucfirst($method);
+        })->implode(', ');
+
+        if (empty($paymentMethods)) {
+            $paymentMethods = Payment::where('patient_id', $this->patient_id)
+                ->whereNull('follow_up_id')
+                ->where('status', 'posted')
+                ->pluck('payment_method')
+                ->filter()
+                ->unique()
+                ->map(function($method) {
+                    return ucfirst($method);
+                })->implode(', ');
+        }
+
+        if (empty($paymentMethods)) {
+            $checkUpInfo = json_decode($this->check_up_info, true);
+            return $checkUpInfo['payment_method'] ?? 'N/A';
+        }
+
+        return $paymentMethods;
+    }
+
     // Define the relationship with the Upload model
     public function uploads()
     {
