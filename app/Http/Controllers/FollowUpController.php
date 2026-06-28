@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\FollowUpExport;
 use App\Models\Upload;
+use App\Models\Payment;
 use Illuminate\Support\Facades\Storage;
 
 
@@ -45,7 +46,12 @@ class FollowUpController extends Controller
         // Calculate total due using simple subtraction
         $totalBilled = $patient->followUps()->sum('amount_billed');
         $totalPaid = $patient->followUps()->sum('amount_paid');
-        $totalDueAll = $totalBilled - $totalPaid;
+        $standalonePaid = Payment::where('patient_id', $patient->id)
+            ->whereNull('follow_up_id')
+            ->where('source', 'manual')
+            ->where('status', 'posted')
+            ->sum('amount');
+        $totalDueAll = ($totalBilled - $totalPaid) - $standalonePaid;
 
         $parameters = Parameter::orderBy('display_order')->get();
 
@@ -139,6 +145,8 @@ class FollowUpController extends Controller
             'amount_paid' => $amount_paid, // Ensuring it does not exceed the total_due
 
         ]);
+
+    $this->syncFollowUpAutoPayment($followUp, $checkUpInfo);
 
         $followUp->patient->update(['vishesh' => $request->vishesh]);
 
@@ -618,7 +626,12 @@ class FollowUpController extends Controller
         // Calculate total due
         $totalBilled = $patient->followUps()->sum('amount_billed');
         $totalPaid = $patient->followUps()->sum('amount_paid');
-        $totalDueAll = $totalBilled - $totalPaid;
+        $standalonePaid = Payment::where('patient_id', $patient->id)
+            ->whereNull('follow_up_id')
+            ->where('source', 'manual')
+            ->where('status', 'posted')
+            ->sum('amount');
+        $totalDueAll = ($totalBilled - $totalPaid) - $standalonePaid;
 
         // Fetch parameters
         $parameters = Parameter::all();
@@ -686,6 +699,8 @@ class FollowUpController extends Controller
             'amount_billed' => $request->amount_billed,
             'amount_paid' => $request->amount_paid,
         ]);
+
+        $this->syncFollowUpAutoPayment($followup, $updatedCheckUpInfo);
 
         $followup->patient->update(['vishesh' => $request->vishesh]);
 
@@ -821,5 +836,45 @@ class FollowUpController extends Controller
         return Excel::download(new FollowUpExport($request), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    private function syncFollowUpAutoPayment(FollowUp $followUp, array $checkUpInfo = []): void
+    {
+        $existingAutoPayment = Payment::where('follow_up_id', $followUp->id)
+            ->where('source', 'followup_auto')
+            ->first();
+
+        if ((float) $followUp->amount_paid <= 0) {
+            if ($existingAutoPayment) {
+                $existingAutoPayment->update([
+                    'status' => 'void',
+                    'notes' => trim(($existingAutoPayment->notes ? $existingAutoPayment->notes . ' | ' : '') . 'Auto-voided due to zero follow-up payment'),
+                ]);
+            }
+
+            return;
+        }
+
+        $paymentData = [
+            'patient_id' => $followUp->patient_id,
+            'follow_up_id' => $followUp->id,
+            'received_by' => $followUp->doctor_id,
+            'amount' => $followUp->amount_paid,
+            'payment_method' => strtolower(trim($checkUpInfo['payment_method'] ?? 'cash')),
+            'paid_at' => $followUp->created_at,
+            'status' => 'posted',
+            'reference_no' => null,
+            'notes' => 'Auto-synced from follow-up payment fields',
+            'branch_id' => $checkUpInfo['branch_id'] ?? null,
+            'branch_name' => $checkUpInfo['branch_name'] ?? null,
+            'source' => 'followup_auto',
+        ];
+
+        if ($existingAutoPayment) {
+            $existingAutoPayment->update($paymentData);
+            return;
+        }
+
+        Payment::create($paymentData);
     }
 }

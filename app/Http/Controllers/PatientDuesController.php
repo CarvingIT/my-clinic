@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Patient;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 
 class PatientDuesController extends Controller
@@ -28,7 +29,12 @@ class PatientDuesController extends Controller
             ->map(function ($patient) {
                 $totalBilled = $patient->followUps()->sum('amount_billed');
                 $totalPaid = $patient->followUps()->sum('amount_paid');
-                $patient->total_due = $totalBilled - $totalPaid;
+                $standalonePaid = Payment::where('patient_id', $patient->id)
+                    ->whereNull('follow_up_id')
+                    ->where('source', 'manual')
+                    ->where('status', 'posted')
+                    ->sum('amount');
+                $patient->total_due = ($totalBilled - $totalPaid) - $standalonePaid;
 
                 $latestFollowUp = $patient->followUps()->latest('created_at')->first();
                 $patient->last_follow_up_date = $latestFollowUp ? $latestFollowUp->created_at : null;

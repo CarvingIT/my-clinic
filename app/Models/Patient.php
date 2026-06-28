@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
 use App\Models\FollowUp;
+use App\Models\Payment;
 
 class Patient extends Model
 {
@@ -29,6 +30,7 @@ class Patient extends Model
         'weight',
         'occupation',
         'reference',
+        'patient_group_id',
         'created_at',
         'updated_at',
 
@@ -53,9 +55,20 @@ class Patient extends Model
 
         });
     }
+
+    public function group()
+    {
+        return $this->belongsTo(PatientGroup::class, 'patient_group_id');
+    }
+
     public function followUps()
     {
         return $this->hasMany(FollowUp::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 
     public function uploads()
