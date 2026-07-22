@@ -737,6 +737,7 @@ class FollowUpController extends Controller
         $amountPaid = \App\Models\Payment::where('follow_up_id', $followup->id)->where('status', 'posted')->sum('amount');
 
         return view('followups.edit', compact(
+            'patient',
             'followup',
             'followUps',
             'parameters',
