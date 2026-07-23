@@ -58,7 +58,7 @@ class BackfillFollowUpPayments extends Command
                     'patient_id' => $followUp->patient_id,
                     'follow_up_id' => $followUp->id,
                     'received_by' => $receivedBy,
-                    'amount' => $followUp->amount_paid,
+                    'amount' => (float) $followUp->getRawOriginal('amount_paid'),
                     'payment_method' => $checkUpInfo['payment_method'] ?? 'cash',
                     'paid_at' => $followUp->created_at,
                     'status' => 'posted',
