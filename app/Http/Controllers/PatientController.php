@@ -158,12 +158,13 @@ class PatientController extends Controller
 
         $patient->fresh(); // Ensure latest data is loaded
 
-        // Get total amount billed and total amount paid across all follow-ups
+        // Get total amount billed, total amount paid, and total amount exempted
         $totalBilled = $patient->followUps()->sum('amount_billed');
         $totalPaid = \App\Models\Payment::where('patient_id', $patient->id)->where('status', 'posted')->sum('amount');
+        $totalExempted = \App\Models\Exemption::where('patient_id', $patient->id)->sum('amount');
 
         // Calculate total outstanding balance (Total Due)
-        $totalDueAll = $totalBilled - $totalPaid;
+        $totalDueAll = $totalBilled - $totalPaid - $totalExempted;
 
         // Load paginated follow-ups and reports
         $patient->followUps = $patient->followUps()->orderBy('created_at', 'desc')->paginate(5);
@@ -175,7 +176,7 @@ class PatientController extends Controller
         // Load all uploads for the patient, ordered by date
         $uploads = $patient->uploads()->orderBy('created_at', 'desc')->get();
 
-        return view('patients.show', compact('patient', 'totalDueAll', 'followUps', 'uploads'));
+        return view('patients.show', compact('patient', 'totalDueAll', 'totalExempted', 'followUps', 'uploads'));
     }
 
     /**
@@ -255,6 +256,133 @@ class PatientController extends Controller
         return $pdf->inline($patient->name . '.pdf');
     }
 
+
+    /**
+     * Generate Patient Invoice / Ledger Statement
+     */
+    public function generateInvoice(Patient $patient, Request $request)
+    {
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        // Query followups in period
+        $followUps = $patient->followUps()
+            ->when($fromDate, fn($q) => $q->whereDate('created_at', '>=', $fromDate))
+            ->when($toDate, fn($q) => $q->whereDate('created_at', '<=', $toDate))
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Query posted payments in period
+        $payments = \App\Models\Payment::where('patient_id', $patient->id)
+            ->where('status', 'posted')
+            ->when($fromDate, fn($q) => $q->whereDate('paid_at', '>=', $fromDate))
+            ->when($toDate, fn($q) => $q->whereDate('paid_at', '<=', $toDate))
+            ->orderBy('paid_at', 'asc')
+            ->get();
+
+        // Query exemptions in period
+        $exemptions = \App\Models\Exemption::where('patient_id', $patient->id)
+            ->when($fromDate, fn($q) => $q->whereDate('exempted_at', '>=', $fromDate))
+            ->when($toDate, fn($q) => $q->whereDate('exempted_at', '<=', $toDate))
+            ->orderBy('exempted_at', 'asc')
+            ->get();
+
+        // Helper for uniform Title Case payment method formatting (e.g. Cash, Card, Online, UPI)
+        $formatMethod = function ($m) {
+            if (empty($m)) return 'Cash';
+            $upper = strtoupper(trim($m));
+            if ($upper === 'UPI') return 'UPI';
+            return ucwords(strtolower(str_replace(['_', '-'], ' ', $m)));
+        };
+
+        // Build itemized ledger entries
+        $ledgerEntries = collect();
+
+        foreach ($followUps as $fu) {
+            $linkedPayment = $fu->payments()->where('status', 'posted')->first();
+            $rawMethod = $linkedPayment ? $linkedPayment->payment_method : ($fu->payment_method ?? 'Cash');
+            $method = $formatMethod($rawMethod);
+
+            $ledgerEntries->push((object)[
+                'date' => $fu->created_at,
+                'billed_amount' => (float)($fu->amount_billed ?? 0),
+                'paid_amount' => (float)($fu->amount_paid ?? 0),
+                'payment_method' => $method,
+            ]);
+        }
+
+        foreach ($payments as $p) {
+            if (empty($p->follow_up_id)) {
+                $ledgerEntries->push((object)[
+                    'date' => $p->paid_at ?? $p->created_at,
+                    'billed_amount' => 0.0,
+                    'paid_amount' => (float)$p->amount,
+                    'payment_method' => $formatMethod($p->payment_method ?? 'Payment'),
+                ]);
+            }
+        }
+
+        foreach ($exemptions as $ex) {
+            $ledgerEntries->push((object)[
+                'date' => $ex->exempted_at ?? $ex->created_at,
+                'billed_amount' => 0.0,
+                'paid_amount' => 0.0,
+                'payment_method' => 'Exemption' . ($ex->reason ? ' (' . $ex->reason . ')' : ''),
+            ]);
+        }
+
+        $ledgerEntries = $ledgerEntries->sortBy('date')->values();
+
+        // Opening balance calculation (prior to from_date)
+        $openingBalance = 0.0;
+        if ($fromDate) {
+            $priorBilled = $patient->followUps()->whereDate('created_at', '<', $fromDate)->sum('amount_billed');
+            $priorPaid = \App\Models\Payment::where('patient_id', $patient->id)->where('status', 'posted')->whereDate('paid_at', '<', $fromDate)->sum('amount');
+            $priorExempted = \App\Models\Exemption::where('patient_id', $patient->id)->whereDate('exempted_at', '<', $fromDate)->sum('amount');
+            $openingBalance = (float)($priorBilled - $priorPaid - $priorExempted);
+        }
+
+        // Calculate Totals for the selected range
+        $totalBilled = (float)$patient->followUps()
+            ->when($fromDate, fn($q) => $q->whereDate('created_at', '>=', $fromDate))
+            ->when($toDate, fn($q) => $q->whereDate('created_at', '<=', $toDate))
+            ->sum('amount_billed');
+
+        $totalPaid = (float)\App\Models\Payment::where('patient_id', $patient->id)
+            ->where('status', 'posted')
+            ->when($fromDate, fn($q) => $q->whereDate('paid_at', '>=', $fromDate))
+            ->when($toDate, fn($q) => $q->whereDate('paid_at', '<=', $toDate))
+            ->sum('amount');
+
+        $totalExempted = (float)\App\Models\Exemption::where('patient_id', $patient->id)
+            ->when($fromDate, fn($q) => $q->whereDate('exempted_at', '>=', $fromDate))
+            ->when($toDate, fn($q) => $q->whereDate('exempted_at', '<=', $toDate))
+            ->sum('amount');
+
+        // Closing balance at end of period
+        $closingBalance = $openingBalance + $totalBilled - $totalPaid - $totalExempted;
+        $totalDue = $closingBalance;
+
+        // Current net due overall today
+        $allTimeBilled = (float)$patient->followUps()->sum('amount_billed');
+        $allTimePaid = (float)\App\Models\Payment::where('patient_id', $patient->id)->where('status', 'posted')->sum('amount');
+        $allTimeExempted = (float)\App\Models\Exemption::where('patient_id', $patient->id)->sum('amount');
+        $currentBalanceToday = $allTimeBilled - $allTimePaid - $allTimeExempted;
+
+        return view('patients.invoice', compact(
+            'patient',
+            'ledgerEntries',
+            'openingBalance',
+            'totalBilled',
+            'totalPaid',
+            'totalExempted',
+            'closingBalance',
+            'totalDue',
+            'currentBalanceToday',
+            'fromDate',
+            'toDate'
+        ));
+    }
 
     /**
      *  Generate Medical Certificate

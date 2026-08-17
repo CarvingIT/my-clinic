@@ -46,7 +46,8 @@ class FollowUpController extends Controller
         // Calculate total due using simple subtraction
         $totalBilled = $patient->followUps()->sum('amount_billed');
         $totalPaid = \App\Models\Payment::where('patient_id', $patient->id)->where('status', 'posted')->sum('amount');
-        $totalDueAll = $totalBilled - $totalPaid;
+        $totalExempted = \App\Models\Exemption::where('patient_id', $patient->id)->sum('amount');
+        $totalDueAll = $totalBilled - $totalPaid - $totalExempted;
 
         $parameters = Parameter::orderBy('display_order')->get();
 
@@ -55,7 +56,12 @@ class FollowUpController extends Controller
             // ->take(2)
             ->get();
 
-        return view('followups.create', compact('patient', 'parameters', 'followUps', 'totalDueAll'));
+        $latestFollowUp = $followUps->first();
+        $previousChikitsa = $latestFollowUp
+            ? (json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? '')
+            : '';
+
+        return view('followups.create', compact('patient', 'parameters', 'followUps', 'totalDueAll', 'previousChikitsa'));
     }
 
 
@@ -376,6 +382,66 @@ class FollowUpController extends Controller
             ->latest()
             ->get(['id', 'patient_id', 'amount_billed', 'created_at']);
 
+        // Base query for exemptions
+        $exemptionsQuery = \App\Models\Exemption::query()
+            ->when($timePeriod !== 'all', function ($q) use ($timePeriod) {
+                switch ($timePeriod) {
+                    case 'today':
+                        $q->whereDate('exempted_at', Carbon::today());
+                        break;
+                    case 'last_week':
+                        $q->whereBetween('exempted_at', [
+                            Carbon::now()->subWeek()->startOfWeek(),
+                            Carbon::now()->subWeek()->endOfWeek(),
+                        ]);
+                        break;
+                    case 'this_month':
+                        $q->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_month':
+                        $q->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth()->subMonth()->startOfMonth(),
+                            Carbon::now()->startOfMonth()->subMonth()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_3_months':
+                        $q->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth()->subMonths(2)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_6_months':
+                        $q->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth()->subMonths(5)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_12_months':
+                        $q->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth()->subMonths(11)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                }
+            }, function ($q) use ($fromDate, $toDate) {
+                if ($fromDate) {
+                    $q->whereDate('exempted_at', '>=', Carbon::parse($fromDate)->startOfDay());
+                }
+                if ($toDate) {
+                    $q->whereDate('exempted_at', '<=', Carbon::parse($toDate)->endOfDay());
+                }
+            });
+
+        $totalExemptedAmount = (clone $exemptionsQuery)->sum('amount');
+        $exemptedPatientsCount = (clone $exemptionsQuery)->distinct('patient_id')->count('patient_id');
+        $exemptionsList = (clone $exemptionsQuery)
+            ->with(['patient:id,name,mobile_phone', 'user:id,name'])
+            ->latest('exempted_at')
+            ->get();
+
         $patientIds = $allFollowUpsList->pluck('patient_id')->unique();
         $patientsList = \App\Models\Patient::withSum('followUps', 'amount_billed')
             ->whereIn('id', $patientIds)
@@ -388,10 +454,16 @@ class FollowUpController extends Controller
             ->selectRaw('patient_id, SUM(amount) as total_paid')
             ->pluck('total_paid', 'patient_id');
 
-        $patientBalances = $patientsList->mapWithKeys(function($p) use ($patientPayments) {
+        $patientExemptions = \App\Models\Exemption::whereIn('patient_id', $patientIds)
+            ->groupBy('patient_id')
+            ->selectRaw('patient_id, SUM(amount) as total_exempted')
+            ->pluck('total_exempted', 'patient_id');
+
+        $patientBalances = $patientsList->mapWithKeys(function($p) use ($patientPayments, $patientExemptions) {
             $totalBilled = $p->follow_ups_sum_amount_billed ?? 0;
             $totalPaid = $patientPayments[$p->id] ?? 0;
-            $bal = $totalBilled - $totalPaid;
+            $totalExempted = $patientExemptions[$p->id] ?? 0;
+            $bal = $totalBilled - $totalPaid - $totalExempted;
             return [$p->id => $bal];
         });
 
@@ -553,6 +625,9 @@ class FollowUpController extends Controller
             'branches',
             'selectedBranch',
             'totalDueAll',
+            'totalExemptedAmount',
+            'exemptedPatientsCount',
+            'exemptionsList',
             'followUpFrequencyDaily',
             'followUpFrequencyMonthly',
             'followUpFrequencyYearly',
@@ -736,6 +811,11 @@ class FollowUpController extends Controller
         $amountBilled = $followup->amount_billed ?? '';
         $amountPaid = \App\Models\Payment::where('follow_up_id', $followup->id)->where('status', 'posted')->sum('amount');
 
+        $latestFollowUp = $followUps->first();
+        $previousChikitsa = $latestFollowUp
+            ? (json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? '')
+            : '';
+
         return view('followups.edit', compact(
             'patient',
             'followup',
@@ -745,7 +825,8 @@ class FollowUpController extends Controller
             'totalDueAll',
             'totalDue',
             'amountBilled',
-            'amountPaid'
+            'amountPaid',
+            'previousChikitsa'
         ));
     }
 

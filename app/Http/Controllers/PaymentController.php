@@ -149,7 +149,8 @@ class PaymentController extends Controller
         $members = $group->members->map(function ($member) {
             $totalBilled = $member->followUps()->sum('amount_billed');
             $totalPaid = \App\Models\Payment::where('patient_id', $member->id)->where('status', 'posted')->sum('amount');
-            $due = $totalBilled - $totalPaid;
+            $totalExempted = \App\Models\Exemption::where('patient_id', $member->id)->sum('amount');
+            $due = $totalBilled - $totalPaid - $totalExempted;
 
             return [
                 'id' => $member->id,

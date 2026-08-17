@@ -334,23 +334,196 @@
                         </div>
 
                         </div>{{-- End grid --}}
-                        <div class="flex justify-end mb-8 mt-3">
+                        <div class="flex flex-wrap lg:flex-nowrap items-center justify-between gap-2 w-full py-2 mb-6 mt-3">
                             <a href="{{ route('followups.create', ['patient' => $patient->id]) }}"
-                                class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-md shadow-md transition duration-300">
+                                class="flex-1 min-w-max bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-3 text-xs sm:text-sm rounded-lg shadow-sm hover:shadow transition duration-200 flex items-center justify-center text-center whitespace-nowrap">
                                 {{ __('messages.add_follow_up') }}
                             </a>
 
                             <a href="{{ route('patients.export-pdf', $patient) }}" target="_blank"
-                                class="bg-sky-400 hover:bg-sky-500 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
+                                class="flex-1 min-w-max bg-sky-500 hover:bg-sky-600 text-white font-semibold py-2.5 px-3 text-xs sm:text-sm rounded-lg shadow-sm hover:shadow transition duration-200 flex items-center justify-center text-center whitespace-nowrap">
                                 {{ __('messages.Export to PDF') }}
                             </a>
 
+                            <!-- Invoice Button & Modal -->
+                            <div x-data="{
+                                openInvoiceModal: false,
+                                fromDate: '',
+                                toDate: '',
+                                setPeriod(type) {
+                                    const today = new Date();
+                                    const formatDate = (d) => {
+                                        const year = d.getFullYear();
+                                        const month = String(d.getMonth() + 1).padStart(2, '0');
+                                        const day = String(d.getDate()).padStart(2, '0');
+                                        return `${year}-${month}-${day}`;
+                                    };
+                                    if (type === 'this_month') {
+                                        const start = new Date(today.getFullYear(), today.getMonth(), 1);
+                                        this.fromDate = formatDate(start);
+                                        this.toDate = formatDate(today);
+                                    } else if (type === 'last_month') {
+                                        const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                                        const end = new Date(today.getFullYear(), today.getMonth(), 0);
+                                        this.fromDate = formatDate(start);
+                                        this.toDate = formatDate(end);
+                                    } else if (type === '3_months') {
+                                        const start = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+                                        this.fromDate = formatDate(start);
+                                        this.toDate = formatDate(today);
+                                    } else if (type === '6_months') {
+                                        const start = new Date(today.getFullYear(), today.getMonth() - 5, 1);
+                                        this.fromDate = formatDate(start);
+                                        this.toDate = formatDate(today);
+                                    } else if (type === 'all') {
+                                        this.fromDate = '';
+                                        this.toDate = '';
+                                    }
+                                }
+                            }" class="flex-1 min-w-max">
+                                <button @click="openInvoiceModal = true" title="Generate Invoice"
+                                    class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2.5 px-3 text-xs sm:text-sm rounded-lg shadow-sm hover:shadow transition duration-200 flex items-center justify-center text-center whitespace-nowrap">
+                                    <i class="fas fa-file-invoice mr-1.5"></i> {{ __('Invoice') }}
+                                </button>
+
+                                <!-- Invoice Modal -->
+                                <div x-show="openInvoiceModal" x-cloak x-transition.opacity
+                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                                    <div @click.away="openInvoiceModal = false"
+                                        class="relative w-full max-w-lg mx-4 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-teal-100 dark:border-gray-700 transition-all">
+                                        <!-- Header -->
+                                        <div class="flex items-center justify-between px-6 py-4 bg-teal-50 dark:bg-teal-900/30 border-b border-teal-100 dark:border-gray-700 rounded-t-2xl">
+                                            <h3 class="text-lg font-bold text-teal-800 dark:text-teal-300 flex items-center gap-2">
+                                                <i class="fas fa-file-invoice"></i> {{ __('Generate Patient Invoice / Statement') }}
+                                            </h3>
+                                            <button @click="openInvoiceModal = false" class="text-teal-800 dark:text-teal-300 text-2xl font-bold hover:text-red-500 transition">
+                                                &times;
+                                            </button>
+                                        </div>
+                                        <!-- Form -->
+                                        <form method="GET" action="{{ route('patients.invoice', $patient->id) }}" target="_blank" class="px-6 py-5 space-y-4">
+                                            <div>
+                                                <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
+                                                    Quick Preset Period
+                                                </label>
+                                                <div class="grid grid-cols-5 gap-1.5 w-full mb-3">
+                                                    <button type="button" @click="setPeriod('this_month')" class="px-1.5 py-1.5 text-xs text-center font-semibold rounded-md bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 transition whitespace-nowrap">
+                                                        This Month
+                                                    </button>
+                                                    <button type="button" @click="setPeriod('last_month')" class="px-1.5 py-1.5 text-xs text-center font-semibold rounded-md bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 transition whitespace-nowrap">
+                                                        Last Month
+                                                    </button>
+                                                    <button type="button" @click="setPeriod('3_months')" class="px-1.5 py-1.5 text-xs text-center font-semibold rounded-md bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 transition whitespace-nowrap">
+                                                        3 Months
+                                                    </button>
+                                                    <button type="button" @click="setPeriod('6_months')" class="px-1.5 py-1.5 text-xs text-center font-semibold rounded-md bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 transition whitespace-nowrap">
+                                                        6 Months
+                                                    </button>
+                                                    <button type="button" @click="setPeriod('all')" class="px-1.5 py-1.5 text-xs text-center font-semibold rounded-md bg-teal-50 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800 hover:bg-teal-100 transition whitespace-nowrap">
+                                                        All Time
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div>
+                                                    <label for="inv_from_date" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                                        {{ __('From Date') }}
+                                                    </label>
+                                                    <input type="date" id="inv_from_date" name="from_date" x-model="fromDate"
+                                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+                                                </div>
+                                                <div>
+                                                    <label for="inv_to_date" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                                        {{ __('To Date') }}
+                                                    </label>
+                                                    <input type="date" id="inv_to_date" name="to_date" x-model="toDate"
+                                                        class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-teal-500 focus:border-teal-500" />
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                                <button type="button" @click="openInvoiceModal = false"
+                                                    class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg transition">
+                                                    {{ __('Cancel') }}
+                                                </button>
+                                                <button type="submit" @click="openInvoiceModal = false"
+                                                    class="bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-5 rounded-lg shadow transition">
+                                                    <i class="fas fa-print mr-1.5"></i> {{ __('Generate Invoice') }}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Exemption Button & Modal -->
+                            <div x-data="{ openExemptionModal: false }" class="flex-1 min-w-max">
+                                @if (Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')))
+                                    <button @click="openExemptionModal = true" title="Exempt Money"
+                                        class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2.5 px-3 text-xs sm:text-sm rounded-lg shadow-sm hover:shadow transition duration-200 flex items-center justify-center text-center whitespace-nowrap">
+                                        <i class="fas fa-hand-holding-usd mr-1.5"></i> {{ __('Exemption') }}
+                                    </button>
+                                @endif
+
+                                <!-- Exemption Modal -->
+                                <div x-show="openExemptionModal" x-cloak x-transition.opacity
+                                    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                                    <div @click.away="openExemptionModal = false"
+                                        class="relative w-full max-w-md mx-4 bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-amber-100 dark:border-gray-700 transition-all">
+                                        <!-- Header -->
+                                        <div class="flex items-center justify-between px-6 py-4 bg-amber-50 dark:bg-amber-900/30 border-b border-amber-100 dark:border-gray-700 rounded-t-2xl">
+                                            <h3 class="text-lg font-bold text-amber-800 dark:text-amber-300 flex items-center gap-2">
+                                                <i class="fas fa-hand-holding-usd"></i> {{ __('Exempt Amount for Patient') }}
+                                            </h3>
+                                            <button @click="openExemptionModal = false" class="text-amber-800 dark:text-amber-300 text-2xl font-bold hover:text-red-500 transition">
+                                                &times;
+                                            </button>
+                                        </div>
+                                        <!-- Form -->
+                                        <form method="POST" action="{{ route('patients.exemptions.store', $patient->id) }}" class="px-6 py-5 space-y-4">
+                                            @csrf
+                                            <div>
+                                                <label for="exemption_amount" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                                    {{ __('Exemption Amount (₹)') }} <span class="text-red-500">*</span>
+                                                </label>
+                                                <input type="number" step="0.01" id="exemption_amount" name="amount" required min="0.01"
+                                                    placeholder="e.g. 500"
+                                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                                            </div>
+                                            <div>
+                                                <label for="exemption_reason" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                                    {{ __('Reason / Note') }}
+                                                </label>
+                                                <textarea id="exemption_reason" name="reason" rows="3" placeholder="e.g. Senior citizen discount, Fee waiver"
+                                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500"></textarea>
+                                            </div>
+                                            <div>
+                                                <label for="exempted_at" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                                    {{ __('Exemption Date & Time') }}
+                                                </label>
+                                                <input type="datetime-local" id="exempted_at" name="exempted_at" value="{{ date('Y-m-d\TH:i') }}"
+                                                    class="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500" />
+                                            </div>
+                                            <div class="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+                                                <button type="button" @click="openExemptionModal = false"
+                                                    class="bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold py-2 px-4 rounded-lg transition">
+                                                    {{ __('Cancel') }}
+                                                </button>
+                                                <button type="submit"
+                                                    class="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-5 rounded-lg shadow transition">
+                                                    {{ __('Exempt Money') }}
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Share Patient Button (Modal Trigger) -->
-                            <div x-data="{ openExportPatientModal: false }">
+                            <div x-data="{ openExportPatientModal: false }" class="flex-1 min-w-max">
                                 @if (Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')))
                                     <button @click="openExportPatientModal = true" title="Share Patient"
-                                        class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
-                                        <i class="fas fa-share-alt mr-2"></i> {{ __('Share Patient') }}
+                                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-3 text-xs sm:text-sm rounded-lg shadow-sm hover:shadow transition duration-200 flex items-center justify-center text-center whitespace-nowrap">
+                                        <i class="fas fa-share-alt mr-1.5"></i> {{ __('Share Patient') }}
                                     </button>
                                 @endif
 
@@ -410,10 +583,10 @@
 
                             {{-- Generate Certificate button --}}
 
-                            <div x-data="{ open: false }">
+                            <div x-data="{ open: false }" class="flex-1 min-w-max">
                                 <button @click="open = true"
-                                    class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-6 ml-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
-                                    <i class="fas fa-certificate mr-2"></i>{{ __('messages.Generate Certificate') }}
+                                    class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 px-3 text-xs sm:text-sm rounded-lg shadow-sm hover:shadow transition duration-200 flex items-center justify-center text-center whitespace-nowrap">
+                                    <i class="fas fa-certificate mr-1.5"></i>{{ __('messages.Generate Certificate') }}
                                 </button>
 
                                 <!-- Modal Backdrop -->
@@ -510,10 +683,10 @@
                             </div>
 
                             {{-- Consent Form Button --}}
-                            <div x-data="{ openConsentModal: false }">
+                            <div x-data="{ openConsentModal: false }" class="flex-1 min-w-max">
                                 <button @click="openConsentModal = true"
-                                    class="bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 px-6 ml-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105">
-                                    <i class="fas fa-file-signature mr-2"></i>{{ __('messages.Consent Form') }}
+                                    class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 px-3 text-xs sm:text-sm rounded-lg shadow-sm hover:shadow transition duration-200 flex items-center justify-center text-center whitespace-nowrap">
+                                    <i class="fas fa-file-signature mr-1.5"></i>{{ __('messages.Consent Form') }}
                                 </button>
 
                                 <!-- Modal Backdrop -->
@@ -606,10 +779,10 @@
                             </div>
 
                             {{-- Reports Button --}}
-                            <div x-data="{ openReportModal: false, selectedImageUrl: '' }">
+                            <div x-data="{ openReportModal: false, selectedImageUrl: '' }" class="flex-shrink-0">
                                 <button @click="openReportModal = true" title="{{ __('messages.View Reports') }}"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 ml-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-15 h-10 flex items-center justify-center">
-                                    <i class="fas fa-file-image text-white text-2xl"></i>
+                                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-3.5 text-xs sm:text-sm rounded-lg shadow-sm hover:shadow transition duration-200 flex items-center justify-center whitespace-nowrap h-10">
+                                    <i class="fas fa-file-image text-white text-base"></i>
                                 </button>
 
                                 <!-- Medical Reports Modal -->
@@ -801,10 +974,10 @@
 
                             {{-- Chikitsa Ahwal --}}
 
-                            <div x-data="{ openReportModal: false }">
+                            <div x-data="{ openReportModal: false }" class="flex-shrink-0">
                                 <button @click="openReportModal = true" title="{{ __('Upload/View PDF') }}"
-                                    class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-medium py-2 px-6 ml-4 rounded-md shadow-md transition duration-300">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-6 h-6">
+                                    class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white font-semibold py-2.5 px-3.5 text-xs sm:text-sm rounded-lg shadow-sm hover:shadow transition duration-200 flex items-center justify-center whitespace-nowrap h-10">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="w-4 h-4">
                                         <!-- White document icon -->
                                         <path fill="white"
                                             d="M224 0v128h128L224 0zM64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H224c-17.7 0-32-14.3-32-32V0H64z" />
@@ -929,15 +1102,22 @@
 
                     {{-- Outstanding Balance --}}
                     @if (isset($totalDueAll))
-                        <div
-                            class="
+                        <div class="flex flex-col sm:flex-row justify-between items-center p-4 rounded-md font-bold
                                 @if ($totalDueAll == 0) bg-green-200 text-green-800
                                 @elseif($totalDueAll < 0) bg-blue-200 text-blue-800
                                 @elseif($totalDueAll < 2000) bg-yellow-200 text-yellow-800
-                                @else bg-red-200 text-red-800 @endif
-                                p-4 rounded-md font-bold text-right pr-15">
-                            {{ __('messages.Total Outstanding Balance') }}:
-                            ₹{{ number_format($totalDueAll, 2) }}
+                                @else bg-red-200 text-red-800 @endif mb-4">
+                            <div class="text-sm font-semibold flex items-center gap-2 mb-2 sm:mb-0">
+                                @if(($totalExempted ?? 0) > 0)
+                                    <span class="bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-700 text-xs shadow-sm">
+                                        <i class="fas fa-hand-holding-usd mr-1"></i> {{ __('Total Exempted') }}: ₹{{ number_format($totalExempted, 2) }}
+                                    </span>
+                                @endif
+                            </div>
+                            <div class="text-right text-base sm:text-lg">
+                                {{ __('messages.Total Outstanding Balance') }}:
+                                ₹{{ number_format($totalDueAll, 2) }}
+                            </div>
                         </div>
                     @else
                         <div class="text-red-600 font-bold">Error: Total Outstanding Balance not found!</div>
@@ -1010,6 +1190,16 @@
                                 ]);
                             }
                         }
+
+                        // Add exemptions to timeline
+                        $allExemptions = \App\Models\Exemption::where('patient_id', $patient->id)->orderBy('exempted_at', 'asc')->get();
+                        foreach ($allExemptions as $ex) {
+                            $timelineEntries->push((object)[
+                                'type' => 'exemption',
+                                'date' => $ex->exempted_at ?? $ex->created_at,
+                                'exemption' => $ex,
+                            ]);
+                        }
                         
                         $timelineEntries = $timelineEntries->sortByDesc('date')->values();
                     @endphp
@@ -1057,13 +1247,45 @@
                                                 <td class="px-6 py-4 align-top text-gray-600 dark:text-gray-300">Standalone payment</td>
                                                 <td class="px-2 py-4 align-top text-gray-600 dark:text-gray-300">-</td>
                                                 <td class="w-[250px] px-6 py-2 align-top text-gray-600 dark:text-gray-300">
-                                                    <p>{{ strtoupper($payment->payment_method) }}</p>
+                                                    <p>{{ strtoupper($payment->payment_method) === 'UPI' ? 'UPI' : ucwords(strtolower(str_replace(['_', '-'], ' ', $payment->payment_method))) }}</p>
                                                     <p class="font-bold text-gray-800 dark:text-gray-200">₹{{ number_format($payment->amount, 2) }}</p>
                                                 </td>
                                                 <td class="px-6 py-4 text-gray-600 dark:text-gray-300 flex gap-4 items-center">
                                                     <a href="{{ route('payments.edit', $payment) }}" class="text-indigo-600 hover:text-indigo-900 font-medium" title="Edit Payment">
                                                         <i class="fas fa-pen"></i>
                                                     </a>
+                                                </td>
+                                            </tr>
+                                        @elseif ($entry->type === 'exemption')
+                                            @php $exemption = $entry->exemption; @endphp
+                                            <tr class="hover:bg-amber-50/50 transition duration-300 dark:hover:bg-gray-700">
+                                                <td class="w-[220px] px-6 py-4 text-gray-600 dark:text-gray-300" style="vertical-align: top;">
+                                                    <p>{{ optional($exemption->exempted_at ?? $exemption->created_at)->format('d M Y, h:i A') }}</p>
+                                                    <p><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300"><i class="fas fa-hand-holding-usd mr-1"></i> Exemption</span></p>
+                                                </td>
+                                                <td class="px-6 py-4 align-top text-gray-600 dark:text-gray-300">
+                                                    <span class="font-semibold text-amber-900 dark:text-amber-200">Exemption Amount</span>
+                                                    @if($exemption->reason)
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Reason: {{ $exemption->reason }}</p>
+                                                    @endif
+                                                </td>
+                                                <td class="px-2 py-4 align-top text-gray-600 dark:text-gray-300 text-xs">
+                                                    By: {{ $exemption->user->name ?? 'Admin' }}
+                                                </td>
+                                                <td class="w-[250px] px-6 py-2 align-top text-gray-600 dark:text-gray-300">
+                                                    <p class="text-xs text-amber-600 dark:text-amber-400 font-semibold">Exempted</p>
+                                                    <p class="font-bold text-amber-700 dark:text-amber-400">₹{{ number_format($exemption->amount, 2) }}</p>
+                                                </td>
+                                                <td class="px-6 py-4 text-gray-600 dark:text-gray-300 flex gap-4 items-center">
+                                                    @if (Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')))
+                                                        <form method="POST" action="{{ route('exemptions.destroy', $exemption) }}" onsubmit="return confirm('Are you sure you want to delete this exemption?');" class="inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-red-600 hover:text-red-900 font-medium" title="Delete Exemption">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @else
@@ -1290,7 +1512,7 @@
                                                     <div>
                                                         @if ($followUp->payment_method && $followUp->payment_method !== 'N/A')
                                                             <p class="">
-                                                                {{ $followUp->payment_method }}
+                                                                {{ strtoupper($followUp->payment_method) === 'UPI' ? 'UPI' : ucwords(strtolower(str_replace(['_', '-'], ' ', $followUp->payment_method))) }}
                                                             </p>
                                                         @endif
                                                     </div>

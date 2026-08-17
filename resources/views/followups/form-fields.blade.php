@@ -109,10 +109,12 @@
 
 @php
     // Fetch the latest follow-up's 'chikitsa' if available
-    $latestFollowUp = $followUps->first();
-    $previousChikitsa = $latestFollowUp
-        ? json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? ''
-        : '';
+    if (!isset($previousChikitsa)) {
+        $latestFollowUp = isset($followUps) ? $followUps->first() : null;
+        $previousChikitsa = $latestFollowUp
+            ? (json_decode($latestFollowUp->check_up_info, true)['chikitsa'] ?? '')
+            : '';
+    }
 @endphp
 
 <!-- Chikitsa Textarea with Dravya Popup -->
