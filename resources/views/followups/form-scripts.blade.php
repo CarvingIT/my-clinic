@@ -272,6 +272,15 @@
 
 {{-- Script for chikitsa --}}
 
+@php
+    if (!isset($previousChikitsa)) {
+        $latestFollowUpForChikitsa = isset($followUps) ? $followUps->first() : null;
+        $previousChikitsa = $latestFollowUpForChikitsa
+            ? (json_decode($latestFollowUpForChikitsa->check_up_info, true)['chikitsa'] ?? '')
+            : '';
+    }
+@endphp
+
 <script>
     const chikitsaFieldId = {{ \App\Models\Field::where('name', 'chikitsa')->first()->id ?? 0 }};
     const chikitsaStorageKey = 'customChikitsaPresets';
@@ -300,8 +309,9 @@
                 withCredentials: true
             });
             response.data.forEach(preset => {
-                const presetText = preset.button_text === 'चिकित्सा यथा पूर्व' ? previousChikitsa : preset
-                    .preset_text;
+                const presetText = (preset.button_text && preset.button_text.trim() === 'चिकित्सा यथा पूर्व') 
+                    ? previousChikitsa 
+                    : preset.preset_text;
                 createChikitsaPresetButton(preset.button_text, presetText, preset.id, true);
             });
         } catch (error) {
@@ -340,24 +350,32 @@
             return;
         }
 
+        if (!text) {
+            return;
+        }
+
         editor.focus();
-        const rng = editor.selection.getRng();
-        const container = rng.startContainer;
-        const cursorPos = rng.startOffset;
-        const nodeText = container.textContent || '';
-        const beforeText = nodeText.substring(0, cursorPos);
-        const afterText = nodeText.substring(cursorPos);
+        if (text.includes('<') && text.includes('>')) {
+            editor.insertContent(text);
+        } else {
+            const rng = editor.selection.getRng();
+            const container = rng.startContainer;
+            const cursorPos = rng.startOffset;
+            const nodeText = container.textContent || '';
+            const beforeText = nodeText.substring(0, cursorPos);
+            const afterText = nodeText.substring(cursorPos);
 
-        const needsSpaceBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
-        const needsSpaceAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
+            const needsSpaceBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
+            const needsSpaceAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
 
-        let insertText = '';
-        if (needsSpaceBefore) insertText += ' ';
-        insertText += text.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim().replace(/,/g, '').replace(/\s+/g, ' ').trim();
-        if (needsSpaceAfter) insertText += ' ';
+            let insertText = '';
+            if (needsSpaceBefore) insertText += ' ';
+            insertText += text;
+            if (needsSpaceAfter) insertText += ' ';
 
-        editor.selection.setContent(insertText);
-        editor.selection.collapse(false);
+            editor.selection.setContent(insertText);
+            editor.selection.collapse(false);
+        }
     }
 
     async function loadChikitsaPresetList() {

@@ -29,7 +29,8 @@ class PatientDuesController extends Controller
             ->map(function ($patient) {
                 $totalBilled = $patient->followUps()->sum('amount_billed');
                 $totalPaid = \App\Models\Payment::where('patient_id', $patient->id)->where('status', 'posted')->sum('amount');
-                $patient->total_due = $totalBilled - $totalPaid;
+                $totalExempted = \App\Models\Exemption::where('patient_id', $patient->id)->sum('amount');
+                $patient->total_due = $totalBilled - $totalPaid - $totalExempted;
 
                 $latestFollowUp = $patient->followUps()->latest('created_at')->first();
                 $patient->last_follow_up_date = $latestFollowUp ? $latestFollowUp->created_at : null;

@@ -229,8 +229,11 @@ Route::middleware(['auth', DoctorMiddleware::class])
 // single patient export and import
 Route::middleware(['auth'])->group(function () {
     Route::resource('patients', PatientController::class);
+    Route::get('patients/{patient}/invoice', [PatientController::class, 'generateInvoice'])->name('patients.invoice');
     Route::post('patients/{patient}/export-json', [PatientController::class, 'exportPatientJSON'])->name('patients.export_json');
     Route::post('patients/import-json', [PatientController::class, 'importPatientJSON'])->name('patients.import_json');
+    Route::post('patients/{patient}/exemptions', [\App\Http\Controllers\ExemptionController::class, 'store'])->name('patients.exemptions.store');
+    Route::delete('exemptions/{exemption}', [\App\Http\Controllers\ExemptionController::class, 'destroy'])->name('exemptions.destroy');
 });
 
 // Preset Routes

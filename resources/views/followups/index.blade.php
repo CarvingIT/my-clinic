@@ -675,6 +675,78 @@ if (!function_exists('indFormat')) {
                                 </div>
                             </div>
                         </div>
+                        <div x-data="{ openExempted: false }" class="h-full">
+                            <div @click="openExempted = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
+
+                                <!-- Animated Bottom Accent Line -->
+                                <div class="absolute bottom-0 left-0 w-full h-1.5 bg-gradient-to-r from-amber-600 to-yellow-500 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-0"></div>
+
+                                <!-- Immersive Glow Blob Behind Icon on Hover -->
+                                <div class="absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br from-amber-600 to-yellow-500 opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none z-0"></div>
+
+                                <div class="flex justify-between items-start mb-3 relative z-10">
+                                    <div class="pr-2">
+                                        <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors duration-300">{{ __('Exempted Patients') }}</h3>
+                                        <p class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-600 to-yellow-500 truncate break-words transform origin-left group-hover:scale-105 filter group-hover:brightness-75 dark:group-hover:brightness-125 transition-all duration-300">
+                                            ₹{{ indFormat($totalExemptedAmount ?? 0) }}
+                                        </p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 font-medium mt-0.5">
+                                            {{ $exemptedPatientsCount ?? 0 }} {{ __('Patients') }}
+                                        </p>
+                                    </div>
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-amber-50 dark:bg-amber-900/30 border-amber-100 dark:border-amber-800 border shadow-inner group-hover:bg-white dark:group-hover:bg-gray-800 transition-colors duration-300">
+                                        <span class="text-lg drop-shadow-sm transform group-hover:scale-125 group-hover:rotate-6 transition-all duration-300 ease-out">🏷️</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300 relative z-10">
+                                    <span>View detailed log</span>
+                                    <svg class="w-4 h-4 ml-1 transform group-hover:translate-x-1.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </div>
+                            </div>
+                            <div x-show="openExempted" x-transition x-cloak class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4" style="display: none;">
+                                <div @click.away="openExempted = false" class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-4xl flex flex-col max-h-[80vh] overflow-hidden">
+                                    <div class="px-5 py-4 border-b dark:border-gray-700 flex justify-between items-center bg-amber-50 dark:bg-amber-900/30">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                            <span>🏷️</span> Exempted Patients Log
+                                        </h3>
+                                        <button @click="openExempted = false" class="text-gray-500 hover:text-red-500 transition-colors p-1 bg-white dark:bg-gray-800 rounded-full shadow-sm hover:shadow">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                        </button>
+                                    </div>
+                                    <div class="p-0 overflow-y-auto flex-1">
+                                        <table class="w-full text-sm text-left">
+                                            <thead class="bg-gray-50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 border-b dark:border-gray-700 sticky top-0 z-10">
+                                                <tr>
+                                                    <th class="px-5 py-3 font-semibold w-16 text-center">#</th>
+                                                    <th class="px-5 py-3 font-semibold">Date</th>
+                                                    <th class="px-5 py-3 font-semibold">Patient</th>
+                                                    <th class="px-5 py-3 font-semibold">Reason / Note</th>
+                                                    <th class="px-5 py-3 font-semibold">Exempted By</th>
+                                                    <th class="px-5 py-3 font-semibold text-right">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                                @forelse($exemptionsList as $index => $ex)
+                                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
+                                                        <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
+                                                        <td class="px-5 py-3">{{ optional($ex->exempted_at ?? $ex->created_at)->format('d M Y') }}</td>
+                                                        <td class="px-5 py-3 font-medium">
+                                                            <a target="_blank" href="{{ route('patients.show', $ex->patient_id) }}" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">{{ optional($ex->patient)->name ?? 'Unknown' }}</a>
+                                                        </td>
+                                                        <td class="px-5 py-3 text-gray-600 dark:text-gray-400">{{ $ex->reason ?? '-' }}</td>
+                                                        <td class="px-5 py-3 text-xs text-gray-500">{{ optional($ex->user)->name ?? 'Admin' }}</td>
+                                                        <td class="px-5 py-3 text-right font-bold text-amber-600 dark:text-amber-400">₹{{ indFormat($ex->amount) }}</td>
+                                                    </tr>
+                                                @empty
+                                                    <tr><td colspan="6" class="px-5 py-8 text-center text-gray-500 italic">No fee exemptions recorded in this period.</td></tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                     </div>
                     {{-- <a href="{{ route('patient-dues.index') }}" title="View all patient dues"

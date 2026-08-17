@@ -71,6 +71,11 @@ class Patient extends Model
         return $this->hasMany(Payment::class);
     }
 
+    public function exemptions()
+    {
+        return $this->hasMany(Exemption::class);
+    }
+
     public function uploads()
     {
         return $this->hasMany(Upload::class, 'patient_id');
