@@ -1318,10 +1318,12 @@
 <script>
     let cameraStream = null;
     let capturedFiles = []; // Array to store captured files and their types
+    let currentFacingMode = "environment";
 
     const cameraModal = document.getElementById("cameraModal");
     const openCameraModal = document.getElementById("openCameraModal");
     const closeCameraModal = document.getElementById("closeCameraModal");
+    const switchCameraBtn = document.getElementById("switchCameraBtn");
     const captureBtn = document.getElementById("captureBtn");
     const patientPhotosImages = document.getElementById("patientPhotosImages");
     const labReportsImages = document.getElementById("labReportsImages");
@@ -1363,8 +1365,20 @@
 
     async function loadCameras() {
         try {
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === "videoinput");
+            let devices = await navigator.mediaDevices.enumerateDevices();
+            let videoDevices = devices.filter(device => device.kind === "videoinput");
+
+            if (videoDevices.length > 0 && !videoDevices[0].label) {
+                try {
+                    const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    devices = await navigator.mediaDevices.enumerateDevices();
+                    videoDevices = devices.filter(device => device.kind === "videoinput");
+                    tempStream.getTracks().forEach(track => track.stop());
+                } catch (e) {
+                    console.warn("Could not retrieve full camera labels:", e);
+                }
+            }
+
             if (videoDevices.length === 0) {
                 alert("No cameras found.");
                 return;
@@ -1373,7 +1387,13 @@
             videoDevices.forEach((device, index) => {
                 const option = document.createElement("option");
                 option.value = device.deviceId;
-                option.text = device.label || `Camera ${index + 1}`;
+                let label = device.label || `Camera ${index + 1}`;
+                if (/back|rear|environment/i.test(label)) {
+                    label = `📷 Back Camera (${index + 1})`;
+                } else if (/front|user|facing/i.test(label)) {
+                    label = `🤳 Front Camera (${index + 1})`;
+                }
+                option.text = label;
                 cameraSelect.appendChild(option);
             });
             await startCamera(videoDevices[0]?.deviceId);
@@ -1383,21 +1403,32 @@
         }
     }
 
-    async function startCamera(deviceId) {
+    async function startCamera(deviceId = null, facingMode = null) {
         stopCamera();
         try {
+            let constraints = {};
+            if (deviceId) {
+                constraints = { deviceId: { exact: deviceId } };
+            } else if (facingMode) {
+                constraints = { facingMode: facingMode };
+            } else {
+                constraints = { facingMode: currentFacingMode };
+            }
+
             cameraStream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    deviceId: deviceId ? {
-                        exact: deviceId
-                    } : undefined
-                }
+                video: constraints
             });
             video.srcObject = cameraStream;
-            video.play();
+            await video.play();
         } catch (error) {
-            console.error("Error starting camera:", error);
-            alert("Camera access denied or unavailable.");
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = cameraStream;
+                await video.play();
+            } catch (err) {
+                console.error("Error starting camera:", err);
+                alert("Camera access denied or unavailable.");
+            }
         }
     }
 
@@ -1414,12 +1445,48 @@
         });
     }
 
+    if (switchCameraBtn) {
+        switchCameraBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (cameraSelect && cameraSelect.options.length > 1) {
+                const nextIndex = (cameraSelect.selectedIndex + 1) % cameraSelect.options.length;
+                cameraSelect.selectedIndex = nextIndex;
+                startCamera(cameraSelect.value);
+            } else {
+                currentFacingMode = (currentFacingMode === "user") ? "environment" : "user";
+                startCamera(null, currentFacingMode);
+            }
+        });
+    }
+
+    function updateCapturedCounts() {
+        const patientCount = capturedFiles.filter(f => f.type === "patient_photo").length;
+        const labCount = capturedFiles.filter(f => f.type === "lab_report").length;
+        const totalCount = capturedFiles.length;
+
+        const patientCounterEl = document.getElementById("patientPhotoCount");
+        const labCounterEl = document.getElementById("labReportCount");
+        const totalCounterEl = document.getElementById("totalCapturedBadge");
+
+        if (patientCounterEl) patientCounterEl.innerText = patientCount;
+        if (labCounterEl) labCounterEl.innerText = labCount;
+        if (totalCounterEl) totalCounterEl.innerText = `${totalCount} item${totalCount === 1 ? '' : 's'}`;
+    }
+
     if (captureBtn) {
         captureBtn.addEventListener("click", (e) => {
             e.preventDefault();
+
+            // Trigger visual flash effect on camera viewport
+            const flash = document.getElementById("cameraFlash");
+            if (flash) {
+                flash.style.opacity = "0.75";
+                setTimeout(() => { flash.style.opacity = "0"; }, 150);
+            }
+
             const canvas = document.createElement("canvas");
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
             canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
 
             canvas.toBlob((blob) => {
@@ -1434,40 +1501,66 @@
                     type: photoTypeValue
                 });
 
-                // Create preview container
+                // Create clean light theme thumbnail tile container matching natural aspect ratio
                 const previewContainer = document.createElement("div");
-                previewContainer.classList.add("preview-container");
+                previewContainer.className = "relative flex-shrink-0 group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md bg-white dark:bg-slate-800 transition-all transform hover:scale-[1.02] p-0.5";
 
-                // Create image preview
+                // Create image preview with natural aspect ratio & proper thumbnail height
                 const img = document.createElement("img");
                 img.src = URL.createObjectURL(blob);
-                img.classList.add("w-full", "h-full", "object-cover", "rounded", "border",
-                    "border-gray-300");
+                img.className = "h-20 sm:h-22 w-auto object-contain cursor-pointer rounded-lg block";
+                img.title = "Click to view full image";
+                img.addEventListener("click", () => openImagePreviewModal(img.src));
 
-                // Create delete button
+                // Create frosted glass delete button badge
                 const deleteBtn = document.createElement("button");
-                deleteBtn.innerHTML = "✖";
-                deleteBtn.classList.add("delete-btn");
-                deleteBtn.addEventListener("click", () => {
-                    // Remove from capturedFiles
+                deleteBtn.innerHTML = "✕";
+                deleteBtn.title = "Remove";
+                deleteBtn.className = "absolute top-2 right-2 w-5 h-5 bg-slate-900/80 hover:bg-red-600 text-white rounded-full text-[10px] font-extrabold flex items-center justify-center shadow-lg backdrop-blur-md transition-all transform active:scale-90 z-10 border border-white/20";
+                deleteBtn.addEventListener("click", (e) => {
+                    e.stopPropagation();
                     const index = capturedFiles.findIndex(f => f.file === file);
                     if (index !== -1) capturedFiles.splice(index, 1);
-                    // Remove preview from DOM
                     previewContainer.remove();
+                    updateCapturedCounts();
                 });
 
-                // Append elements
                 previewContainer.appendChild(img);
                 previewContainer.appendChild(deleteBtn);
 
-                // Append to the correct section based on photo type
                 if (photoTypeValue === "patient_photo") {
                     patientPhotosImages.appendChild(previewContainer);
                 } else if (photoTypeValue === "lab_report") {
                     labReportsImages.appendChild(previewContainer);
                 }
+
+                updateCapturedCounts();
             }, "image/png");
         });
+    }
+
+    function selectCaptureType(type) {
+        if (!photoType) return;
+        photoType.value = type;
+
+        const patientBtn = document.getElementById("tabPatientPhotoBtn");
+        const labBtn = document.getElementById("tabLabReportBtn");
+
+        if (type === "patient_photo") {
+            if (patientBtn) {
+                patientBtn.className = "py-1.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center justify-center gap-1.5 cursor-pointer";
+            }
+            if (labBtn) {
+                labBtn.className = "py-1.5 px-3 rounded-xl text-xs font-semibold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1.5 cursor-pointer bg-transparent";
+            }
+        } else {
+            if (labBtn) {
+                labBtn.className = "py-1.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center justify-center gap-1.5 cursor-pointer";
+            }
+            if (patientBtn) {
+                patientBtn.className = "py-1.5 px-3 rounded-xl text-xs font-semibold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1.5 cursor-pointer bg-transparent";
+            }
+        }
     }
 
     function updateFileInput() {
@@ -1483,7 +1576,25 @@
         });
 
         photoFileInput.files = dataTransfer.files;
-        photoTypesInput.value = JSON.stringify(types); // Store types as JSON string
+        photoTypesInput.value = JSON.stringify(types);
+    }
+
+    function openImagePreviewModal(src) {
+        const modal = document.getElementById("imagePreviewModal");
+        const fullImg = document.getElementById("fullSizePreviewImage");
+        if (modal && fullImg) {
+            fullImg.src = src;
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+    }
+
+    function closeImagePreviewModal() {
+        const modal = document.getElementById("imagePreviewModal");
+        if (modal) {
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
     }
 
     // Reports functionality
