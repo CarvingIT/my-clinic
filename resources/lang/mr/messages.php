@@ -171,4 +171,13 @@ return [
     'download_pdf' => 'पीडीएफ डाउनलोड करा',
     'print' => 'मुद्रण करा',
     'Treatment' => 'उपचार',
+    'Add Branch' => 'नवीन शाखा जोडा',
+    'Edit Branch' => 'शाखा संपादित करा',
+    'Branch Name' => 'शाखेचे नाव',
+    'Save Branch' => 'शाखा जतन करा',
+    'Update Branch' => 'शाखा अद्यतनित करा',
+    'Enter Branch Name' => 'उदा. कोथरूड',
+    'Manage Staff and Branches' => 'कर्मचारी, भूमिका, परवानग्या आणि क्लिनिक शाखांचे व्यवस्थापन करा.',
+    'Clinic Branches' => 'क्लिनिकच्या शाखा',
+    'Staff Users' => 'कर्मचारी वापरकर्ते',
 ];

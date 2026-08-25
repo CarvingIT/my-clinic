@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PatientController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\BranchController;
 use App\Http\Controllers\FollowUpController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\FollowupImageController;
@@ -126,6 +127,7 @@ Route::get('/set-locale/{locale}', function ($locale) {
 // Admin Routes
 Route::middleware(['auth', AdminMiddleware::class])->group(function () {
     Route::resource('users', UserController::class); // Admin can manage users
+    Route::resource('branches', BranchController::class)->only(['store', 'update', 'destroy']); // Admin can manage branches
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index'); // Admin can view analytics
     Route::get('/followups', [FollowUpController::class, 'index'])->name('followups.index'); // List follow-ups
     Route::get('/followups/fetch', [FollowUpController::class, 'fetchFollowUps'])->name('followups.fetch'); // Fetch follow-ups via AJAX
