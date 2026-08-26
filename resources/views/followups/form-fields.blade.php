@@ -228,57 +228,139 @@
         </div>
     </div>
 
-    <!-- Camera Modal -->
+    <!-- Camera Modal (Native Mobile & Desktop Responsive UI) -->
     <div id="cameraModal"
-        class="fixed inset-0 bg-gray-200 bg-opacity-75 hidden flex justify-center items-center transition-opacity duration-300 z-50">
-        <div
-            class="bg-white p-6 rounded-xl shadow-lg w-[800px] h-[650px] flex flex-row gap-6 border border-gray-300">
-            <!-- Left Side: Camera and Controls -->
-            <div class="w-1/2 flex flex-col gap-4">
-                <h2 class="text-2xl font-bold tracking-wider text-blue-600">Capture Interface</h2>
+        class="fixed inset-0 bg-slate-900/70 backdrop-blur-md hidden flex justify-center items-center z-50 p-0 sm:p-4 transition-all duration-300">
+        
+        <div class="bg-white dark:bg-slate-900 w-full sm:max-w-5xl h-full sm:h-auto sm:max-h-[90vh] sm:rounded-3xl shadow-2xl border-0 sm:border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row overflow-hidden divide-y md:divide-y-0 md:divide-x divide-slate-200 dark:divide-slate-800">
+            
+            <!-- Left Side: Viewfinder & Camera Controls (Mobile App Experience / Desktop 3/5 Column) -->
+            <div class="w-full md:w-3/5 flex flex-col justify-between p-3 sm:p-5 bg-white dark:bg-slate-900 relative flex-1 min-h-0">
+                
+                <!-- Top Header & Segmented Mode Switcher Bar -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 z-10 pb-2 border-b border-slate-100 dark:border-slate-800">
+                    
+                    <!-- Segmented Tab Switcher (Clear Visual Selection) -->
+                    <div class="grid grid-cols-2 p-1 bg-slate-200/80 dark:bg-slate-800 rounded-2xl border border-slate-300/70 dark:border-slate-700 shadow-inner flex-1 max-w-sm">
+                        <button type="button" id="tabPatientPhotoBtn" onclick="selectCaptureType('patient_photo')"
+                            class="py-1.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 bg-indigo-600 text-white shadow-md flex items-center justify-center gap-1.5 cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                            <span>Patient Photo</span>
+                        </button>
+                        <button type="button" id="tabLabReportBtn" onclick="selectCaptureType('lab_report')"
+                            class="py-1.5 px-3 rounded-xl text-xs font-semibold transition-all duration-200 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center justify-center gap-1.5 cursor-pointer bg-transparent">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span>Lab Report</span>
+                        </button>
+                    </div>
 
-                <label class="block text-sm text-gray-700">Camera Source:</label>
-                <select id="cameraSelect"
-                    class="w-full p-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"></select>
+                    <!-- Flip Camera & Close Action Icons -->
+                    <div class="flex items-center justify-end gap-2">
+                        <button id="switchCameraBtn" type="button" title="Switch Camera"
+                            class="px-3 py-1.5 bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                            <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                            <span>Flip</span>
+                        </button>
 
-                <label class="block text-sm text-gray-700">Capture Type:</label>
-                <select id="photoType"
-                    class="w-full p-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200">
+                        <button id="closeCameraModal" type="button"
+                            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition font-bold text-sm">
+                            ✕
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hidden select for form JS compatibility -->
+                <select id="photoType" class="hidden">
                     <option value="patient_photo">Patient Photo</option>
                     <option value="lab_report">Lab Report</option>
                 </select>
 
-                <div
-                    class="flex-1 overflow-hidden rounded-lg border border-gray-300 shadow-inner bg-gray-200">
-                    <video id="cameraPreview" class="w-full h-full object-contain"
-                        autoplay></video>
+                <!-- Live Stream Video Viewport (Native Camera Feel) -->
+                <div id="viewfinderContainer" class="relative w-full my-auto flex-1 min-h-[260px] sm:min-h-[320px] rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center border border-slate-800 shadow-inner my-2">
+                    <video id="cameraPreview" class="w-full h-full object-contain rounded-2xl" autoplay playsinline></video>
+                    
+                    <!-- Flash Effect overlay -->
+                    <div id="cameraFlash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-150 z-20"></div>
+
+                    <!-- Live Status Badge -->
+                    <div class="absolute top-3 left-3 bg-slate-950/70 backdrop-blur-md px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/10 z-10">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[10px] font-bold text-slate-100 tracking-wider">LIVE</span>
+                    </div>
                 </div>
 
-                <div class="flex justify-between">
-                    <button id="captureBtn" type="button"
-                        class="px-5 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-200 shadow-md">📸
-                        Capture</button>
-                    <button id="closeCameraModal" type="button"
-                        class="px-5 py-2 bg-gradient-to-r from-red-400 to-pink-400 text-white rounded-lg hover:from-red-500 hover:to-pink-500 transform hover:scale-105 transition-all duration-200 shadow-md">Close</button>
+                <!-- Native Mobile/Desktop Shutter Action Bar -->
+                <div class="pt-2 flex items-center justify-between gap-3 z-10">
+                    <div class="w-1/3">
+                        <select id="cameraSelect"
+                            class="w-full px-2.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-200 font-medium focus:ring-2 focus:ring-indigo-500 shadow-sm truncate"></select>
+                    </div>
+
+                    <!-- Large Circular Camera Shutter Button -->
+                    <div class="w-1/3 flex justify-center">
+                        <button id="captureBtn" type="button" title="Capture Photo"
+                            class="w-14 h-14 sm:w-16 sm:h-16 rounded-full border-4 border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 p-1 flex items-center justify-center transition hover:scale-105 active:scale-90 shadow-lg cursor-pointer">
+                            <div class="w-full h-full bg-indigo-600 rounded-full flex items-center justify-center text-white shadow-inner">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H3a2 2 0 01-2-2V9z"></path>
+                                    <circle cx="12" cy="13" r="3" stroke-width="2"></circle>
+                                </svg>
+                            </div>
+                        </button>
+                    </div>
+
+                    <div class="w-1/3 text-right">
+                        <button type="button" onclick="document.getElementById('closeCameraModal').click()"
+                            class="px-4 sm:px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow transition cursor-pointer">
+                            Done
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Side: Separate Preview Sections -->
-            <div class="w-1/2 flex flex-col gap-4">
-                <!-- Patient Photos Section -->
-                <div id="patientPhotosPreview"
-                    class="flex-1 flex flex-col bg-gray-50 rounded-lg p-3 border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Patient Photos</h3>
-                    <div id="patientPhotosImages" class="flex-1 overflow-y-auto"></div>
+            <!-- Right Side / Mobile Bottom Panel: Captured Media Gallery -->
+            <div class="w-full md:w-2/5 p-4 sm:p-5 bg-slate-50/90 dark:bg-slate-800/50 flex flex-col gap-3.5 max-h-[30vh] md:max-h-none overflow-y-auto border-t md:border-t-0 border-slate-200 dark:border-slate-800">
+                <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-xs font-extrabold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Captured Gallery</h3>
+                    </div>
+                    <span id="totalCapturedBadge" class="text-[11px] bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 font-bold px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">0 items</span>
                 </div>
 
-                <!-- Lab Reports Section -->
-                <div id="labReportsPreview"
-                    class="flex-1 flex flex-col bg-gray-50 rounded-lg p-3 border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Lab Reports</h3>
-                    <div id="labReportsImages" class="flex-1 overflow-y-auto"></div>
+                <!-- Patient Photos Card Section -->
+                <div class="flex flex-col gap-2 bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                        <span>👤 Patient Photos</span>
+                        <span id="patientPhotoCount" class="text-[11px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">0</span>
+                    </div>
+                    <div id="patientPhotosImages" class="flex flex-wrap gap-2.5 min-h-[50px] p-1">
+                        <!-- Dynamic Items -->
+                    </div>
+                </div>
+
+                <!-- Lab Reports Card Section -->
+                <div class="flex flex-col gap-2 bg-white dark:bg-slate-800 rounded-2xl p-3 border border-slate-200/80 dark:border-slate-700/80 shadow-sm">
+                    <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300">
+                        <span>📄 Lab Reports</span>
+                        <span id="labReportCount" class="text-[11px] font-semibold bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full">0</span>
+                    </div>
+                    <div id="labReportsImages" class="flex flex-wrap gap-2.5 min-h-[50px] p-1">
+                        <!-- Dynamic Items -->
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Full Image Preview Lightbox Modal -->
+    <div id="imagePreviewModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md hidden flex flex-col items-center justify-center z-[60] p-4 transition-all duration-300">
+        <div class="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center">
+            <button type="button" onclick="closeImagePreviewModal()" class="absolute -top-12 right-0 text-white bg-slate-800/80 hover:bg-slate-700 px-4 py-1.5 rounded-full text-xs font-bold transition-all shadow-xl backdrop-blur-md flex items-center gap-1.5">
+                <span>✕ Close</span>
+            </button>
+            <img id="fullSizePreviewImage" src="" class="max-w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl border border-slate-800 bg-slate-950" />
         </div>
     </div>
 

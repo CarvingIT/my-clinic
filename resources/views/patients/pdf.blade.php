@@ -94,7 +94,7 @@
         <tr>
             <th>{{ __('messages.Age') }}/{{ __('messages.Gender') }}</th>
             <td>
-                {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
+                {{ $patient->age ?? __('') }}/{{ $patient->gender ?? __('') }}
             </td>
         </tr>
         <tr>

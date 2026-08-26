@@ -40,6 +40,24 @@ class Patient extends Model
         'birthdate' => 'date',
     ];
 
+    public function getAgeAttribute()
+    {
+        if (!$this->birthdate) {
+            return null;
+        }
+        $diff = $this->birthdate->diff(now());
+        $years = $diff->y;
+        $months = $diff->m;
+
+        if ($years > 0 && $months > 0) {
+            return "{$years} yrs {$months} mos";
+        } elseif ($years > 0) {
+            return "{$years} yrs";
+        } else {
+            return "{$months} mos";
+        }
+    }
+
 
     protected static function boot()
     {

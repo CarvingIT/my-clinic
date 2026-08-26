@@ -5,7 +5,7 @@
 
             <span class="text-gray-600 text-sm">
                 @if ($patient->birthdate || $patient->gender)
-                    {{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}
+                    {{ $patient->age ?? __('') }}/{{ $patient->gender ?? __('') }}
                 @endif
                 @if ($patient->height)
                     | {{ __('messages.Height') }}: {{ $patient->height }} cm
@@ -77,7 +77,7 @@
                                 @if ($patient->birthdate || $patient->gender)
                                     <div class="bg-gray-50 dark:bg-gray-700 p-2 rounded">
                                         <span class="font-semibold text-gray-700 dark:text-gray-300">{{ __('messages.Age/Gender') }}:</span>
-                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->birthdate?->age ?? __('') }}/{{ $patient->gender ?? __('') }}</span>
+                                        <span class="text-gray-600 dark:text-gray-400 ml-1">{{ $patient->age ?? __('') }}/{{ $patient->gender ?? __('') }}</span>
                                     </div>
                                 @endif
 

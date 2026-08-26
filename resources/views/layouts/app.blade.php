@@ -71,75 +71,131 @@
 
     <script>
         const marathiToEnglishMapping = {
-            '०': '0',
-            '१': '1',
-            '२': '2',
-            '३': '3',
-            '४': '4',
-            '५': '5',
-            '६': '6',
-            '७': '7',
-            '८': '8',
-            '९': '9'
+            '०': '0', '१': '1', '२': '2', '३': '3', '४': '4',
+            '५': '5', '६': '6', '७': '7', '८': '8', '९': '9'
         };
 
         function convertMarathiToEnglish(input) {
-            // First convert all Marathi digits to English digits
-            let result = input.replace(/[०-९]/g, (match) => marathiToEnglishMapping[match]);
-
-            // Then remove spaces between English digits to create proper numbers
+            if (input === null || input === undefined) return '';
+            let result = String(input).replace(/[०-९]/g, (match) => marathiToEnglishMapping[match]);
             result = result.replace(/(\d)\s+(\d)/g, '$1$2');
-
-            // Remove spaces before decimal points
             result = result.replace(/\s+\./g, '.');
-
             return result;
         }
 
-        // Apply Marathi to English conversion to all text and number input fields
-        document.querySelectorAll('input[type="text"], input[type="number"], input[type="tel"], input[type="email"]').forEach(inputField => {
-            // Skip fields that explicitly don't want this conversion
-            if (inputField.classList.contains('no-transliteration')) {
-                return;
+        // Global Fix for Google Input Tools (IME) on Numeric & Text Inputs
+        (function() {
+            // Function to transform type="number" to type="text" inputmode="decimal"
+            // Chromium natively disables IME on type="number" elements, causing Google Input Tools to drop all keystrokes.
+            function fixNumericInput(input) {
+                if (!input || input.dataset.imeFixed) return;
+                if (input.tagName !== 'INPUT') return;
+                if (input.classList && input.classList.contains('no-transliteration')) return;
+
+                const isNumberType = input.type === 'number' || input.getAttribute('type') === 'number' || input.dataset.type === 'number';
+                
+                if (isNumberType) {
+                    input.dataset.type = 'number';
+                    input.dataset.imeFixed = 'true';
+                    
+                    const step = input.getAttribute('step');
+                    const allowDecimal = !step || step === 'any' || step.includes('.');
+                    input.dataset.allowDecimal = allowDecimal ? 'true' : 'false';
+
+                    try {
+                        input.type = 'text';
+                    } catch (e) {
+                        input.setAttribute('type', 'text');
+                    }
+                    input.setAttribute('inputmode', allowDecimal ? 'decimal' : 'numeric');
+                }
             }
 
-            let timeoutId;
-            let lastValue = inputField.value;
+            function processAllInputs() {
+                document.querySelectorAll('input[type="number"]').forEach(fixNumericInput);
+            }
 
-            // Function to apply conversion
-            const applyConversion = () => {
-                const currentValue = inputField.value;
-                if (currentValue !== lastValue) {
-                    const converted = convertMarathiToEnglish(currentValue);
-                    if (converted !== currentValue) {
-                        inputField.value = converted;
-                        lastValue = converted;
-                        // Dispatch custom event to notify other scripts of the conversion
-                        inputField.dispatchEvent(new CustomEvent('marathiConverted', { detail: { original: currentValue, converted: converted } }));
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', processAllInputs);
+            } else {
+                processAllInputs();
+            }
+
+            // Capture focus/click/mouseenter on any number field dynamically
+            ['focusin', 'pointerdown', 'mouseenter'].forEach(eventType => {
+                document.addEventListener(eventType, function(e) {
+                    if (e.target && e.target.tagName === 'INPUT') {
+                        if (e.target.type === 'number' || e.target.getAttribute('type') === 'number') {
+                            fixNumericInput(e.target);
+                        }
+                    }
+                }, true);
+            });
+
+            // Observe newly added DOM nodes (Modals, Livewire, Alpine.js, AJAX)
+            if (window.MutationObserver) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1) {
+                                if (node.tagName === 'INPUT' && (node.type === 'number' || node.getAttribute('type') === 'number')) {
+                                    fixNumericInput(node);
+                                } else if (node.querySelectorAll) {
+                                    node.querySelectorAll('input[type="number"]').forEach(fixNumericInput);
+                                }
+                            }
+                        });
+                    });
+                });
+                observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+            }
+
+            // Handle input events: Convert Devanagari digits & sanitize numeric inputs
+            document.addEventListener('input', function(e) {
+                const target = e.target;
+                if (!target || target.tagName !== 'INPUT') return;
+                const type = target.type ? target.type.toLowerCase() : 'text';
+                if (!['text', 'number', 'tel', 'email', 'search'].includes(type)) return;
+                if (target.classList && target.classList.contains('no-transliteration')) return;
+
+                let val = target.value;
+                if (!val && val !== 0) return;
+
+                // 1. Transliterate Marathi digits to English digits
+                let converted = convertMarathiToEnglish(val);
+
+                // 2. For number fields, sanitize to numeric characters only
+                if (target.dataset.imeFixed === 'true' || target.dataset.type === 'number' || target.getAttribute('inputmode') === 'numeric' || target.getAttribute('inputmode') === 'decimal') {
+                    const allowDecimal = target.dataset.allowDecimal !== 'false';
+                    if (allowDecimal) {
+                        converted = converted.replace(/[^0-9.]/g, '');
+                        const parts = converted.split('.');
+                        if (parts.length > 2) {
+                            converted = parts[0] + '.' + parts.slice(1).join('');
+                        }
                     } else {
-                        lastValue = currentValue;
+                        converted = converted.replace(/[^0-9]/g, '');
                     }
                 }
-            };
 
-            // Listen to multiple events
-            ['input', 'change', 'blur', 'focus', 'keyup', 'keydown'].forEach(eventType => {
-                inputField.addEventListener(eventType, () => {
-                    clearTimeout(timeoutId);
-                    timeoutId = setTimeout(applyConversion, 50);
-                });
-            });
+                if (converted !== val) {
+                    target.value = converted;
+                    target.dispatchEvent(new CustomEvent('marathiConverted', { 
+                        bubbles: true, 
+                        detail: { original: val, converted: converted } 
+                    }));
+                }
+            }, true);
 
-            // Also listen for composition end (for IME like Google Input Tools)
-            inputField.addEventListener('compositionend', () => {
-                setTimeout(applyConversion, 10);
-            });
-
-            // Periodic check for changes (fallback)
-            setInterval(() => {
-                applyConversion();
-            }, 500);
-        });
+            // Composition end handler for Google Input Tools / IME completion
+            document.addEventListener('compositionend', function(e) {
+                const target = e.target;
+                if (!target || target.tagName !== 'INPUT') return;
+                setTimeout(function() {
+                    target.dispatchEvent(new Event('input', { bubbles: true }));
+                }, 10);
+            }, true);
+        })();
     </script>
 
     <script src="{{ asset('tinymce/tinymce.min.js') }}"></script>

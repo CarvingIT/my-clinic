@@ -237,13 +237,25 @@
                             <x-input-error :messages="$errors->get('birthdate')" class="mt-1" />
                         </div>
 
-                        <!-- Age Field -->
+                        <!-- Age Field (Years & Months) -->
                         <div class="mt-2">
-                            <x-input-label for="age" :value="__('Age')" />
-                            <x-text-input id="age"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
-                                type="text" name="age" placeholder="Enter Age (If no birthdate)"
-                                value="{{ old('age', isset($patient->birthdate) ? \Carbon\Carbon::parse($patient->birthdate)->age : '') }}" />
+                            <x-input-label :value="__('Age')" />
+                            <div class="flex items-center space-x-2">
+                                <div class="relative flex-1">
+                                    <input type="number" id="age_years" min="0" max="150" placeholder="Years"
+                                        value="{{ old('age_years', isset($patient->birthdate) ? $patient->birthdate->diff(now())->y : '') }}"
+                                        class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 pr-7 px-2 reverse-transliteration [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        oninput="calculateBirthdateFromAgeParts()" />
+                                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">Y</span>
+                                </div>
+                                <div class="relative flex-1">
+                                    <input type="number" id="age_months" min="0" max="11" placeholder="Months"
+                                        value="{{ old('age_months', isset($patient->birthdate) ? $patient->birthdate->diff(now())->m : '') }}"
+                                        class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 pr-7 px-2 reverse-transliteration [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        oninput="calculateBirthdateFromAgeParts()" />
+                                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">M</span>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Mobile Phone -->
@@ -404,22 +416,37 @@
 
 <script>
     function calculateAgeFromBirthdate() {
-        let birthdate = document.getElementById('birthdate').value;
-        if (birthdate) {
-            let birthYear = new Date(birthdate).getFullYear();
-            let currentYear = new Date().getFullYear();
-            let age = currentYear - birthYear;
-            document.getElementById('age').value = age; // Auto-fill age
+        let birthdateVal = document.getElementById('birthdate').value;
+        if (birthdateVal) {
+            let birthDate = new Date(birthdateVal);
+            let today = new Date();
+            let years = today.getFullYear() - birthDate.getFullYear();
+            let months = today.getMonth() - birthDate.getMonth();
+            if (months < 0 || (months === 0 && today.getDate() < birthDate.getDate())) {
+                years--;
+                months += 12;
+            }
+            if (today.getDate() < birthDate.getDate()) {
+                months--;
+                if (months < 0) months += 12;
+            }
+            document.getElementById('age_years').value = years >= 0 ? years : '';
+            document.getElementById('age_months').value = months >= 0 ? months : '';
         }
     }
 
-    function calculateBirthdateFromAge() {
-        let age = document.getElementById('age').value;
-        if (age) {
-            let currentYear = new Date().getFullYear();
-            let birthYear = currentYear - age;
-            let birthdate = `${birthYear}-01-01`; // Default to Jan 1st
-            document.getElementById('birthdate').value = birthdate;
+    function calculateBirthdateFromAgeParts() {
+        let years = parseInt(document.getElementById('age_years').value, 10) || 0;
+        let months = parseInt(document.getElementById('age_months').value, 10) || 0;
+
+        if (years > 0 || months > 0) {
+            let d = new Date();
+            d.setFullYear(d.getFullYear() - years);
+            d.setMonth(d.getMonth() - months);
+            let yyyy = d.getFullYear();
+            let mm = String(d.getMonth() + 1).padStart(2, '0');
+            let dd = String(d.getDate()).padStart(2, '0');
+            document.getElementById('birthdate').value = `${yyyy}-${mm}-${dd}`;
         }
     }
 
@@ -428,7 +455,10 @@
         calculateAgeFromBirthdate();
 
         // Calculate birthdate from age after Marathi conversion
-        document.getElementById('age').addEventListener('marathiConverted', calculateBirthdateFromAge);
+        const ageYEl = document.getElementById('age_years');
+        const ageMEl = document.getElementById('age_months');
+        if (ageYEl) ageYEl.addEventListener('marathiConverted', calculateBirthdateFromAgeParts);
+        if (ageMEl) ageMEl.addEventListener('marathiConverted', calculateBirthdateFromAgeParts);
 
         // Camera functionality
         let cameraStream = null;

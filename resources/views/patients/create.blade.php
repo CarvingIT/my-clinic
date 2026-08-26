@@ -234,13 +234,23 @@
                             <x-input-error :messages="$errors->get('birthdate')" class="mt-1" />
                         </div>
 
-                        <!-- Age Field -->
+                        <!-- Age Field (Years & Months) -->
                         <div>
-                            <x-input-label for="age" :value="__('Age')" />
-                            <x-text-input id="age"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2 reverse-transliteration"
-                                type="text" name="age" placeholder="Enter Age (If no birthdate)"
-                                oninput="calculateBirthdateFromAge()" />
+                            <x-input-label :value="__('Age')" />
+                            <div class="flex items-center space-x-2">
+                                <div class="relative flex-1">
+                                    <input type="number" id="age_years" min="0" max="150" placeholder="Years"
+                                        class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 pr-7 px-2 reverse-transliteration [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        oninput="calculateBirthdateFromAgeParts()" />
+                                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">Y</span>
+                                </div>
+                                <div class="relative flex-1">
+                                    <input type="number" id="age_months" min="0" max="11" placeholder="Months"
+                                        class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 pr-7 px-2 reverse-transliteration [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        oninput="calculateBirthdateFromAgeParts()" />
+                                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 font-bold text-sm pointer-events-none">M</span>
+                                </div>
+                            </div>
                         </div>
 
 
@@ -363,18 +373,24 @@
                     </div>
 
                     <!-- Vishesh -->
-                        <div>
+                    <div class="mt-4 mb-4">
+                        <div class="flex items-center justify-between space-x-2">
                             <x-input-label for="vishesh" :value="__('messages.Vishesh')" />
-                            <textarea id="vishesh" name="vishesh"
-                                class="tinymce-editor w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                            ></textarea>
-                            {{--
-                            <x-text-input id="vishesh"
-                                class="w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
-                                type="text" name="vishesh" :value="old('vishesh')" />
-                            --}}
-                            <x-input-error :messages="$errors->get('vishesh')" class="mt-1" />
+                            <button type="button" onclick="openVisheshModal()"
+                                class="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600 transition text-lg mb-1">
+                                +
+                            </button>
                         </div>
+                        <textarea id="vishesh" name="vishesh"
+                            class="tinymce-editor w-full rounded-lg border-2 border-gray-400 focus:ring-0 focus:border-gray-500 p-1.5 px-2"
+                        >{{ old('vishesh') }}</textarea>
+                        <x-input-error :messages="$errors->get('vishesh')" class="mt-1" />
+
+                        <!-- Presets Container -->
+                        <div id="visheshPresets"
+                            class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-2 mt-4">
+                        </div>
+                    </div>
 
                     <!-- Buttons -->
                     <div class="flex justify-end gap-4 pt-4 border-t border-gray-200 mt-4">
@@ -394,31 +410,104 @@
     </div>
 </x-app-layout>
 
+<!-- Vishesh Modal -->
+<div id="visheshModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg w-full max-w-2xl">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">विशेष प्रीसेट व्यवस्थापन</h2>
+        <div class="mb-4 p-4 bg-gray-100 dark:bg-gray-700 rounded">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">नवीन विशेष जोडा</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300">बटण टेक्स्ट</label>
+                    <input type="text" id="visheshButtonText" placeholder="उदा. रक्तदाब"
+                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-700 dark:text-gray-300">प्रीसेट टेक्स्ट</label>
+                    <input type="text" id="visheshPresetText" placeholder="उदा. रक्तदाब - "
+                        class="w-full px-3 py-2 border rounded dark:bg-gray-900 dark:text-white" />
+                </div>
+            </div>
+            <div class="mt-4 flex justify-end space-x-2">
+                <button type="button" onclick="clearVisheshForm()"
+                    class="px-4 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-700 rounded">Clear</button>
+                <button type="button" onclick="saveVisheshPreset()"
+                    class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded">Save</button>
+            </div>
+        </div>
+        <div class="max-h-96 overflow-y-auto">
+            <table class="w-full text-left text-sm text-gray-700 dark:text-gray-300">
+                <thead>
+                    <tr class="bg-gray-200 dark:bg-gray-700">
+                        <th class="p-2">बटण टेक्स्ट</th>
+                        <th class="p-2">प्रीसेट टेक्स्ट</th>
+                        <th class="p-2">स्रोत</th>
+                        <th class="p-2">कृती</th>
+                    </tr>
+                </thead>
+                <tbody id="visheshPresetList"></tbody>
+            </table>
+        </div>
+        <div class="mt-4 flex justify-end">
+            <button type="button" onclick="closeVisheshModal()"
+                class="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Close</button>
+        </div>
+    </div>
+</div>
+
 <script>
     function calculateAgeFromBirthdate() {
-        let birthdate = document.getElementById('birthdate').value;
-        if (birthdate) {
-            let birthYear = new Date(birthdate).getFullYear();
-            let currentYear = new Date().getFullYear();
-            let age = currentYear - birthYear;
-            document.getElementById('age').value = age; // Auto-fill age
+        let birthdateVal = document.getElementById('birthdate').value;
+        if (birthdateVal) {
+            let birthDate = new Date(birthdateVal);
+            let today = new Date();
+            let years = today.getFullYear() - birthDate.getFullYear();
+            let months = today.getMonth() - birthDate.getMonth();
+            if (months < 0 || (months === 0 && today.getDate() < birthDate.getDate())) {
+                years--;
+                months += 12;
+            }
+            if (today.getDate() < birthDate.getDate()) {
+                months--;
+                if (months < 0) months += 12;
+            }
+            document.getElementById('age_years').value = years >= 0 ? years : '';
+            document.getElementById('age_months').value = months >= 0 ? months : '';
         }
     }
 
-    function calculateBirthdateFromAge() {
-        let age = document.getElementById('age').value;
-        if (age && !isNaN(age)) {
-            let currentYear = new Date().getFullYear();
-            let birthYear = currentYear - parseInt(age);
-            let birthdate = `${birthYear}-01-01`; // Default to Jan 1st
-            document.getElementById('birthdate').value = birthdate;
+    function calculateBirthdateFromAgeParts() {
+        let years = parseInt(document.getElementById('age_years').value, 10) || 0;
+        let months = parseInt(document.getElementById('age_months').value, 10) || 0;
+
+        if (years > 0 || months > 0) {
+            let d = new Date();
+            d.setFullYear(d.getFullYear() - years);
+            d.setMonth(d.getMonth() - months);
+            let yyyy = d.getFullYear();
+            let mm = String(d.getMonth() + 1).padStart(2, '0');
+            let dd = String(d.getDate()).padStart(2, '0');
+            document.getElementById('birthdate').value = `${yyyy}-${mm}-${dd}`;
         }
     }
 
     // Add event listeners after page load
     document.addEventListener('DOMContentLoaded', function() {
-        // Listen for Marathi conversion events on age field
-        document.getElementById('age').addEventListener('marathiConverted', calculateBirthdateFromAge);
+        // Listen for Marathi conversion events on age fields
+        const ageYEl = document.getElementById('age_years');
+        const ageMEl = document.getElementById('age_months');
+        if (ageYEl) ageYEl.addEventListener('marathiConverted', calculateBirthdateFromAgeParts);
+        if (ageMEl) ageMEl.addEventListener('marathiConverted', calculateBirthdateFromAgeParts);
+
+        const checkTinyMCE = () => {
+            if (typeof tinymce !== 'undefined' && tinymce.get('vishesh')) {
+                loadVisheshPresets();
+            } else {
+                setTimeout(checkTinyMCE, 200);
+            }
+        };
+        checkTinyMCE();
 
         // Camera functionality
         let cameraStream = null;
@@ -606,6 +695,184 @@
             }
         }
     });
+
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.content || '';
+    }
+
+    const visheshFieldId = {{ \App\Models\Field::where('name', 'vishesh')->first()->id ?? 0 }};
+    const visheshStorageKey = 'customVisheshPresets';
+
+    async function loadVisheshPresets() {
+        const container = document.getElementById('visheshPresets');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!visheshFieldId) return;
+
+        try {
+            const response = await axios.get(`/presets?field_id=${visheshFieldId}`, {
+                headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createVisheshPresetButton(preset.button_text, preset.preset_text, preset.id, true);
+            });
+        } catch (error) {
+            console.error('Error loading vishesh presets:', error);
+        }
+
+        const localPresets = JSON.parse(localStorage.getItem(visheshStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createVisheshPresetButton(preset, preset, null, false);
+        });
+    }
+
+    function createVisheshPresetButton(buttonText, presetText, id, isDatabase) {
+        const presetDiv = document.createElement('div');
+        presetDiv.className = 'relative';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'vishesh-box bg-gray-200 dark:bg-gray-700 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500 transition w-full text-center pr-6 text-sm';
+        button.innerText = buttonText;
+        button.onclick = () => appendVishesh(presetText);
+
+        presetDiv.appendChild(button);
+        document.getElementById('visheshPresets').appendChild(presetDiv);
+    }
+
+    async function loadVisheshPresetList() {
+        const list = document.getElementById('visheshPresetList');
+        if (!list) return;
+        list.innerHTML = '';
+
+        try {
+            const response = await axios.get(`/presets?field_id=${visheshFieldId}`, {
+                headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
+                withCredentials: true
+            });
+            response.data.forEach(preset => {
+                createVisheshPresetRow(preset, true);
+            });
+        } catch (error) {
+            console.error('Error loading vishesh preset list:', error);
+        }
+
+        const localPresets = JSON.parse(localStorage.getItem(visheshStorageKey)) || [];
+        localPresets.forEach(preset => {
+            createVisheshPresetRow({ button_text: preset, preset_text: preset, id: null }, false);
+        });
+    }
+
+    function createVisheshPresetRow(preset, isDatabase) {
+        const row = document.createElement('tr');
+        row.className = 'border-b dark:border-gray-600';
+        row.innerHTML = `
+            <td class="p-2">${preset.button_text}</td>
+            <td class="p-2">${preset.preset_text || preset.button_text}</td>
+            <td class="p-2">${isDatabase ? 'Database' : 'LocalStorage'}</td>
+            <td class="p-2">
+                <button type="button" class="text-red-500 hover:text-red-700" onclick="deleteVisheshPreset('${preset.id || ''}', '${preset.button_text}', ${isDatabase})">Delete</button>
+            </td>
+        `;
+        document.getElementById('visheshPresetList').appendChild(row);
+    }
+
+    function openVisheshModal() {
+        const modal = document.getElementById('visheshModal');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        loadVisheshPresetList();
+        clearVisheshForm();
+    }
+
+    function closeVisheshModal() {
+        document.getElementById('visheshModal').classList.add('hidden');
+    }
+
+    function clearVisheshForm() {
+        const buttonText = document.getElementById('visheshButtonText');
+        const presetText = document.getElementById('visheshPresetText');
+        if (buttonText && presetText) {
+            buttonText.value = '';
+            presetText.value = '';
+        }
+    }
+
+    async function saveVisheshPreset() {
+        const buttonText = document.getElementById('visheshButtonText').value.trim();
+        const presetText = document.getElementById('visheshPresetText').value.trim();
+        if (!buttonText) {
+            alert('Button text is required.');
+            return;
+        }
+
+        try {
+            await axios.post('/presets', {
+                field_id: visheshFieldId,
+                button_text: buttonText,
+                preset_text: presetText || buttonText,
+                display_order: 0
+            }, {
+                headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
+                withCredentials: true
+            });
+            loadVisheshPresets();
+            loadVisheshPresetList();
+            clearVisheshForm();
+            closeVisheshModal();
+        } catch (error) {
+            console.error('Error saving vishesh preset:', error);
+            alert(`Failed to save vishesh preset: ${error.response?.data?.message || error.message}`);
+        }
+    }
+
+    async function deleteVisheshPreset(id, buttonText, isDatabase) {
+        if (confirm(`Are you sure you want to delete "${buttonText}"?`)) {
+            try {
+                if (isDatabase && id) {
+                    await axios.delete(`/presets/${id}`, {
+                        headers: { 'X-CSRF-TOKEN': getCsrfToken(), 'Accept': 'application/json' },
+                        withCredentials: true
+                    });
+                } else {
+                    const stored = JSON.parse(localStorage.getItem(visheshStorageKey)) || [];
+                    const updated = stored.filter(item => item !== buttonText);
+                    localStorage.setItem(visheshStorageKey, JSON.stringify(updated));
+                }
+                loadVisheshPresets();
+                loadVisheshPresetList();
+            } catch (error) {
+                console.error('Error deleting vishesh preset:', error);
+            }
+        }
+    }
+
+    function appendVishesh(text) {
+        const editor = tinymce.get('vishesh');
+        if (!editor) {
+            console.error('TinyMCE editor for vishesh not found.');
+            return;
+        }
+        editor.focus();
+        const rng = editor.selection.getRng();
+        const container = rng.startContainer;
+        const cursorPos = rng.startOffset;
+        const nodeText = container.textContent || '';
+        const beforeText = nodeText.substring(0, cursorPos);
+        const afterText = nodeText.substring(cursorPos);
+
+        const needsSpaceBefore = beforeText.trim().length > 0 && !beforeText.trim().endsWith(' ');
+        const needsSpaceAfter = afterText.trim().length > 0 && !afterText.trim().startsWith(' ');
+
+        let insertText = '';
+        if (needsSpaceBefore) insertText += ' ';
+        insertText += text;
+        if (needsSpaceAfter) insertText += ' ';
+
+        editor.selection.setContent(insertText);
+        editor.selection.collapse(false);
+    }
 </script>
 
 

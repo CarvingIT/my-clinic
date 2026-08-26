@@ -263,7 +263,7 @@
             <div>
                 <span class="label">वय / लिंग:</span>
                 <span class="value">
-                    {{ $patient->birthdate ? floor(abs(now()->diffInYears($patient->birthdate))) . ' वर्षे' : '-' }} / {{ $patient->gender ?? '-' }}
+                    {{ $patient->age ?? '-' }} / {{ $patient->gender ?? '-' }}
                 </span>
             </div>
             <div>

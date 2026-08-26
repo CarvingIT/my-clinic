@@ -86,7 +86,7 @@
             <p>To whom it may concern,</p>
             <p>This is to certify that <strong>{{ $patient->name }}</strong>,
                 @if ($patient->birthdate)
-                    aged {{ floor(abs(now()->diffInYears($patient->birthdate))) }} years,
+                    aged {{ $patient->age }},
                 @endif
                 has been under our care and treatment at the clinic from
                 {{ \Carbon\Carbon::parse($startDate)->format('d/m/Y') }} to

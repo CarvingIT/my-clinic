@@ -28,18 +28,14 @@ class UserController extends Controller
     public function index()
     // {
     //     $users = User::all()->load('roles');
-    //     return view('users.index', compact('users'));
-    // }
     {
         $users = User::all();
         foreach ($users as $user) {
-            // $user->setAttribute('roles', $user->roles()->get()); // Manually attach roles
-            // $user->setAttribute('roles', $user->roles()); // Use the roles relationship to get roles
             $user->setAttribute('roles', $user->roles()->pluck('name')->toArray()); // Ensure array for view
         }
-        return view('users.index', compact('users'));
+        $branches = \App\Models\Branch::orderBy('name')->get();
+        return view('users.index', compact('users', 'branches'));
     }
-
     /**
      * Show the form for creating a new resource.
      */

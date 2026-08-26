@@ -173,4 +173,13 @@ return [
     'print' => 'Print',
     'Date' => 'Date',
     'Treatment' => 'Treatment',
+    'Add Branch' => 'Add Branch',
+    'Edit Branch' => 'Edit Branch',
+    'Branch Name' => 'Branch Name',
+    'Save Branch' => 'Save Branch',
+    'Update Branch' => 'Update Branch',
+    'Enter Branch Name' => 'e.g. Kothrud',
+    'Manage Staff and Branches' => 'Manage staff users, roles, permissions, and clinic branch locations.',
+    'Clinic Branches' => 'Clinic Branches',
+    'Staff Users' => 'Staff Users',
 ];
