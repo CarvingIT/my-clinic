@@ -35,7 +35,10 @@ return [
 
     'pdf' => [
         'enabled' => true,
-        'binary'  => env('WKHTML_PDF_BINARY', '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf"'),
+        'binary'  => env('WKHTML_PDF_BINARY', PHP_OS_FAMILY === 'Windows'
+            ? '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"'
+            : (file_exists('/usr/local/bin/wkhtmltopdf') ? '/usr/local/bin/wkhtmltopdf' : '/usr/bin/wkhtmltopdf')
+        ),
         'timeout' => false,
         'options' => [
             'encoding' => 'UTF-8',
@@ -45,7 +48,10 @@ return [
 
     'image' => [
         'enabled' => true,
-        'binary'  => env('WKHTML_IMG_BINARY', '"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe"'),
+        'binary'  => env('WKHTML_IMG_BINARY', PHP_OS_FAMILY === 'Windows'
+            ? '"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe"'
+            : (file_exists('/usr/local/bin/wkhtmltoimage') ? '/usr/local/bin/wkhtmltoimage' : '/usr/bin/wkhtmltoimage')
+        ),
         'timeout' => false,
         'options' => [],
         'env'     => [],

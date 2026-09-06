@@ -62,25 +62,45 @@ class PrescriptionController extends Controller
         // Get all available fields
         $allFields = $this->buildAllFields($followup, $patient, $checkUpInfo);
 
-        // Get selected fields from request
-        $selectedFields = $request->get('selected_fields', []);
+        // Get selected fields from request (or default to all if accessed via GET)
+        $defaultSelected = [
+            'patient_name', 'patient_id', 'patient_age', 'patient_gender',
+            'patient_mobile', 'patient_address', 'nadi', 'lakshane',
+            'nidan', 'chikitsa', 'days', 'packets', 'amount_billed',
+            'amount_paid', 'amount_due'
+        ];
+        $selectedFields = $request->get('selected_fields', $defaultSelected);
         $customValues = $request->get('field_values', []);
 
-        // Build prescription data with custom values overriding defaults
+        // Build prescription data for form and placeholder replacement
         $prescriptionData = [];
+        $placeholderData = $this->buildPlaceholderData($followup, $patient, $checkUpInfo);
+
         foreach ($allFields as $key => $field) {
             if (in_array($key, $selectedFields)) {
-                // Use custom value if provided, otherwise use default
-                $prescriptionData[$key] = $customValues[$key] ?? $field['value'];
+                $val = $customValues[$key] ?? $field['value'];
+                $prescriptionData[$key] = $val;
                 $prescriptionData[$key . '_label'] = $field['label'];
+
+                if (($field['type'] ?? '') === 'textarea') {
+                    $placeholderData[$key] = nl2br(htmlspecialchars($val));
+                } else {
+                    $placeholderData[$key] = htmlspecialchars($val);
+                }
+            } else {
+                $placeholderData[$key] = '';
             }
         }
+
+        $templateRender = $this->renderPrescriptionTemplate($placeholderData);
 
         return view('prescriptions.generate', [
             'followup' => $followup,
             'patient' => $patient,
             'data' => $prescriptionData,
             'selectedFields' => $selectedFields,
+            'templateStyles' => $templateRender['styles'],
+            'templateBody' => $templateRender['bodyHtml'],
         ]);
     }
 
@@ -262,35 +282,88 @@ class PrescriptionController extends Controller
         $checkUpInfo = json_decode($followup->check_up_info, true) ?? [];
         $allFields = $this->buildAllFields($followup, $patient, $checkUpInfo);
 
-        $prescriptionData = [];
+        $placeholderData = $this->buildPlaceholderData($followup, $patient, $checkUpInfo);
         foreach ($allFields as $key => $field) {
             if (in_array($key, $selectedFields)) {
-                $prescriptionData[$key] = $customValues[$key] ?? $field['value'];
-                $prescriptionData[$key . '_label'] = $field['label'];
+                $val = $customValues[$key] ?? $field['value'];
+                if (($field['type'] ?? '') === 'textarea') {
+                    $placeholderData[$key] = nl2br(htmlspecialchars($val));
+                } else {
+                    $placeholderData[$key] = htmlspecialchars($val);
+                }
+            } else {
+                $placeholderData[$key] = '';
             }
         }
 
-        $viewData = [
-            'data' => $prescriptionData,
-            'followup' => $followup,
-            'patient' => $patient,
-            'selectedFields' => $selectedFields,
-            'font_scale' => $request->get('font_scale', 1)
-        ];
+        $templateRender = $this->renderPrescriptionTemplate($placeholderData);
 
-        $pdf = PDF::loadView('prescriptions.pdf-download', $viewData);
-        $pdf->setOption('page-size', 'A4');
-                // Dynamic Margins
-        $pdf->setOption('margin-top', $request->get('margin_top', 10) . 'mm');
-        $pdf->setOption('margin-bottom', $request->get('margin_bottom', 10) . 'mm');
-        $pdf->setOption('margin-left', $request->get('margin_left', 10) . 'mm');
-        $pdf->setOption('margin-right', $request->get('margin_right', 10) . 'mm');
+        $pdf = PDF::loadHTML($templateRender['fullHtml']);
+        $pdf->setOption('page-size', 'A5');
+        $pdf->setOption('margin-top', $request->get('margin_top', 6) . 'mm');
+        $pdf->setOption('margin-bottom', $request->get('margin_bottom', 6) . 'mm');
+        $pdf->setOption('margin-left', $request->get('margin_left', 8) . 'mm');
+        $pdf->setOption('margin-right', $request->get('margin_right', 8) . 'mm');
         $pdf->setOption('encoding', 'UTF-8');
         $pdf->setOption('enable-local-file-access', true);
 
         $filename = 'prescription_' . str_replace(' ', '_', $patient->name) . '_' . $followup->created_at->format('Y-m-d') . '.pdf';
 
         return $pdf->download($filename);
+    }
+
+    /**
+     * Render the prescription template with data and extract styles/body.
+     */
+    private function renderPrescriptionTemplate(array $placeholderData): array
+    {
+        $template = Template::findBySlug('prescription');
+        $content = ($template && $template->is_active && !empty($template->content))
+            ? $template->content
+            : file_get_contents(resource_path('views/admin/templates/prescription.html'));
+
+        // If specific clinical or extra sections are empty, cleanly remove them
+        $sectionKeys = ['nadi', 'lakshane', 'nidan', 'chikitsa'];
+        foreach ($sectionKeys as $secKey) {
+            if (empty($placeholderData[$secKey])) {
+                $content = preg_replace('/<div class="section">\s*<div class="section-header">[^<]*<\/div>\s*<div class="section-content">\{' . $secKey . '\}<\/div>\s*<\/div>/is', '', $content);
+            }
+        }
+
+        if (empty($placeholderData['vishesh'])) {
+            $content = preg_replace('/<div class="instructions-box">\s*<div class="title">[^<]*<\/div>\s*<div class="instructions-content">\{vishesh\}<\/div>\s*<\/div>/is', '', $content);
+        }
+
+        if (empty($placeholderData['days']) && empty($placeholderData['packets'])) {
+            $content = preg_replace('/<table class="med-table".*?<\/table>/is', '', $content);
+        }
+
+        if (empty($placeholderData['amount_billed']) && empty($placeholderData['amount_paid']) && empty($placeholderData['amount_due'])) {
+            $content = preg_replace('/<table class="payment-table".*?<\/table>/is', '', $content);
+        }
+
+        // Replace placeholders
+        foreach ($placeholderData as $key => $value) {
+            $content = str_replace('{' . $key . '}', $value ?? '', $content);
+        }
+
+        // Extract style block
+        preg_match('/<style[^>]*>(.*?)<\/style>/is', $content, $styleMatches);
+        $styles = $styleMatches[1] ?? '';
+
+        // Scope body & * rules to .prescription-page so preview toolbar stays uncorrupted
+        $scopedStyles = preg_replace('/(?<![.\w-])body\s*\{/i', '.prescription-page {', $styles);
+        $scopedStyles = preg_replace('/(?<![.\w-])\*\s*\{/i', '.prescription-page, .prescription-page * {', $scopedStyles);
+
+        // Extract body inner HTML
+        preg_match('/<body[^>]*>(.*?)<\/body>/is', $content, $bodyMatches);
+        $bodyHtml = $bodyMatches[1] ?? $content;
+
+        return [
+            'fullHtml' => $content,
+            'styles' => $scopedStyles,
+            'bodyHtml' => $bodyHtml,
+        ];
     }
 
     /**
