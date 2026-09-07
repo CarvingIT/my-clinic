@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="mr,en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Informed Consent Form - {patient_name}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 20mm 16mm 14mm 16mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans Devanagari', 'DejaVu Sans', 'Arial Unicode MS', Arial, sans-serif;
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: #1e293b;
+            background-color: #ffffff;
+        }
+
+        .consent-page {
+            width: 100%;
+            margin: 0 auto;
+            padding-top: 12px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        /* 1. Header Section */
+        .clinic-header {
+            width: 100%;
+            border-bottom: 3px double #047857;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .clinic-header td {
+            vertical-align: top;
+        }
+
+        .doctor-name-mr {
+            font-size: 19px;
+            font-weight: bold;
+            color: #0f172a;
+            line-height: 1.25;
+        }
+
+        .doctor-name-en {
+            font-size: 14px;
+            font-weight: bold;
+            color: #334155;
+            margin-top: 3px;
+        }
+
+        .doctor-reg {
+            font-size: 12.5px;
+            color: #475569;
+            margin-top: 4px;
+        }
+
+        .clinic-name-mr {
+            font-size: 20px;
+            font-weight: bold;
+            color: #047857;
+            text-align: right;
+            line-height: 1.25;
+        }
+
+        .clinic-name-en {
+            font-size: 13px;
+            font-weight: bold;
+            color: #1e293b;
+            text-align: right;
+            margin-top: 3px;
+            letter-spacing: 0.3px;
+        }
+
+        .clinic-desc {
+            font-size: 11.5px;
+            color: #64748b;
+            text-align: right;
+            margin-top: 3px;
+        }
+
+        .header-contact-row td {
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 8px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        /* 2. Document Title */
+        .title-container {
+            text-align: center;
+            background-color: #f0fdf4;
+            border: 1.5px solid #86efac;
+            padding: 10px 14px;
+            margin-bottom: 18px;
+            border-radius: 4px;
+        }
+
+        .title-en {
+            font-size: 16px;
+            font-weight: bold;
+            color: #14532d;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        .title-mr {
+            font-size: 15px;
+            font-weight: bold;
+            color: #166534;
+            margin-top: 2px;
+        }
+
+        /* 3. Patient Information Bar */
+        .patient-info-table {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            margin-bottom: 18px;
+            font-size: 13px;
+        }
+
+        .patient-info-table td {
+            padding: 9px 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .patient-info-table .label {
+            background-color: #f8fafc;
+            font-weight: bold;
+            color: #334155;
+            width: 24%;
+        }
+
+        .patient-info-table .value {
+            color: #0f172a;
+            width: 26%;
+        }
+
+        /* 4. Voluntary Statement Intro */
+        .declaration-intro {
+            font-size: 13.5px;
+            line-height: 1.65;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            background-color: #f8fafc;
+            border-left: 4px solid #047857;
+            color: #1e293b;
+        }
+
+        /* 5. Terms & Condition Sections */
+        .terms-section {
+            margin-bottom: 16px;
+        }
+
+        .clause-item {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 4.5px solid #059669;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .clause-header {
+            font-size: 14.5px;
+            font-weight: bold;
+            color: #065f46;
+            margin-bottom: 6px;
+        }
+
+        .clause-en {
+            font-size: 12.5px;
+            line-height: 1.6;
+            color: #334155;
+            text-align: justify;
+            margin-bottom: 6px;
+        }
+
+        .clause-mr {
+            font-size: 13.5px;
+            line-height: 1.65;
+            color: #0f172a;
+            text-align: justify;
+        }
+
+        /* 6. Acknowledgment Checkbox Row */
+        .confirmation-box {
+            padding: 10px 14px;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            font-size: 12.5px;
+            line-height: 1.55;
+            color: #334155;
+            margin-bottom: 22px;
+        }
+
+        /* 7. Signatures Area */
+        .signature-table {
+            width: 100%;
+            margin-top: 18px;
+            margin-bottom: 16px;
+            page-break-inside: avoid;
+        }
+
+        .signature-table td {
+            vertical-align: top;
+        }
+
+        .sign-card {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 14px 18px;
+            background-color: #ffffff;
+        }
+
+        .sign-space {
+            height: 70px;
+            border-bottom: 1.5px dashed #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .sign-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #0f172a;
+        }
+
+        .sign-sub {
+            font-size: 12.5px;
+            color: #475569;
+            margin-top: 2px;
+        }
+
+        .sign-meta-table {
+            width: 100%;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .sign-meta-table td {
+            padding: 3px 0;
+        }
+
+        /* 8. Footer */
+        .clinic-footer {
+            border-top: 1px solid #cbd5e1;
+            padding-top: 10px;
+            margin-top: 16px;
+            text-align: center;
+            font-size: 11px;
+            color: #64748b;
+            page-break-inside: avoid;
+            line-height: 1.5;
+        }
+
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+            .title-container {
+                background-color: #f1f5f9 !important;
+                border-color: #94a3b8 !important;
+            }
+            .clause-item {
+                border-left-color: #000000 !important;
+            }
+            .clinic-header {
+                border-bottom: 2px solid #000000 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="consent-page">
+
+        <!-- 1. Clinic Letterhead / Header -->
+        <table class="clinic-header" cellpadding="0" cellspacing="0">
+            <tr>
+                <td style="width: 50%;">
+                    <div class="doctor-name-mr">डॉ. दिनेश सतीश पंचभाई</div>
+                    <div class="doctor-name-en">Dr. Dinesh Satish Panchbhai <span style="font-weight: normal; font-size: 12.5px;">(M.D. Ayurved)</span></div>
+                    <div class="doctor-reg">
+                        <strong>Registration No:</strong> I-57000A<br>
+                        <strong>Mobile:</strong> +91 9011095357
+                    </div>
+                </td>
+                <td style="width: 50%;">
+                    <div class="clinic-name-mr">श्रीराम आयुर्वेद व पंचकर्म क्लिनिक</div>
+                    <div class="clinic-name-en">SHRIRAM AYURVED &amp; PANCHAKARMA CLINIC</div>
+                    <div class="clinic-desc">विशुद्ध आयुर्वेदिक चिकित्सा आणि पंचकर्म केंद्र</div>
+                </td>
+            </tr>
+            <tr class="header-contact-row">
+                <td style="padding-top: 8px;">
+                    <strong>क्लिनिक पत्ता:</strong> N/6/K-4, जुना सिडको, भाजी मार्केट, ओम मसाला शेजारी, लेखानगर जवळ, नाशिक.
+                </td>
+                <td style="text-align: right; padding-top: 8px; white-space: nowrap;">
+                    <strong>वेळ:</strong> सोमवार ते शनिवार: सायं. 5:30 ते रात्री 9:00
+                </td>
+            </tr>
+        </table>
+
+        <!-- 2. Form Banner / Title -->
+        <div class="title-container">
+            <div class="title-en">INFORMED CONSENT FORM FOR AYURVEDIC TREATMENT</div>
+            <div class="title-mr">माहितीपूर्ण रुग्ण संमती पत्र (आयुर्वेद व पंचकर्म उपचार)</div>
+        </div>
+
+        <!-- 3. Patient Details Bar -->
+        <table class="patient-info-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="label">Patient Name / रुग्णाचे नाव:</td>
+                <td class="value"><strong>{patient_name}</strong></td>
+                <td class="label">Date / दिनांक:</td>
+                <td class="value"><strong>{current_date}</strong></td>
+            </tr>
+            <tr>
+                <td class="label">Age / वय:</td>
+                <td class="value">{patient_age}</td>
+                <td class="label">Treatment / उपचार:</td>
+                <td class="value"><strong>{procedure_name}</strong></td>
+            </tr>
+        </table>
+
+        <!-- 4. Voluntary Preamble -->
+        <div class="declaration-intro">
+            I, <strong>{patient_name}</strong>, voluntarily consent to undergo examination and treatment at this clinic and agree to the following terms and conditions:<br>
+            <strong>मी, {patient_name}, या दवाखान्यात उपचार घेण्यास माझी स्वेच्छेने संमती देत असून खालील अटींशी सहमत आहे:</strong>
+        </div>
+
+        <!-- 5. Core Terms & Conditions -->
+        <div class="terms-section">
+            <!-- Term 1: OPD -->
+            <div class="clause-item">
+                <div class="clause-header">१. OPD Treatment &amp; Medication / ओपीडी उपचार व औषधोपचार:</div>
+                <div class="clause-en">
+                    <strong>English:</strong> I have accurately and completely disclosed my medical history, past illnesses, drug allergies, and current medications. I understand that the efficacy of Ayurvedic medicine depends upon individual constitution (Prakriti), and strict adherence to the prescribed diet and lifestyle regimen (Pathya-Apathya) is mandatory for achieving therapeutic results.
+                </div>
+                <div class="clause-mr">
+                    <strong>मराठी:</strong> मी माझी आरोग्यविषयक संपूर्ण माहिती, जुने आजार, ऍलर्जी आणि सुरू असलेली सर्व औषधे वैद्यांना अचूक सांगितली आहेत. आयुर्वेदिक औषधांचे परिणाम हे प्रकृतीनुसार बदलू शकतात आणि वैद्यांनी सांगितलेले पथ्य-अपथ्य पाळणे माझ्यासाठी अनिवार्य आहे याची मला पूर्ण जाणीव आहे.
+                </div>
+            </div>
+
+            <!-- Term 2: Panchakarma -->
+            <div class="clause-item">
+                <div class="clause-header">२. Panchakarma Procedures / पंचकर्म उपचार व संसर्जन क्रम:</div>
+                <div class="clause-en">
+                    <strong>English:</strong> I consent to undergo the advised Panchakarma detoxification procedures (such as Vamana, Virechana, Basti, Nasya, Raktamokshana, Shirodhara, etc.). I am aware that temporary physiological changes, detoxification responses, or mild fatigue may occur. I take full responsibility for diligently adhering to the post-procedure dietary progression (Samsarjana Krama) and rest rules.
+                </div>
+                <div class="clause-mr">
+                    <strong>मराठी:</strong> मी माझ्या आजारासाठी सुचवलेल्या पंचकर्म प्रक्रिया (उदा. वमन, विरेचन, बस्ती, नस्य, रक्तमोक्षण इ.) करून घेण्यास संमती देत आहे. या प्रक्रियेदरम्यान शरीरात काही बदल जाणवू शकतात किंवा तात्पुरता थकवा येऊ शकतो याची मला पूर्वकल्पना आहे. प्रक्रियेनंतरचा आहार (संसर्जन क्रम) आणि विश्रांतीचे सर्व नियम पाळण्याची माझी पूर्ण जबाबदारी राहील.
+                </div>
+            </div>
+
+            <!-- Term 3: Declaration -->
+            <div class="clause-item">
+                <div class="clause-header">३. Informed Consent &amp; Voluntary Undertaking / संमती व जाहीरनामा:</div>
+                <div class="clause-en">
+                    <strong>English:</strong> I am signing this consent form in a sound state of mind, without any external coercion, influence, or pressure, having fully understood the nature, duration, and instructions of the proposed treatment.
+                </div>
+                <div class="clause-mr">
+                    <strong>मराठी:</strong> मी हे संमती पत्र पूर्णपणे वाचून व समजून घेऊन, कोणत्याही दबावाशिवाय स्वखुशीने व शुद्ध मनावर स्वाक्षरी करत आहे.
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Confirmation Statement -->
+        <div class="confirmation-box">
+            ☑ <strong>Confirmation / पुष्टी:</strong> All my questions regarding the treatment, potential outcomes, and dietary restrictions have been answered satisfactorily in my preferred language (English / मराठी).
+        </div>
+
+        <!-- 7. Signatures Section -->
+        <table class="signature-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td style="width: 48%;">
+                    <div class="sign-card">
+                        <div class="sign-space"></div>
+                        <div class="sign-title">Patient / Guardian's Signature</div>
+                        <div class="sign-sub">रुग्णाची / पालकाची स्वाक्षरी</div>
+                        <table class="sign-meta-table">
+                            <tr>
+                                <td><strong>Name / नाव:</strong> {patient_name}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Date / दिनांक:</strong> {current_date}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Place / ठिकाण:</strong> Nashik / नाशिक</td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+                <td style="width: 4%;"></td>
+                <td style="width: 48%;">
+                    <div class="sign-card">
+                        <div class="sign-space"></div>
+                        <div class="sign-title">Doctor's Signature &amp; Stamp</div>
+                        <div class="sign-sub">वैद्यांची स्वाक्षरी व शिक्का</div>
+                        <table class="sign-meta-table">
+                            <tr>
+                                <td><strong>वैद्य:</strong> डॉ. दिनेश सतीश पंचभाई (MD Ayu)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Reg. No:</strong> I-57000A</td>
+                            </tr>
+                            <tr>
+                                <td><strong>क्लिनिक:</strong> श्रीराम आयुर्वेद व पंचकर्म क्लिनिक, नाशिक</td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- 8. Footer -->
+        <div class="clinic-footer">
+            श्रीराम आयुर्वेद व पंचकर्म क्लिनिक • N/6/K-4, जुना सिडको, भाजी मार्केट, ओम मसाला शेजारी, लेखानगर जवळ, नाशिक • मो: 9011095357<br>
+            <span style="font-size: 10px; color: #94a3b8;">This clinical consent record is maintained in accordance with institutional healthcare documentation standards.</span>
+        </div>
+
+    </div>
+</body>
+</html>

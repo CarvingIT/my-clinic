@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="mr,en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Prescription - {patient_name}</title>
+    <style>
+        @page {
+            size: A5 portrait;
+            margin: 6mm 8mm 6mm 8mm;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Devanagari', 'DejaVu Sans', 'Arial Unicode MS', 'Segoe UI', Arial, sans-serif;
+            font-size: 10.5px;
+            color: #1e293b;
+            background: #ffffff;
+            line-height: 1.4;
+        }
+
+        .prescription-page {
+            width: 100%;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 8px 10px 6px 10px;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* ── Minimal Header (Left: English | Right: Marathi) ── */
+        .header-table {
+            width: 100%;
+            border-bottom: 2.5px solid #047857;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .header-table td {
+            vertical-align: top;
+        }
+
+        .header-left {
+            width: 50%;
+            text-align: left;
+            padding-right: 8px;
+        }
+
+        .header-right {
+            width: 50%;
+            text-align: right;
+            padding-left: 8px;
+        }
+
+        .clinic-title-en {
+            font-size: 18px;
+            font-weight: 800;
+            color: #047857;
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .clinic-title-mr {
+            font-size: 20px;
+            font-weight: 800;
+            color: #047857;
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+        }
+
+        .doc-name-en {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 3px;
+        }
+
+        .doc-name-mr {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-top: 3px;
+        }
+
+        .doc-degree {
+            font-size: 11px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .clinic-meta {
+            font-size: 10.5px;
+            color: #475569;
+            margin-top: 3px;
+            line-height: 1.45;
+        }
+
+        /* ── Patient Details Table ── */
+        .patient-table {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            background-color: #f8fafc;
+            margin-bottom: 6px;
+            font-size: 9.5px;
+        }
+
+        .patient-table td {
+            padding: 3.5px 6px;
+            border: 1px solid #e2e8f0;
+            vertical-align: middle;
+        }
+
+        .patient-table .lbl {
+            font-weight: 700;
+            color: #334155;
+            width: 13%;
+            white-space: nowrap;
+        }
+
+        .patient-table .val {
+            color: #0f172a;
+            width: 20%;
+        }
+
+        /* ── Rx Symbol Bar ── */
+        .rx-table {
+            width: 100%;
+            margin-bottom: 4px;
+        }
+
+        .rx-symbol {
+            font-family: 'Times New Roman', serif;
+            font-size: 20px;
+            font-weight: 700;
+            font-style: italic;
+            color: #047857;
+            line-height: 1;
+            width: 25px;
+        }
+
+        .rx-line {
+            border-bottom: 1px solid #cbd5e1;
+            height: 10px;
+        }
+
+        /* ── Prescription Body & Clinical Sections ── */
+        .prescription-body {
+            width: 100%;
+        }
+
+        .section {
+            margin-bottom: 5px;
+            border-left: 2.5px solid #059669;
+            background-color: #ffffff;
+            padding: 3px 6px 4px 6px;
+            border-top: 1px solid #f1f5f9;
+            border-right: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            border-radius: 0 3px 3px 0;
+        }
+
+        .section-header {
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #065f46;
+            margin-bottom: 1px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .section-content {
+            font-size: 10px;
+            color: #1e293b;
+            line-height: 1.4;
+            min-height: 16px;
+        }
+
+        .section-content p {
+            margin: 0;
+        }
+
+        /* ── Duration & Packets Table ── */
+        .med-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9.5px;
+            margin-top: 4px;
+            margin-bottom: 5px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .med-table th {
+            background: #f1f5f9;
+            color: #065f46;
+            font-weight: 700;
+            padding: 3px 6px;
+            text-align: center;
+            border: 1px solid #cbd5e1;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        .med-table td {
+            padding: 4px 6px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        /* ── Instructions Box (Vishesh) ── */
+        .instructions-box {
+            background: #fefce8;
+            border: 1px solid #fef08a;
+            border-left: 3px solid #ca8a04;
+            border-radius: 3px;
+            padding: 4px 8px;
+            margin-bottom: 6px;
+            font-size: 9.5px;
+        }
+
+        .instructions-box .title {
+            font-weight: 700;
+            color: #854d0e;
+            margin-bottom: 1px;
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        .instructions-content {
+            color: #713f12;
+            line-height: 1.35;
+        }
+
+        /* ── Payment Strip ── */
+        .payment-table {
+            width: 100%;
+            background: #f8fafc;
+            border-top: 1px dashed #cbd5e1;
+            border-bottom: 1px dashed #cbd5e1;
+            margin-top: 4px;
+            margin-bottom: 6px;
+        }
+
+        .payment-table td {
+            padding: 3px 8px;
+            font-size: 9px;
+            text-align: center;
+            color: #475569;
+        }
+
+        .payment-table strong {
+            color: #0f172a;
+        }
+
+        /* ── Footer ── */
+        .footer-table {
+            width: 100%;
+            margin-top: 4px;
+            padding-top: 4px;
+            border-top: 1.5px solid #047857;
+        }
+
+        .footer-table td {
+            vertical-align: bottom;
+        }
+
+        .next-visit {
+            font-size: 9px;
+            color: #475569;
+            line-height: 1.35;
+        }
+
+        .next-visit strong {
+            color: #047857;
+        }
+
+        .signature-area {
+            text-align: right;
+            width: 120px;
+        }
+
+        .signature-line {
+            width: 110px;
+            border-bottom: 1px solid #047857;
+            margin-left: auto;
+            margin-bottom: 2px;
+            height: 24px;
+        }
+
+        .doctor-name {
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .signature-label {
+            font-size: 8px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            .prescription-page {
+                border: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="prescription-page">
+
+        <!-- ── Minimal Header (Left: English | Right: Marathi) ── -->
+        <table class="header-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="header-left">
+                    <div class="clinic-title-en">SHRIRAM AYURVED &amp; PANCHAKARMA CLINIC</div>
+                    <div class="doc-name-en">Dr. Dinesh Satish Panchbhai <span class="doc-degree">(M.D. Ayurved)</span></div>
+                    <div class="clinic-meta">
+                        Reg. No: <strong>I-57000A</strong> &bull; Mo: <strong>9011095357</strong><br>
+                        N/6/K-4, Old CIDCO, Lekhanagar, Nashik.<br>
+                        Timing: Mon - Sat: 5:30 PM - 9:00 PM
+                    </div>
+                </td>
+                <td class="header-right">
+                    <div class="clinic-title-mr">श्रीराम आयुर्वेद व पंचकर्म क्लिनिक</div>
+                    <div class="doc-name-mr">डॉ. दिनेश सतीश पंचभाई <span class="doc-degree">(एम.डी. आयुर्वेद)</span></div>
+                    <div class="clinic-meta">
+                        नोंदणी क्र.: <strong>I-57000A</strong> &bull; मो.: <strong>9011095357</strong><br>
+                        N/6/K-4, जुना सिडको, भाजी मार्केट, लेखानगर जवळ, नाशिक.<br>
+                        वेळ: सोम ते शनि: सायं. 5:30 ते रात्री 9:00
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- ── Patient Info Bar ── -->
+        <table class="patient-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="lbl">Patient:</td>
+                <td class="val"><strong>{patient_name}</strong></td>
+                <td class="lbl">ID:</td>
+                <td class="val">{patient_id}</td>
+                <td class="lbl">Date:</td>
+                <td class="val"><strong>{followup_date}</strong></td>
+            </tr>
+            <tr>
+                <td class="lbl">Age/Sex:</td>
+                <td class="val">{patient_age} / {patient_gender}</td>
+                <td class="lbl">Mobile:</td>
+                <td class="val">{patient_mobile}</td>
+                <td class="lbl">Wt/Ht:</td>
+                <td class="val">{patient_weight} / {patient_height}</td>
+            </tr>
+            <tr>
+                <td class="lbl">Address:</td>
+                <td class="val" colspan="3">{patient_address}</td>
+                <td class="lbl">Doctor:</td>
+                <td class="val"><strong>{doctor_name}</strong></td>
+            </tr>
+        </table>
+
+        <!-- ── Rx Symbol Bar ── -->
+        <table class="rx-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="rx-symbol">℞</td>
+                <td class="rx-line"></td>
+            </tr>
+        </table>
+
+        <!-- ── Clinical Body ── -->
+        <div class="prescription-body">
+            <!-- Nadi -->
+            <div class="section">
+                <div class="section-header">नाडी (Nadi / Pulse)</div>
+                <div class="section-content">{nadi}</div>
+            </div>
+
+            <!-- Lakshane -->
+            <div class="section">
+                <div class="section-header">लक्षणे (Lakshane / Symptoms)</div>
+                <div class="section-content">{lakshane}</div>
+            </div>
+
+            <!-- Nidan -->
+            <div class="section">
+                <div class="section-header">निदान (Nidan / Diagnosis)</div>
+                <div class="section-content">{nidan}</div>
+            </div>
+
+            <!-- Chikitsa -->
+            <div class="section">
+                <div class="section-header">चिकित्सा (Chikitsa / Treatment)</div>
+                <div class="section-content">{chikitsa}</div>
+            </div>
+
+            <!-- Duration & Packets -->
+            <table class="med-table" cellpadding="0" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th style="width: 50%;">Duration (दिवस)</th>
+                        <th style="width: 50%;">Packets (पुडे)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{days}</td>
+                        <td>{packets}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Vishesh Instructions -->
+            <div class="instructions-box">
+                <div class="title">विशेष (Special Instructions)</div>
+                <div class="instructions-content">{vishesh}</div>
+            </div>
+        </div>
+
+        <!-- ── Payment Strip ── -->
+        <table class="payment-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td><strong>Billed:</strong> ₹{amount_billed}</td>
+                <td><strong>Paid:</strong> ₹{amount_paid}</td>
+                <td><strong>Due:</strong> ₹{amount_due}</td>
+            </tr>
+        </table>
+
+        <!-- ── Footer ── -->
+        <table class="footer-table" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="next-visit">
+                    <strong>Next Visit / पुढील भेट:</strong> As advised<br>
+                    <span style="font-size: 8px; color: #64748b;">औषधे वेळेवर घ्या व पथ्य पाळावे.</span>
+                </td>
+                <td class="signature-area">
+                    <div class="signature-line"></div>
+                    <div class="doctor-name">{doctor_name}</div>
+                    <div class="signature-label">Authorized Signatory</div>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+</body>
+
+</html>
