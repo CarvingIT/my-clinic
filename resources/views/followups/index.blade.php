@@ -913,44 +913,57 @@ if (!function_exists('indFormat')) {
                         </thead>
 
                         <tbody id="followups-main-tbody" class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200">
-                            @foreach ($followUps as $followUp)
-                                @if ($followUp->patient)
+                            @foreach ($followUps as $item)
+                                @if ($item->patient)
                                     <tr
                                         class="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 animate-fadeIn">
                                         <td class="text-left px-4 py-3">
-                                            {{ $followUp->created_at->format('d M Y, h:i A') }}</td>
+                                            {{ optional($item->date)->format('d M Y, h:i A') }}</td>
                                         <td class="text-center px-4 py-3">
-                                            <a href="{{ route('patients.show', $followUp->patient->id) }}"
+                                            <a href="{{ route('patients.show', $item->patient->id) }}"
                                                 class="
                                                     font-semibold hover:underline
-                                                    {{ $followUp->amount_paid < $followUp->amount_billed ? 'text-red-600 dark:text-red-400' : 'text-indigo-700 dark:text-indigo-400' }}
+                                                    {{ $item->type === 'payment'
+                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                        : ($item->amount_paid < $item->amount_billed
+                                                            ? 'text-red-600 dark:text-red-400'
+                                                            : 'text-indigo-700 dark:text-indigo-400') }}
                                                 ">
-                                                {{ $followUp->patient->name }}
+                                                {{ $item->patient->name }}
                                             </a>
                                         </td>
 
                                         <td class="text-center px-4 py-3">
-                                            @php
-                                                $checkUpInfo = json_decode($followUp->check_up_info, true);
-                                            @endphp
-                                            {{ $checkUpInfo['user_name'] ?? 'N/A' }}
+                                            @if($item->type === 'payment')
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300">
+                                                    💳 Direct Payment ({{ $item->doctor_name }})
+                                                </span>
+                                            @else
+                                                {{ $item->doctor_name }}
+                                            @endif
                                         </td>
                                         <td
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
-                                            ₹{{ indFormat(@$followUp->amount_billed) }}
+                                            @if($item->type === 'payment')
+                                                <span class="text-gray-400 dark:text-gray-500 font-normal">—</span>
+                                            @else
+                                                ₹{{ indFormat(@$item->amount_billed) }}
+                                            @endif
                                         </td>
                                         <td
                                             class="text-center px-4 py-3 font-semibold text-blue-600 dark:text-blue-300">
-                                            {{ $followUp->payment_method }}
+                                            {{ $item->payment_method }}
                                         </td>
                                         <td
                                             class="text-right px-4 py-3 font-semibold
-                                            {{ $followUp->amount_paid < $followUp->amount_billed
-                                                ? 'text-red-600 dark:text-red-400'
-                                                : ($followUp->amount_paid > $followUp->amount_billed
-                                                    ? 'text-green-600 dark:text-green-300'
-                                                    : 'text-blue-600 dark:text-blue-300') }}">
-                                            ₹{{ indFormat(@$followUp->amount_paid) }}
+                                            {{ $item->type === 'payment'
+                                                ? 'text-emerald-600 dark:text-emerald-400'
+                                                : ($item->amount_paid < $item->amount_billed
+                                                    ? 'text-red-600 dark:text-red-400'
+                                                    : ($item->amount_paid > $item->amount_billed
+                                                        ? 'text-green-600 dark:text-green-300'
+                                                        : 'text-blue-600 dark:text-blue-300')) }}">
+                                            ₹{{ indFormat(@$item->amount_paid) }}
                                         </td>
 
                                     </tr>

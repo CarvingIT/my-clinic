@@ -64,13 +64,12 @@ class FollowUp extends Model
         })->toArray();
 
         foreach ($chronoFollowUps as $fu) {
-            $billed = (float)($fu->amount_billed ?? 0);
             $allocatedForFu = 0.0;
             
-            // First, try to allocate payments that are EXPLICITLY linked to this follow-up
+            // Allocate payments that are EXPLICITLY linked to this follow-up
             foreach ($paymentPool as &$pItem) {
                 if ($pItem['remaining'] > 0 && $pItem['model']->follow_up_id == $fu->id) {
-                    $alloc = min($pItem['remaining'], $billed - $allocatedForFu);
+                    $alloc = $pItem['remaining'];
                     if ($alloc > 0) {
                         $pItem['remaining'] -= $alloc;
                         $allocatedForFu += $alloc;
