@@ -209,12 +209,15 @@ class FollowUpController extends Controller
 
         $branches = Branch::pluck('name'); // actual branch column
 
-        // Get filter inputs with defaults
+        // Get filter inputs with defaults (default to 'this_month' for performance)
         $selectedBranch = $request->input('branch_name', 'all');
         $selectedDoctor = $request->input('doctor', 'all');
-        $timePeriod = $request->input('time_period', 'all');
+        $timePeriod = $request->input('time_period', 'this_month');
         $fromDate = $request->input('from_date');
         $toDate = $request->input('to_date');
+
+        // Fetch distinct doctor names cleanly from Users table (no full-table scans)
+        $doctorNames = \App\Models\User::whereNotNull('name')->orderBy('name')->pluck('name');
 
         // Base query: only follow-ups with a related patient
         $query = FollowUp::whereHas('patient');
@@ -369,22 +372,25 @@ class FollowUpController extends Controller
         $cashPayments = (clone $paymentsQuery)->where('payment_method', 'cash')->sum('amount');
         $onlinePayments = (clone $paymentsQuery)->where('payment_method', 'online')->sum('amount');
 
-        // Fetch detailed data for the modals from payments table
+        // Fetch detailed data for the modals from payments table (bounded to latest 100 for memory performance)
         $cashFollowUps = (clone $paymentsQuery)
             ->where('payment_method', 'cash')
             ->with(['patient' => function($q) { $q->select('id', 'name'); }])
             ->latest()
+            ->take(100)
             ->get(['id', 'patient_id', 'amount', 'created_at']);
 
         $onlineFollowUps = (clone $paymentsQuery)
             ->where('payment_method', 'online')
             ->with(['patient' => function($q) { $q->select('id', 'name'); }])
             ->latest()
+            ->take(100)
             ->get(['id', 'patient_id', 'amount', 'created_at']);
 
         $allFollowUpsList = (clone $summaryQuery)
             ->with(['patient' => function($q) { $q->select('id', 'name'); }, 'payments'])
             ->latest()
+            ->take(100)
             ->get(['id', 'patient_id', 'amount_billed', 'created_at']);
 
         // Base query for exemptions
@@ -445,11 +451,13 @@ class FollowUpController extends Controller
         $exemptionsList = (clone $exemptionsQuery)
             ->with(['patient:id,name,mobile_phone', 'user:id,name'])
             ->latest('exempted_at')
+            ->take(100)
             ->get();
 
         $patientIds = $allFollowUpsList->pluck('patient_id')->unique();
         $patientsList = \App\Models\Patient::withSum('followUps', 'amount_billed')
             ->whereIn('id', $patientIds)
+            ->take(100)
             ->get(['id', 'name', 'mobile_phone', 'created_at']);
 
         // Fetch total paid for each of these patients from the payments table
@@ -475,6 +483,7 @@ class FollowUpController extends Controller
         $paidFollowUpsList = (clone $paymentsQuery)
             ->with(['patient' => function($q) { $q->select('id', 'name'); }])
             ->latest()
+            ->take(100)
             ->get(['id', 'patient_id', 'amount', 'created_at']);
 
         $dueFollowUpsList = $allFollowUpsList->filter(function($fu) {
@@ -625,6 +634,12 @@ class FollowUpController extends Controller
                 return $carry;
             }, ['new' => 0, 'existing' => 0]);
 
+        $totalIncomeCount = (clone $paymentsQuery)->count();
+        $totalCashCount = (clone $paymentsQuery)->where('payment_method', 'cash')->count();
+        $totalOnlineCount = (clone $paymentsQuery)->where('payment_method', 'online')->count();
+        $totalExemptionsCount = (clone $exemptionsQuery)->count();
+        $totalDueCount = $dueFollowUpsList->count();
+
         // Return the view with all variables
         return view('followups.index', compact(
             'followUps',
@@ -640,6 +655,10 @@ class FollowUpController extends Controller
             'totalFollowUps',
             'branches',
             'selectedBranch',
+            'selectedDoctor',
+            'timePeriod',
+            'fromDate',
+            'toDate',
             'totalDueAll',
             'totalExemptedAmount',
             'exemptedPatientsCount',
@@ -651,7 +670,13 @@ class FollowUpController extends Controller
             'paymentStatus',
             'newVsExistingPatients',
             'cashPayments',
-            'onlinePayments'
+            'onlinePayments',
+            'doctorNames',
+            'totalIncomeCount',
+            'totalCashCount',
+            'totalOnlineCount',
+            'totalExemptionsCount',
+            'totalDueCount'
         ));
     }
 
@@ -662,7 +687,7 @@ class FollowUpController extends Controller
     {
         $selectedBranch = $request->input('branch_name', 'all');
         $selectedDoctor = $request->input('doctor', 'all');
-        $timePeriod = $request->input('time_period', 'all');
+        $timePeriod = $request->input('time_period', 'this_month');
         $fromDate = $request->input('from_date');
         $toDate = $request->input('to_date');
 
@@ -900,6 +925,444 @@ class FollowUpController extends Controller
             'remainingCount' => max(0, (int) $followUps->total() - (int) ($followUps->lastItem() ?? 0)),
             'pageCount' => $renderedCount,
             'lastPage' => $followUps->lastPage(),
+        ]);
+    }
+
+    /**
+     * Fetch modal log items for on-demand pagination / Load More (AJAX endpoint)
+     */
+    public function fetchModalLog(Request $request)
+    {
+        $logType = $request->input('log_type', 'patients');
+        $page = (int) $request->input('page', 1);
+        $perPage = (int) $request->input('per_page', 50);
+        $offset = ($page - 1) * $perPage;
+
+        $selectedBranch = $request->input('branch_name', 'all');
+        $selectedDoctor = $request->input('doctor', 'all');
+        $timePeriod = $request->input('time_period', 'this_month');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        // Helper closures for query filtering
+        $applyFuFilters = function ($q) use ($selectedBranch, $selectedDoctor, $timePeriod, $fromDate, $toDate) {
+            $q->whereHas('patient');
+            if ($selectedBranch !== 'all' && !empty($selectedBranch)) {
+                $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.branch_name')) = ?", [$selectedBranch]);
+            }
+            if ($selectedDoctor !== 'all') {
+                $q->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.user_name')) = ?", [$selectedDoctor]);
+            }
+            if ($timePeriod !== 'all') {
+                switch ($timePeriod) {
+                    case 'today':
+                        $q->whereDate('created_at', Carbon::today());
+                        break;
+                    case 'last_week':
+                        $q->whereBetween('created_at', [
+                            Carbon::now()->subWeek()->startOfWeek(),
+                            Carbon::now()->subWeek()->endOfWeek(),
+                        ]);
+                        break;
+                    case 'this_month':
+                        $q->whereBetween('created_at', [
+                            Carbon::now()->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_month':
+                        $q->whereBetween('created_at', [
+                            Carbon::now()->startOfMonth()->subMonth()->startOfMonth(),
+                            Carbon::now()->startOfMonth()->subMonth()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_3_months':
+                        $q->whereBetween('created_at', [
+                            Carbon::now()->startOfMonth()->subMonths(2)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_6_months':
+                        $q->whereBetween('created_at', [
+                            Carbon::now()->startOfMonth()->subMonths(5)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_12_months':
+                        $q->whereBetween('created_at', [
+                            Carbon::now()->startOfMonth()->subMonths(11)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                }
+            } else {
+                if ($fromDate) {
+                    $q->whereDate('created_at', '>=', Carbon::parse($fromDate)->startOfDay());
+                }
+                if ($toDate) {
+                    $q->whereDate('created_at', '<=', Carbon::parse($toDate)->endOfDay());
+                }
+            }
+        };
+
+        $applyPaymentFilters = function ($q) use ($selectedBranch, $selectedDoctor, $timePeriod, $fromDate, $toDate) {
+            $q->where('status', 'posted')
+                ->when($selectedBranch !== 'all' && !empty($selectedBranch), function ($subQ) use ($selectedBranch) {
+                    $subQ->where('branch_name', $selectedBranch);
+                })
+                ->when($selectedDoctor !== 'all', function ($subQ) use ($selectedDoctor) {
+                    $subQ->where(function ($nestedQ) use ($selectedDoctor) {
+                        $nestedQ->whereHas('followUp', function ($fuQ) use ($selectedDoctor) {
+                            $fuQ->whereRaw("JSON_UNQUOTE(JSON_EXTRACT(check_up_info, '$.user_name')) = ?", [$selectedDoctor]);
+                        })->orWhereHas('receiver', function ($sq) use ($selectedDoctor) {
+                            $sq->where('name', $selectedDoctor);
+                        });
+                    });
+                })
+                ->when($timePeriod !== 'all', function ($subQ) use ($timePeriod) {
+                    switch ($timePeriod) {
+                        case 'today':
+                            $subQ->whereDate('paid_at', Carbon::today());
+                            break;
+                        case 'last_week':
+                            $subQ->whereBetween('paid_at', [
+                                Carbon::now()->subWeek()->startOfWeek(),
+                                Carbon::now()->subWeek()->endOfWeek(),
+                            ]);
+                            break;
+                        case 'this_month':
+                            $subQ->whereBetween('paid_at', [
+                                Carbon::now()->startOfMonth(),
+                                Carbon::now()->endOfMonth(),
+                            ]);
+                            break;
+                        case 'last_month':
+                            $subQ->whereBetween('paid_at', [
+                                Carbon::now()->startOfMonth()->subMonth()->startOfMonth(),
+                                Carbon::now()->startOfMonth()->subMonth()->endOfMonth(),
+                            ]);
+                            break;
+                        case 'last_3_months':
+                            $subQ->whereBetween('paid_at', [
+                                Carbon::now()->startOfMonth()->subMonths(2)->startOfMonth(),
+                                Carbon::now()->endOfMonth(),
+                            ]);
+                            break;
+                        case 'last_6_months':
+                            $subQ->whereBetween('paid_at', [
+                                Carbon::now()->startOfMonth()->subMonths(5)->startOfMonth(),
+                                Carbon::now()->endOfMonth(),
+                            ]);
+                            break;
+                        case 'last_12_months':
+                            $subQ->whereBetween('paid_at', [
+                                Carbon::now()->startOfMonth()->subMonths(11)->startOfMonth(),
+                                Carbon::now()->endOfMonth(),
+                            ]);
+                            break;
+                    }
+                }, function ($subQ) use ($fromDate, $toDate) {
+                    if ($fromDate) {
+                        $subQ->whereDate('paid_at', '>=', Carbon::parse($fromDate)->startOfDay());
+                    }
+                    if ($toDate) {
+                        $subQ->whereDate('paid_at', '<=', Carbon::parse($toDate)->endOfDay());
+                    }
+                });
+        };
+
+        $applyExemptionFilters = function ($q) use ($timePeriod, $fromDate, $toDate) {
+            $q->when($timePeriod !== 'all', function ($subQ) use ($timePeriod) {
+                switch ($timePeriod) {
+                    case 'today':
+                        $subQ->whereDate('exempted_at', Carbon::today());
+                        break;
+                    case 'last_week':
+                        $subQ->whereBetween('exempted_at', [
+                            Carbon::now()->subWeek()->startOfWeek(),
+                            Carbon::now()->subWeek()->endOfWeek(),
+                        ]);
+                        break;
+                    case 'this_month':
+                        $subQ->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_month':
+                        $subQ->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth()->subMonth()->startOfMonth(),
+                            Carbon::now()->startOfMonth()->subMonth()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_3_months':
+                        $subQ->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth()->subMonths(2)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_6_months':
+                        $subQ->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth()->subMonths(5)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                    case 'last_12_months':
+                        $subQ->whereBetween('exempted_at', [
+                            Carbon::now()->startOfMonth()->subMonths(11)->startOfMonth(),
+                            Carbon::now()->endOfMonth(),
+                        ]);
+                        break;
+                }
+            }, function ($subQ) use ($fromDate, $toDate) {
+                if ($fromDate) {
+                    $subQ->whereDate('exempted_at', '>=', Carbon::parse($fromDate)->startOfDay());
+                }
+                if ($toDate) {
+                    $subQ->whereDate('exempted_at', '<=', Carbon::parse($toDate)->endOfDay());
+                }
+            });
+        };
+
+        $html = '';
+        $total = 0;
+        $count = 0;
+
+        switch ($logType) {
+            case 'patients':
+                $fuQuery = FollowUp::query();
+                $applyFuFilters($fuQuery);
+                $allPatientIds = $fuQuery->pluck('patient_id')->unique()->values();
+                $total = $allPatientIds->count();
+                $pagedIds = $allPatientIds->slice($offset, $perPage)->values();
+
+                $patients = \App\Models\Patient::whereIn('id', $pagedIds)
+                    ->get(['id', 'name', 'mobile_phone'])
+                    ->keyBy('id');
+
+                foreach ($pagedIds as $idx => $pid) {
+                    $patient = $patients->get($pid);
+                    if ($patient) {
+                        $count++;
+                        $rowNum = $offset + $count;
+                        $phone = htmlspecialchars($patient->mobile_phone ?? 'N/A');
+                        $name = htmlspecialchars($patient->name);
+                        $patientUrl = route('patients.show', $patient->id);
+                        $html .= '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">';
+                        $html .= '<td class="px-5 py-3 text-gray-500 text-center">' . $rowNum . '</td>';
+                        $html .= '<td class="px-5 py-3 font-medium"><a target="_blank" href="' . $patientUrl . '" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">' . $name . '</a></td>';
+                        $html .= '<td class="px-5 py-3 text-right">' . $phone . '</td>';
+                        $html .= '</tr>';
+                    }
+                }
+                break;
+
+            case 'followups':
+                $fuQuery = FollowUp::query();
+                $applyFuFilters($fuQuery);
+                $total = $fuQuery->count();
+                $items = $fuQuery->with(['patient' => function ($q) { $q->select('id', 'name'); }])
+                    ->latest()
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get(['id', 'patient_id', 'created_at']);
+
+                foreach ($items as $item) {
+                    $count++;
+                    $rowNum = $offset + $count;
+                    $date = $item->created_at->format('d M Y');
+                    $patientName = htmlspecialchars(optional($item->patient)->name ?? 'Unknown');
+                    $patientUrl = route('patients.show', $item->patient_id);
+                    $html .= '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">';
+                    $html .= '<td class="px-5 py-3 text-gray-500 text-center">' . $rowNum . '</td>';
+                    $html .= '<td class="px-5 py-3">' . $date . '</td>';
+                    $html .= '<td class="px-5 py-3 font-medium"><a target="_blank" href="' . $patientUrl . '" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">' . $patientName . '</a></td>';
+                    $html .= '</tr>';
+                }
+                break;
+
+            case 'income':
+                $payQuery = \App\Models\Payment::query();
+                $applyPaymentFilters($payQuery);
+                $total = $payQuery->count();
+                $items = $payQuery->with(['patient' => function ($q) { $q->select('id', 'name'); }])
+                    ->latest('paid_at')
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get(['id', 'patient_id', 'amount', 'paid_at', 'created_at']);
+
+                foreach ($items as $item) {
+                    $count++;
+                    $rowNum = $offset + $count;
+                    $date = optional($item->paid_at ?? $item->created_at)->format('d M Y');
+                    $patientName = htmlspecialchars(optional($item->patient)->name ?? 'Unknown');
+                    $patientUrl = route('patients.show', $item->patient_id);
+                    $amount = $this->indFormat($item->amount);
+                    $html .= '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">';
+                    $html .= '<td class="px-5 py-3 text-gray-500 text-center">' . $rowNum . '</td>';
+                    $html .= '<td class="px-5 py-3">' . $date . '</td>';
+                    $html .= '<td class="px-5 py-3 font-medium"><a target="_blank" href="' . $patientUrl . '" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">' . $patientName . '</a></td>';
+                    $html .= '<td class="px-5 py-3 text-right font-bold text-green-600 dark:text-green-400">₹' . $amount . '</td>';
+                    $html .= '</tr>';
+                }
+                break;
+
+            case 'cash':
+                $payQuery = \App\Models\Payment::query();
+                $applyPaymentFilters($payQuery);
+                $payQuery->where('payment_method', 'cash');
+                $total = $payQuery->count();
+                $items = $payQuery->with(['patient' => function ($q) { $q->select('id', 'name'); }])
+                    ->latest('paid_at')
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get(['id', 'patient_id', 'amount', 'paid_at', 'created_at']);
+
+                foreach ($items as $item) {
+                    $count++;
+                    $rowNum = $offset + $count;
+                    $date = optional($item->paid_at ?? $item->created_at)->format('d M Y');
+                    $patientName = htmlspecialchars(optional($item->patient)->name ?? 'Unknown');
+                    $patientUrl = route('patients.show', $item->patient_id);
+                    $amount = $this->indFormat($item->amount);
+                    $html .= '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">';
+                    $html .= '<td class="px-5 py-3 text-gray-500 text-center">' . $rowNum . '</td>';
+                    $html .= '<td class="px-5 py-3">' . $date . '</td>';
+                    $html .= '<td class="px-5 py-3 font-medium"><a target="_blank" href="' . $patientUrl . '" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">' . $patientName . '</a></td>';
+                    $html .= '<td class="px-5 py-3 text-right font-bold text-teal-600 dark:text-teal-400">₹' . $amount . '</td>';
+                    $html .= '</tr>';
+                }
+                break;
+
+            case 'online':
+                $payQuery = \App\Models\Payment::query();
+                $applyPaymentFilters($payQuery);
+                $payQuery->where('payment_method', 'online');
+                $total = $payQuery->count();
+                $items = $payQuery->with(['patient' => function ($q) { $q->select('id', 'name'); }])
+                    ->latest('paid_at')
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get(['id', 'patient_id', 'amount', 'paid_at', 'created_at']);
+
+                foreach ($items as $item) {
+                    $count++;
+                    $rowNum = $offset + $count;
+                    $date = optional($item->paid_at ?? $item->created_at)->format('d M Y');
+                    $patientName = htmlspecialchars(optional($item->patient)->name ?? 'Unknown');
+                    $patientUrl = route('patients.show', $item->patient_id);
+                    $amount = $this->indFormat($item->amount);
+                    $html .= '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">';
+                    $html .= '<td class="px-5 py-3 text-gray-500 text-center">' . $rowNum . '</td>';
+                    $html .= '<td class="px-5 py-3">' . $date . '</td>';
+                    $html .= '<td class="px-5 py-3 font-medium"><a target="_blank" href="' . $patientUrl . '" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">' . $patientName . '</a></td>';
+                    $html .= '<td class="px-5 py-3 text-right font-bold text-pink-600 dark:text-pink-400">₹' . $amount . '</td>';
+                    $html .= '</tr>';
+                }
+                break;
+
+            case 'exemptions':
+                $exQuery = \App\Models\Exemption::query();
+                $applyExemptionFilters($exQuery);
+                $total = $exQuery->count();
+                $items = $exQuery->with(['patient:id,name,mobile_phone', 'user:id,name'])
+                    ->latest('exempted_at')
+                    ->skip($offset)
+                    ->take($perPage)
+                    ->get();
+
+                foreach ($items as $item) {
+                    $count++;
+                    $rowNum = $offset + $count;
+                    $date = optional($item->exempted_at ?? $item->created_at)->format('d M Y');
+                    $patientName = htmlspecialchars(optional($item->patient)->name ?? 'Unknown');
+                    $patientUrl = route('patients.show', $item->patient_id);
+                    $reason = htmlspecialchars($item->reason ?? '-');
+                    $userName = htmlspecialchars(optional($item->user)->name ?? 'Admin');
+                    $amount = $this->indFormat($item->amount);
+                    $html .= '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">';
+                    $html .= '<td class="px-5 py-3 text-gray-500 text-center">' . $rowNum . '</td>';
+                    $html .= '<td class="px-5 py-3">' . $date . '</td>';
+                    $html .= '<td class="px-5 py-3 font-medium"><a target="_blank" href="' . $patientUrl . '" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">' . $patientName . '</a></td>';
+                    $html .= '<td class="px-5 py-3 text-gray-600 dark:text-gray-400">' . $reason . '</td>';
+                    $html .= '<td class="px-5 py-3 text-xs text-gray-500">' . $userName . '</td>';
+                    $html .= '<td class="px-5 py-3 text-right font-bold text-amber-600 dark:text-amber-400">₹' . $amount . '</td>';
+                    $html .= '</tr>';
+                }
+                break;
+
+            case 'due':
+                $fuQuery = FollowUp::query();
+                $applyFuFilters($fuQuery);
+                $allDues = $fuQuery->with(['patient', 'payments'])
+                    ->latest()
+                    ->get()
+                    ->filter(function ($fu) {
+                        return ($fu->amount_billed - $fu->amount_paid) > 0;
+                    });
+
+                $total = $allDues->count();
+                $pagedDues = $allDues->slice($offset, $perPage)->values();
+
+                $duePatientIds = $pagedDues->pluck('patient_id')->unique();
+                $patientPayments = \App\Models\Payment::whereIn('patient_id', $duePatientIds)
+                    ->where('status', 'posted')
+                    ->groupBy('patient_id')
+                    ->selectRaw('patient_id, SUM(amount) as total_paid')
+                    ->pluck('total_paid', 'patient_id');
+
+                $patientExemptions = \App\Models\Exemption::whereIn('patient_id', $duePatientIds)
+                    ->groupBy('patient_id')
+                    ->selectRaw('patient_id, SUM(amount) as total_exempted')
+                    ->pluck('total_exempted', 'patient_id');
+
+                $patientPatients = \App\Models\Patient::withSum('followUps', 'amount_billed')
+                    ->whereIn('id', $duePatientIds)
+                    ->get(['id', 'name'])
+                    ->keyBy('id');
+
+                $patientBalances = [];
+                foreach ($duePatientIds as $pid) {
+                    $p = $patientPatients->get($pid);
+                    $totalBilled = $p->follow_ups_sum_amount_billed ?? 0;
+                    $totalPaid = $patientPayments[$pid] ?? 0;
+                    $totalExempted = $patientExemptions[$pid] ?? 0;
+                    $patientBalances[$pid] = $totalBilled - $totalPaid - $totalExempted;
+                }
+
+                foreach ($pagedDues as $fu) {
+                    $count++;
+                    $rowNum = $offset + $count;
+                    $date = $fu->created_at->format('d M Y');
+                    $patientName = htmlspecialchars(optional($fu->patient)->name ?? 'Unknown');
+                    $patientUrl = route('patients.show', $fu->patient_id);
+                    $visitDue = $fu->amount_billed - $fu->amount_paid;
+                    $netBalance = $patientBalances[$fu->patient_id] ?? 0;
+                    $realDue = max(0, min($visitDue, $netBalance));
+
+                    $html .= '<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">';
+                    $html .= '<td class="px-5 py-3 text-gray-500 text-center">' . $rowNum . '</td>';
+                    $html .= '<td class="px-5 py-3">' . $date . '</td>';
+                    $html .= '<td class="px-5 py-3 font-medium"><a target="_blank" href="' . $patientUrl . '" class="text-blue-500 hover:text-blue-700 hover:underline dark:text-blue-400 dark:hover:text-blue-300">' . $patientName . '</a></td>';
+                    $html .= '<td class="px-5 py-3 text-right font-medium text-gray-600 dark:text-gray-400">₹' . $this->indFormat($visitDue) . '</td>';
+                    $html .= '<td class="px-5 py-3 text-right font-medium text-blue-600 dark:text-blue-400">₹' . $this->indFormat($netBalance) . '</td>';
+                    $html .= '<td class="px-5 py-3 text-right font-bold text-red-600 dark:text-red-500 text-base">₹' . $this->indFormat($realDue) . '</td>';
+                    $html .= '</tr>';
+                }
+                break;
+        }
+
+        $shownCount = min($offset + $count, $total);
+        $hasMore = $shownCount < $total;
+
+        return response()->json([
+            'success' => true,
+            'html' => $html,
+            'hasMore' => $hasMore,
+            'page' => $page,
+            'shownCount' => $shownCount,
+            'total' => $total,
+            'count' => $count,
         ]);
     }
 
@@ -1176,7 +1639,20 @@ class FollowUpController extends Controller
             'time_period' => 'nullable|in:all,today,last_week,this_month,last_month,last_3_months,last_6_months,last_12_months',
         ]);
 
-        return Excel::download(new FollowUpExport($request), 'followups.csv', \Maatwebsite\Excel\Excel::CSV, [
+        $export = new FollowUpExport($request);
+        $collection = $export->collection();
+
+        return response()->streamDownload(function () use ($export, $collection) {
+            $handle = fopen('php://output', 'w');
+            // UTF-8 BOM for Excel / Marathi compatibility
+            fputs($handle, "\xEF\xBB\xBF");
+            fputcsv($handle, $export->headings());
+
+            foreach ($collection as $item) {
+                fputcsv($handle, $export->map($item));
+            }
+            fclose($handle);
+        }, 'ledger_' . now()->format('Y_m_d_His') . '.csv', [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
     }

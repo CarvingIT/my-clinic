@@ -29,7 +29,7 @@ if (!function_exists('indFormat')) {
                                 Quick Period
                             </label>
                             <div class="flex flex-wrap gap-2">
-                                <input type="hidden" id="time_period" name="time_period" value="{{ request('time_period', 'all') }}">
+                                <input type="hidden" id="time_period" name="time_period" value="{{ request('time_period', 'this_month') }}">
 
                                 @php
                                     $periods = [
@@ -42,7 +42,7 @@ if (!function_exists('indFormat')) {
                                         'last_6_months' => '6 Months',
                                         'last_12_months' => '12 Months',
                                     ];
-                                    $currentPeriod = request('time_period', 'all');
+                                    $currentPeriod = request('time_period', 'this_month');
                                 @endphp
 
                                 @foreach($periods as $key => $label)
@@ -106,19 +106,6 @@ if (!function_exists('indFormat')) {
                             <select id="doctor" name="doctor"
                                 class="w-full border border-gray-300 dark:border-gray-600 rounded-md px-2.5 py-1.5 text-sm bg-white dark:bg-gray-800 dark:text-white shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 transition">
                                 <option value="all" {{ request('doctor') == 'all' ? 'selected' : '' }}>All Doctors</option>
-                                @php
-                                    $doctorNames = \DB::table('follow_ups')
-                                        ->select('check_up_info')
-                                        ->get()
-                                        ->map(function($fu) {
-                                            $data = json_decode($fu->check_up_info, true);
-                                            return $data['user_name'] ?? null;
-                                        })
-                                        ->filter()
-                                        ->unique()
-                                        ->sort()
-                                        ->values();
-                                @endphp
                                 @foreach ($doctorNames as $doctorName)
                                     <option value="{{ $doctorName }}" {{ request('doctor') == $doctorName ? 'selected' : '' }}>
                                         {{ $doctorName }}
@@ -142,12 +129,13 @@ if (!function_exists('indFormat')) {
                         <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-700 dark:text-gray-300">
                             @php
                                 $filterSummary = [];
+                                $effectivePeriod = request('time_period', 'this_month');
 
-                                if (request('time_period') && request('time_period') != 'all') {
+                                if ($effectivePeriod && $effectivePeriod != 'all') {
                                     $filterSummary[] = [
                                         'icon' => '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
                                         'label' => 'Period',
-                                        'value' => match (request('time_period')) {
+                                        'value' => match ($effectivePeriod) {
                                             'today' => 'Today',
                                             'last_week' => 'Last Week',
                                             'this_month' => 'This Month',
@@ -155,7 +143,7 @@ if (!function_exists('indFormat')) {
                                             'last_3_months' => 'Last 3 Months',
                                             'last_6_months' => 'Last 6 Months',
                                             'last_12_months' => 'Last 12 Months',
-                                            default => 'Unknown',
+                                            default => 'This Month',
                                         },
                                     ];
                                 } elseif (request('from_date') || request('to_date')) {
@@ -227,7 +215,45 @@ if (!function_exists('indFormat')) {
 
 
 
-                        <div x-data="{ openPatients: false }" class="h-full">
+                        <div x-data="{
+                            openPatients: false,
+                            page: 1,
+                            perPage: 50,
+                            hasMore: {{ $totalPatients > count($patientsList) ? 'true' : 'false' }},
+                            total: {{ (int) $totalPatients }},
+                            shown: {{ count($patientsList) }},
+                            isLoading: false,
+                            loadMore() {
+                                if (this.isLoading || !this.hasMore) return;
+                                this.isLoading = true;
+                                this.page++;
+                                const params = new URLSearchParams({
+                                    log_type: 'patients',
+                                    page: this.page,
+                                    per_page: this.perPage,
+                                    branch_name: document.getElementById('branch_name')?.value || '{{ $selectedBranch }}',
+                                    doctor: document.getElementById('doctor')?.value || '{{ $selectedDoctor }}',
+                                    time_period: document.getElementById('time_period')?.value || '{{ $timePeriod }}',
+                                    from_date: document.getElementById('from_date')?.value || '{{ $fromDate }}',
+                                    to_date: document.getElementById('to_date')?.value || '{{ $toDate }}'
+                                });
+                                fetch('{{ route('followups.fetch-modal-log') }}?' + params.toString())
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const tbody = document.getElementById('modal-tbody-patients');
+                                        if (tbody && data.html) {
+                                            tbody.insertAdjacentHTML('beforeend', data.html);
+                                        }
+                                        this.hasMore = data.hasMore;
+                                        this.shown = data.shownCount;
+                                        this.isLoading = false;
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        this.isLoading = false;
+                                    });
+                            }
+                        }" class="h-full">
                             <div @click="openPatients = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
 
     <!-- Animated Bottom Accent Line -->
@@ -273,7 +299,7 @@ if (!function_exists('indFormat')) {
                                                     <th class="px-5 py-3 font-semibold text-right">Phone</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                            <tbody id="modal-tbody-patients" class="divide-y border-t dark:border-gray-700">
                                                 @forelse($patientsList as $index => $patient)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
                                                         <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
@@ -286,11 +312,58 @@ if (!function_exists('indFormat')) {
                                             </tbody>
                                         </table>
                                     </div>
+                                    <div x-show="total > 0" class="px-5 py-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            Showing <span class="font-bold text-gray-700 dark:text-gray-200" x-text="shown"></span> of <span class="font-bold text-gray-700 dark:text-gray-200" x-text="total"></span> patients
+                                        </span>
+                                        <button x-show="hasMore" type="button" @click="loadMore()" :disabled="isLoading" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer">
+                                            <svg x-show="isLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span x-text="isLoading ? 'Loading...' : 'Load More'"></span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div x-data="{ openFollowups: false }" class="h-full">
+                        <div x-data="{
+                            openFollowups: false,
+                            page: 1,
+                            perPage: 50,
+                            hasMore: {{ $totalFollowUps > count($allFollowUpsList) ? 'true' : 'false' }},
+                            total: {{ (int) $totalFollowUps }},
+                            shown: {{ count($allFollowUpsList) }},
+                            isLoading: false,
+                            loadMore() {
+                                if (this.isLoading || !this.hasMore) return;
+                                this.isLoading = true;
+                                this.page++;
+                                const params = new URLSearchParams({
+                                    log_type: 'followups',
+                                    page: this.page,
+                                    per_page: this.perPage,
+                                    branch_name: document.getElementById('branch_name')?.value || '{{ $selectedBranch }}',
+                                    doctor: document.getElementById('doctor')?.value || '{{ $selectedDoctor }}',
+                                    time_period: document.getElementById('time_period')?.value || '{{ $timePeriod }}',
+                                    from_date: document.getElementById('from_date')?.value || '{{ $fromDate }}',
+                                    to_date: document.getElementById('to_date')?.value || '{{ $toDate }}'
+                                });
+                                fetch('{{ route('followups.fetch-modal-log') }}?' + params.toString())
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const tbody = document.getElementById('modal-tbody-followups');
+                                        if (tbody && data.html) {
+                                            tbody.insertAdjacentHTML('beforeend', data.html);
+                                        }
+                                        this.hasMore = data.hasMore;
+                                        this.shown = data.shownCount;
+                                        this.isLoading = false;
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        this.isLoading = false;
+                                    });
+                            }
+                        }" class="h-full">
                             <div @click="openFollowups = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
 
     <!-- Animated Bottom Accent Line -->
@@ -336,7 +409,7 @@ if (!function_exists('indFormat')) {
                                                     <th class="px-5 py-3 font-semibold">Patient</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                            <tbody id="modal-tbody-followups" class="divide-y border-t dark:border-gray-700">
                                                 @forelse($allFollowUpsList as $index => $fu)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
                                                         <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
@@ -351,11 +424,58 @@ if (!function_exists('indFormat')) {
                                             </tbody>
                                         </table>
                                     </div>
+                                    <div x-show="total > 0" class="px-5 py-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            Showing <span class="font-bold text-gray-700 dark:text-gray-200" x-text="shown"></span> of <span class="font-bold text-gray-700 dark:text-gray-200" x-text="total"></span> follow-ups
+                                        </span>
+                                        <button x-show="hasMore" type="button" @click="loadMore()" :disabled="isLoading" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer">
+                                            <svg x-show="isLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span x-text="isLoading ? 'Loading...' : 'Load More'"></span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div x-data="{ openIncome: false }" class="h-full">
+                        <div x-data="{
+                            openIncome: false,
+                            page: 1,
+                            perPage: 50,
+                            hasMore: {{ ($totalIncomeCount ?? 0) > count($paidFollowUpsList) ? 'true' : 'false' }},
+                            total: {{ (int) ($totalIncomeCount ?? 0) }},
+                            shown: {{ count($paidFollowUpsList) }},
+                            isLoading: false,
+                            loadMore() {
+                                if (this.isLoading || !this.hasMore) return;
+                                this.isLoading = true;
+                                this.page++;
+                                const params = new URLSearchParams({
+                                    log_type: 'income',
+                                    page: this.page,
+                                    per_page: this.perPage,
+                                    branch_name: document.getElementById('branch_name')?.value || '{{ $selectedBranch }}',
+                                    doctor: document.getElementById('doctor')?.value || '{{ $selectedDoctor }}',
+                                    time_period: document.getElementById('time_period')?.value || '{{ $timePeriod }}',
+                                    from_date: document.getElementById('from_date')?.value || '{{ $fromDate }}',
+                                    to_date: document.getElementById('to_date')?.value || '{{ $toDate }}'
+                                });
+                                fetch('{{ route('followups.fetch-modal-log') }}?' + params.toString())
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const tbody = document.getElementById('modal-tbody-income');
+                                        if (tbody && data.html) {
+                                            tbody.insertAdjacentHTML('beforeend', data.html);
+                                        }
+                                        this.hasMore = data.hasMore;
+                                        this.shown = data.shownCount;
+                                        this.isLoading = false;
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        this.isLoading = false;
+                                    });
+                            }
+                        }" class="h-full">
                             <div @click="openIncome = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
 
     <!-- Animated Bottom Accent Line -->
@@ -402,7 +522,7 @@ if (!function_exists('indFormat')) {
                                                     <th class="px-5 py-3 font-semibold text-right">Amount Paid</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                            <tbody id="modal-tbody-income" class="divide-y border-t dark:border-gray-700">
                                                 @forelse($paidFollowUpsList as $index => $fu)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
                                                         <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
@@ -418,10 +538,57 @@ if (!function_exists('indFormat')) {
                                             </tbody>
                                         </table>
                                     </div>
+                                    <div x-show="total > 0" class="px-5 py-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            Showing <span class="font-bold text-gray-700 dark:text-gray-200" x-text="shown"></span> of <span class="font-bold text-gray-700 dark:text-gray-200" x-text="total"></span> payments
+                                        </span>
+                                        <button x-show="hasMore" type="button" @click="loadMore()" :disabled="isLoading" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer">
+                                            <svg x-show="isLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span x-text="isLoading ? 'Loading...' : 'Load More'"></span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div x-data="{ openCash: false }" class="h-full">
+                        <div x-data="{
+                            openCash: false,
+                            page: 1,
+                            perPage: 50,
+                            hasMore: {{ ($totalCashCount ?? 0) > count($cashFollowUps) ? 'true' : 'false' }},
+                            total: {{ (int) ($totalCashCount ?? 0) }},
+                            shown: {{ count($cashFollowUps) }},
+                            isLoading: false,
+                            loadMore() {
+                                if (this.isLoading || !this.hasMore) return;
+                                this.isLoading = true;
+                                this.page++;
+                                const params = new URLSearchParams({
+                                    log_type: 'cash',
+                                    page: this.page,
+                                    per_page: this.perPage,
+                                    branch_name: document.getElementById('branch_name')?.value || '{{ $selectedBranch }}',
+                                    doctor: document.getElementById('doctor')?.value || '{{ $selectedDoctor }}',
+                                    time_period: document.getElementById('time_period')?.value || '{{ $timePeriod }}',
+                                    from_date: document.getElementById('from_date')?.value || '{{ $fromDate }}',
+                                    to_date: document.getElementById('to_date')?.value || '{{ $toDate }}'
+                                });
+                                fetch('{{ route('followups.fetch-modal-log') }}?' + params.toString())
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const tbody = document.getElementById('modal-tbody-cash');
+                                        if (tbody && data.html) {
+                                            tbody.insertAdjacentHTML('beforeend', data.html);
+                                        }
+                                        this.hasMore = data.hasMore;
+                                        this.shown = data.shownCount;
+                                        this.isLoading = false;
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        this.isLoading = false;
+                                    });
+                            }
+                        }" class="h-full">
                             <div @click="openCash = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
 
     <!-- Animated Bottom Accent Line -->
@@ -468,7 +635,7 @@ if (!function_exists('indFormat')) {
                                                     <th class="px-5 py-3 font-semibold text-right">Amount</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                            <tbody id="modal-tbody-cash" class="divide-y border-t dark:border-gray-700">
                                                 @forelse($cashFollowUps as $index => $fu)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
                                                         <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
@@ -484,10 +651,57 @@ if (!function_exists('indFormat')) {
                                             </tbody>
                                         </table>
                                     </div>
+                                    <div x-show="total > 0" class="px-5 py-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            Showing <span class="font-bold text-gray-700 dark:text-gray-200" x-text="shown"></span> of <span class="font-bold text-gray-700 dark:text-gray-200" x-text="total"></span> cash payments
+                                        </span>
+                                        <button x-show="hasMore" type="button" @click="loadMore()" :disabled="isLoading" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer">
+                                            <svg x-show="isLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span x-text="isLoading ? 'Loading...' : 'Load More'"></span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div x-data="{ openDue: false }" class="h-full">
+                        <div x-data="{
+                            openDue: false,
+                            page: 1,
+                            perPage: 50,
+                            hasMore: {{ ($totalDueCount ?? 0) > count($dueFollowUpsList) ? 'true' : 'false' }},
+                            total: {{ (int) ($totalDueCount ?? 0) }},
+                            shown: {{ count($dueFollowUpsList) }},
+                            isLoading: false,
+                            loadMore() {
+                                if (this.isLoading || !this.hasMore) return;
+                                this.isLoading = true;
+                                this.page++;
+                                const params = new URLSearchParams({
+                                    log_type: 'due',
+                                    page: this.page,
+                                    per_page: this.perPage,
+                                    branch_name: document.getElementById('branch_name')?.value || '{{ $selectedBranch }}',
+                                    doctor: document.getElementById('doctor')?.value || '{{ $selectedDoctor }}',
+                                    time_period: document.getElementById('time_period')?.value || '{{ $timePeriod }}',
+                                    from_date: document.getElementById('from_date')?.value || '{{ $fromDate }}',
+                                    to_date: document.getElementById('to_date')?.value || '{{ $toDate }}'
+                                });
+                                fetch('{{ route('followups.fetch-modal-log') }}?' + params.toString())
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const tbody = document.getElementById('modal-tbody-due');
+                                        if (tbody && data.html) {
+                                            tbody.insertAdjacentHTML('beforeend', data.html);
+                                        }
+                                        this.hasMore = data.hasMore;
+                                        this.shown = data.shownCount;
+                                        this.isLoading = false;
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        this.isLoading = false;
+                                    });
+                            }
+                        }" class="h-full">
                             <div @click="openDue = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
 
     <!-- Animated Bottom Accent Line -->
@@ -539,7 +753,7 @@ if (!function_exists('indFormat')) {
                                                     <th class="px-5 py-3 font-semibold text-right">Visit Bill</th><th class="px-5 py-3 font-semibold text-right">Account Net</th><th class="px-5 py-3 font-bold text-right text-red-600 dark:text-red-500">Actual Due</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                            <tbody id="modal-tbody-due" class="divide-y border-t dark:border-gray-700">
                                                 @forelse($dueFollowUpsList as $index => $fu)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
                                                         <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
@@ -606,10 +820,57 @@ if (!function_exists('indFormat')) {
     </td></tr></tfoot>
                                         </table>
                                     </div>
+                                    <div x-show="total > 0" class="px-5 py-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            Showing <span class="font-bold text-gray-700 dark:text-gray-200" x-text="shown"></span> of <span class="font-bold text-gray-700 dark:text-gray-200" x-text="total"></span> dues
+                                        </span>
+                                        <button x-show="hasMore" type="button" @click="loadMore()" :disabled="isLoading" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer">
+                                            <svg x-show="isLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span x-text="isLoading ? 'Loading...' : 'Load More'"></span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div x-data="{ openOnline: false }" class="h-full">
+                        <div x-data="{
+                            openOnline: false,
+                            page: 1,
+                            perPage: 50,
+                            hasMore: {{ ($totalOnlineCount ?? 0) > count($onlineFollowUps) ? 'true' : 'false' }},
+                            total: {{ (int) ($totalOnlineCount ?? 0) }},
+                            shown: {{ count($onlineFollowUps) }},
+                            isLoading: false,
+                            loadMore() {
+                                if (this.isLoading || !this.hasMore) return;
+                                this.isLoading = true;
+                                this.page++;
+                                const params = new URLSearchParams({
+                                    log_type: 'online',
+                                    page: this.page,
+                                    per_page: this.perPage,
+                                    branch_name: document.getElementById('branch_name')?.value || '{{ $selectedBranch }}',
+                                    doctor: document.getElementById('doctor')?.value || '{{ $selectedDoctor }}',
+                                    time_period: document.getElementById('time_period')?.value || '{{ $timePeriod }}',
+                                    from_date: document.getElementById('from_date')?.value || '{{ $fromDate }}',
+                                    to_date: document.getElementById('to_date')?.value || '{{ $toDate }}'
+                                });
+                                fetch('{{ route('followups.fetch-modal-log') }}?' + params.toString())
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const tbody = document.getElementById('modal-tbody-online');
+                                        if (tbody && data.html) {
+                                            tbody.insertAdjacentHTML('beforeend', data.html);
+                                        }
+                                        this.hasMore = data.hasMore;
+                                        this.shown = data.shownCount;
+                                        this.isLoading = false;
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        this.isLoading = false;
+                                    });
+                            }
+                        }" class="h-full">
                             <div @click="openOnline = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
 
     <!-- Animated Bottom Accent Line -->
@@ -656,7 +917,7 @@ if (!function_exists('indFormat')) {
                                                     <th class="px-5 py-3 font-semibold text-right">Amount</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                            <tbody id="modal-tbody-online" class="divide-y border-t dark:border-gray-700">
                                                 @forelse($onlineFollowUps as $index => $fu)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
                                                         <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
@@ -672,10 +933,57 @@ if (!function_exists('indFormat')) {
                                             </tbody>
                                         </table>
                                     </div>
+                                    <div x-show="total > 0" class="px-5 py-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            Showing <span class="font-bold text-gray-700 dark:text-gray-200" x-text="shown"></span> of <span class="font-bold text-gray-700 dark:text-gray-200" x-text="total"></span> online payments
+                                        </span>
+                                        <button x-show="hasMore" type="button" @click="loadMore()" :disabled="isLoading" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-pink-600 hover:bg-pink-700 disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer">
+                                            <svg x-show="isLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span x-text="isLoading ? 'Loading...' : 'Load More'"></span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div x-data="{ openExempted: false }" class="h-full">
+                        <div x-data="{
+                            openExempted: false,
+                            page: 1,
+                            perPage: 50,
+                            hasMore: {{ ($totalExemptionsCount ?? 0) > count($exemptionsList) ? 'true' : 'false' }},
+                            total: {{ (int) ($totalExemptionsCount ?? 0) }},
+                            shown: {{ count($exemptionsList) }},
+                            isLoading: false,
+                            loadMore() {
+                                if (this.isLoading || !this.hasMore) return;
+                                this.isLoading = true;
+                                this.page++;
+                                const params = new URLSearchParams({
+                                    log_type: 'exemptions',
+                                    page: this.page,
+                                    per_page: this.perPage,
+                                    branch_name: document.getElementById('branch_name')?.value || '{{ $selectedBranch }}',
+                                    doctor: document.getElementById('doctor')?.value || '{{ $selectedDoctor }}',
+                                    time_period: document.getElementById('time_period')?.value || '{{ $timePeriod }}',
+                                    from_date: document.getElementById('from_date')?.value || '{{ $fromDate }}',
+                                    to_date: document.getElementById('to_date')?.value || '{{ $toDate }}'
+                                });
+                                fetch('{{ route('followups.fetch-modal-log') }}?' + params.toString())
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const tbody = document.getElementById('modal-tbody-exempted');
+                                        if (tbody && data.html) {
+                                            tbody.insertAdjacentHTML('beforeend', data.html);
+                                        }
+                                        this.hasMore = data.hasMore;
+                                        this.shown = data.shownCount;
+                                        this.isLoading = false;
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        this.isLoading = false;
+                                    });
+                            }
+                        }" class="h-full">
                             <div @click="openExempted = true" class="group relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full flex flex-col justify-between overflow-hidden isolate" tabindex="0">
 
                                 <!-- Animated Bottom Accent Line -->
@@ -726,7 +1034,7 @@ if (!function_exists('indFormat')) {
                                                     <th class="px-5 py-3 font-semibold text-right">Amount</th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="divide-y border-t dark:border-gray-700">
+                                            <tbody id="modal-tbody-exempted" class="divide-y border-t dark:border-gray-700">
                                                 @forelse($exemptionsList as $index => $ex)
                                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition text-gray-800 dark:text-gray-200">
                                                         <td class="px-5 py-3 text-gray-500 text-center">{{ $loop->iteration }}</td>
@@ -743,6 +1051,15 @@ if (!function_exists('indFormat')) {
                                                 @endforelse
                                             </tbody>
                                         </table>
+                                    </div>
+                                    <div x-show="total > 0" class="px-5 py-3 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/80 flex items-center justify-between">
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">
+                                            Showing <span class="font-bold text-gray-700 dark:text-gray-200" x-text="shown"></span> of <span class="font-bold text-gray-700 dark:text-gray-200" x-text="total"></span> exemptions
+                                        </span>
+                                        <button x-show="hasMore" type="button" @click="loadMore()" :disabled="isLoading" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 disabled:opacity-50 rounded-lg shadow-sm transition-colors cursor-pointer">
+                                            <svg x-show="isLoading" class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
+                                            <span x-text="isLoading ? 'Loading...' : 'Load More'"></span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -856,7 +1173,7 @@ if (!function_exists('indFormat')) {
                             page: this.currentPage,
                             branch_name: document.getElementById('branch_name')?.value || 'all',
                             doctor: document.getElementById('doctor')?.value || 'all',
-                            time_period: document.getElementById('time_period')?.value || 'all',
+                            time_period: document.getElementById('time_period')?.value || 'this_month',
                             from_date: document.getElementById('from_date')?.value || '',
                             to_date: document.getElementById('to_date')?.value || ''
                         });
