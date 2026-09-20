@@ -44,6 +44,9 @@ import "animate-css-grid";
 // Dashboard Enhancements
 import './dashboard-enhancements';
 
+// Global Marathi Number & Google Input Tools (IME) Fix
+import './marathi-input-fix';
+
 const TEXT_SCALE_STORAGE_KEY = "clinic_text_scale";
 const TEXT_SCALE_LEVELS = ["100", "110", "120", "130"];
 const TEXT_SCALE_DEFAULT = "100";
