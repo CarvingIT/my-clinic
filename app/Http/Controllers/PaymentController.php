@@ -321,6 +321,6 @@ class PaymentController extends Controller
             'notes' => trim(($payment->notes ? $payment->notes . ' | ' : '') . 'Voided by user #' . Auth::id() . ' at ' . now()->toDateTimeString()),
         ]);
 
-        return redirect()->route('payments.index')->with('success', 'Payment voided successfully.');
+        return redirect()->back()->with('success', 'Payment voided successfully.');
     }
 }

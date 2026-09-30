@@ -21,6 +21,19 @@ class FollowUp extends Model
         'updated_at',
     ];
 
+    protected static function booted()
+    {
+        static::deleting(function ($followUp) {
+            $followUp->payments()->delete();
+            foreach ($followUp->uploads as $upload) {
+                if (\Illuminate\Support\Facades\Storage::disk('local')->exists($upload->file_path)) {
+                    \Illuminate\Support\Facades\Storage::disk('local')->delete($upload->file_path);
+                }
+                $upload->delete();
+            }
+        });
+    }
+
 
     public function patient()
     {

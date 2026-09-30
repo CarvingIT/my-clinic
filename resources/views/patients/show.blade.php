@@ -1253,6 +1253,15 @@
                                                     <a href="{{ route('payments.edit', $payment) }}" class="text-indigo-600 hover:text-indigo-900 font-medium" title="Edit Payment">
                                                         <i class="fas fa-pen"></i>
                                                     </a>
+                                                    @if (Auth::check() && (Auth::user()->hasRole('doctor') || Auth::user()->hasRole('admin')))
+                                                        <form method="POST" action="{{ route('payments.destroy', $payment) }}" onsubmit="return confirm('Are you sure you want to delete/void this payment?');" class="inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="text-red-600 hover:text-red-900 font-medium" title="Delete Payment">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @elseif ($entry->type === 'exemption')
