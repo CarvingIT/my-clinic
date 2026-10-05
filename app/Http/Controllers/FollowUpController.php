@@ -1399,10 +1399,24 @@ class FollowUpController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Calculate total due
+        // Calculate previous/other dues (excluding the follow-up being edited)
+        $otherBilled = $patient->followUps()->where('id', '!=', $followup->id)->sum('amount_billed');
+        $otherPaid = \App\Models\Payment::where('patient_id', $patient->id)
+            ->where('status', 'posted')
+            ->where(function ($q) use ($followup) {
+                $q->whereNull('follow_up_id')->orWhere('follow_up_id', '!=', $followup->id);
+            })
+            ->sum('amount');
+        $totalExempted = \App\Models\Exemption::where('patient_id', $patient->id)->sum('amount');
+        $otherDues = $otherBilled - $otherPaid - $totalExempted;
+
+        // Total outstanding for header display
         $totalBilled = $patient->followUps()->sum('amount_billed');
         $totalPaid = \App\Models\Payment::where('patient_id', $patient->id)->where('status', 'posted')->sum('amount');
-        $totalDueAll = $totalBilled - $totalPaid;
+        $patientTotalOutstanding = $totalBilled - $totalPaid - $totalExempted;
+
+        // Baseline for form calculation: dues from other visits
+        $totalDueAll = $otherDues;
 
         // Fetch parameters
         $parameters = Parameter::all();
@@ -1411,6 +1425,11 @@ class FollowUpController extends Controller
         $totalDue = $totalDueAll; // as per create.blade.php
         $amountBilled = $followup->amount_billed ?? '';
         $amountPaid = \App\Models\Payment::where('follow_up_id', $followup->id)->where('status', 'posted')->sum('amount');
+
+        // Fallback for legacy follow-up records where payment wasn't explicitly linked in payments table
+        if ($amountPaid == 0 && (float) $followup->amount_paid > 0) {
+            $amountPaid = (float) $followup->amount_paid;
+        }
 
         $latestFollowUp = $followUps->first();
         $previousChikitsa = $latestFollowUp
@@ -1425,6 +1444,7 @@ class FollowUpController extends Controller
             'checkUpInfo',
             'totalDueAll',
             'totalDue',
+            'patientTotalOutstanding',
             'amountBilled',
             'amountPaid',
             'previousChikitsa'
