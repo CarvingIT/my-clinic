@@ -26,7 +26,9 @@
                     @endphp
                     | {{ __('BMI') }}: {{ number_format($bmi, 2) }}
                 @endif
-                @if (isset($totalDueAll))
+                @if (isset($patientTotalOutstanding))
+                    | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($patientTotalOutstanding, 2) }}
+                @elseif (isset($totalDueAll))
                     | {{ __('messages.Total Outstanding Balance') }}: ₹{{ number_format($totalDueAll, 2) }}
                 @endif
                 @if ($patient->occupation)

@@ -481,7 +481,8 @@
         </label>
         <x-text-input id="amount_billed"
             class="reverse-transliteration px-2 py-1 block w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-md text-md"
-            type="text" name="amount_billed" value="{{ old('amount_billed', $isEdit ? ($followup->amount_billed ?? 0) : '') }}" required />
+            type="text" inputmode="decimal" data-type="number" name="amount_billed" value="{{ old('amount_billed', $isEdit ? ($followup->amount_billed ?? 0) : '') }}" required />
+        <x-input-error :messages="$errors->get('amount_billed')" class="mt-1" />
     </div>
 
     <!-- Amount Paid -->
@@ -492,7 +493,8 @@
         </label>
         <x-text-input id="amount_paid"
             class="reverse-transliteration px-2 py-1 block w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 rounded-md shadow-md text-md"
-            type="text" name="amount_paid" value="{{ old('amount_paid', $isEdit ? ($amountPaid ?? 0) : '') }}" required />
+            type="text" inputmode="decimal" data-type="number" name="amount_paid" value="{{ old('amount_paid', $isEdit ? ($amountPaid ?? 0) : '') }}" required />
+        <x-input-error :messages="$errors->get('amount_paid')" class="mt-1" />
     </div>
 
 </div>
@@ -500,27 +502,44 @@
 
 <script>
     function calculateTotalDue() {
-        let allDues = parseFloat(document.getElementById('all_dues').value) || 0;
-        let amountBilled = parseFloat(document.getElementById('amount_billed').value) || 0;
-        let amountPaid = parseFloat(document.getElementById('amount_paid').value) || 0;
+        let allDuesEl = document.getElementById('all_dues');
+        let billedEl = document.getElementById('amount_billed');
+        let paidEl = document.getElementById('amount_paid');
+        let totalDueEl = document.getElementById('total_due');
+
+        if (!totalDueEl) return;
+
+        let allDues = allDuesEl ? (parseFloat(allDuesEl.value) || 0) : 0;
+        let amountBilled = billedEl ? (parseFloat(billedEl.value) || 0) : 0;
+        let amountPaid = paidEl ? (parseFloat(paidEl.value) || 0) : 0;
 
         let totalDue = allDues + amountBilled - amountPaid;
-        // totalDue = totalDue > 0 ? totalDue : 0; // Prevent negative values
-
-        document.getElementById('total_due').value = totalDue.toFixed(2); // Ensure 2 decimal places
+        totalDueEl.value = totalDue.toFixed(2);
     }
 
-    // Ensure script runs after page load
-    window.onload = function() {
+    function initFollowUpCalculations() {
         calculateTotalDue();
 
-        document.getElementById('amount_billed').addEventListener('input', calculateTotalDue);
-        document.getElementById('amount_paid').addEventListener('input', calculateTotalDue);
+        const billedEl = document.getElementById('amount_billed');
+        const paidEl = document.getElementById('amount_paid');
 
-        // Listen for Marathi conversion events on amount fields
-        document.getElementById('amount_billed').addEventListener('marathiConverted', calculateTotalDue);
-        document.getElementById('amount_paid').addEventListener('marathiConverted', calculateTotalDue);
-    };
+        if (billedEl) {
+            billedEl.addEventListener('input', calculateTotalDue);
+            billedEl.addEventListener('change', calculateTotalDue);
+            billedEl.addEventListener('marathiConverted', calculateTotalDue);
+        }
+        if (paidEl) {
+            paidEl.addEventListener('input', calculateTotalDue);
+            paidEl.addEventListener('change', calculateTotalDue);
+            paidEl.addEventListener('marathiConverted', calculateTotalDue);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initFollowUpCalculations);
+    } else {
+        initFollowUpCalculations();
+    }
 </script>
 
 <!-- Submit Button -->
